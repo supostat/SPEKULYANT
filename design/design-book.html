@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Дизайн-книга СПЕКУЛЯНТЪ</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ruslan+Display&family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: roman-numeral rail on the left, one reading column; DOS screens break wider inside their own scrollers.
+   Concept: a Soviet ledger lit by a VGA monitor. EGA blue marks the game world; brown marks risk and money. */
+:root{
+  --bg:#E8EBF2; --surface:#FFFFFF; --sunk:#DCE1EB;
+  --ink:#12162B; --ink-2:#464D66; --ink-3:#6E7590; --rule:#CBD1DE;
+  --acc:#0000AA; --acc-soft:#DDDDF7; --hot:#9A4A00; --hot-soft:#F6E3CF;
+  --s1:#0000AA; --s2:#9A4A00; --s3:#007A7A; --s4:#AA0066;
+  --f-disp:"Ruslan Display","Arial Black",Impact,sans-serif;
+  --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  /* EGA palette: the game's own world, identical in both themes */
+  --e0:#000000;--e1:#0000AA;--e2:#00AA00;--e3:#00AAAA;--e4:#AA0000;--e5:#AA00AA;--e6:#AA5500;--e7:#AAAAAA;
+  --e8:#555555;--e9:#5555FF;--e10:#55FF55;--e11:#55FFFF;--e12:#FF5555;--e13:#FF55FF;--e14:#FFFF55;--e15:#FFFFFF;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C0E19; --surface:#151827; --sunk:#090A12;
+  --ink:#E4E6EF; --ink-2:#A9AEC2; --ink-3:#757B93; --rule:#272B3F;
+  --acc:#8C8CFF; --acc-soft:#1D1D4C; --hot:#E79A4E; --hot-soft:#3A2410;
+  --s1:#8C8CFF; --s2:#E79A4E; --s3:#4FD1D1; --s4:#F26AB4;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C0E19; --surface:#151827; --sunk:#090A12;
+  --ink:#E4E6EF; --ink-2:#A9AEC2; --ink-3:#757B93; --rule:#272B3F;
+  --acc:#8C8CFF; --acc-soft:#1D1D4C; --hot:#E79A4E; --hot-soft:#3A2410;
+  --s1:#8C8CFF; --s2:#E79A4E; --s3:#4FD1D1; --s4:#F26AB4;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.62 var(--f-body);-webkit-font-smoothing:antialiased}
+a{color:var(--acc)}
+:focus-visible{outline:2px solid var(--hot);outline-offset:2px}
+code,.mono{font-family:var(--f-mono);font-size:.86em}
+code{background:var(--sunk);padding:1px 5px;border-radius:4px}
+
+.book{display:grid;grid-template-columns:270px minmax(0,1fr);min-height:100vh}
+.rail{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;border-right:1px solid var(--rule);background:var(--surface);padding-block:30px 40px;padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:22px}
+.brand{font:400 21px/1 var(--f-disp);letter-spacing:.06em;display:flex;align-items:center;gap:10px;color:var(--ink)}
+.brand i{width:12px;height:18px;background:var(--acc);display:inline-block;animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.brand-sub{font-size:12px;color:var(--ink-3);margin:10px 0 24px;line-height:1.45}
+.rail ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.rail a{display:grid;grid-template-columns:44px 1fr;align-items:baseline;padding:6px 8px;border-radius:6px;color:var(--ink-2);text-decoration:none;font-size:14px;line-height:1.35}
+.rail a:hover{background:var(--sunk);color:var(--ink)}
+.rail a.on{background:var(--acc-soft);color:var(--ink)}
+.rail a span:first-child{font:600 11px/1 var(--f-mono);color:var(--ink-3);letter-spacing:.04em}
+.rail a.on span:first-child{color:var(--acc)}
+.rail-foot{margin-top:26px;font-size:12px;color:var(--ink-3);line-height:1.5}
+
+main{min-width:0;padding-block:56px 120px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.col{max-width:880px;margin:0 auto}
+
+.cover{margin:0 0 40px}
+.eyebrow{font:600 12px/1.4 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--hot);margin:0 0 14px}
+.cover h1{font:400 clamp(44px,8vw,92px)/.95 var(--f-disp);letter-spacing:.03em;margin:0 0 20px;color:var(--ink);text-wrap:balance}
+.cover h1 span{color:var(--acc)}
+.cover p{font-size:19px;color:var(--ink-2);max-width:62ch;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:24px;font:500 12px/1.4 var(--f-mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
+
+section{scroll-margin-top:24px;margin:0 0 96px}
+.sh{display:grid;grid-template-columns:auto 1fr;gap:6px 22px;align-items:end;border-bottom:1px solid var(--rule);padding-bottom:16px;margin-bottom:26px}
+.sh .num{font:400 clamp(38px,5vw,58px)/.9 var(--f-disp);color:var(--acc)}
+.sh h2{font:700 clamp(21px,2.6vw,29px)/1.15 var(--f-body);margin:0;text-wrap:balance}
+.lede{font-size:18px;color:var(--ink-2);max-width:66ch;margin:0 0 24px}
+h3{font:700 17px/1.3 var(--f-body);margin:38px 0 12px;text-wrap:balance}
+p{margin:0 0 14px;max-width:70ch}
+ul.plain,ol.plain{margin:0 0 16px;padding-left:22px;max-width:70ch}
+ul.plain li,ol.plain li{margin:5px 0}
+.note{border-left:3px solid var(--hot);background:var(--surface);padding:12px 16px;border-radius:0 8px 8px 0;margin:18px 0;max-width:72ch;color:var(--ink-2);font-size:15px}
+.note b{color:var(--ink)}
+
+.tw{overflow-x:auto;margin:0 0 20px;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px solid var(--rule)}
+tr:last-child td{border-bottom:0}
+th{font:600 11px/1.3 var(--f-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);background:var(--sunk)}
+td:first-child{font-weight:600;white-space:nowrap}
+.pill{display:inline-block;font:600 10px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;padding:4px 7px;border-radius:4px;white-space:nowrap}
+.pill.ok{background:var(--acc-soft);color:var(--acc)}
+.pill.prop{background:var(--hot-soft);color:var(--hot)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:0 0 20px}
+.box{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:16px 18px;min-width:0}
+.box h4{font:700 15px/1.3 var(--f-body);margin:0 0 6px}
+.box p{font-size:14px;color:var(--ink-2);margin:0}
+.box .k{font:600 11px/1 var(--f-mono);color:var(--acc);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:10px}
+.box ul{margin:8px 0 0;padding-left:18px;font-size:14px;color:var(--ink-2)}
+.box li{margin:3px 0}
+
+/* eras */
+.eras{display:grid;gap:14px;margin:0 0 20px}
+.era{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:18px}
+.era .yr{font:400 26px/1 var(--f-disp);color:var(--acc)}
+.era .nm{font:600 12px/1.3 var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-top:8px}
+.era dl{display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px 14px;margin:0;font-size:14px}
+.era dt{color:var(--ink-3);font:600 11px/1.6 var(--f-mono);text-transform:uppercase;letter-spacing:.06em}
+.era dd{margin:0;color:var(--ink-2)}
+@media (max-width:640px){.era{grid-template-columns:1fr}.era dl{grid-template-columns:1fr}.era dt{margin-top:6px}}
+
+/* figures */
+.fig{overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px;margin:0 0 10px}
+.fig svg{display:block;max-width:none}
+.cap{font-size:13px;color:var(--ink-3);margin:0 0 24px;max-width:72ch}
+.d-box{fill:var(--surface);stroke:var(--rule);stroke-width:1.2}
+.d-core{fill:var(--acc-soft);stroke:var(--acc);stroke-width:1.4}
+.d-hot{fill:var(--hot-soft);stroke:var(--hot);stroke-width:1.2}
+.d-t{fill:var(--ink);font:600 13px var(--f-body)}
+.d-s{fill:var(--ink-3);font:400 11px var(--f-mono)}
+.d-line{stroke:var(--ink-3);stroke-width:1.2;fill:none}
+.d-dash{stroke:var(--ink-3);stroke-width:1.2;fill:none;stroke-dasharray:4 4}
+.d-arrow{fill:var(--ink-3)}
+.c-grid{stroke:var(--rule);stroke-width:1}
+.c-ax{fill:var(--ink-3);font:400 11px var(--f-mono)}
+.c-ev{stroke:var(--hot);stroke-width:1;stroke-dasharray:3 4}
+.c-evt{fill:var(--hot);font:600 10.5px var(--f-mono)}
+
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:var(--surface);margin:0 0 12px}
+.seg button{font:500 13px/1 var(--f-body);padding:9px 14px;border:0;background:transparent;color:var(--ink-2);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--acc);color:var(--surface)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink-2);margin:10px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
+
+/* DOS screens */
+.stage{overflow-x:auto;padding:22px 18px;margin:0 0 10px;border-radius:14px;background:var(--sunk);border:1px solid var(--rule)}
+.crt{width:max-content;margin:0 auto;padding:18px 22px;background:var(--e0);border-radius:18px;box-shadow:0 0 0 10px #2A2C33,0 0 0 11px #0D0E12,0 18px 40px rgba(0,0,0,.35);position:relative}
+.crt::after{content:"";position:absolute;inset:18px 22px;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.16) 2px 3px);border-radius:4px}
+pre.dos{margin:0;font:400 14px/1.15 var(--f-mono);letter-spacing:0;white-space:pre;color:var(--e7);background:var(--e1);font-variant-ligatures:none}
+pre.dos span{display:inline}
+.f0{color:var(--e0)}.f1{color:var(--e1)}.f2{color:var(--e2)}.f3{color:var(--e3)}.f4{color:var(--e4)}.f5{color:var(--e5)}.f6{color:var(--e6)}.f7{color:var(--e7)}
+.f8{color:var(--e8)}.f9{color:var(--e9)}.f10{color:var(--e10)}.f11{color:var(--e11)}.f12{color:var(--e12)}.f13{color:var(--e13)}.f14{color:var(--e14)}.f15{color:var(--e15)}
+.b0{background:var(--e0)}.b1{background:var(--e1)}.b2{background:var(--e2)}.b3{background:var(--e3)}.b4{background:var(--e4)}.b5{background:var(--e5)}.b6{background:var(--e6)}.b7{background:var(--e7)}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 0}
+.ctrl button{font:500 13px/1.2 var(--f-body);padding:8px 13px;border-radius:7px;border:1px solid var(--rule);background:var(--surface);color:var(--ink);cursor:pointer}
+.ctrl button:hover{border-color:var(--acc);color:var(--acc)}
+.ctrl button.pri{background:var(--acc);border-color:var(--acc);color:var(--surface)}
+
+@media (max-width:900px){
+  .book{grid-template-columns:1fr}
+  .rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .rail ol{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+}
+</style>
+
+</head>
+<body>
+<div class="book">
+<nav class="rail" aria-label="Содержание">
+  <div class="brand">СПЕКУЛЯНТЪ<i aria-hidden="true"></i></div>
+  <p class="brand-sub">Дизайн-книга торгового рогалика. Все решения, принятые 16 октября 2026.</p>
+  <ol>
+    <li><a href="#i"><span>I</span><span>Замысел</span></a></li>
+    <li><a href="#ii"><span>II</span><span>Принятые решения</span></a></li>
+    <li><a href="#iii"><span>III</span><span>Эпохи</span></a></li>
+    <li><a href="#iv"><span>IV</span><span>Карта и рейсы</span></a></li>
+    <li><a href="#v"><span>V</span><span>Цены</span></a></li>
+    <li><a href="#vi"><span>VI</span><span>Деньги</span></a></li>
+    <li><a href="#vii"><span>VII</span><span>Своё дело</span></a></li>
+    <li><a href="#viii"><span>VIII</span><span>Соперники</span></a></li>
+    <li><a href="#ix"><span>IX</span><span>Репутация и связи</span></a></li>
+    <li><a href="#x"><span>X</span><span>События</span></a></li>
+    <li><a href="#xi"><span>XI</span><span>Жизни и финалы</span></a></li>
+    <li><a href="#xii"><span>XII</span><span>Зона</span></a></li>
+    <li><a href="#xiii"><span>XIII</span><span>Экран и стиль</span></a></li>
+    <li><a href="#xiv"><span>XIV</span><span>Архитектура</span></a></li>
+    <li><a href="#xv"><span>XV</span><span>Открытые вопросы</span></a></li>
+  </ol>
+  <p class="rail-foot">Godot 4 · Rust (gdext) · Windows / macOS / Linux · только русский язык</p>
+</nav>
+
+<main>
+<div class="col">
+
+<header class="cover">
+  <p class="eyebrow">Дизайн-книга · октябрь 2026</p>
+  <h1>Спекулянт<span>ъ</span></h1>
+  <p>Торговый рогалик по мотивам досовского «Коммерсанта». Двадцать лет жизни одного человека, от фарцовки у «Интуриста» в 1984-м до сетевой розницы 2004-го, а дальше песочница без конца.</p>
+  <div class="meta"><span>Жанр: рогалик + экономика</span><span>Период: 1984–2004+</span><span>Стиль: VGA 80×25</span></div>
+</header>
+
+<div class="stage" aria-label="Живой макет главного экрана">
+  <div class="crt"><pre class="dos" id="scr-market"></pre></div>
+  <div class="ctrl">
+    <button id="mk-pause" class="pri" type="button">Пауза</button>
+    <button id="mk-speed" type="button">Скорость: ▶</button>
+  </div>
+</div>
+<p class="cap">Главный экран, весна 1986-го. Дни идут сами, цены на толкучке дышат. Пробел ставит паузу, как в оригинале.</p>
+
+<section id="i">
+  <div class="sh"><div class="num">I</div><h2>Замысел</h2></div>
+  <p class="lede">«Коммерсантъ» держался на трёх вещах: живые цены, время, которое идёт без тебя, и случайные события, требующие решения. Мы берём их целиком и растягиваем на двадцать лет, четыре экономики и десяток городов.</p>
+  <div class="grid">
+    <div class="box"><span class="k">Опора 1</span><h4>Время не ждёт</h4><p>Реальное время с остановкой на событиях. День проходит за несколько секунд, скорость регулируется, спокойные периоды можно перематывать.</p></div>
+    <div class="box"><span class="k">Опора 2</span><h4>Эпоха меняет правила</h4><p>Что вчера было статьёй УК, завтра становится профессией. Каждая эпоха перестраивает законы, валюту, угрозы и возможности.</p></div>
+    <div class="box"><span class="k">Опора 3</span><h4>Сила в людях</h4><p>Числовых навыков нет. Персонаж силён тем, что накопил, кого знает и какая о нём слава.</p></div>
+    <div class="box"><span class="k">Опора 4</span><h4>Жизнь конечна</h4><p>Рогалик: смерть, зона, разорение. Следующая жизнь начинается с нуля, но со знаниями и открытиями.</p></div>
+  </div>
+  <p>Тон: сатира на эпоху, а не её романтизация. Абсурд бюрократии, малиновые пиджаки, реклама «Хопра», анекдоты. Ориентир по интонации: старые анекдоты и «Особенности национальной...».</p>
+</section>
+
+<section id="ii">
+  <div class="sh"><div class="num">II</div><h2>Принятые решения</h2></div>
+  <p class="lede">Сводка того, что согласовано в обсуждении. Метка «предложение» означает, что принцип принят, а детали ещё можно двигать.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Область</th><th>Решение</th><th>Статус</th></tr></thead>
+    <tbody>
+      <tr><td>Название</td><td>«Спекулянтъ»</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Стиль</td><td>Точная ностальгическая стилизация под DOS</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Геймплей</td><td>Как в оригинале, плюс современные тренды, переложенные на эпоху</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Сеттинг</td><td>1984–2004, старт в СССР; сатира с юмором</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>После 2004</td><td>Песочница продолжается, генератор без исторического сценария</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>География</td><td>Города СССР / России и рейсы в Польшу, Турцию, Китай</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Жанр</td><td>Рогалик, песочница без финальной цели</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Старт</td><td>Выбор стартовой биографии</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Сохранения</td><td>Два режима: ironman и свободные сохранения</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Метапрогрессия</td><td>Только знания и открытия; доступна в обоих режимах, рекорды раздельно</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Тюрьма</td><td>Отдельный игровой режим</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Бизнес</td><td>Со временем своё дело: ларьки, магазины, производство, банк, работники</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Управление</td><td>Через управляющих с политиками</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Товары</td><td>30–60 характерных, у каждого своя история цены по эпохам</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Соперники</td><td>Живые NPC: торгуют, влияют на цены, враги или партнёры</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Деньги</td><td>Несколько валют и способов хранения, каждый со своим риском</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Персонаж</td><td>Без числовых навыков: ресурсы, связи, репутация</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Торг</td><td>Выбор внутри события, без отдельной мини-игры</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Технологии</td><td>Godot 4; ядро симуляции на Rust (gdext), интерфейс на GDScript</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Платформы</td><td>Только десктоп: Windows, macOS, Linux</td><td><span class="pill ok">решено</span></td></tr>
+      <tr><td>Язык</td><td>Только русский</td><td><span class="pill ok">решено</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="iii">
+  <div class="sh"><div class="num">III</div><h2>Эпохи</h2></div>
+  <p class="lede">Четыре экономики с разными правилами и пятая, бесконечная. Переходы происходят через исторические события, а не щелчком.</p>
+  <div class="eras">
+    <div class="era"><div><div class="yr">1984–87</div><div class="nm">Застой</div></div>
+      <dl><dt>Закон</dt><dd>Торговля с выгодой — спекуляция (ст. 154 УК РСФСР). Валютные операции (ст. 88) смертельно опасны.</dd>
+      <dt>Деньги</dt><dd>Советский рубль, чеки «Берёзки», доллары под полом.</dd>
+      <dt>Угрозы</dt><dd>ОБХСС, участковый, соседи, комсомольские дружинники.</dd>
+      <dt>Возможности</dt><dd>Фарцовка, дефицит, блат, перепродажа из «Берёзки», товар от моряков.</dd>
+      <dt>События</dt><dd>Антиалкогольная кампания 1985 года, очереди, «выбросили» товар.</dd></dl></div>
+    <div class="era"><div><div class="yr">1988–91</div><div class="nm">Перестройка</div></div>
+      <dl><dt>Закон</dt><dd>Закон о кооперации 1988 года: торговля становится легальной в рамках кооператива.</dd>
+      <dt>Деньги</dt><dd>Рубль слабеет, доллар уходит в тень. Павловский обмен 50- и 100-рублёвок в январе 1991-го.</dd>
+      <dt>Угрозы</dt><dd>Первый рэкет, исполкомы, ревизии, сгоревшие сбережения.</dd>
+      <dt>Возможности</dt><dd>Кооперативы, видеосалоны, варёнки, первые товарные биржи, компьютеры.</dd>
+      <dt>События</dt><dd>ГКЧП в августе 1991-го, распад СССР в декабре.</dd></dl></div>
+    <div class="era"><div><div class="yr">1992–98</div><div class="nm">Дикий рынок</div></div>
+      <dl><dt>Закон</dt><dd>Свобода торговли, законы пишутся на ходу. Крыша важнее суда.</dd>
+      <dt>Деньги</dt><dd>Гиперинфляция, доллар как мера всего, ваучеры, ГКО, пирамиды.</dd>
+      <dt>Угрозы</dt><dd>Бандиты, налоговая полиция, лопнувший банк, кинувший партнёр.</dd>
+      <dt>Возможности</dt><dd>Челночные рейсы, ларьки, приватизация, свой банк.</dd>
+      <dt>События</dt><dd>Либерализация цен, крах МММ, «чёрный вторник» 1994-го, деноминация, дефолт августа 1998-го.</dd></dl></div>
+    <div class="era"><div><div class="yr">1999–04</div><div class="nm">Стабилизация</div></div>
+      <dl><dt>Закон</dt><dd>Плоский налог 13% с 2001 года, бизнес легализуется.</dd>
+      <dt>Деньги</dt><dd>Рубль устойчивее, банковская система восстанавливается.</dd>
+      <dt>Угрозы</dt><dd>Силовики вместо бандитов, рейдерские захваты, проверки.</dd>
+      <dt>Возможности</dt><dd>Сетевая розница, сотовая связь, интернет, производство.</dd>
+      <dt>События</dt><dd>Рынки уходят, приходят гипермаркеты; бывшие соперники становятся депутатами.</dd></dl></div>
+    <div class="era"><div><div class="yr">2005+</div><div class="nm">Песочница</div></div>
+      <dl><dt>Правило</dt><dd>Исторический сценарий заканчивается. Генератор продолжает выдавать кризисы, бумы и новые законы по тем же механизмам.</dd>
+      <dt>Смысл</dt><dd>Достроить дело, удержать капитал, дожить.</dd></dl></div>
+  </div>
+  <div class="note"><b>История плавает по сиду.</b> Каркас эпохи неизменен, но точные даты сдвигаются на недели и месяцы, масштаб событий меняется, у части событий есть альтернативные исходы. Игрок, помнящий дефолт, получает преимущество, но не гарантию.</div>
+</section>
+
+<section id="iv">
+  <div class="sh"><div class="num">IV</div><h2>Карта и рейсы</h2></div>
+  <p class="lede">Деньги делаются на разнице цен между городами. Поездка всегда событие: время, расходы, таможня, поезд, ограбление.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Направление</th><th>Когда доступно</th><th>Что везут</th></tr></thead>
+    <tbody>
+      <tr><td>Москва, Ленинград</td><td>С начала</td><td>Всё; «Берёзка», ГУМ, «Интурист», толкучки</td></tr>
+      <tr><td>Провинция</td><td>С начала</td><td>Дефицит продаётся дороже, мясо и продукты дешевле</td></tr>
+      <tr><td>Прибалтика</td><td>С начала</td><td>«Почти заграница»: одежда, косметика, кофе</td></tr>
+      <tr><td>Средняя Азия, Кавказ</td><td>С начала</td><td>Фрукты, ковры, коньяк</td></tr>
+      <tr><td>ГДР, Венгрия</td><td>До 1990 только «по блату»</td><td>Через моряков, командировки, туристические группы</td></tr>
+      <tr><td>Польша</td><td>С 1990–91</td><td>Первая челночная волна: одежда, косметика, электроника</td></tr>
+      <tr><td>Турция</td><td>С 1991–92</td><td>Кожа, текстиль, золото</td></tr>
+      <tr><td>Китай</td><td>С 1992</td><td>Ширпотреб, игрушки, позже электроника</td></tr>
+    </tbody>
+  </table></div>
+  <p>Список конкретных городов и их множителей остаётся открытым вопросом (раздел XV).</p>
+</section>
+
+<section id="v">
+  <div class="sh"><div class="num">V</div><h2>Цены</h2></div>
+  <p class="lede">Ядро считает цены в реальных единицах. На экран они выводятся в номинале текущей валюты через индекс инфляции. Гиперинфляция становится слоем поверх экономики и бьёт только по тем, кто держит рубли.</p>
+  <div class="seg" role="group" aria-label="Режим графика">
+    <button type="button" id="ch-real" aria-pressed="true">Реальная стоимость</button>
+    <button type="button" id="ch-nom" aria-pressed="false">Номинал на ценнике</button>
+  </div>
+  <div class="fig"><svg id="chart" width="780" height="380" viewBox="0 0 780 380" role="img" aria-label="Цены четырёх товаров с 1984 по 2004 год"></svg></div>
+  <div class="legend" id="legend"></div>
+  <p class="cap">Иллюстративные кривые, не исторические данные. Логарифмическая шкала. В номинале видно, как ценники взлетают в 1992–1997 годах и сбрасывают три нуля при деноминации 1998-го.</p>
+
+  <h3>Из чего складывается цена в городе</h3>
+  <ol class="plain">
+    <li><b>Кривая товара по эпохам.</b> Опорные точки по годам. Видеомагнитофон в 1986-м стоит как полмашины, в 2000-м копейки. Траектории сами рассказывают историю эпохи.</li>
+    <li><b>Множитель города.</b> Кожа дешёвая в Стамбуле, электроника в Китае, дефицит дороже в провинции.</li>
+    <li><b>Местный запас и спрос.</b> Крупная продажа обваливает цену, со временем она восстанавливается. Это не даёт бесконечно гонять одну схему.</li>
+    <li><b>Шоки от событий.</b> Указы, кризисы, слухи двигают кривые временно или навсегда.</li>
+    <li><b>Действия соперников.</b> NPC торгуют по тем же правилам и тоже выбирают запасы.</li>
+  </ol>
+  <p>Ассортимент: 30–60 характерных товаров. Подробный список с кривыми — открытый вопрос.</p>
+</section>
+
+<section id="vi">
+  <div class="sh"><div class="num">VI</div><h2>Деньги</h2></div>
+  <p class="lede">Хранение денег — отдельное решение с риском. Опытный игрок учится не держать всё в одном месте.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Где</th><th>Когда</th><th>Риск</th></tr></thead>
+    <tbody>
+      <tr><td>Под матрасом</td><td>Всегда</td><td>Кража, пожар, инфляция, обмен купюр</td></tr>
+      <tr><td>Сберкасса</td><td>До 1992</td><td>Заморозка вкладов</td></tr>
+      <tr><td>Чеки «Берёзки»</td><td>До 1988</td><td>Статья, отмена чеков</td></tr>
+      <tr><td>Доллары</td><td>Всегда, до 1991 нелегально</td><td>Статья до 90-х, фальшивки, «кидалы» в обменниках</td></tr>
+      <tr><td>Коммерческий банк</td><td>С 1989</td><td>Отзыв лицензии, банкир с деньгами в бегах</td></tr>
+      <tr><td>Ваучеры, акции</td><td>С 1992</td><td>Пустые бумаги или будущее состояние</td></tr>
+      <tr><td>Пирамиды</td><td>1992–1994</td><td>Растут, пока не рухнут; можно запустить свою</td></tr>
+      <tr><td>ГКО</td><td>1993–1998</td><td>Высокая доходность до дефолта</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="vii">
+  <div class="sh"><div class="num">VII</div><h2>Своё дело</h2></div>
+  <p class="lede">Прогрессия смещается от торговли к управлению. В начале всё делаешь сам, потом нанимаешь людей и задаёшь правила. Игра становится вопросом, кому доверять.</p>
+  <div class="grid">
+    <div class="box"><span class="k">Формы по эпохам</span><ul><li>Подпольный цех</li><li>Кооператив</li><li>ТОО, АОЗТ</li><li>ООО, холдинг</li><li>Банк</li></ul></div>
+    <div class="box"><span class="k">Типы дел</span><ul><li>Ларьки и палатки</li><li>Магазины</li><li>Производство</li><li>Челночный рейс как бизнес</li><li>Банк</li></ul></div>
+    <div class="box"><span class="k">Сотрудник</span><ul><li>Навык, честность, лояльность</li><li>Привычки и слабости</li><li>Ворует, спивается, уходит к конкурентам, сдаёт</li></ul></div>
+  </div>
+  <p>Управляющий получает политики, и события возникают только когда ситуация в них не вписывается: «Крыша подняла ставку, платить?». Так 20 лет игры не превращаются в микроменеджмент.</p>
+  <div class="stage">
+    <div class="crt"><pre class="dos" id="scr-manager"></pre></div>
+    <div class="ctrl" id="mg-ctrl"></div>
+  </div>
+  <p class="cap">Экран управляющего, 1995 год. Кнопки под экраном меняют политики, прогноз пересчитывается.</p>
+</section>
+
+<section id="viii">
+  <div class="sh"><div class="num">VIII</div><h2>Соперники</h2></div>
+  <p class="lede">10–15 постоянных персонажей на мир. Они живут по тем же правилам, только симулируются грубее.</p>
+  <ul class="plain">
+    <li>У каждого имя, биография, капитал, стратегия и характер. Состав соперников определяется сидом мира.</li>
+    <li>Они торгуют, открывают дела, двигают цены; тоже могут сесть, разориться, погибнуть, уйти в депутаты.</li>
+    <li>Отношения с памятью. Партнёрство, кредит, совместное дело с одной стороны; демпинг, наезды, доносы с другой. Обида помнится годами, кинутый партнёр возвращается через полгода.</li>
+    <li>Торг с ними идёт через выбор в событиях.</li>
+  </ul>
+</section>
+
+<section id="ix">
+  <div class="sh"><div class="num">IX</div><h2>Репутация и связи</h2></div>
+  <p class="lede">Раз числовых навыков нет, сила персонажа складывается из трёх вещей: что у него есть, кого он знает и что о нём говорят.</p>
+  <div class="grid">
+    <div class="box"><span class="k">Ресурсы</span><p>Деньги в разных формах, товар, недвижимость, машины, дела.</p></div>
+    <div class="box"><span class="k">Связи</span><p>Конкретные люди с именами. Их можно попросить, им можно задолжать, их можно потерять.</p></div>
+    <div class="box"><span class="k">Репутация по фракциям</span><p>Бандиты, милиция, чиновники, торговцы, народ, позже силовики. Каждая открывает и закрывает свои возможности.</p></div>
+  </div>
+</section>
+
+<section id="x">
+  <div class="sh"><div class="num">X</div><h2>События</h2></div>
+  <p class="lede">Главный механизм игры. Через события идут торг, угрозы, сюжетные цепочки и последствия старых решений. Их сотни, поэтому они живут в данных, а не в коде.</p>
+  <div class="stage">
+    <div class="crt"><pre class="dos" id="scr-event"></pre></div>
+    <div class="ctrl" id="ev-ctrl">
+      <button type="button" data-c="1">1. Взять</button>
+      <button type="button" data-c="2">2. Отказаться</button>
+      <button type="button" data-c="3">3. Сдать участковому</button>
+      <button type="button" data-c="0">Сначала</button>
+    </div>
+  </div>
+  <p class="cap">Событие лета 1985-го, в начале антиалкогольной кампании. Попробуй выбрать: каждый исход меняет репутацию и запоминается.</p>
+
+  <h3>Из чего состоит событие</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Часть</th><th>Что задаёт</th></tr></thead>
+    <tbody>
+      <tr><td>Условия</td><td>Эпоха и окно дат, город, репутация по фракциям, наличие товара или денег, флаги прошлых решений, участие конкретного NPC</td></tr>
+      <tr><td>Вес</td><td>Вероятность среди подходящих событий; может зависеть от состояния мира</td></tr>
+      <tr><td>Текст</td><td>Описание и реплики с подстановками: имена, цены, суммы в текущей валюте</td></tr>
+      <tr><td>Выборы</td><td>Варианты, у каждого свои условия доступности</td></tr>
+      <tr><td>Последствия</td><td>Деньги, товар, репутация, связи, флаги, сдвиг цен</td></tr>
+      <tr><td>Отложенные эффекты</td><td>Событие-продолжение через N дней с вероятностью; так строятся цепочки</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><b>Главный риск проекта — объём контента.</b> Четыре эпохи, десяток городов, сотни событий с юмором. Поэтому нужны инструменты авторинга и валидации с первого дня (раздел XIV).</div>
+</section>
+
+<section id="xi">
+  <div class="sh"><div class="num">XI</div><h2>Жизни и финалы</h2></div>
+  <p class="lede">Каждая жизнь начинается в 1984-м с выбранной биографии. Персонаж стареет, в 2004-м ему за сорок. Полная жизнь длится 6–10 часов, но большинство обрываются раньше, и это учит.</p>
+
+  <h3>Стартовые биографии</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Биография</th><th>Старт</th><th>Статус</th></tr></thead>
+    <tbody>
+      <tr><td>Студент</td><td>Общежитие, иностранцы-сокурсники, мало денег</td><td><span class="pill prop">предложение</span></td></tr>
+      <tr><td>Инженер НИИ</td><td>Доступ к технике и дефициту, служебная дисциплина</td><td><span class="pill prop">предложение</span></td></tr>
+      <tr><td>Моряк загранплавания</td><td>Канал товара из-за границы, таможня следит</td><td><span class="pill prop">предложение</span></td></tr>
+      <tr><td>Комсомольский работник</td><td>Связи с чиновниками, первые кооперативы при райкоме</td><td><span class="pill prop">предложение</span></td></tr>
+      <tr><td>Таксист</td><td>Знает город, водка по ночам, свои люди везде</td><td><span class="pill prop">предложение</span></td></tr>
+      <tr><td>Сын партработника</td><td>Открывается после выхода на номенклатуру в одной из жизней</td><td><span class="pill prop">открываемая</span></td></tr>
+      <tr><td>Бывший сиделец</td><td>Открывается после выхода с зоны</td><td><span class="pill prop">открываемая</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Финалы</h3>
+  <ul class="plain">
+    <li><b>Смерть.</b> Бандиты, несчастный случай, здоровье, пьянство.</li>
+    <li><b>Зона.</b> Отдельный режим; конец жизни, только если срок слишком велик.</li>
+    <li><b>Разорение с долгами.</b> Бегство из города или страны.</li>
+    <li><b>Добровольный уход.</b> Эмиграция или покой с подсчётом итогов.</li>
+  </ul>
+
+  <h3>Метапрогрессия: только знания и открытия</h3>
+  <ul class="plain">
+    <li>Новые биографии открываются достижениями.</li>
+    <li>Записная книжка: постоянная энциклопедия товаров, людей и схем, пополняемая от жизни к жизни.</li>
+    <li>Стартовые слухи: следующий персонаж знает кое-что из того, что узнал прошлый.</li>
+    <li>Никаких прямых бонусов к деньгам и вещам.</li>
+  </ul>
+
+  <h3>Режимы сохранения</h3>
+  <p>Ironman: одна жизнь, автосохранение, без отката. Свободный режим: сохранения в любой момент. Метапрогрессия идёт в обоих, потому что это знания, а не сила. Рекорды разделены: в «Рейтинг Форбс» попадают только ironman-жизни.</p>
+
+  <div class="stage">
+    <div class="crt"><pre class="dos" id="scr-end"></pre></div>
+  </div>
+  <p class="cap">Итог жизни: некролог в духе эпохи, капитал, лучшая сделка и открытия для следующей жизни.</p>
+</section>
+
+<section id="xii">
+  <div class="sh"><div class="num">XII</div><h2>Зона</h2></div>
+  <p class="lede">Тюрьма — отдельный игровой режим, а не пропуск времени. Срок проходит ускоренно, но со своими событиями и решениями.</p>
+  <ul class="plain">
+    <li><b>Своя экономика.</b> Сигареты и чай как валюта, передачи с воли, работа на промзоне, услуги.</li>
+    <li><b>Свой авторитет.</b> Отдельная репутация, не связанная с волей.</li>
+    <li><b>Бизнес на воле не замирает.</b> Им управляют доверенные люди: ведут честно, воруют или исчезают. Здесь проверяется, кому ты доверял.</li>
+    <li><b>Выход.</b> По сроку, по УДО, по амнистии (исторические амнистии тоже события), за взятку.</li>
+    <li><b>Последствия.</b> Связи «оттуда» и открытая биография «бывший сиделец».</li>
+    <li><b>Колорит эпохи.</b> Советская зона и зона 90-х устроены по-разному.</li>
+  </ul>
+</section>
+
+<section id="xiii">
+  <div class="sh"><div class="num">XIII</div><h2>Экран и стиль</h2></div>
+  <p class="lede">Точная стилизация под DOS. Не «по мотивам», а так, будто игра вышла на дискете в 1993-м.</p>
+  <div class="grid">
+    <div class="box"><span class="k">Текстовый режим</span><p>80×25 символов, рендер 720×400 с целочисленным масштабированием и коррекцией пропорций под 4:3.</p></div>
+    <div class="box"><span class="k">Шрифт</span><p>VGA 9×16 с кириллицей CP866 (Ultimate Oldschool PC Font Pack, CC BY-SA). Рамки только псевдографикой.</p></div>
+    <div class="box"><span class="k">Цвет</span><p>Строго 16 цветов EGA. Синие окна, тени, F-клавиши внизу, как в Norton Commander.</p></div>
+    <div class="box"><span class="k">Управление</span><p>Клавиатура в первую очередь: F-клавиши, стрелки, цифры для выборов. Мышь поддерживается, но не обязательна.</p></div>
+    <div class="box"><span class="k">Звук</span><p>Эмуляция PC-speaker: бипы событий, мелодия заставки.</p></div>
+    <div class="box"><span class="k">Пейджер</span><p>Уведомления приходят на пейджер, позже на «мобилу-кирпич», которая сама по себе статусная вещь.</p></div>
+  </div>
+  <div class="stage">
+    <div class="crt"><pre class="dos" id="scr-pager"></pre></div>
+  </div>
+  <p class="cap">Пейджер, осень 1996-го. Сообщения от управляющего, крыши и рынка в одной ленте.</p>
+  <div class="stage">
+    <div class="crt"><pre class="dos" id="scr-boot"></pre></div>
+  </div>
+  <p class="cap">Заставка. Запуск из стилизованной командной строки с проверкой памяти.</p>
+</section>
+
+<section id="xiv">
+  <div class="sh"><div class="num">XIV</div><h2>Архитектура</h2></div>
+  <p class="lede">Гибрид. Мир считает ядро на Rust, Godot показывает его и передаёт решения игрока. Граница простая: состояние наружу, команды внутрь.</p>
+  <div class="fig"><svg width="780" height="330" viewBox="0 0 780 330" role="img" aria-label="Схема архитектуры">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="d-arrow"/></marker></defs>
+    <rect x="20" y="20" width="230" height="120" rx="10" class="d-box"/>
+    <text x="38" y="48" class="d-t">Godot 4 · GDScript</text>
+    <text x="38" y="72" class="d-s">экраны 80×25, стиль EGA</text>
+    <text x="38" y="90" class="d-s">ввод, звук PC-speaker</text>
+    <text x="38" y="108" class="d-s">сохранения, меню</text>
+    <text x="38" y="126" class="d-s">только показывает мир</text>
+    <rect x="290" y="55" width="110" height="50" rx="8" class="d-box"/>
+    <text x="345" y="78" text-anchor="middle" class="d-t">gdext</text>
+    <text x="345" y="95" text-anchor="middle" class="d-s">тонкий мост</text>
+    <rect x="440" y="20" width="320" height="140" rx="10" class="d-core"/>
+    <text x="458" y="48" class="d-t">speculant-core · Rust</text>
+    <text x="458" y="72" class="d-s">время и календарь эпох</text>
+    <text x="458" y="90" class="d-s">экономика: кривые, запасы, индекс</text>
+    <text x="458" y="108" class="d-s">NPC, дела, управляющие</text>
+    <text x="458" y="126" class="d-s">движок событий, репутация</text>
+    <text x="458" y="144" class="d-s">детерминированный RNG по сиду</text>
+    <rect x="440" y="215" width="150" height="90" rx="10" class="d-hot"/>
+    <text x="458" y="243" class="d-t">Симулятор</text>
+    <text x="458" y="265" class="d-s">CLI, тысячи жизней</text>
+    <text x="458" y="283" class="d-s">боты-стратегии</text>
+    <rect x="610" y="215" width="150" height="90" rx="10" class="d-hot"/>
+    <text x="628" y="243" class="d-t">Валидатор</text>
+    <text x="628" y="265" class="d-s">битые ссылки,</text>
+    <text x="628" y="283" class="d-s">мёртвые события</text>
+    <rect x="20" y="215" width="370" height="90" rx="10" class="d-box"/>
+    <text x="38" y="243" class="d-t">Контент как данные</text>
+    <text x="38" y="265" class="d-s">события, товары и кривые, города,</text>
+    <text x="38" y="283" class="d-s">эпохи, биографии, NPC-шаблоны</text>
+    <path d="M250 80 H286" class="d-line" marker-end="url(#ar)"/>
+    <path d="M400 80 H436" class="d-line" marker-end="url(#ar)"/>
+    <path d="M436 92 H404" class="d-line" marker-end="url(#ar)"/>
+    <path d="M286 92 H254" class="d-line" marker-end="url(#ar)"/>
+    <path d="M390 245 H425 V170" class="d-line" marker-end="url(#ar)"/>
+    <path d="M515 213 V164" class="d-dash" marker-end="url(#ar)"/>
+    <path d="M685 213 V164" class="d-dash" marker-end="url(#ar)"/>
+  </svg></div>
+  <p class="cap">Сплошные стрелки — игровой поток. Пунктир — те же библиотеки ядра, запущенные без движка.</p>
+
+  <h3>Зачем ядро на Rust</h3>
+  <ol class="plain">
+    <li><b>Безголовый прогон.</b> Ядро запускается как CLI и проигрывает тысячи жизней с ботами разных стратегий. Видно, какая схема ломает экономику, какие события убивают слишком часто, какие эпохи скучны. Для рогалика с экономикой на 20 лет это основной инструмент баланса.</li>
+    <li><b>Валидатор контента.</b> Проверяет сотни событий: ссылки на несуществующих NPC и флаги, события, условия которых никогда не выполняются, недостижимые цепочки.</li>
+    <li><b>Детерминизм.</b> Один сид даёт одну и ту же историю, баги воспроизводятся.</li>
+    <li><b>Типы и тесты.</b> Экономика и события тестируются отдельно от движка.</li>
+  </ol>
+  <h3>Цена решения</h3>
+  <ul class="plain">
+    <li>Сборка под три платформы в CI, на macOS universal binary.</li>
+    <li>Нет горячей перезагрузки логики, только интерфейса.</li>
+    <li>API gdext ещё меняется между версиями.</li>
+  </ul>
+  <p>Производительность здесь не аргумент: 60 товаров, десяток городов и 15 NPC GDScript потянул бы без проблем.</p>
+</section>
+
+<section id="xv">
+  <div class="sh"><div class="num">XV</div><h2>Открытые вопросы</h2></div>
+  <p class="lede">То, что ещё нужно решить до планирования реализации.</p>
+  <ol class="plain">
+    <li>Точный список городов, их товары и множители.</li>
+    <li>Полный ассортимент: 30–60 товаров с опорными точками кривых по годам.</li>
+    <li>Масштаб времени: сколько секунд в игровом дне на каждой скорости, правила перемотки.</li>
+    <li>Быт персонажа: жильё, здоровье, семья — что из этого механика, а что только события.</li>
+    <li>Финальный список стартовых биографий и условия открытия новых.</li>
+    <li>Фракции репутации: окончательный набор и как они меняются по эпохам.</li>
+    <li>Формат данных событий и инструмент авторинга: редактор в Godot, внешний файл или отдельная утилита.</li>
+    <li>Механика зоны: длительность, набор событий, правила для доверенных лиц на воле.</li>
+    <li>Генератор после 2004 года: какие типы кризисов и законов он выдаёт.</li>
+    <li>Таблица рекордов: только локальная или общая.</li>
+  </ol>
+</section>
+
+</div>
+</main>
+</div>
+
+<script>
+(function(){
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  class Scr{
+    constructor(w=80,h=25,cls='b1 f7'){this.w=w;this.h=h;this.c=[];for(let i=0;i<w*h;i++)this.c.push([' ',cls]);}
+    put(x,y,s,cls){for(let i=0;i<s.length;i++){const X=x+i;if(X<0||X>=this.w||y<0||y>=this.h)continue;const c=this.c[y*this.w+X];c[0]=s[i];if(cls)c[1]=cls;}}
+    fill(x,y,w,h,cls){for(let j=0;j<h;j++)this.put(x,y+j,' '.repeat(w),cls);}
+    box(x,y,w,h,cls,title,dbl=true){
+      const g=dbl?['╔','╗','╚','╝','═','║']:['┌','┐','└','┘','─','│'];
+      this.fill(x,y,w,h,cls);
+      this.put(x,y,g[0]+g[4].repeat(w-2)+g[1],cls);
+      for(let j=1;j<h-1;j++){this.put(x,y+j,g[5],cls);this.put(x+w-1,y+j,g[5],cls);}
+      this.put(x,y+h-1,g[2]+g[4].repeat(w-2)+g[3],cls);
+      if(title){const t=' '+title+' ';this.put(x+Math.floor((w-t.length)/2),y,t,cls);}
+    }
+    shadow(x,y,w,h){
+      const sh=(X,Y)=>{if(X<0||X>=this.w||Y<0||Y>=this.h)return;this.c[Y*this.w+X][1]='b0 f8';};
+      for(let j=1;j<=h;j++){sh(x+w,y+j);sh(x+w+1,y+j);}
+      for(let i=2;i<w+2;i++)sh(x+i,y+h);
+    }
+    html(){
+      let out='';
+      for(let y=0;y<this.h;y++){
+        let run='',cur=null;
+        for(let x=0;x<this.w;x++){const [ch,cls]=this.c[y*this.w+x];if(cls!==cur){if(cur!==null)out+='<span class="'+cur+'">'+esc(run)+'</span>';run='';cur=cls;}run+=ch;}
+        out+='<span class="'+cur+'">'+esc(run)+'</span>'+(y<this.h-1?'\n':'');
+      }
+      return out;
+    }
+  }
+  const wrap=(t,w)=>{const out=[];let line='';for(const word of t.split(' ')){if((line+' '+word).trim().length>w){out.push(line);line=word;}else line=(line?line+' ':'')+word;}if(line)out.push(line);return out;};
+  const pad=(s,n)=>s.length>=n?s.slice(0,n):s+' '.repeat(n-s.length);
+  const lpad=(s,n)=>s.length>=n?s:' '.repeat(n-s.length)+s;
+  const money=n=>String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+  function fkeys(s,items){
+    let x=0;
+    for(const [k,l] of items){s.put(x,24,k,'b0 f15');x+=k.length;s.put(x,24,pad(l,8-k.length+1),'b3 f0');x+=8-k.length+1;}
+    if(x<80)s.put(x,24,' '.repeat(80-x),'b3 f0');
+  }
+
+  /* ---------- market (live) ---------- */
+  const months=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  const wd=['вс','пн','вт','ср','чт','пт','сб'];
+  const goods=[
+    ['Джинсы (фирма)',160,140,6],['Видеокассета E-180',70,58,12],['Пластинки (фирма)',45,38,9],
+    ['Жвачка, блок',25,19,30],['Сигареты (импорт)',4.5,3.6,40],['Кроссовки (импорт)',120,100,3],
+    ['Часы «Электроника»',35,27,8],['Водка, ящик',140,118,2]
+  ];
+  const mk={day:new Date(1986,2,14),cash:1240,sel:0,speed:1,paused:false,
+    log:['> Купил 3 пары джинсов по 160 р.','> Незнакомец в кепке смотрит на тебя слишком долго.'],
+    prices:goods.map(g=>[g[1],g[2]])};
+  function drawMarket(){
+    const s=new Scr();
+    s.put(0,0,' СПЕКУЛЯНТЪ ','b4 f15');
+    const d=mk.day;
+    const hdr=' Москва │ '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear()+', '+wd[d.getDay()]+' │ Наличные: '+money(mk.cash)+' р. │ Чеки: 85 ';
+    s.put(12,0,pad(hdr,68),'b3 f0');
+    s.box(1,2,50,15,'b1 f15','Толкучка у Рижского вокзала');
+    s.put(3,3,'Товар                   Купить  Продать  Есть','b1 f14');
+    goods.forEach((g,i)=>{
+      const [b,sl]=mk.prices[i];
+      const fmt=v=>v<10?v.toFixed(2):String(Math.round(v));
+      const line=pad(g[0],22)+lpad(fmt(b),8)+lpad(fmt(sl),9)+lpad(String(g[3]),6);
+      s.put(3,5+i,pad(line,46),i===mk.sel?'b3 f0':'b1 f7');
+    });
+    s.put(3,14,'↑↓ выбрать   F2 купить   F3 продать','b1 f8');
+    s.box(52,2,27,8,'b1 f15','Карман');
+    s.put(54,3,'Джинсы          3 шт','b1 f7');
+    s.put(54,4,'Жвачка          2 бл','b1 f7');
+    s.put(54,5,'Чеки ВПТ          85','b1 f7');
+    s.put(54,6,'Связей             4','b1 f7');
+    s.put(54,8,'ОБХСС ','b1 f12');s.put(60,8,'▓▓▓░░░░','b1 f12');
+    s.box(52,10,27,7,'b1 f15','Слухи',false);
+    s.put(54,11,'В ГУМ, говорят,','b1 f11');s.put(54,12,'завезут финские','b1 f11');s.put(54,13,'сапоги.','b1 f11');
+    s.put(54,14,'Участковый новый,','b1 f11');s.put(54,15,'злой.','b1 f11');
+    s.box(1,17,78,5,'b1 f7','Сообщения',false);
+    mk.log.slice(-3).forEach((l,i)=>s.put(3,18+i,pad(l,74),'b1 f7'));
+    s.put(1,23,mk.paused?' ПАУЗА  (пробел)':' Время идёт  '+'▶'.repeat(mk.speed)+'  (+/−, пробел)',mk.paused?'b1 f14':'b1 f10');
+    fkeys(s,[['1','Помощь'],['2','Купить'],['3','Продать'],['4','Ехать'],['5','Связи'],['6','Дела'],['7','Пейджер'],['10','Выход']]);
+    document.getElementById('scr-market').innerHTML=s.html();
+  }
+  const lines=['> Мент на углу закурил и ушёл.','> Цыгане скупают жвачку оптом.','> В «Берёзку» завезли видеомагнитофоны.','> Дождь. Покупателей меньше.','> Сосед спросил, откуда у тебя кроссовки.','> На толкучке облава у соседнего ряда.'];
+  let rngS=7;const rnd=()=>{rngS=(rngS*16807)%2147483647;return rngS/2147483647;};
+  function tick(){
+    mk.day=new Date(mk.day.getTime()+86400000);
+    mk.prices=mk.prices.map(([b,sl],i)=>{const k=1+(rnd()-.5)*.08;const base=goods[i][1];let nb=Math.max(base*.6,Math.min(base*1.6,b*k));return [nb,nb*(goods[i][2]/goods[i][1])];});
+    mk.sel=(mk.sel+(rnd()<.3?1:0))%goods.length;
+    if(rnd()<.35){mk.log.push(lines[Math.floor(rnd()*lines.length)]);}
+    drawMarket();
+  }
+  let timer=null;
+  const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function setRun(){clearInterval(timer);if(!mk.paused)timer=setInterval(tick,[0,1800,1000,500][mk.speed]);}
+  const pb=document.getElementById('mk-pause'),sb=document.getElementById('mk-speed');
+  pb.onclick=()=>{mk.paused=!mk.paused;pb.textContent=mk.paused?'Продолжить':'Пауза';setRun();drawMarket();};
+  sb.onclick=()=>{mk.speed=mk.speed%3+1;sb.textContent='Скорость: '+'▶'.repeat(mk.speed);setRun();drawMarket();};
+  if(reduce){mk.paused=true;pb.textContent='Продолжить';}
+  drawMarket();setRun();
+
+  /* ---------- event ---------- */
+  const evOut={
+    1:['Ящик твой. Через месяц водку начнут продавать с двух часов, и цена на толкучке вырастет втрое.','Торговцы +1. Деньги −600 р.'],
+    2:['Мужик сплёвывает и уходит. Через час его забирает патруль у соседнего гастронома. Повезло.','Ничего не изменилось.'],
+    3:['Участковый доволен и записывает твою фамилию. Мужик тебя запомнил, и это не последняя встреча.','Милиция +2. Торговцы −3. Новый флаг: «стукнул в 1985-м».']
+  };
+  function drawEvent(choice){
+    const s=new Scr();
+    s.put(0,0,' СПЕКУЛЯНТЪ ','b4 f15');
+    s.put(12,0,pad(' Москва │ 2 июня 1985, вс │ Наличные: 870 р. │ Чеки: 40 ',68),'b3 f0');
+    s.box(1,2,50,15,'b1 f8','Толкучка у Рижского вокзала');
+    for(let i=0;i<8;i++)s.put(3,5+i,pad(goods[i][0],44),'b1 f8');
+    s.box(52,2,27,8,'b1 f8','Карман');
+    s.box(1,17,78,5,'b1 f8','Сообщения',false);
+    fkeys(s,[['1','Помощь'],['2','Купить'],['3','Продать'],['4','Ехать'],['5','Связи'],['6','Дела'],['7','Пейджер'],['10','Выход']]);
+    const x=13,y=4,w=54,h=15;
+    s.shadow(x,y,w,h);
+    s.box(x,y,w,h,'b4 f15','СОБЫТИЕ');
+    let row=y+2;
+    if(!choice){
+      wrap('У магазина «Вино-Водка» мужик в спецовке тянет тебя за рукав: «Есть ящик „Столичной“, со свадьбы остался. Шестьсот, и я тебя не знаю».',w-6).forEach(l=>s.put(x+3,row++,l,'b4 f15'));
+      row++;
+      s.put(x+3,row++,'1. Взять за 600 р. наличными','b4 f14');
+      s.put(x+3,row++,'2. Сказать, что денег нет','b4 f14');
+      s.put(x+3,row++,'3. Свистнуть участковому','b4 f14');
+      s.put(x+3,y+h-2,'Время остановлено. Выбери 1–3.','b4 f7');
+    }else{
+      const [t,eff]=evOut[choice];
+      wrap(t,w-6).forEach(l=>s.put(x+3,row++,l,'b4 f15'));
+      row++;
+      wrap(eff,w-6).forEach(l=>s.put(x+3,row++,l,'b4 f14'));
+      s.put(x+3,y+h-2,'Любая клавиша — продолжить','b4 f7');
+    }
+    document.getElementById('scr-event').innerHTML=s.html();
+  }
+  document.getElementById('ev-ctrl').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const c=+b.dataset.c;drawEvent(c||0);});
+  drawEvent(0);
+
+  /* ---------- manager ---------- */
+  const pol=[
+    ['Наценка',['20%','30%','45%'],1],
+    ['Платить крыше',['нет','да, 10%','да, 15%'],2],
+    ['Закупка',['сам, Черкизон','оптовик','через Гену'],0],
+    ['Ночная торговля',['нет','пиво','водка «Рояль»'],2],
+    ['При проверке',['платить','звонить мне','закрыться'],1],
+    ['Зарплата',['ниже рынка','по рынку','+10% к рынку'],2]
+  ];
+  function drawManager(){
+    const s=new Scr();
+    s.put(0,0,' СПЕКУЛЯНТЪ ','b4 f15');
+    s.put(12,0,pad(' Москва │ 9 сентября 1995, сб │ $ 18 400 │ Курс: 4 455 р. ',68),'b3 f0');
+    s.box(1,2,52,17,'b1 f15','Ларьки у «Тушинской» · 3 точки');
+    s.put(3,4,'Управляющий: Гена Кабанов, с 1994 года','b1 f14');
+    pol.forEach((p,i)=>{
+      const label=pad(p[0]+' ',20).replace(/ (?= *$)/g,'.');
+      s.put(3,6+i*2,label,'b1 f7');
+      s.put(24,6+i*2,'◄ '+pad(p[1][p[2]],20)+' ►','b1 f15');
+    });
+    // forecast
+    const markup=[0.8,1,1.25][pol[0][2]];
+    const krysha=pol[1][2];
+    const night=pol[3][2];
+    const wage=pol[5][2];
+    let rev=Math.round((markup-1)*40+night*9-(pol[2][2]===2?6:0));
+    let risk=2-krysha+ (night===2?1:0) + (pol[4][2]===2?1:0) - (pol[4][2]===0?1:0);
+    risk=Math.max(0,Math.min(4,risk));
+    let theft=2-wage+(pol[2][2]===2?1:0);theft=Math.max(0,Math.min(4,theft));
+    const lvl=['низкий','умеренный','средний','высокий','очень высокий'];
+    s.box(54,2,25,9,'b1 f15','Гена',false);
+    s.put(56,3,'Честность  ▓▓▓░░','b1 f7');
+    s.put(56,4,'Хватка     ▓▓▓▓░','b1 f7');
+    s.put(56,5,'Лояльность ▓▓░░░','b1 f7');
+    s.put(56,7,'Пьёт по пятницам.','b1 f8');
+    s.put(56,8,'Брат в милиции.','b1 f8');
+    s.box(54,11,25,8,'b1 f15','Прогноз на месяц',false);
+    s.put(56,12,'Выручка  '+(rev>=0?'+':'')+rev+'%','b1 '+(rev>=0?'f10':'f12'));
+    s.put(56,14,'Риск наезда:','b1 f7');s.put(56,15,lvl[risk],'b1 '+(risk>=3?'f12':'f14'));
+    s.put(56,16,'Риск воровства:','b1 f7');s.put(56,17,lvl[theft],'b1 '+(theft>=3?'f12':'f14'));
+    s.put(1,20,' События придут, только если ситуация выйдет за эти правила.','b1 f8');
+    fkeys(s,[['1','Помощь'],['2','Нанять'],['3','Уволить'],['4','Касса'],['5','Отчёт'],['6','Дела'],['7','Пейджер'],['10','Назад']]);
+    document.getElementById('scr-manager').innerHTML=s.html();
+  }
+  const mc=document.getElementById('mg-ctrl');
+  pol.forEach((p,i)=>{const b=document.createElement('button');b.type='button';b.textContent=p[0]+' ▸';b.onclick=()=>{p[2]=(p[2]+1)%p[1].length;drawManager();};mc.appendChild(b);});
+  drawManager();
+
+  /* ---------- pager ---------- */
+  (function(){
+    const s=new Scr(80,25,'b0 f8');
+    s.put(0,0,' СПЕКУЛЯНТЪ ','b4 f15');
+    s.put(12,0,pad(' Москва │ 22 октября 1996, вт │ $ 61 200 │ Курс: 5 410 р. ',68),'b3 f0');
+    s.fill(0,1,80,23,'b1 f8');
+    s.shadow(12,4,56,15);
+    s.box(12,4,56,15,'b0 f10','ПЕЙДЖЕР · абонент 4417');
+    const msgs=[['09:12','ГЕНА: ПЕРЕЗВОНИ. СРОЧНО'],['11:40','КРЫША ПОДНИМАЕТ ДО 20%. ЖДУТ ДО ПЯТНИЦЫ'],['13:05','ДОЛЛАР 5 410. ГОВОРЯТ, БУДЕТ БОЛЬШЕ'],['15:30','ЛЕНА: ТЫ ГДЕ?'],['17:55','КАБАНОВ ВИДЕЛ ТВОЮ ФУРУ НА ЛУЖНИКАХ'],['20:20','БАНК «ТИТАН» НЕ ВЫДАЁТ ВКЛАДЫ']];
+    msgs.forEach((m,i)=>{s.put(15,6+i*2,m[0],'b0 f2');s.put(22,6+i*2,m[1],i===5?'b0 f12':'b0 f10');});
+    s.put(15,17,'↑↓ листать   Enter ответить   Del стереть','b0 f2');
+    fkeys(s,[['1','Помощь'],['2','Звонить'],['3',''],['4',''],['5','Связи'],['6','Дела'],['7','Пейджер'],['10','Назад']]);
+    document.getElementById('scr-pager').innerHTML=s.html();
+  })();
+
+  /* ---------- end of life ---------- */
+  (function(){
+    const s=new Scr(80,25,'b1 f7');
+    s.box(4,1,72,23,'b7 f0','ИТОГИ ЖИЗНИ');
+    s.put(8,3,'«ВЕЧЕРНЯЯ МОСКВА» · 5 ноября 1997 · с. 14','b7 f8');
+    s.put(8,5,'ЛЫКОВ ПЁТР СЕРГЕЕВИЧ  1961–1997','b7 f4');
+    wrap('Начинал фарцовщиком у гостиницы «Интурист». В 1989 году открыл кооператив по пошиву варёнок. Пережил гиперинфляцию, двух компаньонов и одну налоговую проверку. Погиб 3 ноября 1997 года, отказавшись поднять долю крыше. Друзья помнят его щедрым, конкуренты — упрямым.',64).forEach((l,i)=>s.put(8,7+i,l,'b7 f0'));
+    s.put(8,14,'Капитал на момент смерти ....... $ 41 300','b7 f1');
+    s.put(8,15,'Лучшая сделка .................. ваучеры, 1993','b7 f1');
+    s.put(8,16,'Худшая сделка .................. банк «Титан», 1996','b7 f1');
+    s.put(8,17,'Прожито ........................ 13 лет 7 месяцев','b7 f1');
+    s.put(8,19,'Открыто: биография «Бывший кооператор»','b7 f4');
+    s.put(8,20,'В записной книжке: +6 записей, +2 человека','b7 f4');
+    s.put(8,22,'Нажми любую клавишу, чтобы начать новую жизнь','b7 f8');
+    document.getElementById('scr-end').innerHTML=s.html();
+  })();
+
+  /* ---------- boot ---------- */
+  (function(){
+    const s=new Scr(80,25,'b0 f7');
+    const L=[
+      ['C:\\>CD GAMES\\SPEKUL','f7'],['','f7'],['C:\\GAMES\\SPEKUL>SPEKUL.EXE','f7'],['','f7'],
+      ['СПЕКУЛЯНТЪ  версия 1.0','f15'],['(с) 1993 ТОО «Перестройка-Софт»  · Все права защищены, кроме прав на товар','f8'],['','f7'],
+      ['Проверка памяти ............. 640K  OK','f7'],['Расширенная память ......... 3072K  OK','f7'],
+      ['Звук ........................ PC-speaker','f7'],['Загрузка цен 1984 года ...... OK','f7'],
+      ['Загрузка слухов ............. 213 шт.','f7'],['Проверка совести ............ не найдена','f14'],['','f7'],
+      ['Нажмите любую клавишу, чтобы начать жить_','f10']
+    ];
+    L.forEach((l,i)=>s.put(1,1+i,l[0],'b0 '+l[1]));
+    document.getElementById('scr-boot').innerHTML=s.html();
+  })();
+
+  /* ---------- price chart ---------- */
+  const YEARS=[];for(let y=1984;y<=2004;y++)YEARS.push(y);
+  const series=[
+    {name:'Видеомагнитофон',tok:'--s1',pts:{1984:1200,1986:1200,1988:1100,1990:900,1992:500,1994:350,1996:250,1998:180,2000:120,2002:80,2004:50}},
+    {name:'Компьютер',tok:'--s2',pts:{1987:30000,1988:40000,1989:60000,1990:50000,1991:25000,1992:8000,1994:3000,1996:2000,1998:1500,2000:1000,2002:800,2004:600}},
+    {name:'Джинсы',tok:'--s3',pts:{1984:180,1988:150,1990:120,1992:60,1994:40,1996:30,2000:25,2004:25}},
+    {name:'Водка, бутылка',tok:'--s4',pts:{1984:5.3,1985:6,1986:9,1987:14,1988:12,1990:10,1992:3,1994:2,1998:2,2004:2.5}}
+  ];
+  const IDX={1984:1,1985:1,1986:1.02,1987:1.05,1988:1.1,1989:1.2,1990:1.3,1991:2.6,1992:70,1993:700,1994:2300,1995:7000,1996:10000,1997:11000,1998:20,1999:37,2000:45,2001:53,2002:61,2003:69,2004:77};
+  function interp(pts,y){
+    const ks=Object.keys(pts).map(Number).sort((a,b)=>a-b);
+    if(y<ks[0])return null;
+    for(let i=0;i<ks.length-1;i++){if(y>=ks[i]&&y<=ks[i+1]){const t=(y-ks[i])/(ks[i+1]-ks[i]);return Math.exp(Math.log(pts[ks[i]])*(1-t)+Math.log(pts[ks[i+1]])*t);}}
+    return pts[ks[ks.length-1]];
+  }
+  let mode='real';
+  const svg=document.getElementById('chart');
+  const W=780,H=380,ML=74,MR=20,MT=34,MB=40;
+  const fmtN=v=>{if(v>=1e9)return (v/1e9)+' млрд';if(v>=1e6)return (v/1e6)+' млн';if(v>=1e3)return (v/1e3)+' тыс';return String(v);};
+  function drawChart(){
+    const lo=mode==='real'?1:1,hi=mode==='real'?1e5:1e9;
+    const X=y=>ML+(y-1984)/20*(W-ML-MR);
+    const Y=v=>MT+(1-(Math.log10(v)-Math.log10(lo))/(Math.log10(hi)-Math.log10(lo)))*(H-MT-MB);
+    let g='';
+    for(let p=Math.log10(lo);p<=Math.log10(hi);p++){const v=Math.pow(10,p);g+='<line x1="'+ML+'" x2="'+(W-MR)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" class="c-grid"/><text x="'+(ML-8)+'" y="'+(Y(v)+4)+'" text-anchor="end" class="c-ax">'+fmtN(v)+'</text>';}
+    for(let y=1984;y<=2004;y+=4){g+='<text x="'+X(y)+'" y="'+(H-MB+20)+'" text-anchor="middle" class="c-ax">'+y+'</text>';}
+    const evs=[[1985,'сухой закон'],[1992,'либерализация'],[1998,'деноминация, дефолт']];
+    evs.forEach(([y,t])=>{g+='<line x1="'+X(y)+'" x2="'+X(y)+'" y1="'+(MT-6)+'" y2="'+(H-MB)+'" class="c-ev"/><text x="'+(X(y)+4)+'" y="'+(MT-10)+'" class="c-evt">'+t+'</text>';});
+    series.forEach(s=>{
+      let d='',last=null;
+      YEARS.forEach(y=>{let v=interp(s.pts,y);if(v==null)return;if(mode==='nom')v=v*IDX[y];d+=(d?'L':'M')+X(y).toFixed(1)+','+Y(v).toFixed(1);last=[X(y),Y(v)];});
+      g+='<path d="'+d+'" fill="none" stroke="var('+s.tok+')" stroke-width="2.4" stroke-linejoin="round"/>';
+      if(last)g+='<circle cx="'+last[0]+'" cy="'+last[1]+'" r="3.5" fill="var('+s.tok+')"/>';
+    });
+    g+='<text x="'+ML+'" y="'+(H-4)+'" class="c-ax">'+(mode==='real'?'реальные единицы, «рубли 1984 года»':'рубли на ценнике (после 1998 — новые)')+'</text>';
+    svg.innerHTML=g;
+  }
+  document.getElementById('legend').innerHTML=series.map(s=>'<span><i style="background:var('+s.tok+')"></i>'+s.name+'</span>').join('');
+  const br=document.getElementById('ch-real'),bn=document.getElementById('ch-nom');
+  br.onclick=()=>{mode='real';br.setAttribute('aria-pressed','true');bn.setAttribute('aria-pressed','false');drawChart();};
+  bn.onclick=()=>{mode='nom';bn.setAttribute('aria-pressed','true');br.setAttribute('aria-pressed','false');drawChart();};
+  drawChart();
+
+  /* ---------- rail ---------- */
+  const links=[...document.querySelectorAll('.rail a')];
+  const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('on'));const a=map.get(e.target.id);if(a)a.classList.add('on');}});},{rootMargin:'-30% 0px -60% 0px'});
+    document.querySelectorAll('main section').forEach(s=>io.observe(s));
+  }
+})();
+</script>
+
+</body>
+</html>

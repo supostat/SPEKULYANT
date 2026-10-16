@@ -1,0 +1,11 @@
+# Editor
+.vscode/
+
+# macOS
+.DS_Store
+
+# Godot 4
+.godot/
+
+# Rust
+target/
