@@ -2,69 +2,92 @@
 
 use crate::command::{Command, LifeSettings};
 use crate::command_error::CommandError;
-use crate::view::StateView;
+use crate::time::{Clock, GameDate, MAX_SPEED, TimeRules};
+use crate::view::{StateView, TimeView};
 
-const MAX_SPEED: u8 = 3;
 const OPENING_SNAPSHOT: &str = include_str!("../../../design/etalons/market.view.json");
 
 #[derive(Debug)]
 pub struct Game {
+    rules: TimeRules,
+    clock: Clock,
     view: StateView,
 }
 
 impl Game {
-    /// Открывает жизнь. Мир пока не симулируется, поэтому жизнь начинается со снимка рынка
-    /// дизайн-книги (`design/etalons/market.view.json`); фаза core-time заменит снимок миром по сиду.
-    pub fn new_life(settings: &LifeSettings) -> Result<Self, CommandError> {
+    /// Открывает жизнь в первый день 1984 года. Дата, скорость и пауза — настоящие, от часов мира.
+    /// Рынок, карман, слухи и сообщения пока берутся из снимка рынка дизайн-книги
+    /// (`design/etalons/market.view.json`) — их заменят экономика и контент мира.
+    pub fn new_life(settings: &LifeSettings, rules: &TimeRules) -> Result<Self, CommandError> {
         if settings.biography.trim().is_empty() {
             return Err(CommandError::EmptyBiography);
         }
         let view = serde_json::from_str(OPENING_SNAPSHOT)
             .expect("снимок рынка дизайн-книги соответствует StateView");
-        Ok(Self { view })
+        let mut game = Self {
+            rules: rules.clone(),
+            clock: Clock::new(rules.clock.clone(), GameDate::START),
+            view,
+        };
+        game.refresh_time();
+        Ok(game)
     }
 
     pub fn view(&self) -> &StateView {
         &self.view
     }
 
-    /// Двигает мир на `milliseconds` реального времени и сообщает, изменился ли снимок.
-    /// Календаря ещё нет — он появится в фазе core-time, — поэтому мир стоит.
-    pub fn advance(&mut self, _milliseconds: u32) -> bool {
-        false
+    pub fn today(&self) -> GameDate {
+        self.clock.today()
+    }
+
+    /// Двигает мир на `milliseconds` реального времени; `true`, если наступил хотя бы один день.
+    pub fn advance(&mut self, milliseconds: u32) -> bool {
+        let days_passed = !self.clock.advance(milliseconds).is_empty();
+        if days_passed {
+            self.refresh_time();
+        }
+        days_passed
     }
 
     pub fn apply(&mut self, command: Command) -> Result<(), CommandError> {
         match command {
             Command::NewLife(settings) => {
-                *self = Self::new_life(&settings)?;
-                Ok(())
+                *self = Self::new_life(&settings, &self.rules)?;
             }
             Command::Advance { milliseconds } => {
                 self.advance(milliseconds);
-                Ok(())
             }
             Command::SetSpeed { speed } => {
-                if !(1..=MAX_SPEED).contains(&speed) {
-                    return Err(CommandError::InvalidSpeed {
-                        speed,
+                self.clock
+                    .set_speed(speed)
+                    .map_err(|invalid| CommandError::InvalidSpeed {
+                        speed: invalid.speed,
                         max: MAX_SPEED,
-                    });
-                }
-                self.view.time.speed = speed;
-                Ok(())
+                    })?;
+                self.refresh_time();
             }
             Command::Pause { paused } => {
-                self.view.time.paused = paused;
-                Ok(())
+                self.clock.set_paused(paused);
+                self.refresh_time();
             }
             Command::OpenScreen { screen } => {
                 self.view.screen = screen;
-                Ok(())
             }
-            other => Err(CommandError::NotSimulatedYet {
-                command: other.name().to_owned(),
-            }),
+            other => {
+                return Err(CommandError::NotSimulatedYet {
+                    command: other.name().to_owned(),
+                });
+            }
         }
+        Ok(())
+    }
+
+    fn refresh_time(&mut self) {
+        self.view.header.date = self.clock.today().russian();
+        self.view.time = TimeView {
+            speed: self.clock.speed(),
+            paused: self.clock.is_paused(),
+        };
     }
 }

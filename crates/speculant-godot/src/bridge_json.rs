@@ -4,14 +4,17 @@
 //! Ответ на команду — `{"ok":true}` или `{"error":"<вид>", ..., "message":"<текст для игрока>"}`.
 
 use serde_json::{Value, json};
-use speculant_core::{Command, CommandError, Game, LifeSettings};
+use speculant_core::{Command, CommandError, Game, LifeSettings, TimeRules};
 
 pub const OK: &str = r#"{"ok":true}"#;
+const TIME_RULES: &str = include_str!("../../../data/epochs/time.toml");
 
 pub fn new_life(settings_json: &str) -> Result<Game, String> {
     let settings: LifeSettings = serde_json::from_str(settings_json)
         .map_err(|error| bridge_error("malformed_settings", error.to_string()))?;
-    Game::new_life(&settings).map_err(|error| command_error(&error))
+    let rules = TimeRules::from_toml(TIME_RULES)
+        .map_err(|error| bridge_error("invalid_time_rules", error.to_string()))?;
+    Game::new_life(&settings, &rules).map_err(|error| command_error(&error))
 }
 
 pub fn apply(game: &mut Game, command_json: &str) -> String {
@@ -78,6 +81,7 @@ mod tests {
             serde_json::from_str(&view_json(&game)).expect("снимок разбирается обратно");
         assert_eq!(view.header.city, "Москва");
         assert_eq!(view.market.goods.len(), 8);
+        assert_eq!(view.header.date, "1 января 1984, вс");
     }
 
     #[test]
@@ -121,7 +125,8 @@ mod tests {
     #[test]
     fn advance_refuses_a_negative_step() {
         let mut game = new_life(SETTINGS).expect("жизнь начинается");
-        assert_eq!(advance(&mut game, 1800), Ok(false));
+        assert_eq!(advance(&mut game, 1800), Ok(true));
+        assert_eq!(game.view().header.date, "2 января 1984, пн");
         assert_eq!(
             parsed(&advance(&mut game, -1).expect_err("отрицательный шаг отвергнут"))["error"],
             "invalid_delta"

@@ -1,9 +1,10 @@
 //! Контракт моста: снимок мира и команды переживают JSON без потерь, фикстура рынка — валидный снимок.
 
 use speculant_core::view::Screen;
-use speculant_core::{Command, CommandError, Game, LifeSettings, StateView};
+use speculant_core::{Command, CommandError, Game, LifeSettings, StateView, TimeRules};
 
 const MARKET_FIXTURE: &str = include_str!("../../../design/etalons/market.view.json");
+const TIME_TOML: &str = include_str!("../../../data/epochs/time.toml");
 
 fn life_settings() -> LifeSettings {
     LifeSettings {
@@ -11,6 +12,14 @@ fn life_settings() -> LifeSettings {
         ironman: true,
         seed: 7,
     }
+}
+
+fn time_rules() -> TimeRules {
+    TimeRules::from_toml(TIME_TOML).expect("data/epochs/time.toml валиден")
+}
+
+fn new_life() -> Game {
+    Game::new_life(&life_settings(), &time_rules()).expect("жизнь начинается")
 }
 
 #[test]
@@ -102,9 +111,10 @@ fn command_json_from_the_interface_parses_by_name() {
 
 #[test]
 fn a_new_life_opens_on_the_market_snapshot() {
-    let game = Game::new_life(&life_settings()).expect("жизнь начинается");
+    let game = new_life();
     assert_eq!(game.view().screen, Screen::Market);
     assert_eq!(game.view().market.goods.len(), 8);
+    assert_eq!(game.view().header.date, "1 января 1984, вс");
 }
 
 #[test]
@@ -114,14 +124,14 @@ fn a_new_life_requires_a_biography() {
         ..life_settings()
     };
     assert_eq!(
-        Game::new_life(&settings).err(),
+        Game::new_life(&settings, &time_rules()).err(),
         Some(CommandError::EmptyBiography)
     );
 }
 
 #[test]
 fn speed_pause_and_screen_commands_change_the_snapshot() {
-    let mut game = Game::new_life(&life_settings()).expect("жизнь начинается");
+    let mut game = new_life();
     game.apply(Command::SetSpeed { speed: 3 })
         .expect("скорость 3 есть");
     game.apply(Command::Pause { paused: true })
@@ -137,7 +147,7 @@ fn speed_pause_and_screen_commands_change_the_snapshot() {
 
 #[test]
 fn speed_outside_one_to_three_is_refused() {
-    let mut game = Game::new_life(&life_settings()).expect("жизнь начинается");
+    let mut game = new_life();
     assert_eq!(
         game.apply(Command::SetSpeed { speed: 4 }),
         Err(CommandError::InvalidSpeed { speed: 4, max: 3 })
@@ -147,7 +157,7 @@ fn speed_outside_one_to_three_is_refused() {
 
 #[test]
 fn commands_of_unsimulated_subsystems_are_refused_by_name() {
-    let mut game = Game::new_life(&life_settings()).expect("жизнь начинается");
+    let mut game = new_life();
     let refusal = game.apply(Command::Buy {
         good: "jeans".to_owned(),
         quantity: 1,

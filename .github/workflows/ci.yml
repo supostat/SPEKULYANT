@@ -28,6 +28,7 @@ jobs:
       - run: cargo xtask godot-check
       - run: cargo xtask gd-check
       - run: cargo xtask deps-check
+      - run: cargo xtask docs-check
       - run: cargo xtask charset-check
       - run: cargo xtask etalons --check
       - run: cargo xtask screen-check boot

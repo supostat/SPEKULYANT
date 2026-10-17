@@ -1,0 +1,32 @@
+# Календарь эпох и часы игры. Решение 15.3 (docs/SPEKULYANT.md §15): день идёт 1,8 / 1,0 / 0,5 с
+# на скоростях 1–3, как на макете рынка; перемотка — до события и до прибытия.
+# Границы эпох — каркас §3: даты исторических событий плавают по сиду, рамки эпох — нет.
+
+[clock]
+day_milliseconds = [1800, 1000, 500]
+fast_forward_day_milliseconds = 20
+
+[[epochs]]
+id = "stagnation"
+title = "Застой"
+starts = "1984-01-01"
+
+[[epochs]]
+id = "perestroika"
+title = "Перестройка"
+starts = "1988-01-01"
+
+[[epochs]]
+id = "wild_market"
+title = "Дикий рынок"
+starts = "1992-01-01"
+
+[[epochs]]
+id = "stabilization"
+title = "Стабилизация"
+starts = "1999-01-01"
+
+[[epochs]]
+id = "sandbox"
+title = "Песочница"
+starts = "2005-01-01"
