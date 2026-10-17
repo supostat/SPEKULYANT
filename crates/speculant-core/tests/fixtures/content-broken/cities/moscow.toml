@@ -1,3 +1,4 @@
 name = "Москва"
+market = "Толкучка у Рижского вокзала"
 region = "center"
 multipliers = { clothes = 1.0, electronics = 1.4 }

@@ -1,0 +1,6 @@
+title = "Пирамиды"
+currency = "ruble"
+opens = "1992-01-01"
+closes = "1995-01-01"
+risk = "Растут, пока не рухнут; можно запустить свою"
+interest = [{ year = 1992, percent = 600 }]

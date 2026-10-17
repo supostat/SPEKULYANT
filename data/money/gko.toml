@@ -1,0 +1,11 @@
+title = "ГКО"
+currency = "ruble"
+opens = "1993-01-01"
+closes = "1999-01-01"
+risk = "Высокая доходность до дефолта"
+interest = [
+  { year = 1993, percent = 150 },
+  { year = 1996, percent = 80 },
+  { year = 1997, percent = 25 },
+  { year = 1998, percent = 60 },
+]

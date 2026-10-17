@@ -49,6 +49,11 @@ impl GameDate {
         (date.year_month_day() == (year, month, day)).then_some(date)
     }
 
+    /// 1 января года; `None` для года, который не помещается в календарь игры.
+    pub fn new_year(year: i32) -> Option<Self> {
+        Self::from_ymd(year, 1, 1)
+    }
+
     /// Дата в записи ISO 8601 `ГГГГ-ММ-ДД`.
     pub fn parse_iso(text: &str) -> Option<Self> {
         let mut parts = text.splitn(3, '-');
@@ -66,6 +71,14 @@ impl GameDate {
 
     pub fn next(self) -> Self {
         Self { day: self.day + 1 }
+    }
+
+    /// Дата через `days` дней.
+    pub fn after_days(self, days: u32) -> Self {
+        let days = i32::try_from(days).expect("срок в днях укладывается в календарь игры");
+        Self {
+            day: self.day + days,
+        }
     }
 
     pub fn year(self) -> i32 {

@@ -1,0 +1,14 @@
+name = "Часы «Электроника»"
+short_name = "Часы"
+category = "electronics"
+unit = "шт"
+stock = 8
+curve = [
+  { year = 1984, price = 40 },
+  { year = 1986, price = 30 },
+  { year = 1988, price = 25 },
+  { year = 1990, price = 20 },
+  { year = 1992, price = 8 },
+  { year = 1996, price = 4 },
+  { year = 2004, price = 3 },
+]

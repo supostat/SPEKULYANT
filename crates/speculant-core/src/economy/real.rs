@@ -30,6 +30,10 @@ impl Real {
     pub fn is_positive(self) -> bool {
         self.0 > 0
     }
+
+    pub fn is_negative(self) -> bool {
+        self.0 < 0
+    }
 }
 
 impl Serialize for Real {

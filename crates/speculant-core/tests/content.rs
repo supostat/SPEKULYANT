@@ -31,6 +31,9 @@ fn the_minimal_set_loads_every_kind_of_content() {
     assert_eq!(content.goods.len(), 3);
     assert_eq!(content.cities.len(), 2);
     assert_eq!(content.routes.len(), 2);
+    assert_eq!(content.money_places.len(), 1);
+    assert_eq!(content.money.denomination.factor, 1000);
+    assert!((content.market.spread - 0.08).abs() < f64::EPSILON);
     assert_eq!(content.biographies.len(), 1);
     assert_eq!(content.npcs.len(), 1);
     assert_eq!(content.events.len(), 2);
@@ -40,11 +43,11 @@ fn the_minimal_set_loads_every_kind_of_content() {
 fn prices_in_rubles_of_1984_become_kopecks() {
     let content = load_min();
     assert_eq!(
-        content.goods[&GoodId::new("jeans")].curve[0].price,
+        content.goods[&GoodId::new("jeans")].curve.points()[0].price,
         Real::from_kopecks(18_000)
     );
     assert_eq!(
-        content.goods[&GoodId::new("chewing_gum")].curve[0].price,
+        content.goods[&GoodId::new("chewing_gum")].curve.points()[0].price,
         Real::from_kopecks(2_550)
     );
 }
@@ -82,8 +85,10 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         .collect();
     let expected = [
         "biographies/student.toml:3: стартового города kiev нет в cities/",
-        "cities/leningrad.toml:3: unknown field `population`",
-        "cities/moscow.toml:3: категории electronics нет ни у одного товара",
+        "cities/leningrad.toml:4: unknown field `population`",
+        "cities/moscow.toml:4: категории electronics нет ни у одного товара",
+        "economy/market.toml:1: spread = 1.5: доля должна быть больше 0 и меньше 1",
+        "economy/money.toml:2: индекс 1984 года — единица",
         "events/perestroika/cooperative.toml: каталога events/perestroika/ нет среди эпох календаря",
         "events/stagnation/broken.toml:3: подстановка {npc} в событии без условия npc",
         "events/stagnation/broken.toml:3: подстановки {bribe} нет",
@@ -93,8 +98,9 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "events/stagnation/broken.toml:10: выбор 1 без последствий, исхода и продолжения",
         "events/stagnation/broken.toml:17: события-продолжения missing_event нет в events/",
         "goods/Black-Caviar.toml: имя файла «Black-Caviar» — не идентификатор",
-        "goods/jeans.toml:4: годы опорных точек кривой должны строго возрастать",
+        "goods/jeans.toml:6: годы опорных точек кривой должны строго возрастать",
         "goods/sugar.toml:1: invalid basic string",
+        "money/pyramids.toml:4: место закрывается не позже, чем открывается",
         "music/song.toml: путь не входит в раскладку data/",
         "routes.toml:3: города riga нет в cities/",
     ];

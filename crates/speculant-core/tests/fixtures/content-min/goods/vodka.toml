@@ -1,6 +1,8 @@
 name = "Водка, ящик"
+short_name = "Водка"
 category = "alcohol"
 unit = "ящ"
+stock = 2
 curve = [
   { year = 1984, price = 106 },
   { year = 1986, price = 180 },

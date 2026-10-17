@@ -1,0 +1,5 @@
+title = "Студент"
+description = "Общежитие, иностранцы-сокурсники, мало денег."
+start_city = "moscow"
+start_cash = 2000
+starts_unlocked = true

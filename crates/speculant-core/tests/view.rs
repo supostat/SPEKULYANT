@@ -1,10 +1,13 @@
 //! Контракт моста: снимок мира и команды переживают JSON без потерь, фикстура рынка — валидный снимок.
 
+use std::path::Path;
+use std::sync::Arc;
+
 use speculant_core::view::Screen;
-use speculant_core::{Command, CommandError, Game, LifeSettings, StateView, TimeRules};
+use speculant_core::{Command, CommandError, Content, Game, LifeSettings, StateView};
 
 const MARKET_FIXTURE: &str = include_str!("../../../design/etalons/market.view.json");
-const TIME_TOML: &str = include_str!("../../../data/epochs/time.toml");
+const DATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../data");
 
 fn life_settings() -> LifeSettings {
     LifeSettings {
@@ -14,12 +17,12 @@ fn life_settings() -> LifeSettings {
     }
 }
 
-fn time_rules() -> TimeRules {
-    TimeRules::from_toml(TIME_TOML).expect("data/epochs/time.toml валиден")
+fn content() -> Arc<Content> {
+    Arc::new(Content::load(Path::new(DATA)).expect("data/ валиден"))
 }
 
 fn new_life() -> Game {
-    Game::new_life(&life_settings(), &time_rules()).expect("жизнь начинается")
+    Game::new_life(&life_settings(), content()).expect("жизнь начинается")
 }
 
 #[test]
@@ -110,11 +113,15 @@ fn command_json_from_the_interface_parses_by_name() {
 }
 
 #[test]
-fn a_new_life_opens_on_the_market_snapshot() {
-    let game = new_life();
-    assert_eq!(game.view().screen, Screen::Market);
-    assert_eq!(game.view().market.goods.len(), 8);
-    assert_eq!(game.view().header.date, "1 января 1984, вс");
+fn a_new_life_opens_on_the_market_of_the_start_city() {
+    let view = new_life().view();
+    assert_eq!(view.screen, Screen::Market);
+    assert_eq!(view.header.city, "Москва");
+    assert_eq!(view.header.date, "1 января 1984, вс");
+    assert_eq!(view.header.money, vec!["Наличные: 150 р."]);
+    assert_eq!(view.market.place, "Толкучка у Рижского вокзала");
+    assert_eq!(view.market.goods.len(), 8);
+    assert_eq!(view.pager, None, "пейджера в 1984 году нет");
 }
 
 #[test]
@@ -124,7 +131,7 @@ fn a_new_life_requires_a_biography() {
         ..life_settings()
     };
     assert_eq!(
-        Game::new_life(&settings, &time_rules()).err(),
+        Game::new_life(&settings, content()).err(),
         Some(CommandError::EmptyBiography)
     );
 }
@@ -158,14 +165,13 @@ fn speed_outside_one_to_three_is_refused() {
 #[test]
 fn commands_of_unsimulated_subsystems_are_refused_by_name() {
     let mut game = new_life();
-    let refusal = game.apply(Command::Buy {
-        good: "jeans".to_owned(),
-        quantity: 1,
+    let refusal = game.apply(Command::Travel {
+        destination: "leningrad".to_owned(),
     });
     assert_eq!(
         refusal,
         Err(CommandError::NotSimulatedYet {
-            command: "buy".to_owned()
+            command: "travel".to_owned()
         })
     );
 }

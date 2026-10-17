@@ -1,0 +1,5 @@
+title = "Сберкасса"
+currency = "ruble"
+closes = "1992-01-01"
+risk = "Заморозка вкладов"
+interest = [{ year = 1984, percent = 2 }]

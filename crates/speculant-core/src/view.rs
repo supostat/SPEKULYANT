@@ -45,7 +45,7 @@ pub struct StateView {
     pub rumors: Vec<String>,
     pub messages: Vec<String>,
     pub pending_event: Option<EventView>,
-    pub pager: PagerView,
+    pub pager: Option<PagerView>,
     pub businesses: Vec<BusinessView>,
     pub manager: Option<ManagerView>,
     pub contacts: Vec<ContactView>,

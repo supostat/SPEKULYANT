@@ -5,7 +5,7 @@
 
 use serde_json::{Value, json};
 use std::path::Path;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 
 use include_dir::{Dir, include_dir};
 use speculant_core::content::{ContentError, ContentFile};
@@ -13,10 +13,10 @@ use speculant_core::{Command, CommandError, Content, Game, LifeSettings};
 
 pub const OK: &str = r#"{"ok":true}"#;
 static DATA: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../../data");
-static CONTENT: OnceLock<Result<Content, String>> = OnceLock::new();
+static CONTENT: OnceLock<Result<Arc<Content>, String>> = OnceLock::new();
 
-/// Контент игры из вшитого при сборке `data/`: разбирается один раз на запуск.
-fn content() -> Result<&'static Content, String> {
+/// Контент игры из вшитого при сборке `data/`: разбирается один раз на запуск и делится жизнями.
+fn content() -> Result<Arc<Content>, String> {
     CONTENT
         .get_or_init(|| {
             let mut files = Vec::new();
@@ -24,13 +24,13 @@ fn content() -> Result<&'static Content, String> {
             collect_files(&DATA, &mut files, &mut errors);
             if errors.is_empty() {
                 Content::from_files(files)
+                    .map(Arc::new)
                     .map_err(|content_errors| invalid_content(&content_errors))
             } else {
                 Err(invalid_content(&errors))
             }
         })
-        .as_ref()
-        .map_err(Clone::clone)
+        .clone()
 }
 
 fn invalid_content(errors: &[ContentError]) -> String {
@@ -66,8 +66,7 @@ fn slash_path(path: &Path) -> String {
 pub fn new_life(settings_json: &str) -> Result<Game, String> {
     let settings: LifeSettings = serde_json::from_str(settings_json)
         .map_err(|error| bridge_error("malformed_settings", error.to_string()))?;
-    let content = content()?;
-    Game::new_life(&settings, &content.time).map_err(|error| command_error(&error))
+    Game::new_life(&settings, content()?).map_err(|error| command_error(&error))
 }
 
 pub fn apply(game: &mut Game, command_json: &str) -> String {
@@ -92,7 +91,7 @@ pub fn advance(game: &mut Game, delta_ms: i64) -> Result<bool, String> {
 }
 
 pub fn view_json(game: &Game) -> String {
-    serde_json::to_string(game.view()).expect("StateView сериализуется в JSON")
+    serde_json::to_string(&game.view()).expect("StateView сериализуется в JSON")
 }
 
 pub fn no_life() -> String {
@@ -169,10 +168,34 @@ mod tests {
         );
         let refusal = parsed(&apply(
             &mut game,
-            r#"{"command":"buy","good":"jeans","quantity":1}"#,
+            r#"{"command":"travel","destination":"leningrad"}"#,
         ));
         assert_eq!(refusal["error"], "not_simulated_yet");
-        assert_eq!(refusal["command"], "buy");
+        assert_eq!(refusal["command"], "travel");
+    }
+
+    #[test]
+    fn buying_through_the_bridge_fills_the_pocket() {
+        let mut game = new_life(SETTINGS).expect("жизнь начинается");
+        assert_eq!(
+            apply(
+                &mut game,
+                r#"{"command":"buy","good":"chewing_gum","quantity":2}"#
+            ),
+            OK
+        );
+        assert_eq!(game.view().pocket.items[0].amount, "2 бл");
+        let refusal = parsed(&apply(
+            &mut game,
+            r#"{"command":"buy","good":"jeans","quantity":1}"#,
+        ));
+        assert_eq!(refusal["error"], "not_enough_cash");
+        assert!(
+            refusal["message"]
+                .as_str()
+                .is_some_and(|message| message.starts_with("не хватает денег")),
+            "{refusal}"
+        );
     }
 
     #[test]

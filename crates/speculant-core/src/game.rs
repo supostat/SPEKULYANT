@@ -1,59 +1,107 @@
 //! Фасад ядра: интерфейс и симулятор видят мир только через `Game`.
 
+mod snapshot;
+
+use std::sync::Arc;
+
 use crate::command::{Command, LifeSettings};
 use crate::command_error::CommandError;
-use crate::time::{Clock, GameDate, MAX_SPEED, TimeRules};
-use crate::view::{StateView, TimeView};
+use crate::content::{BiographyId, CityId, Content, GoodId, MoneyPlaceId};
+use crate::economy::{Currency, Deal, Markets, Money, Trader};
+use crate::rng::WorldRng;
+use crate::time::{Clock, GameDate, MAX_SPEED};
+use crate::view::{Screen, StateView};
 
-const OPENING_SNAPSHOT: &str = include_str!("../../../design/etalons/market.view.json");
+/// Сколько последних сообщений помнит лента.
+const MESSAGE_LOG_LENGTH: usize = 20;
+const BOUGHT: &str = "Купил";
+const SOLD: &str = "Продал";
+const DEPOSITED: &str = "положил";
+const WITHDREW: &str = "снял";
 
 #[derive(Debug)]
 pub struct Game {
-    rules: TimeRules,
+    content: Arc<Content>,
     clock: Clock,
-    view: StateView,
+    rng: WorldRng,
+    city: CityId,
+    markets: Markets,
+    player: Trader,
+    messages: Vec<String>,
+    screen: Screen,
 }
 
 impl Game {
-    /// Открывает жизнь в первый день 1984 года. Дата, скорость и пауза — настоящие, от часов мира.
-    /// Рынок, карман, слухи и сообщения пока берутся из снимка рынка дизайн-книги
-    /// (`design/etalons/market.view.json`) — их заменят экономика и контент мира.
-    pub fn new_life(settings: &LifeSettings, rules: &TimeRules) -> Result<Self, CommandError> {
+    /// Открывает жизнь в первый день 1984 года: город и наличные — из биографии, случай мира —
+    /// из сида.
+    pub fn new_life(settings: &LifeSettings, content: Arc<Content>) -> Result<Self, CommandError> {
         if settings.biography.trim().is_empty() {
             return Err(CommandError::EmptyBiography);
         }
-        let view = serde_json::from_str(OPENING_SNAPSHOT)
-            .expect("снимок рынка дизайн-книги соответствует StateView");
-        let mut game = Self {
-            rules: rules.clone(),
-            clock: Clock::new(rules.clock.clone(), GameDate::START),
-            view,
-        };
-        game.refresh_time();
-        Ok(game)
+        let biography = content
+            .biographies
+            .get(&BiographyId::new(settings.biography.as_str()))
+            .ok_or_else(|| CommandError::UnknownBiography {
+                biography: settings.biography.clone(),
+            })?;
+        let today = GameDate::START;
+        let cash = content
+            .money
+            .from_real(biography.start_cash, Currency::Ruble, today);
+        Ok(Self {
+            clock: Clock::new(content.time.clock.clone(), today),
+            rng: WorldRng::new(settings.seed),
+            city: biography.start_city.clone(),
+            markets: Markets::new(&content),
+            player: Trader::new(cash, &content),
+            messages: Vec::new(),
+            screen: Screen::Market,
+            content,
+        })
     }
 
-    pub fn view(&self) -> &StateView {
-        &self.view
+    /// Снимок мира для интерфейса.
+    pub fn view(&self) -> StateView {
+        snapshot::snapshot(self)
     }
 
     pub fn today(&self) -> GameDate {
         self.clock.today()
     }
 
+    pub fn content(&self) -> &Content {
+        &self.content
+    }
+
+    pub fn city(&self) -> &CityId {
+        &self.city
+    }
+
+    pub fn markets(&self) -> &Markets {
+        &self.markets
+    }
+
+    pub fn player(&self) -> &Trader {
+        &self.player
+    }
+
     /// Двигает мир на `milliseconds` реального времени; `true`, если наступил хотя бы один день.
+    /// Каждый день рынки приходят в себя и колеблются по сиду, вклады получают проценты.
     pub fn advance(&mut self, milliseconds: u32) -> bool {
-        let days_passed = !self.clock.advance(milliseconds).is_empty();
-        if days_passed {
-            self.refresh_time();
+        let days = self.clock.advance(milliseconds);
+        for day in &days {
+            self.markets
+                .next_day(&self.content, &mut self.rng, day.date);
+            self.player.next_day(&self.content, day.date);
         }
-        days_passed
+        !days.is_empty()
     }
 
     pub fn apply(&mut self, command: Command) -> Result<(), CommandError> {
+        let today = self.clock.today();
         match command {
             Command::NewLife(settings) => {
-                *self = Self::new_life(&settings, &self.rules)?;
+                *self = Self::new_life(&settings, Arc::clone(&self.content))?;
             }
             Command::Advance { milliseconds } => {
                 self.advance(milliseconds);
@@ -65,14 +113,42 @@ impl Game {
                         speed: invalid.speed,
                         max: MAX_SPEED,
                     })?;
-                self.refresh_time();
             }
-            Command::Pause { paused } => {
-                self.clock.set_paused(paused);
-                self.refresh_time();
+            Command::Pause { paused } => self.clock.set_paused(paused),
+            Command::OpenScreen { screen } => self.screen = screen,
+            Command::Buy { good, quantity } => {
+                let good = GoodId::new(good);
+                let deal = self.player.buy(
+                    &mut self.markets,
+                    &self.content,
+                    &self.city,
+                    &good,
+                    quantity,
+                    today,
+                )?;
+                self.log_deal(BOUGHT, &good, deal);
             }
-            Command::OpenScreen { screen } => {
-                self.view.screen = screen;
+            Command::Sell { good, quantity } => {
+                let good = GoodId::new(good);
+                let deal = self.player.sell(
+                    &mut self.markets,
+                    &self.content,
+                    &self.city,
+                    &good,
+                    quantity,
+                    today,
+                )?;
+                self.log_deal(SOLD, &good, deal);
+            }
+            Command::Deposit { place, amount } => {
+                let place = MoneyPlaceId::new(place);
+                let deposited = self.player.deposit(&self.content, &place, amount, today)?;
+                self.log_money_move(&place, DEPOSITED, deposited);
+            }
+            Command::Withdraw { place, amount } => {
+                let place = MoneyPlaceId::new(place);
+                let withdrawn = self.player.withdraw(&self.content, &place, amount, today)?;
+                self.log_money_move(&place, WITHDREW, withdrawn);
             }
             other => {
                 return Err(CommandError::NotSimulatedYet {
@@ -83,11 +159,29 @@ impl Game {
         Ok(())
     }
 
-    fn refresh_time(&mut self) {
-        self.view.header.date = self.clock.today().russian();
-        self.view.time = TimeView {
-            speed: self.clock.speed(),
-            paused: self.clock.is_paused(),
-        };
+    /// «Купил: Джинсы (фирма), 3 шт за 495 р.»
+    fn log_deal(&mut self, verb: &str, good: &GoodId, deal: Deal) {
+        let item = &self.content.goods[good];
+        let total = self.content.money.format_money(deal.total, self.today());
+        let message = format!(
+            "{verb}: {}, {} {} за {total}",
+            item.name, deal.quantity, item.unit
+        );
+        self.log(message);
+    }
+
+    /// «Сберкасса: положил 500 р.»
+    fn log_money_move(&mut self, place: &MoneyPlaceId, verb: &str, amount: Money) {
+        let title = &self.content.money_places[place].title;
+        let amount = self.content.money.format_money(amount, self.today());
+        let message = format!("{title}: {verb} {amount}");
+        self.log(message);
+    }
+
+    fn log(&mut self, message: String) {
+        self.messages.push(message);
+        if self.messages.len() > MESSAGE_LOG_LENGTH {
+            self.messages.remove(0);
+        }
     }
 }

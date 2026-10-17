@@ -3,12 +3,18 @@
 use std::collections::BTreeSet;
 
 use super::loader::{Entry, Parsed};
-use super::{Choice, Conditions, ContentError, ContentFile, Event};
+use super::{
+    Biography, Choice, City, Conditions, ContentError, ContentFile, Event, Good, MoneyPlace,
+};
+use crate::economy::{MarketRules, MoneyRules, RubleCurve};
 use crate::time::{GameDate, TimeRules};
 
 const PLACEHOLDERS: [&str; 3] = ["npc", "price", "sum"];
 const NPC_PLACEHOLDER: &str = "npc";
 const FIRST_YEAR: i32 = 1984;
+/// Индекс цен 1984 года — единица: реальные цены считаются в рублях 1984 года.
+const BASE_INDEX: f64 = 1.0;
+const ENTIRE_DEPOSIT_PERCENT: f64 = -100.0;
 
 /// Множества идентификаторов, на которые можно ссылаться.
 struct Known {
@@ -111,14 +117,41 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
         );
     }
     for entry in &parsed.biographies {
-        let city = entry.value.start_city.as_str();
-        if !known.cities.contains(city) {
-            Report {
+        check_biography(
+            &entry.value,
+            &known,
+            &mut Report {
                 file: entry.file,
                 errors: &mut *errors,
-            }
-            .at_reference(city, format!("стартового города {city} нет в cities/"));
-        }
+            },
+        );
+    }
+    if let Some((file, rules)) = &parsed.market {
+        check_market(
+            rules,
+            &mut Report {
+                file,
+                errors: &mut *errors,
+            },
+        );
+    }
+    if let Some((file, rules)) = &parsed.money {
+        check_money(
+            rules,
+            &mut Report {
+                file,
+                errors: &mut *errors,
+            },
+        );
+    }
+    for entry in &parsed.money_places {
+        check_money_place(
+            &entry.value,
+            &mut Report {
+                file: entry.file,
+                errors: &mut *errors,
+            },
+        );
     }
     for entry in &parsed.events {
         check_event(
@@ -136,8 +169,14 @@ fn ids<T>(entries: &[Entry<'_, T>]) -> BTreeSet<String> {
     entries.iter().map(|entry| entry.id.clone()).collect()
 }
 
-fn check_good(entry: &Entry<'_, super::Good>, report: &mut Report<'_, '_>) {
-    let curve = &entry.value.curve;
+fn check_good(entry: &Entry<'_, Good>, report: &mut Report<'_, '_>) {
+    if entry.value.stock == 0 {
+        report.at(
+            report.file.line_of("stock"),
+            "обычный запас товара на толкучке должен быть больше нуля".to_owned(),
+        );
+    }
+    let curve = entry.value.curve.points();
     let curve_line = report.file.line_of("curve");
     if curve.is_empty() {
         report.at(
@@ -146,15 +185,7 @@ fn check_good(entry: &Entry<'_, super::Good>, report: &mut Report<'_, '_>) {
         );
     }
     for point in curve {
-        if point.year < FIRST_YEAR {
-            report.at(
-                curve_line,
-                format!(
-                    "опорная точка {} раньше начала игры в {FIRST_YEAR} году",
-                    point.year
-                ),
-            );
-        }
+        check_year(point.year, curve_line, report);
         if !point.price.is_positive() {
             report.at(
                 curve_line,
@@ -170,7 +201,13 @@ fn check_good(entry: &Entry<'_, super::Good>, report: &mut Report<'_, '_>) {
     }
 }
 
-fn check_city(entry: &Entry<'_, super::City>, known: &Known, report: &mut Report<'_, '_>) {
+fn check_city(entry: &Entry<'_, City>, known: &Known, report: &mut Report<'_, '_>) {
+    if entry.value.market.trim().is_empty() {
+        report.at(
+            report.file.line_of("market"),
+            "у города нет толкучки: market пустой".to_owned(),
+        );
+    }
     for (category, multiplier) in &entry.value.multipliers {
         if !known.categories.contains(category) {
             report.at(
@@ -195,6 +232,171 @@ fn check_city(entry: &Entry<'_, super::City>, known: &Known, report: &mut Report
                 format!("{key} раньше начала игры 1984-01-01"),
             );
         }
+    }
+}
+
+fn check_biography(biography: &Biography, known: &Known, report: &mut Report<'_, '_>) {
+    let city = biography.start_city.as_str();
+    if !known.cities.contains(city) {
+        report.at_reference(city, format!("стартового города {city} нет в cities/"));
+    }
+    if biography.start_cash.is_negative() {
+        report.at(
+            report.file.line_of("start_cash"),
+            "стартовые наличные не могут быть меньше нуля".to_owned(),
+        );
+    }
+}
+
+fn check_market(rules: &MarketRules, report: &mut Report<'_, '_>) {
+    let shares = [
+        (
+            "spread",
+            rules.spread,
+            0.0 < rules.spread && rules.spread < 1.0,
+            "больше 0 и меньше 1",
+        ),
+        (
+            "recovery",
+            rules.recovery,
+            0.0 < rules.recovery && rules.recovery <= 1.0,
+            "больше 0 и не больше 1",
+        ),
+        (
+            "daily_noise",
+            rules.daily_noise,
+            (0.0..1.0).contains(&rules.daily_noise),
+            "от 0 и меньше 1",
+        ),
+    ];
+    for (key, value, valid, range) in shares {
+        if !valid {
+            report.at(
+                report.file.line_of(key),
+                format!("{key} = {value}: доля должна быть {range}"),
+            );
+        }
+    }
+}
+
+fn check_money(rules: &MoneyRules, report: &mut Report<'_, '_>) {
+    let denomination_line = report.file.line_of("denomination");
+    if rules.denomination.factor <= 1 {
+        report.at(
+            denomination_line,
+            "деноминация должна укрупнять рубль: factor больше 1".to_owned(),
+        );
+    }
+    if rules.denomination.date < GameDate::START {
+        report.at(
+            denomination_line,
+            "деноминация раньше начала игры 1984-01-01".to_owned(),
+        );
+    }
+    for (key, curve) in [
+        ("inflation", &rules.inflation),
+        ("checks_rate", &rules.checks_rate),
+        ("dollar_rate", &rules.dollar_rate),
+    ] {
+        check_ruble_curve(key, curve, report);
+    }
+    if rules
+        .inflation
+        .points()
+        .first()
+        .is_some_and(|point| point.rubles != BASE_INDEX)
+    {
+        report.at(
+            report.file.line_of("inflation"),
+            "индекс 1984 года — единица: реальные цены считаются в рублях 1984 года".to_owned(),
+        );
+    }
+}
+
+fn check_ruble_curve(key: &str, curve: &RubleCurve, report: &mut Report<'_, '_>) {
+    let line = report.file.line_of(key);
+    let points = curve.points();
+    if points.first().is_none_or(|point| point.year != FIRST_YEAR) {
+        report.at(
+            line,
+            format!("кривая {key} должна начинаться с {FIRST_YEAR} года"),
+        );
+    }
+    for point in points {
+        check_year(point.year, line, report);
+        if !(point.rubles.is_finite() && point.rubles > 0.0) {
+            report.at(
+                line,
+                format!(
+                    "{key}: рублей в {} году должно быть больше нуля",
+                    point.year
+                ),
+            );
+        }
+    }
+    if points.windows(2).any(|pair| pair[1].year <= pair[0].year) {
+        report.at(
+            line,
+            format!("годы опорных точек {key} должны строго возрастать"),
+        );
+    }
+}
+
+fn check_money_place(place: &MoneyPlace, report: &mut Report<'_, '_>) {
+    for (key, date) in [
+        ("opens", place.opens),
+        ("closes", place.closes),
+        ("illegal_until", place.illegal_until),
+    ] {
+        if date.is_some_and(|date| date < GameDate::START) {
+            report.at(
+                report.file.line_of(key),
+                format!("{key} раньше начала игры 1984-01-01"),
+            );
+        }
+    }
+    if let (Some(opens), Some(closes)) = (place.opens, place.closes)
+        && closes <= opens
+    {
+        report.at(
+            report.file.line_of("closes"),
+            "место закрывается не позже, чем открывается".to_owned(),
+        );
+    }
+    let interest_line = report.file.line_of("interest");
+    for point in &place.interest {
+        check_year(point.year, interest_line, report);
+        if !(point.percent.is_finite() && point.percent > ENTIRE_DEPOSIT_PERCENT) {
+            report.at(
+                interest_line,
+                format!(
+                    "процент {} года должен быть больше {ENTIRE_DEPOSIT_PERCENT}",
+                    point.year
+                ),
+            );
+        }
+    }
+    if place
+        .interest
+        .windows(2)
+        .any(|pair| pair[1].year <= pair[0].year)
+    {
+        report.at(
+            interest_line,
+            "годы процентов должны строго возрастать".to_owned(),
+        );
+    }
+}
+
+/// Год опорной точки: не раньше начала игры и в пределах календаря.
+fn check_year(year: i32, line: Option<usize>, report: &mut Report<'_, '_>) {
+    if year < FIRST_YEAR {
+        report.at(
+            line,
+            format!("опорная точка {year} раньше начала игры в {FIRST_YEAR} году"),
+        );
+    } else if GameDate::new_year(year).is_none() {
+        report.at(line, format!("год {year} вне календаря игры"));
     }
 }
 

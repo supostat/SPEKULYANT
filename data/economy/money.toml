@@ -1,0 +1,62 @@
+# Номинал и валюты (§5.1, §6). Значения — рубли на ценнике в начале года; после деноминации —
+# новые рубли, как на ценнике своего года. Индекс — из графика дизайн-книги (§V), курсы — по
+# мотивам истории; калибровка — в фазе симулятора.
+
+denomination = { date = "1998-01-01", factor = 1000 }
+
+# Индекс цен: рублей на ценнике за рубль 1984 года.
+inflation = [
+  { year = 1984, rubles = 1 },
+  { year = 1985, rubles = 1 },
+  { year = 1986, rubles = 1.02 },
+  { year = 1987, rubles = 1.05 },
+  { year = 1988, rubles = 1.1 },
+  { year = 1989, rubles = 1.2 },
+  { year = 1990, rubles = 1.3 },
+  { year = 1991, rubles = 2.6 },
+  { year = 1992, rubles = 70 },
+  { year = 1993, rubles = 700 },
+  { year = 1994, rubles = 2300 },
+  { year = 1995, rubles = 7000 },
+  { year = 1996, rubles = 10000 },
+  { year = 1997, rubles = 11000 },
+  { year = 1998, rubles = 20 },
+  { year = 1999, rubles = 37 },
+  { year = 2000, rubles = 45 },
+  { year = 2001, rubles = 53 },
+  { year = 2002, rubles = 61 },
+  { year = 2003, rubles = 69 },
+  { year = 2004, rubles = 77 },
+]
+
+# Чек ВПТ «Берёзки» у фарцовщиков.
+checks_rate = [
+  { year = 1984, rubles = 2 },
+  { year = 1986, rubles = 2.5 },
+  { year = 1988, rubles = 3 },
+]
+
+# Доллар: до 1991 года — на чёрном рынке, потом — в обменнике.
+dollar_rate = [
+  { year = 1984, rubles = 3 },
+  { year = 1985, rubles = 3.5 },
+  { year = 1986, rubles = 4 },
+  { year = 1987, rubles = 4.5 },
+  { year = 1988, rubles = 5 },
+  { year = 1989, rubles = 10 },
+  { year = 1990, rubles = 15 },
+  { year = 1991, rubles = 30 },
+  { year = 1992, rubles = 180 },
+  { year = 1993, rubles = 450 },
+  { year = 1994, rubles = 1500 },
+  { year = 1995, rubles = 4500 },
+  { year = 1996, rubles = 4700 },
+  { year = 1997, rubles = 5600 },
+  { year = 1998, rubles = 6 },
+  { year = 1999, rubles = 21 },
+  { year = 2000, rubles = 28 },
+  { year = 2001, rubles = 29 },
+  { year = 2002, rubles = 31 },
+  { year = 2003, rubles = 31 },
+  { year = 2004, rubles = 29 },
+]

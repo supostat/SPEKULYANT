@@ -1,0 +1,19 @@
+# Ящик — двадцать бутылок по кривой бутылки из графика дизайн-книги (§V): сухой закон 1985 года
+# поднимает цену, дикий рынок её роняет.
+name = "Водка, ящик"
+short_name = "Водка"
+category = "alcohol"
+unit = "ящ"
+stock = 2
+curve = [
+  { year = 1984, price = 106 },
+  { year = 1985, price = 120 },
+  { year = 1986, price = 180 },
+  { year = 1987, price = 280 },
+  { year = 1988, price = 240 },
+  { year = 1990, price = 200 },
+  { year = 1992, price = 60 },
+  { year = 1994, price = 40 },
+  { year = 1998, price = 40 },
+  { year = 2004, price = 50 },
+]

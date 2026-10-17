@@ -1,5 +1,34 @@
-//! Экономика мира. Деньги ядра считаются в реальных единицах — копейках 1984 года (§5.1).
+//! Экономика мира (§5, §6). Цены ядро считает в реальных единицах — копейках 1984 года; номинал на
+//! ценнике, деноминация и валюты — слой поверх через индекс инфляции (§5.1). Деньги игрока лежат в
+//! своей валюте, поэтому гиперинфляция бьёт ровно по тем, кто держит рубли.
 
+mod city_market;
+mod currency;
+mod denomination;
+mod log_interpolation;
+mod market_rules;
+mod markets;
+mod money;
+mod money_rules;
+mod money_store;
+mod pocket;
+mod price_curve;
 mod real;
+mod ruble_curve;
+mod shock;
+mod trader;
 
+pub use city_market::CityMarket;
+pub use currency::Currency;
+pub use denomination::Denomination;
+pub use market_rules::MarketRules;
+pub use markets::{Markets, Quote};
+pub use money::Money;
+pub use money_rules::MoneyRules;
+pub use money_store::MoneyStore;
+pub use pocket::Pocket;
+pub use price_curve::{PriceCurve, PricePoint};
 pub use real::Real;
+pub use ruble_curve::{RubleCurve, RublePoint};
+pub use shock::Shock;
+pub use trader::{Deal, Trader};

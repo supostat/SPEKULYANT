@@ -1,6 +1,8 @@
 name = "Джинсы (фирма)"
+short_name = "Джинсы"
 category = "clothes"
 unit = "шт"
+stock = 6
 curve = [
   { year = 1984, price = 180 },
   { year = 1988, price = 150 },

@@ -1,4 +1,5 @@
 title = "Студент"
 description = "Общежитие, иностранцы-сокурсники, мало денег."
 start_city = "kiev"
+start_cash = 150
 starts_unlocked = true

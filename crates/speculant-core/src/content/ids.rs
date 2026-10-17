@@ -44,6 +44,10 @@ content_id!(
     BiographyId
 );
 content_id!(
+    /// Место хранения денег — имя файла в `data/money/`.
+    MoneyPlaceId
+);
+content_id!(
     /// Шаблон соперника или знакомого — имя файла в `data/npc/`.
     NpcId
 );

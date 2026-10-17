@@ -1,0 +1,15 @@
+name = "Джинсы (фирма)"
+short_name = "Джинсы"
+category = "clothes"
+unit = "шт"
+stock = 6
+curve = [
+  { year = 1984, price = 180 },
+  { year = 1988, price = 150 },
+  { year = 1990, price = 120 },
+  { year = 1992, price = 60 },
+  { year = 1994, price = 40 },
+  { year = 1996, price = 30 },
+  { year = 2000, price = 25 },
+  { year = 2004, price = 25 },
+]

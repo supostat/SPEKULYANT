@@ -1,0 +1,5 @@
+title = "Коммерческий банк"
+currency = "ruble"
+opens = "1989-01-01"
+risk = "Отзыв лицензии, банкир с деньгами в бегах"
+interest = [{ year = 1989, percent = 10 }]

@@ -11,7 +11,7 @@ const FNV_PRIME: u64 = 0x0000_0100_0000_01b3;
 /// Генератор мира на ChaCha8 с именованными подпотоками: у каждой подсистемы свой поток
 /// (`stream("prices")`, `stream("events")`), поэтому новые розыгрыши в одной подсистеме
 /// не сдвигают последовательности других.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WorldRng {
     seed: u64,
     streams: BTreeMap<String, ChaCha8Rng>,

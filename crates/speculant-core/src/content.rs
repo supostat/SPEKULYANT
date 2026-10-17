@@ -1,5 +1,6 @@
-//! Контент как данные (§10, §14.1): товары, города, маршруты, эпохи, биографии, шаблоны NPC
-//! и события. Формат — TOML, файл на сущность в `data/`, имя файла — идентификатор (решение 15.7).
+//! Контент как данные (§10, §14.1): товары, города, маршруты, эпохи, правила толкучки, индекс цен
+//! и курсы, места хранения денег, биографии, шаблоны NPC и события. Формат — TOML, файл на
+//! сущность в `data/`, имя файла — идентификатор (решение 15.7).
 //! Загрузка проверяет схему и ссылки и возвращает все ошибки сразу, каждая — «файл:строка».
 
 mod biography;
@@ -13,6 +14,7 @@ mod event;
 mod good;
 mod ids;
 mod loader;
+mod money_place;
 mod npc_template;
 mod route;
 mod validation;
@@ -28,22 +30,28 @@ pub use content_error::ContentError;
 pub use content_file::ContentFile;
 pub use epoch_profile::EpochProfile;
 pub use event::{Choice, Event, FollowUp};
-pub use good::{Good, PricePoint};
+pub use good::Good;
 pub use ids::{
-    BiographyId, CityId, EpochId, EventId, FactionId, FlagId, GoodId, NpcId, TimelineNodeId,
+    BiographyId, CityId, EpochId, EventId, FactionId, FlagId, GoodId, MoneyPlaceId, NpcId,
+    TimelineNodeId,
 };
+pub use money_place::{InterestPoint, MoneyPlace};
 pub use npc_template::NpcTemplate;
 pub use route::Route;
 
+use crate::economy::{MarketRules, MoneyRules};
 use crate::time::TimeRules;
 
 #[derive(Clone, Debug)]
 pub struct Content {
     pub time: TimeRules,
+    pub market: MarketRules,
+    pub money: MoneyRules,
     pub epochs: BTreeMap<EpochId, EpochProfile>,
     pub goods: BTreeMap<GoodId, Good>,
     pub cities: BTreeMap<CityId, City>,
     pub routes: Vec<Route>,
+    pub money_places: BTreeMap<MoneyPlaceId, MoneyPlace>,
     pub biographies: BTreeMap<BiographyId, Biography>,
     pub npcs: BTreeMap<NpcId, NpcTemplate>,
     pub events: BTreeMap<EventId, Event>,
