@@ -1,5 +1,16 @@
 //! Ядро симуляции «Спекулянта»: время, экономика, события, соперники, дела.
 //! Крейт не зависит от Godot: его гоняют симулятор, валидатор и мост gdext.
+//! Наружу ядро отдаёт `StateView` — снимок мира, готовый к показу, — и принимает `Command`.
+
+pub mod command;
+pub mod command_error;
+pub mod game;
+pub mod view;
+
+pub use command::{Command, LifeSettings};
+pub use command_error::CommandError;
+pub use game::Game;
+pub use view::StateView;
 
 /// Версия ядра из манифеста рабочей области.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

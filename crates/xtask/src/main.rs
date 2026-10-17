@@ -1,6 +1,7 @@
 //! Сквозные команды проекта. Запуск: `cargo xtask <команда>`.
 //! Каждая команда — один argv без shell, чтобы служить критерием готовности фазы.
 
+mod bridge_smoke;
 mod build_godot;
 mod charset_check;
 mod deps_check;
@@ -22,7 +23,9 @@ const USAGE: &str = "\
 Использование: cargo xtask <команда>
 
   godot-fetch               скачать пин Godot из tools.toml в .tools/ (проверка sha256)
-  build-godot               собрать cdylib моста для хоста в godot/bin/
+  build-godot [--release] [--universal]
+                            собрать cdylib моста в godot/bin/ (universal — arm64+x86_64 на macOS)
+  bridge-smoke              безголово создать SpeculantGame в Godot и прочитать снимок ядра
   godot-check               безголовый импорт проекта godot/ пином Godot и собранным мостом
   font-glyphs               записать godot/assets/fonts/glyphs.txt из TTF шрифта игры
   gd-check                  проверить парсером Godot все скрипты godot/src и godot/tools
@@ -45,11 +48,8 @@ fn main() -> Result<()> {
             println!("Godot: {}", binary.display());
             Ok(())
         }
-        "build-godot" => {
-            let library = build_godot::build_host_debug()?;
-            println!("Мост: {}", library.display());
-            Ok(())
-        }
+        "build-godot" => build_godot::run(flags),
+        "bridge-smoke" => bridge_smoke::run(),
         "godot-check" => godot_check::run(),
         "font-glyphs" => font_glyphs::run(),
         "gd-check" => gd_check::run(),

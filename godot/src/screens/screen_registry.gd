@@ -4,6 +4,7 @@ extends RefCounted
 
 const SCREENS := {
 	"boot": preload("res://src/screens/boot.gd"),
+	"market": preload("res://src/screens/market.gd"),
 }
 
 

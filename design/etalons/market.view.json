@@ -1,0 +1,43 @@
+{
+  "screen": "market",
+  "header": {
+    "city": "Москва",
+    "date": "14 марта 1986, пт",
+    "money": ["Наличные: 1 240 р.", "Чеки: 85"]
+  },
+  "time": { "speed": 1, "paused": false },
+  "market": {
+    "place": "Толкучка у Рижского вокзала",
+    "goods": [
+      { "good": "jeans", "name": "Джинсы (фирма)", "buy": "160", "sell": "140", "stock": "6" },
+      { "good": "videocassette", "name": "Видеокассета E-180", "buy": "70", "sell": "58", "stock": "12" },
+      { "good": "records", "name": "Пластинки (фирма)", "buy": "45", "sell": "38", "stock": "9" },
+      { "good": "chewing_gum", "name": "Жвачка, блок", "buy": "25", "sell": "19", "stock": "30" },
+      { "good": "cigarettes", "name": "Сигареты (импорт)", "buy": "4.50", "sell": "3.60", "stock": "40" },
+      { "good": "sneakers", "name": "Кроссовки (импорт)", "buy": "120", "sell": "100", "stock": "3" },
+      { "good": "watch", "name": "Часы «Электроника»", "buy": "35", "sell": "27", "stock": "8" },
+      { "good": "vodka", "name": "Водка, ящик", "buy": "140", "sell": "118", "stock": "2" }
+    ]
+  },
+  "pocket": {
+    "items": [
+      { "label": "Джинсы", "amount": "3 шт" },
+      { "label": "Жвачка", "amount": "2 бл" },
+      { "label": "Чеки ВПТ", "amount": "85" },
+      { "label": "Связей", "amount": "4" }
+    ],
+    "danger": { "label": "ОБХСС", "level": 3, "scale": 7 }
+  },
+  "rumors": ["В ГУМ, говорят, завезут финские сапоги.", "Участковый новый, злой."],
+  "messages": ["Купил 3 пары джинсов по 160 р.", "Незнакомец в кепке смотрит на тебя слишком долго."],
+  "pending_event": null,
+  "pager": { "device": "ПЕЙДЖЕР", "messages": [] },
+  "businesses": [],
+  "manager": null,
+  "contacts": [],
+  "money": { "places": [], "rates": [] },
+  "notebook": [],
+  "zone": null,
+  "summary": null,
+  "biographies": []
+}

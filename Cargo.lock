@@ -1678,6 +1678,8 @@ name = "speculant-godot"
 version = "0.1.0"
 dependencies = [
  "godot",
+ "serde_json",
+ "speculant-core",
 ]
 
 [[package]]

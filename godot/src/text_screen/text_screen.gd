@@ -90,7 +90,7 @@ func fkeys(keys: Array) -> void:
 		put(column, FKEY_ROW, key, FKEY_KEY_FOREGROUND, FKEY_KEY_BACKGROUND)
 		column += key.length()
 		var label_width := FKEY_SLOT_WIDTH - key.length()
-		put(column, FKEY_ROW, _pad_right(label, label_width), FKEY_LABEL_FOREGROUND, FKEY_LABEL_BACKGROUND)
+		put(column, FKEY_ROW, pad_right(label, label_width), FKEY_LABEL_FOREGROUND, FKEY_LABEL_BACKGROUND)
 		column += label_width
 	if column < COLUMNS:
 		put(column, FKEY_ROW, " ".repeat(COLUMNS - column), FKEY_LABEL_FOREGROUND, FKEY_LABEL_BACKGROUND)
@@ -139,5 +139,26 @@ func _hex_row(colors: PackedByteArray, row: int) -> String:
 	return "".join(digits)
 
 
-func _pad_right(text: String, width: int) -> String:
+## Дополняет пробелами справа или обрезает до ширины — колонка, выровненная влево.
+static func pad_right(text: String, width: int) -> String:
 	return text.substr(0, width) if text.length() >= width else text + " ".repeat(width - text.length())
+
+
+## Дополняет пробелами слева — колонка, выровненная вправо; длинный текст не обрезается.
+static func pad_left(text: String, width: int) -> String:
+	return text if text.length() >= width else " ".repeat(width - text.length()) + text
+
+
+## Переносит текст по словам в строки не длиннее ширины.
+static func wrap(text: String, width: int) -> PackedStringArray:
+	var lines := PackedStringArray()
+	var line := ""
+	for word in text.split(" "):
+		if (line + " " + word).strip_edges().length() > width:
+			lines.append(line)
+			line = word
+		else:
+			line = word if line.is_empty() else line + " " + word
+	if not line.is_empty():
+		lines.append(line)
+	return lines

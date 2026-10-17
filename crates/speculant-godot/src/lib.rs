@@ -1,5 +1,8 @@
 //! Мост gdext: тонкий слой между ядром `speculant-core` и Godot 4.
-//! Класс `SpeculantGame` с четырьмя методами появится в фазе `bridge-contract`.
+//! Наружу — снимок мира JSON-строкой, внутрь — команды игрока JSON-строкой; логики игры здесь нет.
+
+mod bridge_json;
+mod speculant_game;
 
 use godot::prelude::*;
 

@@ -11,3 +11,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 godot = { version = "0.5.5", features = ["api-4-7"] }
+serde_json = "1.0.154"
+speculant-core = { path = "../speculant-core" }
