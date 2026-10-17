@@ -1,8 +1,138 @@
 # Контент и экраны «Спекулянта» — руководство автора
 
 Документ для тех, кто пишет данные игры и рисует экраны. Источник решений — `docs/SPEKULYANT.md`,
-эталон интерфейса — `design/design-book.html`. Разделы о формате событий, товаров и городов
-появятся вместе с форматом данных.
+эталон интерфейса — `design/design-book.html`.
+
+## Формат данных
+
+Решение 15.7: контент пишется в TOML, один файл на сущность, в любом текстовом редакторе. Имя
+файла без `.toml` — идентификатор сущности: латиница в нижнем регистре, цифры и `_`, с буквы
+(`chewing_gum.toml` → `chewing_gum`). На него ссылаются другие файлы.
+
+### Раскладка `data/`
+
+| Путь | Что лежит |
+|---|---|
+| `epochs/time.toml` | календарь эпох и часы игры (решение 15.3) |
+| `epochs/<эпоха>.toml` | описание эпохи; сама эпоха должна быть в календаре |
+| `goods/<товар>.toml` | товар и его кривая цены |
+| `cities/<город>.toml` | город, множители цен, доступность |
+| `routes.toml` | направления поездок |
+| `biographies/<биография>.toml` | стартовая биография |
+| `npc/<человек>.toml` | шаблон соперника или знакомого |
+| `events/<эпоха>/<событие>.toml` | событие эпохи |
+| `zone/events/<событие>.toml` | событие зоны |
+
+Файл вне этой раскладки — ошибка: опечатка в имени каталога не пропадёт молча.
+
+### Деньги и даты
+
+Деньги в данных — рубли 1984 года числом (`price = 160`, `price = 4.5`). Ядро хранит их в копейках
+и само переводит в номинал эпохи; гиперинфляция и деноминация в данных не пишутся. Даты —
+`"ГГГГ-ММ-ДД"`, не раньше `"1984-01-01"`.
+
+### Товар, город, маршрут, биография, человек, эпоха
+
+```toml
+# goods/jeans.toml
+name = "Джинсы (фирма)"
+category = "clothes"          # по категории город задаёт множитель
+unit = "шт"
+curve = [                     # опорные точки: год и цена; годы строго возрастают
+  { year = 1984, price = 180 },
+  { year = 1992, price = 60 },
+]
+
+# cities/warsaw.toml
+name = "Варшава"
+region = "abroad"
+multipliers = { clothes = 0.7 } # категория должна быть хотя бы у одного товара
+opens = "1990-06-01"            # до этой даты город закрыт
+connections_only_until = "1991-01-01"  # до этой даты — только по блату
+
+# routes.toml
+[[routes]]
+from = "moscow"
+to = "warsaw"
+days = 2
+fare = 40
+
+# biographies/student.toml
+title = "Студент"
+description = "Общежитие, иностранцы-сокурсники, мало денег."
+start_city = "moscow"
+starts_unlocked = true
+
+# npc/vodka_man.toml
+name = "Мужик в спецовке"
+role = "случайный продавец"
+strategy = "drifter"
+description = "Торгует тем, что осталось со свадьбы. Помнит обиды."
+
+# epochs/stagnation.toml
+summary = "Торговля с выгодой — спекуляция по статье 154."
+```
+
+### Событие
+
+Событие (§10.1) — условия, вес среди подходящих, текст и выборы. Условия — таблица `[conditions]`:
+`epochs`, `window = { from, until }`, `cities`, `reputation = [{ faction, at_least, at_most }]`,
+`money = { at_least }`, `goods = [{ good, at_least }]`, `flags_set`, `flags_unset`, `npc`,
+`timeline`. У выбора свои `[choices.conditions]`, последствия `[choices.consequences]`
+(`money`, `goods = [{ good, change }]`, `reputation = [{ faction, change }]`,
+`contacts = [{ npc, relation }]`, `set_flags`, `clear_flags`,
+`price_shocks = [{ good, city, factor, days }]`), текст исхода `outcome` и отложенные
+продолжения `[[choices.follow_ups]]` (`event`, `after_days`, `chance` от 0 до 1).
+
+В текстах работают подстановки `{npc}` (только при условии `npc`), `{price}` и `{sum}`.
+
+Пример §10.2 целиком лежит в `crates/speculant-core/tests/fixtures/content-min/events/stagnation/`:
+`vodka_crate.toml` и его продолжение `vodka_man_returns.toml`. Начало примера:
+
+```toml
+title = "Ящик «Столичной»"
+weight = 10
+once = true
+text = """
+У магазина «Вино-Водка» мужик в спецовке тянет тебя за рукав: …
+"""
+
+[conditions]
+epochs = ["stagnation"]
+window = { from = "1985-05-17", until = "1985-09-01" }
+cities = ["moscow"]
+npc = "vodka_man"
+
+[[choices]]
+text = "Сдать участковому"
+outcome = "Участковый доволен и записывает твою фамилию."
+
+[choices.consequences]
+reputation = [{ faction = "police", change = 2 }, { faction = "traders", change = -3 }]
+set_flags = ["snitched_1985"]
+
+[[choices.follow_ups]]
+event = "vodka_man_returns"
+after_days = 180
+chance = 0.5
+```
+
+### Заготовка и проверка
+
+```
+cargo xtask new-event <эпоха> <имя>
+```
+
+создаёт `data/events/<эпоха>/<имя>.toml` из заготовки, которая уже проходит проверку.
+
+```
+cargo run -p speculant-validate -- data --watch
+```
+
+проверяет весь каталог при каждом сохранении и печатает ошибки как «файл:строка: сообщение»:
+синтаксис и схема TOML, битые ссылки на товары, города, людей, эпохи и события, флаги, которые
+никто не ставит, выборы без последствий, исхода и продолжения, окна дат раньше 1984 года,
+неизвестные подстановки. Та же проверка стоит в ядре: игра с битым контентом не запустится.
 
 ## Экраны
 

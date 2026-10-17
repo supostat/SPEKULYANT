@@ -1,0 +1,4 @@
+name = "Икра"
+category = "food"
+unit = "банка"
+curve = [{ year = 1984, price = 5 }]

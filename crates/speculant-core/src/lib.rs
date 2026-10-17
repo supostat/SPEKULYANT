@@ -4,6 +4,8 @@
 
 pub mod command;
 pub mod command_error;
+pub mod content;
+pub mod economy;
 pub mod game;
 pub mod rng;
 pub mod time;
@@ -11,6 +13,7 @@ pub mod view;
 
 pub use command::{Command, LifeSettings};
 pub use command_error::CommandError;
+pub use content::Content;
 pub use game::Game;
 pub use time::TimeRules;
 pub use view::StateView;

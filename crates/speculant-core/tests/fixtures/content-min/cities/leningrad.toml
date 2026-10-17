@@ -1,0 +1,3 @@
+name = "Ленинград"
+region = "north_west"
+multipliers = { clothes = 0.95, alcohol = 1.1 }

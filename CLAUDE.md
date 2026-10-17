@@ -20,4 +20,5 @@
 - Единый раннер гейтов — `cargo xtask <команда>`; Godot скачивается командой `cargo xtask godot-fetch` в `.tools/`.
 - Строки игры — русские и только из набора глифов шрифта (`godot/assets/fonts/glyphs.txt`); проверка — `cargo xtask charset-check`.
 - Экран — один узел `TextScreen` 80×25; макеты дизайн-книги сняты в `design/etalons/`, сверка экрана — `cargo xtask screen-check <экран>`.
+- Контент — TOML в `data/`, файл на сущность, имя файла — идентификатор (решение 15.7; формат — `docs/CONTENT.md`). Проверка — `cargo run -p speculant-validate -- data [--watch]`, заготовка события — `cargo xtask new-event <эпоха> <имя>`. Мост вшивает `data/` при сборке.
 - Числовые пороги объёма, баланса и покрытия — только в `data/balance.toml`, никогда в коде и критериях.

@@ -1,0 +1,20 @@
+# Событие эпохи __EPOCH__. Справочник формата — docs/CONTENT.md; проверка при каждом сохранении —
+# `cargo run -p speculant-validate -- data --watch`.
+# В текстах доступны подстановки {npc} (нужно условие npc), {price} и {sum}.
+title = "Название события"
+weight = 10
+once = false
+text = """
+Что происходит и кто перед игроком.
+"""
+
+[conditions]
+epochs = ["__EPOCH__"]
+
+[[choices]]
+text = "Первый выбор"
+outcome = "Что случилось после первого выбора."
+
+[[choices]]
+text = "Второй выбор"
+outcome = "Что случилось после второго выбора."

@@ -1,0 +1,19 @@
+title = "Сломанное событие"
+weight = 5
+text = "Покупатель предлагает {bribe} и шлёт привет от {npc}."
+
+[conditions]
+window = { from = "1983-06-01" }
+cities = ["kiev"]
+flags_set = ["never_set_flag"]
+
+[[choices]]
+text = "Промолчать"
+
+[[choices]]
+text = "Согласиться"
+
+[[choices.follow_ups]]
+event = "missing_event"
+after_days = 30
+chance = 1.0

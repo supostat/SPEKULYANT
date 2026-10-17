@@ -4,17 +4,70 @@
 //! Ответ на команду — `{"ok":true}` или `{"error":"<вид>", ..., "message":"<текст для игрока>"}`.
 
 use serde_json::{Value, json};
-use speculant_core::{Command, CommandError, Game, LifeSettings, TimeRules};
+use std::path::Path;
+use std::sync::OnceLock;
+
+use include_dir::{Dir, include_dir};
+use speculant_core::content::{ContentError, ContentFile};
+use speculant_core::{Command, CommandError, Content, Game, LifeSettings};
 
 pub const OK: &str = r#"{"ok":true}"#;
-const TIME_RULES: &str = include_str!("../../../data/epochs/time.toml");
+static DATA: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../../data");
+static CONTENT: OnceLock<Result<Content, String>> = OnceLock::new();
+
+/// Контент игры из вшитого при сборке `data/`: разбирается один раз на запуск.
+fn content() -> Result<&'static Content, String> {
+    CONTENT
+        .get_or_init(|| {
+            let mut files = Vec::new();
+            let mut errors = Vec::new();
+            collect_files(&DATA, &mut files, &mut errors);
+            if errors.is_empty() {
+                Content::from_files(files)
+                    .map_err(|content_errors| invalid_content(&content_errors))
+            } else {
+                Err(invalid_content(&errors))
+            }
+        })
+        .as_ref()
+        .map_err(Clone::clone)
+}
+
+fn invalid_content(errors: &[ContentError]) -> String {
+    let lines: Vec<String> = errors.iter().map(ContentError::to_string).collect();
+    bridge_error("invalid_content", lines.join("\n"))
+}
+
+fn collect_files(dir: &Dir<'_>, files: &mut Vec<ContentFile>, errors: &mut Vec<ContentError>) {
+    for file in dir.files() {
+        let path = slash_path(file.path());
+        match file.contents_utf8() {
+            Some(text) => files.push(ContentFile::new(path, text)),
+            None => errors.push(ContentError {
+                file: path,
+                line: None,
+                message: "файл не в UTF-8".to_owned(),
+            }),
+        }
+    }
+    for subdirectory in dir.dirs() {
+        collect_files(subdirectory, files, errors);
+    }
+}
+
+/// Путь относительно `data/` через `/` на любой платформе — так его ждёт загрузчик контента.
+fn slash_path(path: &Path) -> String {
+    path.components()
+        .map(|component| component.as_os_str().to_string_lossy())
+        .collect::<Vec<_>>()
+        .join("/")
+}
 
 pub fn new_life(settings_json: &str) -> Result<Game, String> {
     let settings: LifeSettings = serde_json::from_str(settings_json)
         .map_err(|error| bridge_error("malformed_settings", error.to_string()))?;
-    let rules = TimeRules::from_toml(TIME_RULES)
-        .map_err(|error| bridge_error("invalid_time_rules", error.to_string()))?;
-    Game::new_life(&settings, &rules).map_err(|error| command_error(&error))
+    let content = content()?;
+    Game::new_life(&settings, &content.time).map_err(|error| command_error(&error))
 }
 
 pub fn apply(game: &mut Game, command_json: &str) -> String {

@@ -1,0 +1,7 @@
+name = "Водка, ящик"
+category = "alcohol"
+unit = "ящ"
+curve = [
+  { year = 1984, price = 106 },
+  { year = 1986, price = 180 },
+]

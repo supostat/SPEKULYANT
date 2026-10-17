@@ -24,6 +24,7 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
+      - run: cargo run -p speculant-validate -- data
       - run: cargo xtask godot-fetch
       - run: cargo xtask godot-check
       - run: cargo xtask gd-check

@@ -1,4 +1,5 @@
-use serde::{Deserialize, Serialize};
+use serde::de::Error as _;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 const MONTHS_GENITIVE: [&str; 12] = [
     "января",
@@ -19,8 +20,8 @@ const UNIX_DAY_OF_START: i64 = days_from_civil(1984, 1, 1);
 const UNIX_EPOCH_WEEKDAY: i64 = 3;
 
 /// День календаря как номер от 1 января 1984 года — первого дня каждой жизни. Даты раньше старта
-/// (дни рождения персонажей) отрицательны.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+/// (дни рождения персонажей) отрицательны. В данных и JSON дата пишется как `ГГГГ-ММ-ДД`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct GameDate {
     day: i32,
 }
@@ -55,6 +56,12 @@ impl GameDate {
         let month = parts.next()?.parse().ok()?;
         let day = parts.next()?.parse().ok()?;
         Self::from_ymd(year, month, day)
+    }
+
+    /// Дата в записи ISO 8601 `ГГГГ-ММ-ДД`.
+    pub fn to_iso(self) -> String {
+        let (year, month, day) = self.year_month_day();
+        format!("{year:04}-{month:02}-{day:02}")
     }
 
     pub fn next(self) -> Self {
@@ -105,6 +112,20 @@ impl GameDate {
             month,
             day,
         )
+    }
+}
+
+impl Serialize for GameDate {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(&self.to_iso())
+    }
+}
+
+impl<'de> Deserialize<'de> for GameDate {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let text = String::deserialize(deserializer)?;
+        Self::parse_iso(&text)
+            .ok_or_else(|| D::Error::custom(format!("«{text}» — не дата в форме ГГГГ-ММ-ДД")))
     }
 }
 

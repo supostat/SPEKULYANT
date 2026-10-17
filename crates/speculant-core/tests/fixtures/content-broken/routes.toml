@@ -1,0 +1,5 @@
+[[routes]]
+from = "moscow"
+to = "riga"
+days = 1
+fare = 15

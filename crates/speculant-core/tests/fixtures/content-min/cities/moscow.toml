@@ -1,0 +1,3 @@
+name = "Москва"
+region = "center"
+multipliers = { clothes = 1.0, alcohol = 1.0, sweets = 1.0 }

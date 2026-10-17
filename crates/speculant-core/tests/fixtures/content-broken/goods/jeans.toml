@@ -1,0 +1,7 @@
+name = "Джинсы (фирма)"
+category = "clothes"
+unit = "шт"
+curve = [
+  { year = 1988, price = 150 },
+  { year = 1984, price = 180 },
+]

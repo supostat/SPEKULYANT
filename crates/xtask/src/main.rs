@@ -11,6 +11,7 @@ mod font_glyphs;
 mod gd_check;
 mod godot_check;
 mod godot_pin;
+mod new_event;
 mod project_root;
 mod screen_check;
 mod screen_file;
@@ -34,6 +35,7 @@ const USAGE: &str = "\
   screen-check <экран>      буфер экрана Godot против design/etalons/<экран>.screen
   screenshot <экран>        PNG экрана в .tools/out/ (оконный запуск)
   deps-check                ядро speculant-core без Godot; пин gdext согласован с tools.toml
+  new-event <эпоха> <имя>   заготовка события в data/events/<эпоха>/<имя>.toml
   docs-check [--all-decided] маркеры DECIDED-15-N совпадают в документе и дизайн-книге";
 
 fn main() -> Result<()> {
@@ -61,6 +63,7 @@ fn main() -> Result<()> {
             println!("screenshot: {}", png.display());
             Ok(())
         }
+        "new-event" => new_event::run(flags),
         "deps-check" => deps_check::run(),
         "docs-check" => docs_check::run(flags.iter().any(|flag| flag == "--all-decided")),
         unknown => bail!("неизвестная команда xtask: {unknown}\n{USAGE}"),

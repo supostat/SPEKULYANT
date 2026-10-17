@@ -1,23 +1,115 @@
-//! CLI-валидатор контента. Схема и проверки появятся в фазе `content-format`.
+//! CLI-валидатор контента: `speculant-validate <каталог data> [--watch]`.
+//! Печатает каждую ошибку как «файл:строка: сообщение»; с `--watch` перепроверяет каталог
+//! при каждом сохранении файла (решение 15.7).
 
-fn main() {
-    println!("{}", banner());
+use std::path::{Path, PathBuf};
+use std::process::ExitCode;
+use std::sync::mpsc;
+use std::time::Duration;
+
+use notify::{RecursiveMode, Watcher};
+use speculant_core::Content;
+
+const USAGE: &str = "использование: speculant-validate <каталог data> [--watch]";
+const WATCH_FLAG: &str = "--watch";
+const SAVE_SETTLE: Duration = Duration::from_millis(200);
+
+fn main() -> ExitCode {
+    let arguments: Vec<String> = std::env::args().skip(1).collect();
+    let watch = arguments.iter().any(|argument| argument == WATCH_FLAG);
+    let directories: Vec<&String> = arguments
+        .iter()
+        .filter(|argument| *argument != WATCH_FLAG)
+        .collect();
+    let [directory] = directories.as_slice() else {
+        eprintln!("{USAGE}");
+        return ExitCode::from(2);
+    };
+    let directory = PathBuf::from(directory);
+    if watch {
+        watch_directory(&directory)
+    } else {
+        report(&directory)
+    }
 }
 
-fn banner() -> String {
+fn report(directory: &Path) -> ExitCode {
+    match Content::load(directory) {
+        Ok(content) => {
+            println!("{}", summary(&content));
+            ExitCode::SUCCESS
+        }
+        Err(errors) => {
+            for error in &errors {
+                println!("{error}");
+            }
+            println!("ошибок: {}", errors.len());
+            ExitCode::FAILURE
+        }
+    }
+}
+
+fn summary(content: &Content) -> String {
     format!(
-        "speculant-validate {} — валидатор контента на ядре speculant-core {}",
-        env!("CARGO_PKG_VERSION"),
-        speculant_core::VERSION
+        "контент валиден: эпох {}, товаров {}, городов {}, маршрутов {}, биографий {}, людей {}, событий {}",
+        content.time.epochs.epochs().len(),
+        content.goods.len(),
+        content.cities.len(),
+        content.routes.len(),
+        content.biographies.len(),
+        content.npcs.len(),
+        content.events.len()
     )
+}
+
+/// Проверяет каталог сразу и после каждой серии изменений; серия — изменения без паузы в 200 мс.
+fn watch_directory(directory: &Path) -> ExitCode {
+    let (sender, receiver) = mpsc::channel();
+    let mut watcher = match notify::recommended_watcher(sender) {
+        Ok(watcher) => watcher,
+        Err(error) => {
+            eprintln!(
+                "слежение за {} не запускается: {error}",
+                directory.display()
+            );
+            return ExitCode::FAILURE;
+        }
+    };
+    if let Err(error) = watcher.watch(directory, RecursiveMode::Recursive) {
+        eprintln!(
+            "слежение за {} не запускается: {error}",
+            directory.display()
+        );
+        return ExitCode::FAILURE;
+    }
+    report(directory);
+    while receiver.recv().is_ok() {
+        while receiver.recv_timeout(SAVE_SETTLE).is_ok() {}
+        println!("— изменения в {}, проверяю заново —", directory.display());
+        report(directory);
+    }
+    ExitCode::SUCCESS
 }
 
 #[cfg(test)]
 mod tests {
-    use super::banner;
+    use std::path::Path;
+
+    use speculant_core::Content;
+
+    use super::summary;
+
+    const CONTENT_MIN: &str = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../speculant-core/tests/fixtures/content-min"
+    );
 
     #[test]
-    fn banner_names_the_core_version() {
-        assert!(banner().contains(speculant_core::VERSION));
+    fn summary_counts_every_kind_of_content() {
+        let content = Content::load(Path::new(CONTENT_MIN)).expect("минимальный набор валиден");
+        assert_eq!(
+            summary(&content),
+            "контент валиден: эпох 1, товаров 3, городов 2, маршрутов 2, биографий 1, людей 1, событий 2"
+        );
     }
 }
