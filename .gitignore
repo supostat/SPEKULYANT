@@ -9,3 +9,10 @@
 
 # Rust
 target/
+
+# Пин Godot и артефакты xtask
+.tools/
+
+# Godot
+godot/.godot/
+godot/bin/

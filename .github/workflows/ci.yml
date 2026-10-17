@@ -1,0 +1,30 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Тулчейн Rust из rust-toolchain.toml
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - name: Кэш пина Godot
+        uses: actions/cache@v4
+        with:
+          path: .tools/godot
+          key: godot-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('tools.toml') }}
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace
+      - run: cargo xtask godot-fetch
+      - run: cargo xtask godot-check
+      - run: cargo xtask gd-check
+      - run: cargo xtask deps-check

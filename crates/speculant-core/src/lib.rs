@@ -1,0 +1,19 @@
+//! Ядро симуляции «Спекулянта»: время, экономика, события, соперники, дела.
+//! Крейт не зависит от Godot: его гоняют симулятор, валидатор и мост gdext.
+
+/// Версия ядра из манифеста рабочей области.
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+
+#[cfg(test)]
+mod tests {
+    use super::VERSION;
+
+    #[test]
+    fn version_is_a_semver_triplet() {
+        let parts: Vec<u32> = VERSION
+            .split('.')
+            .map(|part| part.parse().expect("числовая часть версии"))
+            .collect();
+        assert_eq!(parts.len(), 3);
+    }
+}

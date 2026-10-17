@@ -1,0 +1,35 @@
+# Пины инструментов проекта. Godot скачивает `cargo xtask godot-fetch` в `.tools/godot/<версия>/`,
+# sha256 архива сверяется до распаковки и выставления прав. Суммы сняты с официальных архивов
+# релиза и сверены с SHA512-SUMS.txt того же релиза.
+# Пины подобраны 2026-10-17: последний стабильный Godot 4 и совместимый с ним godot-rust.
+
+[godot]
+version = "4.7.2-stable"
+release_base_url = "https://github.com/godotengine/godot/releases/download/4.7.2-stable"
+
+[godot.archives.darwin-universal]
+file = "Godot_v4.7.2-stable_macos.universal.zip"
+sha256 = "c58a24e31d720be9d62f60cb5627c4e695fb72f21b0cfe1bc9ccaa9a3b3ba63e"
+binary = "Godot.app/Contents/MacOS/Godot"
+
+[godot.archives.linux-x86_64]
+file = "Godot_v4.7.2-stable_linux.x86_64.zip"
+sha256 = "cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4"
+binary = "Godot_v4.7.2-stable_linux.x86_64"
+
+[godot.archives.linux-aarch64]
+file = "Godot_v4.7.2-stable_linux.arm64.zip"
+sha256 = "5dd0d86405cf7e8adf79fb6377b38ba682a2846cb378ffe5364f38c01ad29b9d"
+binary = "Godot_v4.7.2-stable_linux.arm64"
+
+[godot.archives.windows-x86_64]
+file = "Godot_v4.7.2-stable_win64.exe.zip"
+sha256 = "731980f9608d61333e5baf54a2ef17210acc7a538446c0cb9969f002aca1e953"
+binary = "Godot_v4.7.2-stable_win64_console.exe"
+
+# Мост: крейт godot-rust и уровень API, под который он собран. `cargo xtask deps-check`
+# сверяет это с манифестом crates/speculant-godot.
+[gdext]
+crate = "godot"
+version = "0.5.5"
+api_feature = "api-4-7"

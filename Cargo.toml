@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/speculant-core",
+    "crates/speculant-sim",
+    "crates/speculant-validate",
+    "crates/speculant-godot",
+    "crates/xtask",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.94"
+publish = false

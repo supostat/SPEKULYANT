@@ -1,0 +1,10 @@
+[package]
+name = "speculant-sim"
+description = "CLI-симулятор баланса: боты проигрывают тысячи жизней на настоящем ядре."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+speculant-core = { path = "../speculant-core" }
