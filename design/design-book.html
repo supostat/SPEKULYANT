@@ -194,7 +194,7 @@ pre.dos span{display:inline}
   <div class="crt"><pre class="dos" id="scr-market"></pre></div>
   <div class="ctrl">
     <button id="mk-pause" class="pri" type="button">Пауза</button>
-    <button id="mk-speed" type="button">Скорость: ▶</button>
+    <button id="mk-speed" type="button">Скорость: ►</button>
   </div>
 </div>
 <p class="cap">Главный экран, весна 1986-го. Дни идут сами, цены на толкучке дышат. Пробел ставит паузу, как в оригинале.</p>
@@ -636,7 +636,7 @@ pre.dos span{display:inline}
     s.put(54,14,'Участковый новый,','b1 f11');s.put(54,15,'злой.','b1 f11');
     s.box(1,17,78,5,'b1 f7','Сообщения',false);
     mk.log.slice(-3).forEach((l,i)=>s.put(3,18+i,pad(l,74),'b1 f7'));
-    s.put(1,23,mk.paused?' ПАУЗА  (пробел)':' Время идёт  '+'▶'.repeat(mk.speed)+'  (+/−, пробел)',mk.paused?'b1 f14':'b1 f10');
+    s.put(1,23,mk.paused?' ПАУЗА  (пробел)':' Время идёт  '+'►'.repeat(mk.speed)+'  (+/−, пробел)',mk.paused?'b1 f14':'b1 f10');
     fkeys(s,[['1','Помощь'],['2','Купить'],['3','Продать'],['4','Ехать'],['5','Связи'],['6','Дела'],['7','Пейджер'],['10','Выход']]);
     document.getElementById('scr-market').innerHTML=s.html();
   }
@@ -654,7 +654,7 @@ pre.dos span{display:inline}
   function setRun(){clearInterval(timer);if(!mk.paused)timer=setInterval(tick,[0,1800,1000,500][mk.speed]);}
   const pb=document.getElementById('mk-pause'),sb=document.getElementById('mk-speed');
   pb.onclick=()=>{mk.paused=!mk.paused;pb.textContent=mk.paused?'Продолжить':'Пауза';setRun();drawMarket();};
-  sb.onclick=()=>{mk.speed=mk.speed%3+1;sb.textContent='Скорость: '+'▶'.repeat(mk.speed);setRun();drawMarket();};
+  sb.onclick=()=>{mk.speed=mk.speed%3+1;sb.textContent='Скорость: '+'►'.repeat(mk.speed);setRun();drawMarket();};
   if(reduce){mk.paused=true;pb.textContent='Продолжить';}
   drawMarket();setRun();
 

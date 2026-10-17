@@ -5,7 +5,7 @@ use anyhow::{Context, Result, bail};
 use walkdir::WalkDir;
 
 use crate::build_godot;
-use crate::godot_check::run_godot;
+use crate::godot_check::{import_project, run_godot};
 use crate::godot_pin;
 use crate::project_root::project_root;
 
@@ -14,6 +14,7 @@ use crate::project_root::project_root;
 pub fn run() -> Result<()> {
     let binary = godot_pin::fetch()?;
     build_godot::build_host_debug()?;
+    import_project(&binary)?;
     let godot_dir = project_root().join("godot");
     let scripts = collect_scripts(&godot_dir)?;
     for script in &scripts {

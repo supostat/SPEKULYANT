@@ -14,12 +14,17 @@ const ERROR_PREFIXES: [&str; 2] = ["ERROR:", "SCRIPT ERROR:"];
 pub fn run() -> Result<()> {
     let binary = godot_pin::fetch()?;
     build_godot::build_host_debug()?;
-    run_godot(
-        &binary,
-        &["--headless", "--path", "godot", "--import", "--quit"],
-    )?;
+    import_project(&binary)?;
     println!("godot-check: проект импортируется безголово без ошибок");
     Ok(())
+}
+
+/// Импорт ресурсов и кэш глобальных классов: без него `preload` шрифта и `class_name` не разрешаются.
+pub fn import_project(binary: &Path) -> Result<()> {
+    run_godot(
+        binary,
+        &["--headless", "--path", "godot", "--import", "--quit"],
+    )
 }
 
 /// Запускает Godot из корня репозитория. Godot возвращает 0 даже при ошибках скриптов и

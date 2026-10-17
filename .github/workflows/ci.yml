@@ -28,3 +28,15 @@ jobs:
       - run: cargo xtask godot-check
       - run: cargo xtask gd-check
       - run: cargo xtask deps-check
+      - run: cargo xtask charset-check
+      - run: cargo xtask etalons --check
+      - run: cargo xtask screen-check boot
+      - name: PNG заставки под Xvfb
+        if: runner.os == 'Linux'
+        run: xvfb-run -a cargo xtask screenshot boot
+      - name: Снимки экранов
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: .tools/out/*.png

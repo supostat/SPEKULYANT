@@ -207,7 +207,8 @@
 - Шрифт пака VileR — Unicode TTF с кириллицей и псевдографикой; «CP866» в документе — набор
   глифов, а не кодировка файлов: игра хранит UTF-8. Макет рынка использует ▶ (U+25B6),
   которого в наборе нет — заменяется на ► (U+25BA) и в книге, и в игре.
-- Коррекция 4:3: логический экран 720×400, узел растянут по вертикали ×1,2 до 720×480,
+- Коррекция 4:3: логический экран 720×400, узел растянут по вертикали ×1,35 до 720×540
+  (720 : 540 = 4 : 3; множитель 1,2 верен только для 640×400),
   окно — `display/window/stretch/mode=viewport`, `aspect=keep`, `scale_mode=integer`.
 - Плавающая история: `data/history/*.toml` задают окно дат, масштаб и альтернативные
   исходы; генератор при создании мира фиксирует `Timeline` по сиду, события ссылаются на
@@ -243,7 +244,7 @@
 - [ ] Версии: Godot 4 — последний стабильный на момент фазы, gdext — по таблице
   совместимости godot-rust; записать в `tools.toml` (версия, sha256 архивов для
   darwin/linux/windows) и в `Cargo.toml` крейта моста.
-- [ ] `godot/project.godot` (Godot 4, рендер compatibility, окно 720×480, stretch viewport /
+- [ ] `godot/project.godot` (Godot 4, рендер compatibility, окно 720×540, stretch viewport /
   keep / integer), `godot/speculant.gdextension` с путями библиотек по платформам,
   `godot/main.tscn` с одной нодой и `godot/src/main.gd`.
 - [ ] `cargo xtask godot-fetch`: скачать пин Godot в `.tools/godot/<версия>/`, проверить
@@ -313,7 +314,7 @@ grep -qF godot-check .github/workflows/ci.yml
   (символ, цвет 0–15, фон 0–7), методы `clear`, `put`, `fill`, `box` (одинарная и двойная
   рамка, заголовок), `shadow`, `fkeys`, `dump() -> String` в формате `.screen`; отрисовка в
   `_draw()` глифами шрифта `godot/assets/fonts/` (FontFile, сглаживание и хинтинг
-  выключены, размер 16, шаг 9 px) на логическом поле 720×400 с масштабом ×1,2 по вертикали.
+  выключены, размер 16, шаг 9 px) на логическом поле 720×400 с масштабом ×1,35 по вертикали.
 - [ ] `godot/src/text_screen/ega.gd`: шестнадцать цветов EGA константами; шрифт пака VileR с
   файлом лицензии CC BY-SA; `cargo xtask font-glyphs` генерирует `glyphs.txt` из TTF.
 - [ ] `cargo xtask charset-check`: все строки в `godot/src/**/*.gd` и `data/**` состоят из
