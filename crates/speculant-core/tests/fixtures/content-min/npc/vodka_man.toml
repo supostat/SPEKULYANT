@@ -1,4 +1,5 @@
 name = "Мужик в спецовке"
 role = "случайный продавец"
+faction = "people"
 strategy = "drifter"
 description = "Торгует тем, что осталось со свадьбы. Помнит обиды."

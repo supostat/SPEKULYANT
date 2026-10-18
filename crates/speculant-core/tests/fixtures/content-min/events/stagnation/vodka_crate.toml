@@ -33,7 +33,7 @@ text = "Сдать участковому"
 outcome = "Участковый доволен и записывает твою фамилию. Мужик тебя запомнил, и это не последняя встреча."
 
 [choices.consequences]
-reputation = [{ faction = "police", change = 2 }, { faction = "traders", change = -3 }]
+reputation = [{ faction = "militia", change = 2 }, { faction = "traders", change = -3 }]
 contacts = [{ npc = "vodka_man", relation = -3 }]
 set_flags = ["snitched_1985"]
 

@@ -35,6 +35,7 @@
   "businesses": [],
   "manager": null,
   "contacts": [],
+  "factions": [],
   "money": { "places": [], "rates": [] },
   "notebook": [],
   "zone": null,

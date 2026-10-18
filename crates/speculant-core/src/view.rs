@@ -5,6 +5,7 @@ mod biography;
 mod business;
 mod contact;
 mod event;
+mod faction;
 mod header;
 mod level;
 mod market;
@@ -21,6 +22,7 @@ pub use biography::BiographyView;
 pub use business::{BusinessView, ForecastView, ManagerView, PolicyView};
 pub use contact::ContactView;
 pub use event::{ChoiceView, EventView, OutcomeView};
+pub use faction::FactionView;
 pub use header::HeaderView;
 pub use level::LevelView;
 pub use market::{MarketRowView, MarketView};
@@ -49,6 +51,7 @@ pub struct StateView {
     pub businesses: Vec<BusinessView>,
     pub manager: Option<ManagerView>,
     pub contacts: Vec<ContactView>,
+    pub factions: Vec<FactionView>,
     pub money: MoneyView,
     pub notebook: Vec<NotebookEntryView>,
     pub zone: Option<ZoneView>,

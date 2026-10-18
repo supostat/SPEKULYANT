@@ -471,6 +471,10 @@ fn the_snapshot_shows_the_market_pocket_and_money_from_the_core() {
                 label: "Доллары".to_owned(),
                 amount: "$ 100".to_owned()
             },
+            PocketItemView {
+                label: "Связей".to_owned(),
+                amount: "0".to_owned()
+            },
         ]
     );
     assert_eq!(

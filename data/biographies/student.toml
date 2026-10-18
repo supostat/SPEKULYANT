@@ -2,4 +2,5 @@ title = "Студент"
 description = "Общежитие, иностранцы-сокурсники, мало денег."
 start_city = "moscow"
 start_cash = 150
+contacts = ["kofi", "officer_syomin"]
 starts_unlocked = true

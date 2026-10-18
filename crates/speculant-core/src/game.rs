@@ -2,12 +2,14 @@
 
 mod snapshot;
 
+use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use crate::command::{Command, LifeSettings};
 use crate::command_error::CommandError;
-use crate::content::{BiographyId, CityId, Content, GoodId, MoneyPlaceId};
+use crate::content::{BiographyId, CityId, Content, GoodId, MoneyPlaceId, NpcId};
 use crate::economy::{Currency, Deal, Markets, Money, Trader};
+use crate::reputation::{Contact, FactionReputation};
 use crate::rng::WorldRng;
 use crate::time::{Clock, GameDate, MAX_SPEED};
 use crate::view::{Screen, StateView};
@@ -27,13 +29,15 @@ pub struct Game {
     city: CityId,
     markets: Markets,
     player: Trader,
+    reputation: FactionReputation,
+    contacts: BTreeMap<NpcId, Contact>,
     messages: Vec<String>,
     screen: Screen,
 }
 
 impl Game {
-    /// Открывает жизнь в первый день 1984 года: город и наличные — из биографии, случай мира —
-    /// из сида.
+    /// Открывает жизнь в первый день 1984 года: город, наличные и знакомые — из биографии, случай
+    /// мира — из сида, репутация у всех фракций нулевая.
     pub fn new_life(settings: &LifeSettings, content: Arc<Content>) -> Result<Self, CommandError> {
         if settings.biography.trim().is_empty() {
             return Err(CommandError::EmptyBiography);
@@ -54,6 +58,12 @@ impl Game {
             city: biography.start_city.clone(),
             markets: Markets::new(&content),
             player: Trader::new(cash, &content),
+            reputation: FactionReputation::new(&content.factions),
+            contacts: biography
+                .contacts
+                .iter()
+                .map(|npc| (npc.clone(), Contact::new(npc.clone())))
+                .collect(),
             messages: Vec::new(),
             screen: Screen::Market,
             content,
@@ -85,14 +95,28 @@ impl Game {
         &self.player
     }
 
+    pub fn reputation(&self) -> &FactionReputation {
+        &self.reputation
+    }
+
+    pub fn contacts(&self) -> &BTreeMap<NpcId, Contact> {
+        &self.contacts
+    }
+
     /// Двигает мир на `milliseconds` реального времени; `true`, если наступил хотя бы один день.
-    /// Каждый день рынки приходят в себя и колеблются по сиду, вклады получают проценты.
+    /// Каждый день рынки приходят в себя и колеблются по сиду, вклады получают проценты, а
+    /// репутация дрейфует к нулю в темпе эпохи.
     pub fn advance(&mut self, milliseconds: u32) -> bool {
         let days = self.clock.advance(milliseconds);
         for day in &days {
             self.markets
                 .next_day(&self.content, &mut self.rng, day.date);
             self.player.next_day(&self.content, day.date);
+            let drift_days = self
+                .content
+                .epoch_profile_on(day.date)
+                .reputation_drift_days;
+            self.reputation.next_day(drift_days);
         }
         !days.is_empty()
     }

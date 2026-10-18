@@ -6,16 +6,18 @@ use serde::de::DeserializeOwned;
 use super::validation;
 use super::{
     Biography, BiographyId, City, CityId, Content, ContentError, ContentFile, EpochId,
-    EpochProfile, Event, EventId, Good, GoodId, MoneyPlace, MoneyPlaceId, NpcId, NpcTemplate,
-    Route,
+    EpochProfile, Event, EventId, Faction, FactionId, Good, GoodId, MoneyPlace, MoneyPlaceId,
+    NpcId, NpcTemplate, Route,
 };
 use crate::economy::{MarketRules, MoneyRules};
+use crate::reputation::ReputationRules;
 use crate::time::TimeRules;
 
 const TIME_FILE: &str = "epochs/time.toml";
 const MARKET_FILE: &str = "economy/market.toml";
 const MONEY_FILE: &str = "economy/money.toml";
 const ROUTES_FILE: &str = "routes.toml";
+const REPUTATION_FILE: &str = "reputation.toml";
 const TOML_EXTENSION: &str = ".toml";
 
 /// Сущность, прочитанная из файла: идентификатор из имени файла и сам файл для мест ошибок.
@@ -31,11 +33,13 @@ pub(super) struct Parsed<'a> {
     pub time: Option<TimeRules>,
     pub market: Option<(&'a ContentFile, MarketRules)>,
     pub money: Option<(&'a ContentFile, MoneyRules)>,
+    pub reputation: Option<(&'a ContentFile, ReputationRules)>,
     pub epochs: Vec<Entry<'a, EpochProfile>>,
     pub goods: Vec<Entry<'a, Good>>,
     pub cities: Vec<Entry<'a, City>>,
     pub routes: Option<(&'a ContentFile, Vec<Route>)>,
     pub money_places: Vec<Entry<'a, MoneyPlace>>,
+    pub factions: Vec<Entry<'a, Faction>>,
     pub biographies: Vec<Entry<'a, Biography>>,
     pub npcs: Vec<Entry<'a, NpcTemplate>>,
     pub events: Vec<Entry<'a, Event>>,
@@ -73,6 +77,13 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
             "нет индекса цен и курсов валют",
         ));
     }
+    if parsed.reputation.is_none() {
+        errors.push(ContentError::new(
+            REPUTATION_FILE,
+            None,
+            "нет правил репутации и связей",
+        ));
+    }
     let mut events = BTreeMap::new();
     for entry in &parsed.events {
         if events
@@ -90,18 +101,22 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         errors.sort();
         return Err(errors);
     }
-    let (Some((_, market)), Some((_, money))) = (parsed.market, parsed.money) else {
-        unreachable!("без правил толкучки или денег загрузка вернула ошибку выше");
+    let (Some((_, market)), Some((_, money)), Some((_, reputation))) =
+        (parsed.market, parsed.money, parsed.reputation)
+    else {
+        unreachable!("без правил толкучки, денег или репутации загрузка вернула ошибку выше");
     };
     Ok(Content {
         time,
         market,
         money,
+        reputation,
         epochs: keyed(&parsed.epochs, EpochId::new),
         goods: keyed(&parsed.goods, GoodId::new),
         cities: keyed(&parsed.cities, CityId::new),
         routes: parsed.routes.map(|(_, routes)| routes).unwrap_or_default(),
         money_places: keyed(&parsed.money_places, MoneyPlaceId::new),
+        factions: keyed(&parsed.factions, FactionId::new),
         biographies: keyed(&parsed.biographies, BiographyId::new),
         npcs: keyed(&parsed.npcs, NpcId::new),
         events,
@@ -136,6 +151,11 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
                 parsed.money = Some((file, rules));
             }
         }
+        ["reputation.toml"] => {
+            if let Some(rules) = parse::<ReputationRules>(file, errors) {
+                parsed.reputation = Some((file, rules));
+            }
+        }
         ["routes.toml"] => {
             if let Some(routes) = parse::<RoutesFile>(file, errors) {
                 parsed.routes = Some((file, routes.routes));
@@ -145,6 +165,7 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         ["goods", name] => push_entry(file, name, &mut parsed.goods, errors),
         ["cities", name] => push_entry(file, name, &mut parsed.cities, errors),
         ["money", name] => push_entry(file, name, &mut parsed.money_places, errors),
+        ["factions", name] => push_entry(file, name, &mut parsed.factions, errors),
         ["biographies", name] => push_entry(file, name, &mut parsed.biographies, errors),
         ["npc", name] => push_entry(file, name, &mut parsed.npcs, errors),
         ["events", epoch, name] => push_event(file, name, Some(EpochId::new(*epoch)), parsed, errors),
@@ -152,7 +173,7 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         _ => errors.push(ContentError::new(
             &file.path,
             None,
-            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, epochs/, biographies/, npc/, events/<эпоха>/, zone/events/)"),
+            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, epochs/, biographies/, npc/, events/<эпоха>/, zone/events/)"),
         )),
     }
 }

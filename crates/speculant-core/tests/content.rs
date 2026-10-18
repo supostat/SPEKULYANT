@@ -32,6 +32,8 @@ fn the_minimal_set_loads_every_kind_of_content() {
     assert_eq!(content.cities.len(), 2);
     assert_eq!(content.routes.len(), 2);
     assert_eq!(content.money_places.len(), 1);
+    assert_eq!(content.factions.len(), 3);
+    assert_eq!(content.reputation.limit, 7);
     assert_eq!(content.money.denomination.factor, 1000);
     assert!((content.market.spread - 0.08).abs() < f64::EPSILON);
     assert_eq!(content.biographies.len(), 1);
@@ -97,6 +99,7 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "events/stagnation/broken.toml:8: флаг never_set_flag не ставит ни одно последствие",
         "events/stagnation/broken.toml:10: выбор 1 без последствий, исхода и продолжения",
         "events/stagnation/broken.toml:17: события-продолжения missing_event нет в events/",
+        "events/stagnation/vodka_crate.toml:36: фракции police нет в factions/",
         "goods/Black-Caviar.toml: имя файла «Black-Caviar» — не идентификатор",
         "goods/jeans.toml:6: годы опорных точек кривой должны строго возрастать",
         "goods/sugar.toml:1: invalid basic string",
@@ -156,6 +159,19 @@ fn content_without_a_calendar_is_refused() {
     assert_eq!(
         errors,
         vec!["epochs/time.toml: нет календаря эпох и часов игры".to_owned()]
+    );
+}
+
+#[test]
+fn every_epoch_of_the_calendar_needs_a_description() {
+    let files: Vec<ContentFile> = Content::read_files(Path::new(CONTENT_MIN))
+        .expect("набор читается")
+        .into_iter()
+        .filter(|file| file.path != "epochs/stagnation.toml")
+        .collect();
+    assert_eq!(
+        errors_of(files),
+        vec!["epochs/stagnation.toml: у эпохи stagnation из календаря нет описания".to_owned()]
     );
 }
 

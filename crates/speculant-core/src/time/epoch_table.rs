@@ -44,6 +44,10 @@ impl EpochTable {
         &self.epochs
     }
 
+    pub fn epoch(&self, id: &str) -> Option<&Epoch> {
+        self.epochs.iter().find(|epoch| epoch.id == id)
+    }
+
     /// Эпоха, в которой лежит день игры.
     pub fn epoch_on(&self, date: GameDate) -> &Epoch {
         self.epochs

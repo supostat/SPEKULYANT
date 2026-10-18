@@ -1,12 +1,15 @@
 //! Снимок мира для интерфейса: состояние жизни строками, готовыми к показу (§13.3). Подсистемы,
-//! которых ещё нет в мире (события, связи, дела, зона), отдают пустые окна.
+//! которых ещё нет в мире (события, дела, зона), отдают пустые окна.
+
+use std::cmp::Ordering;
 
 use super::Game;
 use crate::economy::{Currency, MoneyRules};
+use crate::reputation::{Availability, Contact};
 use crate::time::GameDate;
 use crate::view::{
-    HeaderView, MarketRowView, MarketView, MoneyPlaceView, MoneyView, PocketItemView, PocketView,
-    StateView, TimeView,
+    ContactView, FactionView, HeaderView, LevelView, MarketRowView, MarketView, MoneyPlaceView,
+    MoneyView, PocketItemView, PocketView, StateView, TimeView,
 };
 
 const CASH_LABEL: &str = "Наличные";
@@ -16,6 +19,15 @@ const CHECKS_POCKET_LABEL: &str = "Чеки ВПТ";
 const DOLLARS_POCKET_LABEL: &str = "Доллары";
 const CHECKS_RATE_LABEL: &str = "Чек ВПТ";
 const DOLLAR_RATE_LABEL: &str = "Доллар";
+const CONTACTS_POCKET_LABEL: &str = "Связей";
+const WELL_DISPOSED: &str = "расположен";
+const ACQUAINTED: &str = "знакомый";
+const OFFENDED: &str = "обижен";
+const PLAYER_OWES: &str = "За тобой услуг";
+const CONTACT_OWES: &str = "За ним услуг";
+const REACHABLE: &str = "на связи";
+const AWAY_UNTIL: &str = "не на связи до";
+const LOST: &str = "потерян";
 
 pub(super) fn snapshot(game: &Game) -> StateView {
     let today = game.clock.today();
@@ -34,7 +46,12 @@ pub(super) fn snapshot(game: &Game) -> StateView {
         pager: None,
         businesses: Vec::new(),
         manager: None,
-        contacts: Vec::new(),
+        contacts: game
+            .contacts
+            .values()
+            .map(|contact| contact_view(game, contact, today))
+            .collect(),
+        factions: factions(game, today),
         money: money(game, today),
         notebook: Vec::new(),
         zone: None,
@@ -96,7 +113,7 @@ fn market(game: &Game, today: GameDate) -> MarketView {
     }
 }
 
-/// Карман: товар при себе, затем чеки и доллары.
+/// Карман: товар при себе, чеки и доллары, число связей и угроза эпохи.
 fn pocket(game: &Game, today: GameDate) -> PocketView {
     let content = &game.content;
     let mut items: Vec<PocketItemView> = game
@@ -126,10 +143,73 @@ fn pocket(game: &Game, today: GameDate) -> PocketView {
             amount: content.money.format_money(dollars, today),
         });
     }
+    let reachable = game
+        .contacts
+        .values()
+        .filter(|contact| !contact.is_lost())
+        .count();
+    items.push(PocketItemView {
+        label: CONTACTS_POCKET_LABEL.to_owned(),
+        amount: reachable.to_string(),
+    });
+    let threat = &content.epoch_profile_on(today).threat;
     PocketView {
         items,
-        danger: None,
+        danger: Some(LevelView {
+            label: threat.label.clone(),
+            level: game
+                .reputation
+                .hostility(&threat.faction, content.reputation),
+            scale: content.reputation.limit,
+        }),
     }
+}
+
+/// Связь: кто это, как к игроку относится, кто кому должен и можно ли до него достучаться.
+fn contact_view(game: &Game, contact: &Contact, today: GameDate) -> ContactView {
+    let template = &game.content.npcs[contact.npc()];
+    let relation = match contact.relation().cmp(&0) {
+        Ordering::Greater => WELL_DISPOSED,
+        Ordering::Equal => ACQUAINTED,
+        Ordering::Less => OFFENDED,
+    };
+    let debt = match contact.debt().cmp(&0) {
+        Ordering::Less => Some(format!("{PLAYER_OWES}: {}", contact.debt().unsigned_abs())),
+        Ordering::Equal => None,
+        Ordering::Greater => Some(format!("{CONTACT_OWES}: {}", contact.debt())),
+    };
+    let availability = match contact.availability() {
+        Availability::AwayUntil(until) if today < until => {
+            format!("{AWAY_UNTIL} {}", until.numeric())
+        }
+        Availability::AwayUntil(_) | Availability::Available => REACHABLE.to_owned(),
+        Availability::Lost => LOST.to_owned(),
+    };
+    ContactView {
+        contact: contact.npc().to_string(),
+        name: template.name.clone(),
+        role: template.role.clone(),
+        relation: relation.to_owned(),
+        debt,
+        availability,
+        history: contact.history().to_vec(),
+    }
+}
+
+/// Репутация у фракций, которые уже есть в мире: силовики появятся только со стабилизацией.
+fn factions(game: &Game, today: GameDate) -> Vec<FactionView> {
+    let content = &game.content;
+    content
+        .factions
+        .iter()
+        .filter(|(_, faction)| faction.is_visible_on(today, &content.time.epochs))
+        .map(|(id, faction)| FactionView {
+            faction: id.to_string(),
+            title: faction.title.clone(),
+            level: game.reputation.level(id),
+            limit: content.reputation.limit,
+        })
+        .collect()
 }
 
 /// Деньги: места, куда сейчас можно положить или где что-то лежит, и курсы их валют.

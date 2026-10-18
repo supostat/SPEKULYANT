@@ -109,6 +109,12 @@ impl GameDate {
         )
     }
 
+    /// Короткая дата для записей в истории знакомства: «14.03.1986».
+    pub fn numeric(self) -> String {
+        let (year, month, day) = self.year_month_day();
+        format!("{day:02}.{month:02}.{year}")
+    }
+
     /// Полных лет человеку, родившемуся `birth`, на эту дату.
     pub fn age_on(self, birth: Self) -> u32 {
         let (year, month, day) = self.year_month_day();

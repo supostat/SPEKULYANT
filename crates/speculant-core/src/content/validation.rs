@@ -4,9 +4,11 @@ use std::collections::BTreeSet;
 
 use super::loader::{Entry, Parsed};
 use super::{
-    Biography, Choice, City, Conditions, ContentError, ContentFile, Event, Good, MoneyPlace,
+    Biography, Choice, City, Conditions, ContentError, ContentFile, EpochProfile, Event, Faction,
+    Good, MoneyPlace, NpcTemplate,
 };
 use crate::economy::{MarketRules, MoneyRules, RubleCurve};
+use crate::reputation::ReputationRules;
 use crate::time::{GameDate, TimeRules};
 
 const PLACEHOLDERS: [&str; 3] = ["npc", "price", "sum"];
@@ -23,8 +25,11 @@ struct Known {
     categories: BTreeSet<String>,
     cities: BTreeSet<String>,
     npcs: BTreeSet<String>,
+    factions: BTreeSet<String>,
     events: BTreeSet<String>,
     flags_set: BTreeSet<String>,
+    /// Предел уровней репутации, если правила разобрались.
+    reputation_limit: Option<i32>,
 }
 
 /// Отчёт об ошибках одного файла.
@@ -61,6 +66,7 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
             .collect(),
         cities: ids(&parsed.cities),
         npcs: ids(&parsed.npcs),
+        factions: ids(&parsed.factions),
         events: ids(&parsed.events),
         flags_set: parsed
             .events
@@ -74,18 +80,62 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
                     .map(|flag| flag.as_str().to_owned())
             })
             .collect(),
+        reputation_limit: parsed
+            .reputation
+            .as_ref()
+            .map(|(_, rules)| i32::from(rules.limit)),
     };
     for entry in &parsed.epochs {
+        let mut report = Report {
+            file: entry.file,
+            errors: &mut *errors,
+        };
         if !known.epochs.contains(&entry.id) {
-            Report {
-                file: entry.file,
-                errors: &mut *errors,
-            }
-            .at(
+            report.at(
                 None,
                 format!("эпохи {} нет в календаре epochs/time.toml", entry.id),
             );
         }
+        check_epoch_profile(&entry.value, &known, &mut report);
+    }
+    let described = ids(&parsed.epochs);
+    for epoch in time.epochs.epochs() {
+        if !described.contains(&epoch.id) {
+            errors.push(ContentError::new(
+                &format!("epochs/{}.toml", epoch.id),
+                None,
+                format!("у эпохи {} из календаря нет описания", epoch.id),
+            ));
+        }
+    }
+    if let Some((file, rules)) = &parsed.reputation {
+        check_reputation_rules(
+            *rules,
+            &mut Report {
+                file,
+                errors: &mut *errors,
+            },
+        );
+    }
+    for entry in &parsed.factions {
+        check_faction(
+            &entry.value,
+            &known,
+            &mut Report {
+                file: entry.file,
+                errors: &mut *errors,
+            },
+        );
+    }
+    for entry in &parsed.npcs {
+        check_npc(
+            &entry.value,
+            &known,
+            &mut Report {
+                file: entry.file,
+                errors: &mut *errors,
+            },
+        );
     }
     for entry in &parsed.goods {
         check_good(
@@ -235,10 +285,72 @@ fn check_city(entry: &Entry<'_, City>, known: &Known, report: &mut Report<'_, '_
     }
 }
 
+fn check_epoch_profile(profile: &EpochProfile, known: &Known, report: &mut Report<'_, '_>) {
+    check_reference(
+        &known.factions,
+        profile.threat.faction.as_str(),
+        "фракции угрозы",
+        "factions/",
+        report,
+    );
+    if profile.threat.label.trim().is_empty() {
+        report.at(
+            report.file.line_of("label"),
+            "у угрозы эпохи нет подписи для «Кармана»".to_owned(),
+        );
+    }
+    if profile.reputation_drift_days == 0 {
+        report.at(
+            report.file.line_of("reputation_drift_days"),
+            "дрейф репутации раз в ноль дней невозможен".to_owned(),
+        );
+    }
+}
+
+fn check_reputation_rules(rules: ReputationRules, report: &mut Report<'_, '_>) {
+    if rules.limit == 0 {
+        report.at(
+            report.file.line_of("limit"),
+            "предел репутации должен быть больше нуля".to_owned(),
+        );
+    }
+    if rules.max_debt == 0 {
+        report.at(
+            report.file.line_of("max_debt"),
+            "без права хотя бы на одну услугу связи бесполезны: max_debt больше нуля".to_owned(),
+        );
+    }
+}
+
+fn check_faction(faction: &Faction, known: &Known, report: &mut Report<'_, '_>) {
+    if let Some(epoch) = &faction.from_epoch {
+        check_reference(
+            &known.epochs,
+            epoch.as_str(),
+            "эпохи",
+            "epochs/time.toml",
+            report,
+        );
+    }
+}
+
+fn check_npc(npc: &NpcTemplate, known: &Known, report: &mut Report<'_, '_>) {
+    check_reference(
+        &known.factions,
+        npc.faction.as_str(),
+        "фракции",
+        "factions/",
+        report,
+    );
+}
+
 fn check_biography(biography: &Biography, known: &Known, report: &mut Report<'_, '_>) {
     let city = biography.start_city.as_str();
     if !known.cities.contains(city) {
         report.at_reference(city, format!("стартового города {city} нет в cities/"));
+    }
+    for npc in &biography.contacts {
+        check_reference(&known.npcs, npc.as_str(), "знакомого", "npc/", report);
     }
     if biography.start_cash.is_negative() {
         report.at(
@@ -491,6 +603,15 @@ fn check_choice(
         check_placeholders(outcome, has_npc, report);
     }
     let consequences = &choice.consequences;
+    for change in &consequences.reputation {
+        check_reference(
+            &known.factions,
+            change.faction.as_str(),
+            "фракции",
+            "factions/",
+            report,
+        );
+    }
     for change in &consequences.goods {
         check_reference(
             &known.goods,
@@ -593,7 +714,30 @@ fn check_conditions(conditions: &Conditions, known: &Known, report: &mut Report<
         }
     }
     for reputation in &conditions.reputation {
+        check_reference(
+            &known.factions,
+            reputation.faction.as_str(),
+            "фракции",
+            "factions/",
+            report,
+        );
         let reputation_line = report.file.line_of(&format!("\"{}\"", reputation.faction));
+        if let Some(limit) = known.reputation_limit {
+            for bound in [reputation.at_least, reputation.at_most]
+                .into_iter()
+                .flatten()
+            {
+                if bound.abs() > limit {
+                    report.at(
+                        reputation_line,
+                        format!(
+                            "граница репутации {} {bound} за пределом ±{limit}",
+                            reputation.faction
+                        ),
+                    );
+                }
+            }
+        }
         match (reputation.at_least, reputation.at_most) {
             (None, None) => report.at(
                 reputation_line,
