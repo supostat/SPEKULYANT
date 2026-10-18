@@ -1,5 +1,6 @@
 //! Контент как данные (§10, §14.1): товары, города, маршруты, эпохи, правила толкучки, индекс цен
-//! и курсы, места хранения денег, фракции и правила репутации, биографии, шаблоны NPC и события. Формат — TOML, файл на
+//! и курсы, места хранения денег, фракции и правила репутации, биографии, шаблоны NPC, события и
+//! правила их розыгрыша. Формат — TOML, файл на
 //! сущность в `data/`, имя файла — идентификатор (решение 15.7).
 //! Загрузка проверяет схему и ссылки и возвращает все ошибки сразу, каждая — «файл:строка».
 
@@ -42,6 +43,7 @@ pub use npc_template::NpcTemplate;
 pub use route::Route;
 
 use crate::economy::{MarketRules, MoneyRules};
+use crate::events::EventRules;
 use crate::reputation::ReputationRules;
 use crate::time::{GameDate, TimeRules};
 
@@ -51,6 +53,7 @@ pub struct Content {
     pub market: MarketRules,
     pub money: MoneyRules,
     pub reputation: ReputationRules,
+    pub event_rules: EventRules,
     pub epochs: BTreeMap<EpochId, EpochProfile>,
     pub goods: BTreeMap<GoodId, Good>,
     pub cities: BTreeMap<CityId, City>,

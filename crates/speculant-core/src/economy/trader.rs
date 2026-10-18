@@ -34,6 +34,26 @@ impl Trader {
         &self.pocket
     }
 
+    /// Деньги от события: выручка, находка, подарок.
+    pub fn receive_cash(&mut self, amount: Money) {
+        self.money.receive(amount);
+    }
+
+    /// Деньги на событие; хватает ли их, проверяет доступность выбора.
+    pub fn pay_cash(&mut self, amount: Money) {
+        self.money.pay(amount);
+    }
+
+    /// Товар от события.
+    pub fn add_goods(&mut self, good: &GoodId, quantity: u32) {
+        self.pocket.add(good, quantity);
+    }
+
+    /// Товар на событие; есть ли он в кармане, проверяет доступность выбора.
+    pub fn remove_goods(&mut self, good: &GoodId, quantity: u32) {
+        self.pocket.remove(good, quantity);
+    }
+
     /// Покупка на толкучке города: каждая следующая штука дороже, запас тает, платят наличными.
     pub fn buy(
         &mut self,

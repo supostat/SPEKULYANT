@@ -6,6 +6,7 @@ pub mod command;
 pub mod command_error;
 pub mod content;
 pub mod economy;
+pub mod events;
 pub mod game;
 pub mod reputation;
 pub mod rng;

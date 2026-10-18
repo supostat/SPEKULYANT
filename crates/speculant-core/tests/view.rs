@@ -62,6 +62,7 @@ fn every_command_survives_a_json_round_trip_under_its_own_name() {
             destination: "leningrad".to_owned(),
         },
         Command::Choose { choice: 2 },
+        Command::Continue,
         Command::OpenScreen {
             screen: Screen::Pager,
         },

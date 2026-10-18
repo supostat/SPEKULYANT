@@ -28,9 +28,12 @@ pub enum Command {
     Travel {
         destination: String,
     },
+    /// Выбор в событии, остановившем время: номер от 1, как на экране.
     Choose {
         choice: usize,
     },
+    /// Исход события прочитан — время идёт дальше.
+    Continue,
     OpenScreen {
         screen: Screen,
     },
@@ -90,6 +93,7 @@ impl Command {
             Self::Sell { .. } => "sell",
             Self::Travel { .. } => "travel",
             Self::Choose { .. } => "choose",
+            Self::Continue => "continue",
             Self::OpenScreen { .. } => "open_screen",
             Self::SetPolicy { .. } => "set_policy",
             Self::Hire { .. } => "hire",

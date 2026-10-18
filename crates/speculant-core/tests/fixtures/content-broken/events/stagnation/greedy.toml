@@ -1,0 +1,10 @@
+title = "Жадность"
+weight = 1
+cooldown_days = 0
+text = "Дай {sum}, а то по {price} не отдам."
+
+[[choices]]
+text = "Дать"
+
+[choices.consequences]
+contacts = [{ npc = "vodka_man" }]

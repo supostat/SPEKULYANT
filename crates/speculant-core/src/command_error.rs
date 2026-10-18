@@ -50,6 +50,23 @@ pub enum CommandError {
         title: String,
         balance: String,
     },
+    UnknownEvent {
+        event: String,
+    },
+    EventNotReady {
+        event: String,
+    },
+    EventPending,
+    NoPendingEvent,
+    NoSuchChoice {
+        choice: usize,
+        count: usize,
+    },
+    ChoiceUnavailable {
+        choice: usize,
+    },
+    ChoiceAlreadyMade,
+    ChoiceRequired,
     NotSimulatedYet {
         command: String,
     },
@@ -88,6 +105,20 @@ impl fmt::Display for CommandError {
             Self::NotEnoughInPlace { title, balance, .. } => {
                 write!(formatter, "{title}: там только {balance}")
             }
+            Self::UnknownEvent { event } => write!(formatter, "события {event} нет"),
+            Self::EventNotReady { event } => {
+                write!(formatter, "событие {event} сейчас случиться не может")
+            }
+            Self::EventPending => write!(formatter, "время стоит: сначала ответь на событие"),
+            Self::NoPendingEvent => write!(formatter, "сейчас ничего не происходит"),
+            Self::NoSuchChoice { choice, count } => {
+                write!(formatter, "выбора {choice} нет, есть 1–{count}")
+            }
+            Self::ChoiceUnavailable { choice } => {
+                write!(formatter, "выбор {choice} сейчас недоступен")
+            }
+            Self::ChoiceAlreadyMade => write!(formatter, "выбор уже сделан"),
+            Self::ChoiceRequired => write!(formatter, "сначала выбери, что делать"),
             Self::NotSimulatedYet { command } => {
                 write!(formatter, "команда {command} ещё не симулируется ядром")
             }

@@ -8,11 +8,14 @@ use super::{
     Good, MoneyPlace, NpcTemplate,
 };
 use crate::economy::{MarketRules, MoneyRules, RubleCurve};
+use crate::events::EventRules;
 use crate::reputation::ReputationRules;
 use crate::time::{GameDate, TimeRules};
 
 const PLACEHOLDERS: [&str; 3] = ["npc", "price", "sum"];
 const NPC_PLACEHOLDER: &str = "npc";
+const PRICE_PLACEHOLDER: &str = "price";
+const SUM_PLACEHOLDER: &str = "sum";
 const FIRST_YEAR: i32 = 1984;
 /// Индекс цен 1984 года — единица: реальные цены считаются в рублях 1984 года.
 const BASE_INDEX: f64 = 1.0;
@@ -30,6 +33,14 @@ struct Known {
     flags_set: BTreeSet<String>,
     /// Предел уровней репутации, если правила разобрались.
     reputation_limit: Option<i32>,
+}
+
+/// Чем событие наполняет подстановки: участником, товаром для цены, суммой.
+#[derive(Clone, Copy)]
+struct Sources {
+    npc: bool,
+    price: bool,
+    sum: bool,
 }
 
 /// Отчёт об ошибках одного файла.
@@ -107,6 +118,15 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
                 format!("у эпохи {} из календаря нет описания", epoch.id),
             ));
         }
+    }
+    if let Some((file, rules)) = &parsed.event_rules {
+        check_event_rules(
+            *rules,
+            &mut Report {
+                file,
+                errors: &mut *errors,
+            },
+        );
     }
     if let Some((file, rules)) = &parsed.reputation {
         check_reputation_rules(
@@ -303,6 +323,18 @@ fn check_epoch_profile(profile: &EpochProfile, known: &Known, report: &mut Repor
         report.at(
             report.file.line_of("reputation_drift_days"),
             "дрейф репутации раз в ноль дней невозможен".to_owned(),
+        );
+    }
+}
+
+fn check_event_rules(rules: EventRules, report: &mut Report<'_, '_>) {
+    if !(0.0..=1.0).contains(&rules.daily_chance) {
+        report.at(
+            report.file.line_of("daily_chance"),
+            format!(
+                "daily_chance = {}: вероятность от 0 до 1",
+                rules.daily_chance
+            ),
         );
     }
 }
@@ -572,18 +604,38 @@ fn check_event(event: &Event, known: &Known, report: &mut Report<'_, '_>) {
     if event.choices.is_empty() {
         report.at(None, "у события нет ни одного выбора".to_owned());
     }
+    if event.cooldown_days == Some(0) {
+        report.at(
+            report.file.line_of("cooldown_days"),
+            "отдых события в ноль дней — это каждый день; убери cooldown_days или задай срок"
+                .to_owned(),
+        );
+    }
+    if let Some(good) = &event.price_of {
+        check_reference(&known.goods, good.as_str(), "товара", "goods/", report);
+    }
+    if event.sum.is_some_and(|sum| !sum.is_positive()) {
+        report.at(
+            report.file.line_of("sum"),
+            "сумма события должна быть больше нуля".to_owned(),
+        );
+    }
     check_conditions(&event.conditions, known, report);
-    let has_npc = event.conditions.npc.is_some();
-    check_placeholders(&event.text, has_npc, report);
+    let sources = Sources {
+        npc: event.conditions.npc.is_some(),
+        price: event.price_of.is_some(),
+        sum: event.sum.is_some(),
+    };
+    check_placeholders(&event.text, sources, report);
     for (index, choice) in event.choices.iter().enumerate() {
-        check_choice(choice, index, has_npc, known, report);
+        check_choice(choice, index, sources, known, report);
     }
 }
 
 fn check_choice(
     choice: &Choice,
     index: usize,
-    has_npc: bool,
+    sources: Sources,
     known: &Known,
     report: &mut Report<'_, '_>,
 ) {
@@ -598,9 +650,9 @@ fn check_choice(
         );
     }
     check_conditions(&choice.conditions, known, report);
-    check_placeholders(&choice.text, has_npc, report);
+    check_placeholders(&choice.text, sources, report);
     if let Some(outcome) = &choice.outcome {
-        check_placeholders(outcome, has_npc, report);
+        check_placeholders(outcome, sources, report);
     }
     let consequences = &choice.consequences;
     for change in &consequences.reputation {
@@ -623,6 +675,18 @@ fn check_choice(
     }
     for change in &consequences.contacts {
         check_reference(&known.npcs, change.npc.as_str(), "человека", "npc/", report);
+        if !change.changes_anything() {
+            report.at_reference(
+                change.npc.as_str(),
+                format!("последствие для {} ничего не меняет", change.npc),
+            );
+        }
+        if change.away_days == Some(0) {
+            report.at(
+                report.file.line_of("away_days"),
+                format!("{} не может уехать на ноль дней", change.npc),
+            );
+        }
     }
     for shock in &consequences.price_shocks {
         check_reference(
@@ -777,8 +841,9 @@ fn check_reference(
     }
 }
 
-/// Подстановки `{имя}` в тексте: только известные, а `{npc}` — лишь при событии с участником.
-fn check_placeholders(text: &str, has_npc: bool, report: &mut Report<'_, '_>) {
+/// Подстановки `{имя}` в тексте: только известные и только те, которым событие даёт значение —
+/// `{npc}` при условии `npc`, `{price}` при `price_of`, `{sum}` при `sum`.
+fn check_placeholders(text: &str, sources: Sources, report: &mut Report<'_, '_>) {
     let mut rest = text;
     while let Some(start) = rest.find('{') {
         let after = &rest[start + 1..];
@@ -796,11 +861,18 @@ fn check_placeholders(text: &str, has_npc: bool, report: &mut Report<'_, '_>) {
                 line,
                 format!("подстановки {{{name}}} нет, есть {{npc}}, {{price}}, {{sum}}"),
             );
-        } else if name == NPC_PLACEHOLDER && !has_npc {
+        } else if name == NPC_PLACEHOLDER && !sources.npc {
             report.at(
                 line,
                 "подстановка {npc} в событии без условия npc".to_owned(),
             );
+        } else if name == PRICE_PLACEHOLDER && !sources.price {
+            report.at(
+                line,
+                "подстановка {price} в событии без price_of".to_owned(),
+            );
+        } else if name == SUM_PLACEHOLDER && !sources.sum {
+            report.at(line, "подстановка {sum} в событии без sum".to_owned());
         }
         rest = &after[end + 1..];
     }

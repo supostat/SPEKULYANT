@@ -42,12 +42,27 @@ pub struct ReputationChange {
     pub change: i32,
 }
 
-/// Отношение с конкретным человеком: плюс — партнёрство и долг благодарности, минус — обида.
+/// Перемена в связи с конкретным человеком (§9): отношение (плюс — расположение, минус — обида),
+/// услуги (плюс — он должен игроку, минус — игрок ему), отъезд на `away_days` дней или потеря.
+/// Незнакомый человек после такого последствия становится связью.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ContactChange {
     pub npc: NpcId,
+    #[serde(default)]
     pub relation: i32,
+    #[serde(default)]
+    pub favours: i32,
+    pub away_days: Option<u32>,
+    #[serde(default)]
+    pub lost: bool,
+}
+
+impl ContactChange {
+    /// Последствие что-то меняет.
+    pub fn changes_anything(&self) -> bool {
+        self.relation != 0 || self.favours != 0 || self.away_days.is_some() || self.lost
+    }
 }
 
 /// Шок цены (§5.2 п. 4): множитель кривой товара — в одном городе или везде, на срок или навсегда.

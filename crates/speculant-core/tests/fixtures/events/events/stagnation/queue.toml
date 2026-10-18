@@ -1,0 +1,8 @@
+title = "Очередь"
+weight = 3
+cooldown_days = 1
+text = "В гастрономе «выбросили» колбасу."
+
+[[choices]]
+text = "Встать в очередь"
+outcome = "Отстоял."

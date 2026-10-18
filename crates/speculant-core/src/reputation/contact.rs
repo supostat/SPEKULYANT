@@ -1,5 +1,5 @@
 use super::{Availability, ContactRefusal, ReputationRules};
-use crate::content::NpcId;
+use crate::content::{ContactChange, NpcId};
 use crate::time::GameDate;
 
 /// Связь (§9): конкретный человек из шаблонов NPC. Отношение — расположение к игроку от поступков,
@@ -48,6 +48,15 @@ impl Contact {
 
     pub fn is_lost(&self) -> bool {
         self.availability == Availability::Lost
+    }
+
+    /// До человека можно достучаться: он не потерян и не в отъезде.
+    pub fn is_available_on(&self, today: GameDate) -> bool {
+        match self.availability {
+            Availability::Available => true,
+            Availability::AwayUntil(until) => today >= until,
+            Availability::Lost => false,
+        }
     }
 
     /// Попросить об услуге: помогает, если он на связи, не обижен и за игроком меньше
@@ -110,6 +119,25 @@ impl Contact {
     /// Потерять навсегда.
     pub fn lose(&mut self, today: GameDate, what: &str) {
         self.availability = Availability::Lost;
+        self.record(today, what);
+    }
+
+    /// Последствие события (§10.1): отношение, услуги, отъезд и потеря разом, одной записью в истории.
+    pub fn apply(
+        &mut self,
+        change: &ContactChange,
+        rules: ReputationRules,
+        today: GameDate,
+        what: &str,
+    ) {
+        self.relation = rules.clamp(self.relation.saturating_add(change.relation));
+        self.debt = self.debt.saturating_add(change.favours);
+        if let Some(days) = change.away_days {
+            self.availability = Availability::AwayUntil(today.after_days(days));
+        }
+        if change.lost {
+            self.availability = Availability::Lost;
+        }
         self.record(today, what);
     }
 

@@ -1,5 +1,7 @@
 //! Фасад ядра: интерфейс и симулятор видят мир только через `Game`.
 
+mod consequences;
+mod event_flow;
 mod snapshot;
 
 use std::collections::BTreeMap;
@@ -9,6 +11,7 @@ use crate::command::{Command, LifeSettings};
 use crate::command_error::CommandError;
 use crate::content::{BiographyId, CityId, Content, GoodId, MoneyPlaceId, NpcId};
 use crate::economy::{Currency, Deal, Markets, Money, Trader};
+use crate::events::{EventEngine, JournalEntry, Situation};
 use crate::reputation::{Contact, FactionReputation};
 use crate::rng::WorldRng;
 use crate::time::{Clock, GameDate, MAX_SPEED};
@@ -31,6 +34,7 @@ pub struct Game {
     player: Trader,
     reputation: FactionReputation,
     contacts: BTreeMap<NpcId, Contact>,
+    events: EventEngine,
     messages: Vec<String>,
     screen: Screen,
 }
@@ -64,6 +68,7 @@ impl Game {
                 .iter()
                 .map(|npc| (npc.clone(), Contact::new(npc.clone())))
                 .collect(),
+            events: EventEngine::default(),
             messages: Vec::new(),
             screen: Screen::Market,
             content,
@@ -103,26 +108,41 @@ impl Game {
         &self.contacts
     }
 
+    /// Флаги прошлых решений, ожидающее событие, отложенные продолжения.
+    pub fn events(&self) -> &EventEngine {
+        &self.events
+    }
+
+    /// Журнал событий жизни.
+    pub fn journal(&self) -> &[JournalEntry] {
+        self.events.journal()
+    }
+
     /// Двигает мир на `milliseconds` реального времени; `true`, если наступил хотя бы один день.
-    /// Каждый день рынки приходят в себя и колеблются по сиду, вклады получают проценты, а
-    /// репутация дрейфует к нулю в темпе эпохи.
+    /// Каждый день рынки приходят в себя и колеблются по сиду, вклады получают проценты,
+    /// репутация дрейфует к нулю в темпе эпохи, а затем может случиться событие. Событие
+    /// останавливает время: остаток реального времени сгорает, пока игрок не прочтёт исход.
     pub fn advance(&mut self, milliseconds: u32) -> bool {
-        let days = self.clock.advance(milliseconds);
-        for day in &days {
-            self.markets
-                .next_day(&self.content, &mut self.rng, day.date);
-            self.player.next_day(&self.content, day.date);
-            let drift_days = self
-                .content
-                .epoch_profile_on(day.date)
-                .reputation_drift_days;
-            self.reputation.next_day(drift_days);
+        if self.events.pending().is_some() {
+            return false;
         }
-        !days.is_empty()
+        self.clock.add_time(milliseconds);
+        let mut day_passed = false;
+        while let Some(day) = self.clock.next_day() {
+            day_passed = true;
+            if self.live_day(day.date) {
+                self.clock.drop_carried_time();
+                break;
+            }
+        }
+        day_passed
     }
 
     pub fn apply(&mut self, command: Command) -> Result<(), CommandError> {
         let today = self.clock.today();
+        if self.events.pending().is_some() && waits_for_event(&command) {
+            return Err(CommandError::EventPending);
+        }
         match command {
             Command::NewLife(settings) => {
                 *self = Self::new_life(&settings, Arc::clone(&self.content))?;
@@ -174,6 +194,8 @@ impl Game {
                 let withdrawn = self.player.withdraw(&self.content, &place, amount, today)?;
                 self.log_money_move(&place, WITHDREW, withdrawn);
             }
+            Command::Choose { choice } => self.choose(choice)?,
+            Command::Continue => self.close_event()?,
             other => {
                 return Err(CommandError::NotSimulatedYet {
                     command: other.name().to_owned(),
@@ -181,6 +203,28 @@ impl Game {
             }
         }
         Ok(())
+    }
+
+    /// День мира; `true`, если он кончился событием.
+    fn live_day(&mut self, date: GameDate) -> bool {
+        self.markets.next_day(&self.content, &mut self.rng, date);
+        self.player.next_day(&self.content, date);
+        let drift_days = self.content.epoch_profile_on(date).reputation_drift_days;
+        self.reputation.next_day(drift_days);
+        self.start_day_event(date)
+    }
+
+    /// Положение дел для условий событий.
+    fn situation(&self, today: GameDate) -> Situation<'_> {
+        Situation {
+            content: &self.content,
+            today,
+            city: &self.city,
+            player: &self.player,
+            reputation: &self.reputation,
+            contacts: &self.contacts,
+            flags: self.events.flags(),
+        }
     }
 
     /// «Купил: Джинсы (фирма), 3 шт за 495 р.»
@@ -208,4 +252,20 @@ impl Game {
             self.messages.remove(0);
         }
     }
+}
+
+/// Пока событие ждёт ответа, мир стоит: торговать, класть деньги и ехать нельзя.
+fn waits_for_event(command: &Command) -> bool {
+    matches!(
+        command,
+        Command::Buy { .. }
+            | Command::Sell { .. }
+            | Command::Deposit { .. }
+            | Command::Withdraw { .. }
+            | Command::Travel { .. }
+            | Command::SetPolicy { .. }
+            | Command::Hire { .. }
+            | Command::Fire { .. }
+            | Command::Call { .. }
+    )
 }

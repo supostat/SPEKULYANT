@@ -1,0 +1,9 @@
+title = "Завоз в «Берёзку»"
+weight = 4
+once = true
+price_of = "jeans"
+text = "В «Берёзку» завезли джинсы, на толкучке их отдают по {price}"
+
+[[choices]]
+text = "Запомнить"
+outcome = "Запомнил."

@@ -1,0 +1,27 @@
+title = "Кофи едет домой"
+weight = 1
+text = "{npc} собирается на каникулы в Аккру и просит помочь с билетом."
+
+[conditions]
+window = { from = "1987-06-01", until = "1987-07-01" }
+npc = "kofi"
+
+[[choices]]
+text = "Дать денег на билет"
+
+[choices.consequences]
+money = -50
+contacts = [{ npc = "kofi", favours = 1, away_days = 60 }]
+
+[[choices]]
+text = "Занять у него до осени"
+
+[choices.consequences]
+money = 100
+contacts = [{ npc = "kofi", favours = -2 }]
+
+[[choices]]
+text = "Поссориться"
+
+[choices.consequences]
+contacts = [{ npc = "kofi", relation = -2, lost = true }]

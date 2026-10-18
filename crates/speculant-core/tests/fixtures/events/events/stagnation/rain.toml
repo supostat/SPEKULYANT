@@ -1,0 +1,8 @@
+title = "Дождь"
+weight = 1
+cooldown_days = 1
+text = "Дождь. Покупателей меньше."
+
+[[choices]]
+text = "Переждать"
+outcome = "Переждал."

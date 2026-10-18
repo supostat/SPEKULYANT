@@ -7,6 +7,9 @@ use std::sync::Arc;
 use speculant_core::{Command, Content, Game, LifeSettings};
 
 const DATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../data");
+const EVENTS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/events");
+/// До конца августа 1985 года — через окно ящика «Столичной».
+const EVENTFUL_DAYS: i32 = 600;
 const FRAME_MILLISECONDS: u32 = 16;
 const DAYS: i32 = 400;
 
@@ -116,4 +119,68 @@ fn frame_size_does_not_change_history() {
         serde_json::to_string(&fine.view()).ok(),
         serde_json::to_string(&coarse.view()).ok()
     );
+}
+
+/// Жизнь, полная событий: шанс события 0,3 в день, на каждое — первый доступный выбор. Итог —
+/// снимок мира и журнал «дата: событие, выбор».
+fn play_eventful_life(seed: u64) -> (String, Vec<String>) {
+    let mut content = Content::load(Path::new(EVENTS)).expect("фикстура событий валидна");
+    content.event_rules.daily_chance = 0.3;
+    let settings = LifeSettings {
+        biography: "student".to_owned(),
+        ironman: true,
+        seed,
+    };
+    let mut game = Game::new_life(&settings, Arc::new(content)).expect("жизнь начинается");
+    while game.today().day_index() < EVENTFUL_DAYS {
+        game.advance(FRAME_MILLISECONDS);
+        if game.events().pending().is_some() {
+            let shown = game.view().pending_event.expect("событие ждёт ответа");
+            let first = shown
+                .choices
+                .iter()
+                .position(|choice| choice.available)
+                .expect("хотя бы один выбор доступен");
+            game.apply(Command::Choose { choice: first + 1 })
+                .expect("доступный выбор принимается");
+            game.apply(Command::Continue).expect("исход прочитан");
+        }
+    }
+    let journal = game
+        .journal()
+        .iter()
+        .map(|entry| {
+            format!(
+                "{}: {} {:?}",
+                entry.date.to_iso(),
+                entry.event,
+                entry.choice
+            )
+        })
+        .collect();
+    (
+        serde_json::to_string(&game.view()).expect("снимок сериализуется"),
+        journal,
+    )
+}
+
+#[test]
+fn the_same_seed_gives_the_same_events_and_choices() {
+    let (first_view, first_journal) = play_eventful_life(7);
+    let (second_view, second_journal) = play_eventful_life(7);
+    assert_eq!(first_journal, second_journal);
+    assert_eq!(first_view, second_view);
+    assert!(
+        first_journal.len() > 100,
+        "событий за 600 дней: {}",
+        first_journal.len()
+    );
+    assert!(
+        first_journal
+            .iter()
+            .any(|entry| entry.contains("vodka_crate")),
+        "ящик «Столичной» в окне лета 1985-го"
+    );
+    let (_, other_journal) = play_eventful_life(8);
+    assert_ne!(first_journal, other_journal, "другой сид — другие события");
 }

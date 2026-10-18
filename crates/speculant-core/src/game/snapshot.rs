@@ -1,15 +1,17 @@
 //! Снимок мира для интерфейса: состояние жизни строками, готовыми к показу (§13.3). Подсистемы,
-//! которых ещё нет в мире (события, дела, зона), отдают пустые окна.
+//! которых ещё нет в мире (дела, зона), отдают пустые окна.
 
 use std::cmp::Ordering;
 
 use super::Game;
 use crate::economy::{Currency, MoneyRules};
+use crate::events::Substitutions;
 use crate::reputation::{Availability, Contact};
 use crate::time::GameDate;
 use crate::view::{
-    ContactView, FactionView, HeaderView, LevelView, MarketRowView, MarketView, MoneyPlaceView,
-    MoneyView, PocketItemView, PocketView, StateView, TimeView,
+    ChoiceView, ContactView, EventView, FactionView, HeaderView, LevelView, MarketRowView,
+    MarketView, MoneyPlaceView, MoneyView, OutcomeView, PocketItemView, PocketView, StateView,
+    TimeView,
 };
 
 const CASH_LABEL: &str = "Наличные";
@@ -36,13 +38,13 @@ pub(super) fn snapshot(game: &Game) -> StateView {
         header: header(game, today),
         time: TimeView {
             speed: game.clock.speed(),
-            paused: game.clock.is_paused(),
+            paused: game.clock.is_paused() || game.events.pending().is_some(),
         },
         market: market(game, today),
         pocket: pocket(game, today),
         rumors: Vec::new(),
         messages: game.messages.clone(),
-        pending_event: None,
+        pending_event: pending_event(game, today),
         pager: None,
         businesses: Vec::new(),
         manager: None,
@@ -58,6 +60,33 @@ pub(super) fn snapshot(game: &Game) -> StateView {
         summary: None,
         biographies: Vec::new(),
     }
+}
+
+/// Событие, остановившее время: текст и выборы с подстановками, а после выбора — исход.
+fn pending_event(game: &Game, today: GameDate) -> Option<EventView> {
+    let pending = game.events.pending()?;
+    let event = &game.content.events[&pending.event];
+    let situation = game.situation(today);
+    let substitutions = Substitutions::for_event(event, &situation, &game.markets);
+    Some(EventView {
+        title: event.title.clone(),
+        text: substitutions.apply(&event.text),
+        choices: event
+            .choices
+            .iter()
+            .map(|choice| ChoiceView {
+                text: substitutions.apply(&choice.text),
+                available: situation.allows_choice(choice),
+            })
+            .collect(),
+        outcome: pending.resolution.as_ref().map(|resolution| {
+            let choice = &event.choices[resolution.choice];
+            OutcomeView {
+                text: substitutions.apply(choice.outcome.as_deref().unwrap_or_default()),
+                effects: resolution.effects.clone(),
+            }
+        }),
+    })
 }
 
 /// Шапка: город, дата, наличные; чеки, доллары и курс — когда они есть у игрока.

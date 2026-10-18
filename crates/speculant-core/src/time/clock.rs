@@ -128,21 +128,35 @@ impl Clock {
         self.fast_forward = None;
     }
 
-    /// Двигает часы на `milliseconds` реального времени; недобранный до целого дня остаток копится.
+    /// Двигает часы на `milliseconds` реального времени и отдаёт наступившие дни разом.
     pub fn advance(&mut self, milliseconds: u32) -> Vec<DayTick> {
-        if self.paused {
-            return Vec::new();
+        self.add_time(milliseconds);
+        std::iter::from_fn(|| self.next_day()).collect()
+    }
+
+    /// Копит реальное время; на паузе время не идёт.
+    pub fn add_time(&mut self, milliseconds: u32) {
+        if !self.paused {
+            self.carried_milliseconds += u64::from(milliseconds);
         }
-        self.carried_milliseconds += u64::from(milliseconds);
+    }
+
+    /// Следующий наступивший день, если накопленного времени на него хватает; недобранный до
+    /// целого дня остаток копится дальше.
+    pub fn next_day(&mut self) -> Option<DayTick> {
         let day_length = self
             .settings
             .day_milliseconds(self.speed, self.fast_forward.is_some());
-        let mut ticks = Vec::new();
-        while self.carried_milliseconds >= day_length {
-            self.carried_milliseconds -= day_length;
-            self.today = self.today.next();
-            ticks.push(DayTick { date: self.today });
+        if self.paused || self.carried_milliseconds < day_length {
+            return None;
         }
-        ticks
+        self.carried_milliseconds -= day_length;
+        self.today = self.today.next();
+        Some(DayTick { date: self.today })
+    }
+
+    /// Мир остановился на событии: накопленное время сгорает, дни дальше не идут.
+    pub fn drop_carried_time(&mut self) {
+        self.carried_milliseconds = 0;
     }
 }
