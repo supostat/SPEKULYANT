@@ -4,7 +4,7 @@ use rand_chacha::ChaCha8Rng;
 use rand_chacha::rand_core::Rng;
 
 use super::{JournalEntry, PendingEvent, Resolution, ScheduledEvent, Situation};
-use crate::content::{EventId, FlagId};
+use crate::content::{EventId, FlagId, RoadEvent};
 use crate::time::GameDate;
 
 /// Сколько старших бит случайного числа даёт равномерную долю от нуля до единицы.
@@ -64,6 +64,19 @@ impl EventEngine {
             .iter()
             .filter(|(id, _)| self.is_ready(id, situation))
             .map(|(id, event)| (id.clone(), event.weight))
+            .collect()
+    }
+
+    /// Готовые сегодня дорожные события маршрута с весами маршрута.
+    pub fn ready_road_events(
+        &self,
+        situation: &Situation<'_>,
+        road_events: &[RoadEvent],
+    ) -> Vec<(EventId, u32)> {
+        road_events
+            .iter()
+            .filter(|road| self.is_ready(&road.event, situation))
+            .map(|road| (road.event.clone(), road.weight))
             .collect()
     }
 

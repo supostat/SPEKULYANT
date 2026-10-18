@@ -100,6 +100,7 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "events/stagnation/broken.toml:10: выбор 1 без последствий, исхода и продолжения",
         "events/stagnation/broken.toml:17: события-продолжения missing_event нет в events/",
         "events/stagnation/greedy.toml:3: отдых события в ноль дней — это каждый день",
+        "events/stagnation/lost_luggage.toml:3: дорожное событие lost_luggage не стоит ни на одном маршруте",
         "events/stagnation/greedy.toml:4: подстановка {price} в событии без price_of",
         "events/stagnation/greedy.toml:4: подстановка {sum} в событии без sum",
         "events/stagnation/greedy.toml:10: последствие для vodka_man ничего не меняет",
@@ -110,6 +111,7 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "money/pyramids.toml:4: место закрывается не позже, чем открывается",
         "music/song.toml: путь не входит в раскладку data/",
         "routes.toml:3: города riga нет в cities/",
+        "routes.toml:6: событие vodka_crate стоит на маршруте, но не помечено road = true",
     ];
     for prefix in expected {
         assert!(

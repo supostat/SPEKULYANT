@@ -3,3 +3,4 @@ from = "moscow"
 to = "riga"
 days = 1
 fare = 15
+road_events = [{ event = "vodka_crate", weight = 1 }]

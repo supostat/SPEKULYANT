@@ -3,6 +3,7 @@
 use std::path::Path;
 use std::sync::Arc;
 
+use speculant_core::time::FastForward;
 use speculant_core::view::Screen;
 use speculant_core::{Command, CommandError, Content, Game, LifeSettings, StateView};
 
@@ -50,6 +51,9 @@ fn every_command_survives_a_json_round_trip_under_its_own_name() {
         Command::Advance { milliseconds: 1800 },
         Command::SetSpeed { speed: 2 },
         Command::Pause { paused: true },
+        Command::FastForward {
+            until: FastForward::UntilArrival,
+        },
         Command::Buy {
             good: "jeans".to_owned(),
             quantity: 3,
@@ -166,13 +170,13 @@ fn speed_outside_one_to_three_is_refused() {
 #[test]
 fn commands_of_unsimulated_subsystems_are_refused_by_name() {
     let mut game = new_life();
-    let refusal = game.apply(Command::Travel {
-        destination: "leningrad".to_owned(),
+    let refusal = game.apply(Command::Call {
+        contact: "kofi".to_owned(),
     });
     assert_eq!(
         refusal,
         Err(CommandError::NotSimulatedYet {
-            command: "travel".to_owned()
+            command: "call".to_owned()
         })
     );
 }

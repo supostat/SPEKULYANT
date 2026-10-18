@@ -2,6 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::time::FastForward;
 use crate::view::Screen;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -16,6 +17,10 @@ pub enum Command {
     },
     Pause {
         paused: bool,
+    },
+    /// Перемотать спокойное время: до ближайшего события или до прибытия из поездки.
+    FastForward {
+        until: FastForward,
     },
     Buy {
         good: String,
@@ -89,6 +94,7 @@ impl Command {
             Self::Advance { .. } => "advance",
             Self::SetSpeed { .. } => "set_speed",
             Self::Pause { .. } => "pause",
+            Self::FastForward { .. } => "fast_forward",
             Self::Buy { .. } => "buy",
             Self::Sell { .. } => "sell",
             Self::Travel { .. } => "travel",

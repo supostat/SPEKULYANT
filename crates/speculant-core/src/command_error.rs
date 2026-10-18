@@ -67,6 +67,23 @@ pub enum CommandError {
     },
     ChoiceAlreadyMade,
     ChoiceRequired,
+    UnknownCity {
+        city: String,
+    },
+    NoRoute {
+        from: String,
+        to: String,
+    },
+    CityClosed {
+        city: String,
+        name: String,
+    },
+    NeedsConnections {
+        city: String,
+        name: String,
+    },
+    Traveling,
+    NotTraveling,
     NotSimulatedYet {
         command: String,
     },
@@ -119,6 +136,14 @@ impl fmt::Display for CommandError {
             }
             Self::ChoiceAlreadyMade => write!(formatter, "выбор уже сделан"),
             Self::ChoiceRequired => write!(formatter, "сначала выбери, что делать"),
+            Self::UnknownCity { city } => write!(formatter, "города {city} нет"),
+            Self::NoRoute { from, to } => write!(formatter, "из {from} в {to} не ездят"),
+            Self::CityClosed { name, .. } => write!(formatter, "{name}: туда пока не пускают"),
+            Self::NeedsConnections { name, .. } => {
+                write!(formatter, "{name}: только по блату, а помочь некому")
+            }
+            Self::Traveling => write!(formatter, "ты в дороге"),
+            Self::NotTraveling => write!(formatter, "ты никуда не едешь"),
             Self::NotSimulatedYet { command } => {
                 write!(formatter, "команда {command} ещё не симулируется ядром")
             }

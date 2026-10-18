@@ -3,6 +3,7 @@
 mod consequences;
 mod event_flow;
 mod snapshot;
+mod travel_flow;
 
 use std::collections::BTreeMap;
 use std::sync::Arc;
@@ -14,7 +15,8 @@ use crate::economy::{Currency, Deal, Markets, Money, Trader};
 use crate::events::{EventEngine, JournalEntry, Situation};
 use crate::reputation::{Contact, FactionReputation};
 use crate::rng::WorldRng;
-use crate::time::{Clock, GameDate, MAX_SPEED};
+use crate::time::{Clock, FastForward, GameDate, MAX_SPEED};
+use crate::travel::Journey;
 use crate::view::{Screen, StateView};
 
 /// Сколько последних сообщений помнит лента.
@@ -35,6 +37,7 @@ pub struct Game {
     reputation: FactionReputation,
     contacts: BTreeMap<NpcId, Contact>,
     events: EventEngine,
+    journey: Option<Journey>,
     messages: Vec<String>,
     screen: Screen,
 }
@@ -69,6 +72,7 @@ impl Game {
                 .map(|npc| (npc.clone(), Contact::new(npc.clone())))
                 .collect(),
             events: EventEngine::default(),
+            journey: None,
             messages: Vec::new(),
             screen: Screen::Market,
             content,
@@ -118,10 +122,21 @@ impl Game {
         self.events.journal()
     }
 
+    /// Поездка в пути, если игрок едет.
+    pub fn journey(&self) -> Option<&Journey> {
+        self.journey.as_ref()
+    }
+
+    /// Перемотка, если она идёт.
+    pub fn fast_forward(&self) -> Option<FastForward> {
+        self.clock.fast_forward()
+    }
+
     /// Двигает мир на `milliseconds` реального времени; `true`, если наступил хотя бы один день.
     /// Каждый день рынки приходят в себя и колеблются по сиду, вклады получают проценты,
-    /// репутация дрейфует к нулю в темпе эпохи, а затем может случиться событие. Событие
-    /// останавливает время: остаток реального времени сгорает, пока игрок не прочтёт исход.
+    /// репутация дрейфует к нулю в темпе эпохи, а затем может случиться событие — дома или в
+    /// дороге. Событие и прибытие останавливают перемотку, и остаток реального времени сгорает;
+    /// событие держит время, пока игрок не прочтёт исход.
     pub fn advance(&mut self, milliseconds: u32) -> bool {
         if self.events.pending().is_some() {
             return false;
@@ -132,6 +147,7 @@ impl Game {
             day_passed = true;
             if self.live_day(day.date) {
                 self.clock.drop_carried_time();
+                self.clock.stop_fast_forward();
                 break;
             }
         }
@@ -142,6 +158,9 @@ impl Game {
         let today = self.clock.today();
         if self.events.pending().is_some() && waits_for_event(&command) {
             return Err(CommandError::EventPending);
+        }
+        if self.journey.is_some() && needs_a_city(&command) {
+            return Err(CommandError::Traveling);
         }
         match command {
             Command::NewLife(settings) => {
@@ -159,6 +178,13 @@ impl Game {
                     })?;
             }
             Command::Pause { paused } => self.clock.set_paused(paused),
+            Command::FastForward { until } => {
+                if until == FastForward::UntilArrival && self.journey.is_none() {
+                    return Err(CommandError::NotTraveling);
+                }
+                self.clock.start_fast_forward(until);
+            }
+            Command::Travel { destination } => self.travel(&destination)?,
             Command::OpenScreen { screen } => self.screen = screen,
             Command::Buy { good, quantity } => {
                 let good = GoodId::new(good);
@@ -205,13 +231,21 @@ impl Game {
         Ok(())
     }
 
-    /// День мира; `true`, если он кончился событием.
+    /// День мира; `true`, если он кончился событием или прибытием. В пути вместо событий дня
+    /// разыгрываются дорожные события маршрута, а в последний день пути игрок приезжает — если в
+    /// этот день случилось событие, то после того, как прочтёт его исход.
     fn live_day(&mut self, date: GameDate) -> bool {
         self.markets.next_day(&self.content, &mut self.rng, date);
         self.player.next_day(&self.content, date);
         let drift_days = self.content.epoch_profile_on(date).reputation_drift_days;
         self.reputation.next_day(drift_days);
-        self.start_day_event(date)
+        let Some(journey) = self.journey.clone() else {
+            return self.start_day_event(date);
+        };
+        if self.start_road_event(date, &journey) {
+            return true;
+        }
+        self.arrive_if_due(date)
     }
 
     /// Положение дел для условий событий.
@@ -220,6 +254,7 @@ impl Game {
             content: &self.content,
             today,
             city: &self.city,
+            on_road: self.journey.is_some(),
             player: &self.player,
             reputation: &self.reputation,
             contacts: &self.contacts,
@@ -263,9 +298,22 @@ fn waits_for_event(command: &Command) -> bool {
             | Command::Deposit { .. }
             | Command::Withdraw { .. }
             | Command::Travel { .. }
+            | Command::FastForward { .. }
             | Command::SetPolicy { .. }
             | Command::Hire { .. }
             | Command::Fire { .. }
             | Command::Call { .. }
+    )
+}
+
+/// В дороге нет ни толкучки, ни сберкассы, и второй поездки не начать.
+fn needs_a_city(command: &Command) -> bool {
+    matches!(
+        command,
+        Command::Buy { .. }
+            | Command::Sell { .. }
+            | Command::Deposit { .. }
+            | Command::Withdraw { .. }
+            | Command::Travel { .. }
     )
 }

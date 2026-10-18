@@ -67,23 +67,31 @@ impl Contact {
         today: GameDate,
         what: &str,
     ) -> Result<(), ContactRefusal> {
-        match self.availability {
-            Availability::Lost => return Err(ContactRefusal::Lost),
-            Availability::AwayUntil(until) if today < until => {
-                return Err(ContactRefusal::Away { until });
-            }
-            Availability::AwayUntil(_) | Availability::Available => {}
-        }
-        if self.relation < 0 {
-            return Err(ContactRefusal::Offended);
-        }
-        if self.owed_favours() >= rules.max_debt {
-            return Err(ContactRefusal::OwedTooMuch);
+        if let Some(refusal) = self.refusal(rules, today) {
+            return Err(refusal);
         }
         self.availability = Availability::Available;
         self.debt -= 1;
         self.record(today, what);
         Ok(())
+    }
+
+    /// Почему он сейчас не поможет; `None` — поможет.
+    pub fn refusal(&self, rules: ReputationRules, today: GameDate) -> Option<ContactRefusal> {
+        match self.availability {
+            Availability::Lost => return Some(ContactRefusal::Lost),
+            Availability::AwayUntil(until) if today < until => {
+                return Some(ContactRefusal::Away { until });
+            }
+            Availability::AwayUntil(_) | Availability::Available => {}
+        }
+        if self.relation < 0 {
+            Some(ContactRefusal::Offended)
+        } else if self.owed_favours() >= rules.max_debt {
+            Some(ContactRefusal::OwedTooMuch)
+        } else {
+            None
+        }
     }
 
     /// Задолжать: взять деньгами, товаром или делом без просьбы — он дал сам, долг растёт.

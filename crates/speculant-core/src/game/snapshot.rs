@@ -8,10 +8,11 @@ use crate::economy::{Currency, MoneyRules};
 use crate::events::Substitutions;
 use crate::reputation::{Availability, Contact};
 use crate::time::GameDate;
+use crate::travel::Access;
 use crate::view::{
-    ChoiceView, ContactView, EventView, FactionView, HeaderView, LevelView, MarketRowView,
-    MarketView, MoneyPlaceView, MoneyView, OutcomeView, PocketItemView, PocketView, StateView,
-    TimeView,
+    ChoiceView, ContactView, DestinationView, EventView, FactionView, HeaderView, JourneyView,
+    LevelView, MarketRowView, MarketView, MoneyPlaceView, MoneyView, OutcomeView, PocketItemView,
+    PocketView, StateView, TimeView, TravelView,
 };
 
 const CASH_LABEL: &str = "Наличные";
@@ -22,6 +23,7 @@ const DOLLARS_POCKET_LABEL: &str = "Доллары";
 const CHECKS_RATE_LABEL: &str = "Чек ВПТ";
 const DOLLAR_RATE_LABEL: &str = "Доллар";
 const CONTACTS_POCKET_LABEL: &str = "Связей";
+const ON_THE_ROAD: &str = "В дороге";
 const WELL_DISPOSED: &str = "расположен";
 const ACQUAINTED: &str = "знакомый";
 const OFFENDED: &str = "обижен";
@@ -39,8 +41,10 @@ pub(super) fn snapshot(game: &Game) -> StateView {
         time: TimeView {
             speed: game.clock.speed(),
             paused: game.clock.is_paused() || game.events.pending().is_some(),
+            fast_forward: game.clock.fast_forward(),
         },
         market: market(game, today),
+        travel: travel(game, today),
         pocket: pocket(game, today),
         rumors: Vec::new(),
         messages: game.messages.clone(),
@@ -112,16 +116,30 @@ fn header(game: &Game, today: GameDate) -> HeaderView {
             rate(rules, Currency::Dollar, today)
         ));
     }
+    let city = match game.journey {
+        Some(_) => ON_THE_ROAD.to_owned(),
+        None => game.content.cities[&game.city].name.clone(),
+    };
     HeaderView {
-        city: game.content.cities[&game.city].name.clone(),
+        city,
         date: today.russian(),
         money,
     }
 }
 
-/// Толкучка города: товары, которые уже появились, с ценниками следующей штуки и запасом.
+/// Толкучка города: товары, которые уже появились, с ценниками следующей штуки и запасом. В
+/// дороге толкучки нет.
 fn market(game: &Game, today: GameDate) -> MarketView {
     let content = &game.content;
+    if let Some(journey) = &game.journey {
+        return MarketView {
+            place: format!(
+                "{ON_THE_ROAD}: {} — {}",
+                content.cities[&journey.from].name, content.cities[&journey.to].name
+            ),
+            goods: Vec::new(),
+        };
+    }
     let goods = content
         .goods
         .iter()
@@ -139,6 +157,55 @@ fn market(game: &Game, today: GameDate) -> MarketView {
     MarketView {
         place: content.cities[&game.city].market.clone(),
         goods,
+    }
+}
+
+/// Поездка: в пути — откуда, куда и когда приезд; дома — открытые направления из города с днями
+/// и ценой в номинале дня. Закрытые города не показываются.
+fn travel(game: &Game, today: GameDate) -> TravelView {
+    let content = &game.content;
+    if let Some(journey) = &game.journey {
+        let days_left = journey.arrives.day_index() - today.day_index();
+        return TravelView {
+            journey: Some(JourneyView {
+                from: content.cities[&journey.from].name.clone(),
+                to: content.cities[&journey.to].name.clone(),
+                arrives: journey.arrives.russian(),
+                days_left: u32::try_from(days_left)
+                    .expect("в пути приезд не раньше сегодняшнего дня"),
+            }),
+            destinations: Vec::new(),
+        };
+    }
+    let cash = game.player.money().cash();
+    let someone_helps = game
+        .contacts
+        .values()
+        .any(|contact| contact.refusal(content.reputation, today).is_none());
+    let destinations = content
+        .routes
+        .iter()
+        .filter(|route| route.from == game.city)
+        .filter_map(|route| {
+            let access = Access::of(route, content, today);
+            if access == Access::Closed {
+                return None;
+            }
+            let fare = content.money.from_real(route.fare, Currency::Ruble, today);
+            let by_connections = access == Access::ByConnections;
+            Some(DestinationView {
+                city: route.to.to_string(),
+                name: content.cities[&route.to].name.clone(),
+                days: route.days,
+                fare: content.money.format_money(fare, today),
+                by_connections,
+                available: cash.covers(fare) && (!by_connections || someone_helps),
+            })
+        })
+        .collect();
+    TravelView {
+        journey: None,
+        destinations,
     }
 }
 

@@ -16,6 +16,7 @@ mod pocket;
 mod screen;
 mod summary;
 mod time;
+mod travel;
 mod zone;
 
 pub use biography::BiographyView;
@@ -33,6 +34,7 @@ pub use pocket::{PocketItemView, PocketView};
 pub use screen::Screen;
 pub use summary::{LifeSummaryView, SummaryLineView};
 pub use time::TimeView;
+pub use travel::{DestinationView, JourneyView, TravelView};
 pub use zone::ZoneView;
 
 use serde::{Deserialize, Serialize};
@@ -43,6 +45,7 @@ pub struct StateView {
     pub header: HeaderView,
     pub time: TimeView,
     pub market: MarketView,
+    pub travel: TravelView,
     pub pocket: PocketView,
     pub rumors: Vec<String>,
     pub messages: Vec<String>,

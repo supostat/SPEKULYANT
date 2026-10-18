@@ -5,12 +5,13 @@ use crate::economy::{Currency, Money, Real, Trader};
 use crate::reputation::{Contact, FactionReputation};
 use crate::time::GameDate;
 
-/// Положение дел, над которым считаются условия событий (§10.1): день, город, деньги и карман,
-/// репутация, связи и флаги прошлых решений.
+/// Положение дел, над которым считаются условия событий (§10.1): день, город (в пути — город
+/// отправления), дорога, деньги и карман, репутация, связи и флаги прошлых решений.
 pub struct Situation<'a> {
     pub content: &'a Content,
     pub today: GameDate,
     pub city: &'a CityId,
+    pub on_road: bool,
     pub player: &'a Trader,
     pub reputation: &'a FactionReputation,
     pub contacts: &'a BTreeMap<NpcId, Contact>,
@@ -18,14 +19,16 @@ pub struct Situation<'a> {
 }
 
 impl Situation<'_> {
-    /// Событие может случиться: оно из каталога текущей эпохи и его условия выполнены. События
-    /// зоны (без эпохи) в обычной жизни не случаются.
+    /// Событие может случиться: оно из каталога текущей эпохи, дорожное — только в пути, обычное —
+    /// только не в пути, и его условия выполнены. События зоны (без эпохи) в обычной жизни не
+    /// случаются.
     pub fn allows_event(&self, event: &Event) -> bool {
         let epoch = &self.content.time.epochs.epoch_on(self.today).id;
         event
             .epoch
             .as_ref()
             .is_some_and(|own| own.as_str() == epoch)
+            && event.road == self.on_road
             && self.allows(&event.conditions)
     }
 

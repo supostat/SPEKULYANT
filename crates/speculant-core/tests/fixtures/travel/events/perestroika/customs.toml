@@ -1,0 +1,9 @@
+title = "Таможня"
+weight = 1
+road = true
+cooldown_days = 1
+text = "Таможенник листает декларацию и смотрит на твои сумки."
+
+[[choices]]
+text = "Улыбнуться"
+outcome = "Пропустили."

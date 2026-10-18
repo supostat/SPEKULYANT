@@ -12,6 +12,9 @@ pub struct Event {
     pub weight: u32,
     #[serde(default)]
     pub once: bool,
+    /// Дорожное событие (§4): случается только в пути и только на маршрутах, где оно стоит.
+    #[serde(default)]
+    pub road: bool,
     /// Сколько дней повторяемое событие отдыхает после того, как случилось; без поля — по
     /// правилам событий.
     pub cooldown_days: Option<u32>,

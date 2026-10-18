@@ -1,0 +1,39 @@
+[[routes]]
+from = "moscow"
+to = "leningrad"
+days = 1
+fare = 15
+road_events = [{ event = "conductor", weight = 1 }]
+
+[[routes]]
+from = "leningrad"
+to = "moscow"
+days = 1
+fare = 15
+road_events = [{ event = "conductor", weight = 1 }]
+
+[[routes]]
+from = "moscow"
+to = "berlin"
+days = 3
+fare = 120
+
+[[routes]]
+from = "berlin"
+to = "moscow"
+days = 3
+fare = 120
+
+[[routes]]
+from = "moscow"
+to = "warsaw"
+days = 2
+fare = 40
+road_events = [{ event = "customs", weight = 3 }, { event = "robbery", weight = 1 }]
+
+[[routes]]
+from = "warsaw"
+to = "moscow"
+days = 2
+fare = 40
+road_events = [{ event = "customs", weight = 3 }, { event = "robbery", weight = 1 }]

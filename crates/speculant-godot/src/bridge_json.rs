@@ -166,12 +166,9 @@ mod tests {
             parsed(&apply(&mut game, r#"{"command":"fly"}"#))["error"],
             "malformed_command"
         );
-        let refusal = parsed(&apply(
-            &mut game,
-            r#"{"command":"travel","destination":"leningrad"}"#,
-        ));
+        let refusal = parsed(&apply(&mut game, r#"{"command":"call","contact":"kofi"}"#));
         assert_eq!(refusal["error"], "not_simulated_yet");
-        assert_eq!(refusal["command"], "travel");
+        assert_eq!(refusal["command"], "call");
     }
 
     #[test]

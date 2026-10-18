@@ -18,6 +18,7 @@ mod ids;
 mod loader;
 mod money_place;
 mod npc_template;
+mod road_event;
 mod route;
 mod validation;
 
@@ -40,6 +41,7 @@ pub use ids::{
 };
 pub use money_place::{InterestPoint, MoneyPlace};
 pub use npc_template::NpcTemplate;
+pub use road_event::RoadEvent;
 pub use route::Route;
 
 use crate::economy::{MarketRules, MoneyRules};

@@ -1,2 +1,3 @@
 daily_chance = 0.15
+road_daily_chance = 0
 cooldown_days = 90

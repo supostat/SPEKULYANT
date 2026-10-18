@@ -1,0 +1,4 @@
+name = "Берлин"
+region = "abroad"
+market = "Блошиный рынок"
+connections_only_until = "1990-01-01"

@@ -103,13 +103,15 @@ impl Game {
         Ok(())
     }
 
-    /// Исход прочитан — событие закрывается, время идёт.
+    /// Исход прочитан — событие закрывается, время идёт; случилось оно в последний день пути —
+    /// игрок наконец приезжает.
     pub(super) fn close_event(&mut self) -> Result<(), CommandError> {
         let pending = self.events.pending().ok_or(CommandError::NoPendingEvent)?;
         if pending.resolution.is_none() {
             return Err(CommandError::ChoiceRequired);
         }
         self.events.close();
+        self.arrive_if_due(self.today());
         Ok(())
     }
 }

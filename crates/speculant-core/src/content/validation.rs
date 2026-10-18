@@ -30,6 +30,7 @@ struct Known {
     npcs: BTreeSet<String>,
     factions: BTreeSet<String>,
     events: BTreeSet<String>,
+    road_events: BTreeSet<String>,
     flags_set: BTreeSet<String>,
     /// Предел уровней репутации, если правила разобрались.
     reputation_limit: Option<i32>,
@@ -79,6 +80,12 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
         npcs: ids(&parsed.npcs),
         factions: ids(&parsed.factions),
         events: ids(&parsed.events),
+        road_events: parsed
+            .events
+            .iter()
+            .filter(|entry| entry.value.road)
+            .map(|entry| entry.id.clone())
+            .collect(),
         flags_set: parsed
             .events
             .iter()
@@ -223,6 +230,28 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
             },
         );
     }
+    let routed: BTreeSet<&str> = parsed
+        .routes
+        .iter()
+        .flat_map(|(_, routes)| routes.iter())
+        .flat_map(|route| route.road_events.iter())
+        .map(|road| road.event.as_str())
+        .collect();
+    for entry in &parsed.events {
+        if entry.value.road && !routed.contains(entry.id.as_str()) {
+            Report {
+                file: entry.file,
+                errors: &mut *errors,
+            }
+            .at(
+                entry.file.line_of("road"),
+                format!(
+                    "дорожное событие {} не стоит ни на одном маршруте routes.toml",
+                    entry.id
+                ),
+            );
+        }
+    }
     for entry in &parsed.events {
         check_event(
             &entry.value,
@@ -328,14 +357,16 @@ fn check_epoch_profile(profile: &EpochProfile, known: &Known, report: &mut Repor
 }
 
 fn check_event_rules(rules: EventRules, report: &mut Report<'_, '_>) {
-    if !(0.0..=1.0).contains(&rules.daily_chance) {
-        report.at(
-            report.file.line_of("daily_chance"),
-            format!(
-                "daily_chance = {}: вероятность от 0 до 1",
-                rules.daily_chance
-            ),
-        );
+    for (key, chance) in [
+        ("daily_chance", rules.daily_chance),
+        ("road_daily_chance", rules.road_daily_chance),
+    ] {
+        if !(0.0..=1.0).contains(&chance) {
+            report.at(
+                report.file.line_of(key),
+                format!("{key} = {chance}: вероятность от 0 до 1"),
+            );
+        }
     }
 }
 
@@ -582,6 +613,23 @@ fn check_routes(routes: &[super::Route], known: &Known, report: &mut Report<'_, 
                 route_line,
                 format!("маршрут {} → {} описан дважды", route.from, route.to),
             );
+        }
+        for road in &route.road_events {
+            let event = road.event.as_str();
+            if !known.events.contains(event) {
+                report.at_reference(event, format!("события {event} нет в events/"));
+            } else if !known.road_events.contains(event) {
+                report.at_reference(
+                    event,
+                    format!("событие {event} стоит на маршруте, но не помечено road = true"),
+                );
+            }
+            if road.weight == 0 {
+                report.at_reference(
+                    event,
+                    format!("вес дорожного события {event} должен быть больше нуля"),
+                );
+            }
         }
     }
 }
