@@ -1,0 +1,12 @@
+# Ширпотреб и игрушки, позже электроника.
+name = "Пекин"
+region = "abroad"
+market = "Рынок Ябаолу"
+opens = "1992-01-01"
+
+[multipliers]
+electronics = 0.6
+clothes = 0.6
+sweets = 0.7
+media = 0.7
+prestige = 0.9

@@ -1,0 +1,13 @@
+name = "Мобильный телефон"
+short_name = "Мобила"
+category = "electronics"
+unit = "шт"
+stock = 1
+curve = [
+  { year = 1994, price = 1500 },
+  { year = 1996, price = 900 },
+  { year = 1998, price = 500 },
+  { year = 2000, price = 250 },
+  { year = 2002, price = 150 },
+  { year = 2004, price = 100 },
+]

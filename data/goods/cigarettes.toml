@@ -9,6 +9,10 @@ curve = [
   { year = 1988, price = 5 },
   { year = 1990, price = 6 },
   { year = 1992, price = 1.5 },
-  { year = 1994, price = 1 },
+  { year = 1994, price = 1.2 },
+  { year = 1996, price = 1 },
+  { year = 1998, price = 0.9 },
+  { year = 2000, price = 0.8 },
+  { year = 2002, price = 0.8 },
   { year = 2004, price = 0.8 },
 ]

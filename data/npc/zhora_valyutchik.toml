@@ -1,0 +1,6 @@
+name = "Жора Валютчик"
+role = "валютчик у «Берёзки»"
+faction = "traders"
+strategy = "trader"
+capital = 2000
+description = "Меняет чеки на рубли и рубли на нервы."

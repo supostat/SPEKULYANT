@@ -132,7 +132,11 @@ mod tests {
         let view: StateView =
             serde_json::from_str(&view_json(&game)).expect("снимок разбирается обратно");
         assert_eq!(view.header.city, "Москва");
-        assert_eq!(view.market.goods.len(), 8);
+        assert_eq!(
+            view.market.goods.len(),
+            31,
+            "из сорока товаров девять появятся позже 1984 года"
+        );
         assert_eq!(view.header.date, "1 января 1984, вс");
     }
 

@@ -1,0 +1,6 @@
+name = "Додик с Галёрки"
+role = "перекупщик с Галёрки"
+faction = "traders"
+strategy = "trader"
+capital = 1200
+description = "Берёт всё, что блестит, и отдаёт вдвое дороже."

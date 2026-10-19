@@ -1,0 +1,9 @@
+title = "Комсомольский работник"
+description = "Связи с чиновниками, первые кооперативы при райкоме."
+start_city = "moscow"
+start_cash = 500
+contacts = ["raikom_zorin"]
+age = { from = 23, to = 27 }
+housing = "communal_room"
+obituary = "Начинал в райкоме комсомола и первым понял, что кооператив — это деньги."
+starts_unlocked = true

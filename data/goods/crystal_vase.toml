@@ -1,0 +1,18 @@
+name = "Хрусталь, ваза"
+short_name = "Хрусталь"
+category = "prestige"
+unit = "шт"
+stock = 6
+curve = [
+  { year = 1984, price = 60 },
+  { year = 1986, price = 60 },
+  { year = 1988, price = 55 },
+  { year = 1990, price = 50 },
+  { year = 1992, price = 20 },
+  { year = 1994, price = 12 },
+  { year = 1996, price = 10 },
+  { year = 1998, price = 8 },
+  { year = 2000, price = 8 },
+  { year = 2002, price = 7 },
+  { year = 2004, price = 7 },
+]

@@ -1,0 +1,11 @@
+# Первая челночная волна: одежда, косметика, электроника.
+name = "Варшава"
+region = "abroad"
+market = "Стадион Десятилетия"
+opens = "1990-07-01"
+
+[multipliers]
+clothes = 0.7
+sweets = 0.6
+electronics = 0.8
+tobacco = 0.8

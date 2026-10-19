@@ -1,0 +1,6 @@
+name = "Лев Маркович"
+role = "ростовщик"
+faction = "traders"
+strategy = "banker"
+capital = 6000
+description = "Даст в долг кому угодно — под процент, который не снился сберкассе."

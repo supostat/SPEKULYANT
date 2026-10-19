@@ -1,0 +1,6 @@
+name = "Кузькин"
+role = "депутат горсовета"
+faction = "officials"
+strategy = "official"
+capital = 4000
+description = "Обещает всем и помнит только своих."

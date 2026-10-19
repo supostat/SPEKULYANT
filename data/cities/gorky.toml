@@ -1,0 +1,13 @@
+# Провинция: дефицит дороже, продукты дешевле.
+name = "Горький"
+region = "volga"
+market = "Канавинский рынок"
+
+[multipliers]
+clothes = 1.3
+electronics = 1.25
+media = 1.3
+sweets = 1.3
+tobacco = 1.2
+prestige = 1.2
+food = 0.85

@@ -1,0 +1,6 @@
+name = "Бригадир Шрам"
+role = "бригадир рынка"
+faction = "bandits"
+strategy = "racketeer"
+capital = 2500
+description = "Держит рынок и всех, кто на нём стоит."

@@ -1,0 +1,6 @@
+name = "Наташа Турецкая"
+role = "челночница на Стамбул"
+faction = "traders"
+strategy = "shuttle"
+capital = 1100
+description = "Кожу берёт на вес, а продаёт поштучно."

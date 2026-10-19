@@ -315,6 +315,8 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         ["biographies", name] => push_entry(file, name, &mut parsed.biographies, errors),
         ["npc", name] => push_entry(file, name, &mut parsed.npcs, errors),
         ["events", epoch, name] => push_event(file, name, Some(EpochId::new(*epoch)), parsed, errors),
+        // Пороги объёма, баланса и покрытия читают инструменты, а не игра.
+        ["balance.toml"] => {}
         ["history", "generator.toml"] => {
             if let Some(rules) = parse::<HistoryGenerator>(file, errors) {
                 parsed.history_generator = Some((file, rules));
@@ -334,7 +336,7 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         _ => errors.push(ContentError::new(
             &file.path,
             None,
-            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, {LIFE_FILE}, housing/, endings/, epochs/, biographies/, npc/, events/<эпоха>/, {ZONE_RULES_FILE}, zone/services/, zone/events/, {HISTORY_GENERATOR_FILE}, history/, history/post2004/)"),
+            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, {LIFE_FILE}, housing/, endings/, epochs/, biographies/, npc/, events/<эпоха>/, {ZONE_RULES_FILE}, zone/services/, zone/events/, {HISTORY_GENERATOR_FILE}, history/, history/post2004/, balance.toml)"),
         )),
     }
 }

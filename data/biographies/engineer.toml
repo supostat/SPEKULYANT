@@ -1,0 +1,9 @@
+title = "Инженер НИИ"
+description = "Доступ к технике и дефициту, служебная дисциплина."
+start_city = "moscow"
+start_cash = 600
+contacts = ["lab_chief", "officer_syomin"]
+age = { from = 25, to = 30 }
+housing = "communal_room"
+obituary = "Начинал инженером в НИИ и выносил через проходную всё, что не приколочено."
+starts_unlocked = true

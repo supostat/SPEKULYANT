@@ -1,0 +1,11 @@
+title = "Бывший сиделец"
+description = "Справка об освобождении и люди оттуда."
+start_city = "moscow"
+start_cash = 100
+contacts = ["cellmate_lyokha"]
+age = { from = 26, to = 32 }
+housing = "dorm_bed"
+obituary = "Вышел с зоны с одной справкой об освобождении и связями оттуда."
+starts_unlocked = false
+unlocked_by_flag = "released_from_zone"
+unlock_hint = "Открывается после выхода с зоны"

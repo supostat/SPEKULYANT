@@ -1,0 +1,6 @@
+name = "Тётя Валя"
+role = "торговка с колхозного рынка"
+faction = "people"
+strategy = "trader"
+capital = 800
+description = "Её сервелат никогда не кончается, а цена никогда не падает."

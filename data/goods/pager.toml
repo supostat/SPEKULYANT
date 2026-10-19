@@ -1,0 +1,13 @@
+name = "Пейджер"
+short_name = "Пейджер"
+category = "electronics"
+unit = "шт"
+stock = 3
+curve = [
+  { year = 1994, price = 120 },
+  { year = 1996, price = 90 },
+  { year = 1998, price = 60 },
+  { year = 2000, price = 30 },
+  { year = 2002, price = 15 },
+  { year = 2004, price = 10 },
+]

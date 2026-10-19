@@ -1,0 +1,6 @@
+name = "Фарцовщик Стасик"
+role = "фарцовщик у «Интуриста»"
+faction = "traders"
+strategy = "trader"
+capital = 900
+description = "Знает каждого финна в лицо и каждую пару джинсов по запаху."

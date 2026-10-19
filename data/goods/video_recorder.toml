@@ -1,0 +1,18 @@
+name = "Видеомагнитофон"
+short_name = "Видик"
+category = "electronics"
+unit = "шт"
+stock = 1
+curve = [
+  { year = 1984, price = 1200 },
+  { year = 1986, price = 1000 },
+  { year = 1988, price = 800 },
+  { year = 1990, price = 600 },
+  { year = 1992, price = 200 },
+  { year = 1994, price = 120 },
+  { year = 1996, price = 80 },
+  { year = 1998, price = 60 },
+  { year = 2000, price = 45 },
+  { year = 2002, price = 40 },
+  { year = 2004, price = 35 },
+]

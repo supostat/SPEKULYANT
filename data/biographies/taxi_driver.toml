@@ -1,0 +1,9 @@
+title = "Таксист"
+description = "Знает город, водка по ночам, свои люди везде."
+start_city = "moscow"
+start_cash = 700
+contacts = ["dispatcher_lyusya", "officer_syomin"]
+age = { from = 25, to = 32 }
+housing = "communal_room"
+obituary = "Крутил баранку такси и знал, где ночью достать водку."
+starts_unlocked = true

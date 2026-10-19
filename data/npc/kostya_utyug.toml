@@ -1,0 +1,6 @@
+name = "Костя Утюг"
+role = "сборщик дани"
+faction = "bandits"
+strategy = "racketeer"
+capital = 1000
+description = "Прозвище объясняет методы."

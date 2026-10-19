@@ -1,0 +1,9 @@
+title = "Моряк загранплавания"
+description = "Канал товара из-за границы, таможня следит."
+start_city = "leningrad"
+start_cash = 1200
+contacts = ["bosun", "customs_gusev"]
+age = { from = 22, to = 28 }
+housing = "communal_room"
+obituary = "Ходил в загранку и возил оттуда то, что здесь звали дефицитом."
+starts_unlocked = true

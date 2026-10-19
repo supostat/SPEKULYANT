@@ -1,0 +1,10 @@
+# Почти заграница: одежда, косметика, кофе.
+name = "Рига"
+region = "baltic"
+market = "Центральный рынок"
+
+[multipliers]
+clothes = 0.8
+sweets = 0.85
+food = 0.9
+media = 0.9

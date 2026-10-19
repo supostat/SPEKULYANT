@@ -1,0 +1,10 @@
+# Кожа, текстиль и золото.
+name = "Стамбул"
+region = "abroad"
+market = "Лалели"
+opens = "1991-07-01"
+
+[multipliers]
+clothes = 0.55
+prestige = 0.7
+sweets = 0.8

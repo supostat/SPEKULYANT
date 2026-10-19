@@ -4,6 +4,7 @@
 mod bridge_smoke;
 mod build_godot;
 mod charset_check;
+mod content_count;
 mod deps_check;
 mod docs_check;
 mod etalons;
@@ -36,7 +37,10 @@ const USAGE: &str = "\
   screenshot <экран>        PNG экрана в .tools/out/ (оконный запуск)
   deps-check                ядро speculant-core без Godot; пин gdext согласован с tools.toml
   new-event <эпоха> <имя>   заготовка события в data/events/<эпоха>/<имя>.toml
-  docs-check [--all-decided] маркеры DECIDED-15-N совпадают в документе и дизайн-книге";
+  docs-check [--all-decided] маркеры DECIDED-15-N совпадают в документе и дизайн-книге
+  content-count <вид>       сколько в data/ товаров, городов, соперников (npc), событий
+                            (events:<эпоха>, zone-events), шаблонов (post2004-templates)
+                            — не меньше порога [volume] из data/balance.toml";
 
 fn main() -> Result<()> {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
@@ -66,6 +70,7 @@ fn main() -> Result<()> {
         "new-event" => new_event::run(flags),
         "deps-check" => deps_check::run(),
         "docs-check" => docs_check::run(flags.iter().any(|flag| flag == "--all-decided")),
+        "content-count" => content_count::run(single_argument(flags, "content-count <вид>")?),
         unknown => bail!("неизвестная команда xtask: {unknown}\n{USAGE}"),
     }
 }

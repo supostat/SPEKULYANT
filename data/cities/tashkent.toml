@@ -1,0 +1,13 @@
+# Фрукты и ковры дёшевы, привозной дефицит — втридорога.
+name = "Ташкент"
+region = "asia"
+market = "Алайский базар"
+
+[multipliers]
+food = 0.6
+clothes = 1.3
+electronics = 1.3
+media = 1.4
+sweets = 1.2
+alcohol = 1.1
+prestige = 1.1

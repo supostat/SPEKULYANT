@@ -1,0 +1,6 @@
+name = "Серый"
+role = "бригадир с района"
+faction = "bandits"
+strategy = "racketeer"
+capital = 1500
+description = "Вежлив, пока платят."

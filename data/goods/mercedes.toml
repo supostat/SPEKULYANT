@@ -1,0 +1,14 @@
+name = "«Мерседес-600»"
+short_name = "Мерседес"
+category = "prestige"
+unit = "шт"
+stock = 1
+curve = [
+  { year = 1992, price = 30000 },
+  { year = 1994, price = 28000 },
+  { year = 1996, price = 25000 },
+  { year = 1998, price = 20000 },
+  { year = 2000, price = 18000 },
+  { year = 2002, price = 15000 },
+  { year = 2004, price = 12000 },
+]

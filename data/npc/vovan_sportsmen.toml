@@ -1,0 +1,6 @@
+name = "Вован Спортсмен"
+role = "спортсмен из качалки"
+faction = "bandits"
+strategy = "racketeer"
+capital = 1200
+description = "Пришёл из качалки и решил, что рынок — тоже спорт."

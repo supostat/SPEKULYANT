@@ -1,0 +1,20 @@
+# Выход на номенклатуру (§11.1): флаг открывает «Сына партработника» следующим жизням.
+title = "Приглашение в райком"
+weight = 3
+once = true
+text = """
+Инструктор райкома долго жмёт руку и смотрит в глаза. Есть место в аппарате: \
+спецпаёк, поликлиника, и никакой больше толкучки — по крайней мере, на виду."""
+
+[conditions]
+reputation = [{ faction = "officials", at_least = 2 }]
+
+[[choices]]
+text = "Согласиться"
+outcome = "Теперь ты номенклатура. Пайки, путёвки и правильные знакомства."
+consequences = { set_flags = ["nomenklatura"], reputation = [{ faction = "officials", change = 2 }, { faction = "traders", change = -1 }] }
+
+[[choices]]
+text = "Отказаться"
+outcome = "Инструктор пожимает плечами: таких предложений два раза не делают."
+consequences = { reputation = [{ faction = "officials", change = -1 }] }

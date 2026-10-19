@@ -1,0 +1,11 @@
+# Коньяк и фрукты дешевле, всё остальное везут с севера.
+name = "Тбилиси"
+region = "caucasus"
+market = "Дезертирский рынок"
+
+[multipliers]
+alcohol = 0.7
+food = 0.7
+clothes = 1.2
+media = 1.2
+sweets = 1.2

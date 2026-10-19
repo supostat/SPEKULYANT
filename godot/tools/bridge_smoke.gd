@@ -5,7 +5,7 @@ extends SceneTree
 
 const SETTINGS := {"biography": "student", "ironman": true, "seed": 7}
 const EXPECTED_CITY := "Москва"
-const EXPECTED_MARKET_ROWS := 8
+const EXPECTED_MARKET_ROWS := 31  # из сорока товаров девять появятся позже 1984 года
 const SPEED_COMMAND := {"command": "set_speed", "speed": 2}
 const FIRST_DAY := "1 января 1984, вс"
 const SECOND_DAY := "2 января 1984, пн"

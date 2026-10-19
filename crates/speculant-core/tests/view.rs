@@ -128,7 +128,11 @@ fn a_new_life_opens_on_the_market_of_the_start_city() {
     assert_eq!(view.header.date, "1 января 1984, вс");
     assert_eq!(view.header.money, vec!["Наличные: 150 р."]);
     assert_eq!(view.market.place, "Толкучка у Рижского вокзала");
-    assert_eq!(view.market.goods.len(), 8);
+    assert_eq!(
+        view.market.goods.len(),
+        31,
+        "из сорока товаров девять появятся позже 1984 года"
+    );
     assert_eq!(view.pager, None, "пейджера в 1984 году нет");
 }
 

@@ -1,0 +1,6 @@
+name = "Марат из Ташкента"
+role = "челнок с юга"
+faction = "traders"
+strategy = "shuttle"
+capital = 800
+description = "Фрукты на север, дефицит на юг."

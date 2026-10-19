@@ -1,0 +1,18 @@
+name = "Сигары кубинские"
+short_name = "Сигары"
+category = "tobacco"
+unit = "кор"
+stock = 3
+curve = [
+  { year = 1984, price = 60 },
+  { year = 1986, price = 60 },
+  { year = 1988, price = 65 },
+  { year = 1990, price = 70 },
+  { year = 1992, price = 40 },
+  { year = 1994, price = 35 },
+  { year = 1996, price = 30 },
+  { year = 1998, price = 30 },
+  { year = 2000, price = 30 },
+  { year = 2002, price = 30 },
+  { year = 2004, price = 30 },
+]

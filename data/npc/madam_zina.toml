@@ -1,0 +1,6 @@
+name = "Мадам Зина"
+role = "приёмщица комиссионки"
+faction = "traders"
+strategy = "trader"
+capital = 1500
+description = "Через её прилавок проходит половина дефицита района."

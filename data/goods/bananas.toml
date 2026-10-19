@@ -1,0 +1,18 @@
+name = "Бананы, ящик"
+short_name = "Бананы"
+category = "food"
+unit = "ящ"
+stock = 6
+curve = [
+  { year = 1984, price = 30 },
+  { year = 1986, price = 30 },
+  { year = 1988, price = 35 },
+  { year = 1990, price = 40 },
+  { year = 1992, price = 10 },
+  { year = 1994, price = 6 },
+  { year = 1996, price = 5 },
+  { year = 1998, price = 5 },
+  { year = 2000, price = 5 },
+  { year = 2002, price = 5 },
+  { year = 2004, price = 5 },
+]

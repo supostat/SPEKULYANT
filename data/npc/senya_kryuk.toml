@@ -1,0 +1,6 @@
+name = "Сеня Крюк"
+role = "спекулянт с вокзала"
+faction = "traders"
+strategy = "trader"
+capital = 1000
+description = "Работает быстро и не задаёт вопросов."

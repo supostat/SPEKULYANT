@@ -1,0 +1,18 @@
+name = "Холодильник импортный"
+short_name = "Холодильник"
+category = "prestige"
+unit = "шт"
+stock = 2
+curve = [
+  { year = 1984, price = 900 },
+  { year = 1986, price = 900 },
+  { year = 1988, price = 950 },
+  { year = 1990, price = 1000 },
+  { year = 1992, price = 400 },
+  { year = 1994, price = 250 },
+  { year = 1996, price = 200 },
+  { year = 1998, price = 180 },
+  { year = 2000, price = 160 },
+  { year = 2002, price = 150 },
+  { year = 2004, price = 150 },
+]

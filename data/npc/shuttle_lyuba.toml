@@ -1,0 +1,6 @@
+name = "Челночница Люба"
+role = "челночница"
+faction = "traders"
+strategy = "shuttle"
+capital = 700
+description = "Три сумки в каждой руке и ни одной лишней улыбки."

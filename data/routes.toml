@@ -1,0 +1,171 @@
+# Маршруты (§4, решение 15.1): дни в пути и билет в рублях 1984 года.
+# Закрытые города и «по блату» решают сами города; дорожные события
+# встанут на маршруты вместе с событиями эпох.
+
+[[routes]]
+from = "moscow"
+to = "leningrad"
+days = 1
+fare = 15
+
+[[routes]]
+from = "leningrad"
+to = "moscow"
+days = 1
+fare = 15
+
+[[routes]]
+from = "moscow"
+to = "gorky"
+days = 1
+fare = 8
+
+[[routes]]
+from = "gorky"
+to = "moscow"
+days = 1
+fare = 8
+
+[[routes]]
+from = "moscow"
+to = "riga"
+days = 1
+fare = 15
+
+[[routes]]
+from = "riga"
+to = "moscow"
+days = 1
+fare = 15
+
+[[routes]]
+from = "moscow"
+to = "tashkent"
+days = 4
+fare = 60
+
+[[routes]]
+from = "tashkent"
+to = "moscow"
+days = 4
+fare = 60
+
+[[routes]]
+from = "moscow"
+to = "tbilisi"
+days = 3
+fare = 45
+
+[[routes]]
+from = "tbilisi"
+to = "moscow"
+days = 3
+fare = 45
+
+[[routes]]
+from = "moscow"
+to = "berlin"
+days = 2
+fare = 80
+
+[[routes]]
+from = "berlin"
+to = "moscow"
+days = 2
+fare = 80
+
+[[routes]]
+from = "moscow"
+to = "warsaw"
+days = 2
+fare = 50
+
+[[routes]]
+from = "warsaw"
+to = "moscow"
+days = 2
+fare = 50
+
+[[routes]]
+from = "moscow"
+to = "istanbul"
+days = 3
+fare = 150
+
+[[routes]]
+from = "istanbul"
+to = "moscow"
+days = 3
+fare = 150
+
+[[routes]]
+from = "moscow"
+to = "beijing"
+days = 6
+fare = 120
+
+[[routes]]
+from = "beijing"
+to = "moscow"
+days = 6
+fare = 120
+
+[[routes]]
+from = "leningrad"
+to = "riga"
+days = 1
+fare = 12
+
+[[routes]]
+from = "riga"
+to = "leningrad"
+days = 1
+fare = 12
+
+[[routes]]
+from = "leningrad"
+to = "berlin"
+days = 2
+fare = 85
+
+[[routes]]
+from = "berlin"
+to = "leningrad"
+days = 2
+fare = 85
+
+[[routes]]
+from = "warsaw"
+to = "berlin"
+days = 1
+fare = 25
+
+[[routes]]
+from = "berlin"
+to = "warsaw"
+days = 1
+fare = 25
+
+[[routes]]
+from = "tbilisi"
+to = "istanbul"
+days = 2
+fare = 60
+
+[[routes]]
+from = "istanbul"
+to = "tbilisi"
+days = 2
+fare = 60
+
+[[routes]]
+from = "tashkent"
+to = "beijing"
+days = 5
+fare = 90
+
+[[routes]]
+from = "beijing"
+to = "tashkent"
+days = 5
+fare = 90

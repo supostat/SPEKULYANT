@@ -1,0 +1,15 @@
+name = "«Сникерс», блок"
+short_name = "Сникерс"
+category = "sweets"
+unit = "бл"
+stock = 20
+curve = [
+  { year = 1990, price = 20 },
+  { year = 1992, price = 8 },
+  { year = 1994, price = 5 },
+  { year = 1996, price = 4 },
+  { year = 1998, price = 3.5 },
+  { year = 2000, price = 3 },
+  { year = 2002, price = 3 },
+  { year = 2004, price = 3 },
+]

@@ -1,0 +1,6 @@
+name = "Толик-поляк"
+role = "челнок на Варшаву"
+faction = "traders"
+strategy = "shuttle"
+capital = 900
+description = "Говорит по-польски ровно настолько, чтобы торговаться."

@@ -1,0 +1,6 @@
+name = "Пал Палыч"
+role = "инструктор райкома"
+faction = "officials"
+strategy = "official"
+capital = 2000
+description = "Любой вопрос решается, если правильно его задать."

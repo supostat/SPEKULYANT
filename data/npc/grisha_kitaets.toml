@@ -1,0 +1,6 @@
+name = "Гриша Китаец"
+role = "челнок на Пекин"
+faction = "traders"
+strategy = "shuttle"
+capital = 1300
+description = "Везёт из Пекина всё, что влезает в поезд."

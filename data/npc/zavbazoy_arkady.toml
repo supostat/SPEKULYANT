@@ -1,0 +1,6 @@
+name = "Завбазой Аркадий"
+role = "заведующий овощебазой"
+faction = "officials"
+strategy = "official"
+capital = 3000
+description = "На его базе гниёт всё, кроме его благосостояния."
