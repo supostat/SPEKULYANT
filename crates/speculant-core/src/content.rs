@@ -1,7 +1,8 @@
 //! Контент как данные (§10, §14.1): товары, города, маршруты, эпохи, правила толкучки, индекс цен
 //! и курсы, места хранения денег, фракции и правила репутации, биографии, жильё, финалы и правила
 //! жизни, шаблоны NPC, дела — формы, типы, политики, привычки и правила, — события и правила их
-//! розыгрыша, правила зоны и её услуги, исторические узлы и шаблоны генератора песочницы. Формат — TOML, файл на сущность в `data/`, имя файла — идентификатор (решение 15.7).
+//! розыгрыша, правила зоны и её услуги, исторические узлы, шаблоны генератора песочницы и мелодия
+//! заставки. Формат — TOML, файл на сущность в `data/`, имя файла — идентификатор (решение 15.7).
 //! Загрузка проверяет схему и ссылки и возвращает все ошибки сразу, каждая — «файл:строка».
 
 mod biography;
@@ -25,6 +26,7 @@ mod history_template;
 mod housing;
 mod ids;
 mod loader;
+mod melody;
 mod money_place;
 mod npc_template;
 mod policy;
@@ -66,6 +68,7 @@ pub use ids::{
     BiographyId, BusinessFormId, BusinessKindId, CityId, EndingId, EpochId, EventId, FactionId,
     FlagId, GoodId, HabitId, HousingId, MoneyPlaceId, NpcId, TimelineNodeId, ZoneServiceId,
 };
+pub use melody::{Melody, Note, Pitch};
 pub use money_place::{InterestPoint, MoneyPlace};
 pub use npc_template::NpcTemplate;
 pub use policy::{Policy, PolicyOption};
@@ -96,6 +99,8 @@ pub struct Content {
     pub life: LifeRules,
     pub zone: ZoneRules,
     pub history_generator: HistoryGenerator,
+    /// Мелодия заставки для пищалки PC-speaker.
+    pub boot_melody: Melody,
     pub epochs: BTreeMap<EpochId, EpochProfile>,
     pub goods: BTreeMap<GoodId, Good>,
     pub cities: BTreeMap<CityId, City>,

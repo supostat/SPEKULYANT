@@ -5,7 +5,7 @@ use std::path::Path;
 
 use speculant_core::Content;
 use speculant_core::business::Incident;
-use speculant_core::content::{ContentError, ContentFile, EpochId, EventId, GoodId};
+use speculant_core::content::{ContentError, ContentFile, EpochId, EventId, GoodId, Pitch};
 use speculant_core::economy::Real;
 use speculant_core::time::GameDate;
 
@@ -267,4 +267,74 @@ fn every_epoch_of_the_calendar_needs_a_description() {
 fn the_real_data_directory_is_valid() {
     let data = concat!(env!("CARGO_MANIFEST_DIR"), "/../../data");
     Content::load(Path::new(data)).expect("data/ валиден");
+}
+
+#[test]
+fn the_boot_melody_of_the_real_data_plays_as_tones() {
+    let data = concat!(env!("CARGO_MANIFEST_DIR"), "/../../data");
+    let content = Content::load(Path::new(data)).expect("data/ валиден");
+    let tones = content.boot_melody.tones();
+    assert_eq!(
+        tones.first(),
+        Some(&(Pitch::Hertz(659), 300)),
+        "«Коробейники» начинаются с ми второй октавы на две восьмые"
+    );
+    assert_eq!(tones.last(), Some(&(Pitch::Rest, 300)));
+}
+
+/// Минимальный набор с мелодией заставки из текста.
+fn with_melody(text: &str) -> Vec<ContentFile> {
+    let mut files: Vec<ContentFile> = Content::read_files(Path::new(CONTENT_MIN))
+        .expect("набор читается")
+        .into_iter()
+        .filter(|file| file.path != "sound/boot.toml")
+        .collect();
+    files.push(ContentFile::new("sound/boot.toml", text));
+    files
+}
+
+#[test]
+fn a_melody_without_a_beat_notes_or_note_lengths_is_refused_with_its_lines() {
+    let errors = errors_of(with_melody(
+        "beat_ms = 0\nnotes = [\n  { pitch = \"A4\", beats = 1 },\n  { pitch = \"C5\", beats = 0 },\n]\n",
+    ));
+    assert_eq!(
+        errors,
+        vec![
+            "sound/boot.toml:1: beat_ms: больше нуля".to_owned(),
+            "sound/boot.toml:4: нота 2: beats больше нуля".to_owned(),
+        ]
+    );
+    let empty = errors_of(with_melody("beat_ms = 100\nnotes = []\n"));
+    assert_eq!(
+        empty,
+        vec!["sound/boot.toml:2: в мелодии нет ни одной ноты".to_owned()]
+    );
+}
+
+#[test]
+fn a_note_outside_scientific_notation_is_refused() {
+    let errors = errors_of(with_melody(
+        "beat_ms = 100\nnotes = [\n  { pitch = \"H4\", beats = 1 },\n]\n",
+    ));
+    assert!(
+        errors
+            .iter()
+            .any(|error| error.starts_with("sound/boot.toml:3")
+                && error.contains("научной нотацией")),
+        "{errors:#?}"
+    );
+}
+
+#[test]
+fn content_without_a_boot_melody_is_refused() {
+    let files: Vec<ContentFile> = Content::read_files(Path::new(CONTENT_MIN))
+        .expect("набор читается")
+        .into_iter()
+        .filter(|file| file.path != "sound/boot.toml")
+        .collect();
+    assert_eq!(
+        errors_of(files),
+        vec!["sound/boot.toml: нет мелодии заставки".to_owned()]
+    );
 }

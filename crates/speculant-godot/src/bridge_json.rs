@@ -467,6 +467,12 @@ mod tests {
             .find(|biography| biography.biography == "student")
             .expect("студент в данных");
         assert!(student.unlocked, "стартовая биография открыта с начала");
+        assert!(
+            view.boot_melody
+                .first()
+                .is_some_and(|tone| tone.hertz.is_some()),
+            "заставка получает мелодию из вшитых данных"
+        );
         assert!(view.notebook.is_empty() && view.records.ironman.is_empty());
         assert!(!directory.join("saves").exists(), "лобби ничего не пишет");
     }

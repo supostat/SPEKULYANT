@@ -12,6 +12,7 @@ use crate::screen_file::ScreenFile;
 
 const DUMP_TOOL: &str = "res://tools/dump_screen.gd";
 const SCREENSHOT_TOOL: &str = "res://tools/screenshot.gd";
+const CRT_FLAG: &str = "--crt";
 
 /// Рисует экран макета безголово на его фикстуре и возвращает буфер из `.tools/out/<screen>.screen`.
 pub fn dump(screen: &str) -> Result<ScreenFile> {
@@ -22,20 +23,22 @@ pub fn dump(screen: &str) -> Result<ScreenFile> {
 /// Рисует экран безголово на снимке `StateView` из файла (без него — на пустом) и возвращает буфер.
 pub fn dump_with(screen: &str, view: Option<&Path>) -> Result<ScreenFile> {
     let output = output_path(screen, "screen")?;
-    run_screen_tool(DUMP_TOOL, true, screen, &output, view)?;
+    run_screen_tool(DUMP_TOOL, true, screen, &output, view, None)?;
     ScreenFile::parse(&fs::read_to_string(&output)?)
 }
 
-/// Рисует экран макета на его фикстуре в окне и сохраняет PNG в `.tools/out/<screen>.png`.
-pub fn screenshot(screen: &str) -> Result<PathBuf> {
+/// Рисует экран макета на его фикстуре в окне и сохраняет PNG в `.tools/out/<screen>.png`, с CRT —
+/// в `.tools/out/<screen>.crt.png`.
+pub fn screenshot(screen: &str, crt: bool) -> Result<PathBuf> {
     let fixture = etalon_fixture(screen)?;
-    screenshot_with(screen, fixture.as_deref())
+    screenshot_with(screen, fixture.as_deref(), crt)
 }
 
-/// Рисует экран в окне на снимке `StateView` из файла и сохраняет PNG в `.tools/out/<screen>.png`.
-pub fn screenshot_with(screen: &str, view: Option<&Path>) -> Result<PathBuf> {
-    let output = output_path(screen, "png")?;
-    run_screen_tool(SCREENSHOT_TOOL, false, screen, &output, view)?;
+/// Рисует экран в окне на снимке `StateView` из файла и сохраняет PNG в `.tools/out/`.
+pub fn screenshot_with(screen: &str, view: Option<&Path>, crt: bool) -> Result<PathBuf> {
+    let output = output_path(screen, if crt { "crt.png" } else { "png" })?;
+    let extra = crt.then_some(CRT_FLAG);
+    run_screen_tool(SCREENSHOT_TOOL, false, screen, &output, view, extra)?;
     Ok(output)
 }
 
@@ -58,13 +61,15 @@ fn etalon_fixture(screen: &str) -> Result<Option<PathBuf>> {
     Ok(fixture.is_file().then_some(fixture))
 }
 
-/// Аргументы инструмента после `--`: имя экрана, выходной файл и снимок `StateView`, если он есть.
+/// Аргументы инструмента после `--`: имя экрана, выходной файл, снимок `StateView`, если он есть, и
+/// флаг инструмента, если он нужен.
 fn run_screen_tool(
     tool: &str,
     headless: bool,
     screen: &str,
     output: &Path,
     view: Option<&Path>,
+    flag: Option<&str>,
 ) -> Result<()> {
     let binary = godot_pin::fetch()?;
     build_godot::build_host_debug()?;
@@ -85,5 +90,6 @@ fn run_screen_tool(
         output.as_str(),
     ]);
     arguments.extend(fixture.as_deref());
+    arguments.extend(flag);
     run_godot(&binary, &arguments)
 }

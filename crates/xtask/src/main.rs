@@ -20,6 +20,7 @@ mod screen_check;
 mod screen_file;
 mod screen_runner;
 mod screen_smoke;
+mod sound_smoke;
 mod tools_manifest;
 mod ui_flow_smoke;
 
@@ -42,11 +43,14 @@ const USAGE: &str = "\
   screen-check <экран>      буфер экрана Godot против design/etalons/<экран>.screen
   screen-smoke <экран|all>  экран без макета рисуется на снимке ядра, строка F-клавиш на месте;
                             all — все экраны без макета
-  screenshot <экран>        PNG экрана в .tools/out/ (оконный запуск): экран макета — на его
-                            фикстуре, экран без макета — на снимке настоящего ядра
+  screenshot <экран> [--crt] PNG экрана в .tools/out/ (оконный запуск): экран макета — на его
+                            фикстуре, экран без макета — на снимке настоящего ядра; --crt —
+                            с CRT-эффектом поверх, в <экран>.crt.png
   ui-flow-smoke             безголовый клавиатурный сценарий: заставка → меню → новая жизнь →
                             рынок, событие, поездка → дела, связи, пейджер → сохранение →
                             главное меню → загрузка → выход
+  sound-smoke               безголово: пищалка PC-speaker выдаёт ноту заданной частоты, мелодия
+                            заставки приходит из данных через мост
   deps-check                ядро speculant-core без Godot; пин gdext согласован с tools.toml
   new-event <эпоха> <имя>   заготовка события в data/events/<эпоха>/<имя>.toml
   docs-check [--all-decided] маркеры DECIDED-15-N совпадают в документе и дизайн-книге
@@ -80,12 +84,18 @@ fn main() -> Result<()> {
         "screen-check" => screen_check::run(single_argument(flags, "screen-check <экран>")?),
         "screen-smoke" => screen_smoke::run(single_argument(flags, "screen-smoke <экран>")?),
         "ui-flow-smoke" => ui_flow_smoke::run(),
+        "sound-smoke" => sound_smoke::run(),
         "screenshot" => {
-            let screen = single_argument(flags, "screenshot <экран>")?;
+            let (screen, crt) = match flags {
+                [screen] => (screen.as_str(), false),
+                [screen, flag] if flag == "--crt" => (screen.as_str(), true),
+                _ => bail!("использование: cargo xtask screenshot <экран> [--crt]"),
+            };
             let png = if etalons::SCREENS.contains(&screen) {
-                screen_runner::screenshot(screen)?
+                screen_runner::screenshot(screen, crt)?
             } else {
-                screen_runner::screenshot_with(screen, Some(&screen_smoke::live_view(screen)?))?
+                let view = screen_smoke::live_view(screen)?;
+                screen_runner::screenshot_with(screen, Some(&view), crt)?
             };
             println!("screenshot: {}", png.display());
             Ok(())

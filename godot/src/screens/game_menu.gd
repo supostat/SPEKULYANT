@@ -2,12 +2,12 @@ class_name GameMenuScreen
 extends RefCounted
 ## Меню выхода в жизни (F10 или Esc на рынке и в зоне; docs/SPEKULYANT.md §11.2, §11.4): вернуться,
 ## сохранить и загрузить — только в свободном режиме, ironman сохраняется сам, — записная книжка,
-## добровольный уход — эмиграция или покой, с подтверждением, — и выход из игры.
+## настройки, добровольный уход — эмиграция или покой, с подтверждением, — и выход из игры.
 
 const TEXT := 7
 const BACKGROUND := 1
 const FRAME := 15
-const WINDOW := Rect2i(22, 4, 36, 15)
+const WINDOW := Rect2i(22, 4, 36, 16)
 const TITLE := "Выход"
 const MENU_COLUMN := 24
 const MENU_ROW := 6
@@ -80,6 +80,8 @@ func handle(action: Dictionary, view: Dictionary) -> Dictionary:
 			return {"push": "slots", "with": {"mode": SlotsScreen.LOAD}}
 		"notebook":
 			return {"push": "notebook"}
+		"settings":
+			return {"push": "settings"}
 		"retire":
 			_ending = item["ending"]
 			_retire = ConfirmDialog.new(TITLE, RETIRE_QUESTION % item["label"], RETIRE_DETAIL, RETIRE_VERB)
@@ -107,6 +109,7 @@ func _items(view: Dictionary) -> Array:
 		{"id": "save", "label": "Сохранить", "enabled": free},
 		{"id": "load", "label": "Загрузить", "enabled": free},
 		{"id": "notebook", "label": "Записная книжка", "enabled": true},
+		{"id": "settings", "label": "Настройки", "enabled": true},
 	]
 	for exit: Dictionary in view["exits"]:
 		items.append({"id": "retire", "ending": exit["ending"], "label": exit["title"], "enabled": exit["available"]})

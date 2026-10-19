@@ -1,14 +1,18 @@
 extends SceneTree
 ## Безголовый клавиатурный сценарий для `cargo xtask ui-flow-smoke`: настоящее ядро через мост и
-## роутер экранов в чистом каталоге игрока — заставка → главное меню → новая жизнь (студент,
-## свободный режим, сид 7) → рынок: F2 покупка в окне количества, пробел пауза и снова ход, событие
-## → выбор → исход, F4 поездка → прибытие; дела, связи и пейджер — время в них стоит; меню выхода →
-## сохранение в слот → «Abort, Retry, Fail?» → F в главное меню → загрузка слота → снова рынок того
-## же дня; ironman-жизнь ложится в свой слот, «Продолжить» её возвращает, новая ironman-жизнь
-## поверх спрашивает подтверждения; из главного меню A — выход из игры. Клавиши проходят через
-## Keymap, как в игре; после шагов сверяется буфер экрана.
+## роутер экранов в чистом каталоге игрока — заставка под мелодию «Коробейников» → главное меню →
+## настройки: CRT включается и выключается → новая жизнь (студент, свободный режим, сид 7) → рынок:
+## продажа того, чего нет, — бип отказа, F2 покупка в окне количества, пробел пауза и снова ход,
+## событие с бипом → выбор → исход, F4 поездка → прибытие; дела, связи и пейджер — время в них
+## стоит; меню выхода → сохранение в слот → «Abort, Retry, Fail?» → F в главное меню → загрузка
+## слота → снова рынок того же дня; ironman-жизнь ложится в свой слот, «Продолжить» её возвращает,
+## новая ironman-жизнь поверх спрашивает подтверждения; из главного меню A — выход из игры. Клавиши
+## проходят через Keymap, как в игре; после шагов сверяется буфер экрана.
 
 const SAVES_ROOT := "user://ui_flow"
+const SETTINGS_FILE := "user://ui_flow/settings.cfg"
+## Первая нота «Коробейников» — ми второй октавы.
+const FIRST_MELODY_HERTZ := 659
 const BIOGRAPHY := "student"
 const SEED_KEY := KEY_7
 const DAY_MILLISECONDS := 1800
@@ -20,25 +24,33 @@ const DIGIT_KEYS := [KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY
 const CONTINUE_ITEM := 1
 const NEW_LIFE_ITEM := 2
 const LOAD_ITEM := 3
+const SETTINGS_ITEM := 6
 const SAVE_ITEM := 2
 ## Пункты меню выхода до добровольных уходов и после них.
-const ITEMS_BEFORE_EXITS := 4
+const ITEMS_BEFORE_EXITS := 5
 const ITEMS_AFTER_EXITS := 1
 
 var _screen: TextScreen
 var _router: Router
 var _saves := Saves.new(SAVES_ROOT)
 var _quit_asked := false
+var _cues: Array[String] = []
+var _melody: Array = []
 
 
 func _initialize() -> void:
 	_clear_saves()
 	_screen = TextScreen.new()
-	_router = Router.new(SpeculantGame.new(), _screen, _saves)
+	_router = Router.new(SpeculantGame.new(), _screen, _saves, Settings.new(SETTINGS_FILE))
 	_router.quit_requested.connect(func() -> void: _quit_asked = true)
+	_router.sound_cue.connect(func(cue_name: String) -> void: _cues.append(cue_name))
+	_router.melody.connect(func(tones: Array) -> void: _melody = tones)
+	_router.start()
 	var passed := (
 		_boot_and_menu()
+		and _settings()
 		and _new_life(true)
+		and _refused_sale()
 		and _buy()
 		and _pause()
 		and _event()
@@ -55,9 +67,36 @@ func _initialize() -> void:
 func _boot_and_menu() -> bool:
 	if _router.top_name() != "boot" or not _shows("SPEKUL.EXE"):
 		return _fail("сеанс не начался с заставки:\n" + _buffer())
+	if _melody.is_empty() or int(_melody[0]["hertz"]) != FIRST_MELODY_HERTZ:
+		return _fail("заставка не отдала пищалке мелодию: %s" % [_melody])
 	_press(KEY_ENTER)
 	if _router.top_name() != "main_menu" or not _shows(" Главное меню "):
 		return _fail("любая клавиша не открыла главное меню:\n" + _buffer())
+	return true
+
+
+## Цифра 6 — настройки; Enter включает CRT и выключает его снова, Esc — назад в меню.
+func _settings() -> bool:
+	_press(DIGIT_KEYS[SETTINGS_ITEM])
+	if _router.top_name() != "settings" or not _shows(" Настройки "):
+		return _fail("цифра %d не открыла настройки:\n%s" % [SETTINGS_ITEM, _buffer()])
+	for expected: bool in [true, false]:
+		_press(KEY_ENTER)
+		if _router.view()["settings"][Settings.CRT] != expected or Settings.new(SETTINGS_FILE).enabled(Settings.CRT) != expected:
+			return _fail("Enter не переключил CRT в %s:\n%s" % [expected, _buffer()])
+	_press(KEY_ESCAPE)
+	if _router.top_name() != "main_menu":
+		return _fail("Esc из настроек не вернул меню:\n" + _buffer())
+	return true
+
+
+## F3 на товаре, которого нет в кармане, Enter — ядро отказывает, пищалка даёт бип отказа, Esc.
+func _refused_sale() -> bool:
+	_press(KEY_F3)
+	_press(KEY_ENTER)
+	if _cues.back() != Speaker.ERROR or not _shows("Количество:"):
+		return _fail("продажа без товара не дала бип отказа: %s\n%s" % [_cues, _buffer()])
+	_press(KEY_ESCAPE)
 	return true
 
 
@@ -122,6 +161,8 @@ func _event() -> bool:
 		_router.tick(DAY_MILLISECONDS)
 	if _router.top_name() != "event" or not _shows("СОБЫТИЕ") or not _shows("Время остановлено"):
 		return _fail("за %d дней событие не пришло:\n%s" % [LONGEST_WAIT_STEPS, _buffer()])
+	if _cues.back() != Speaker.EVENT:
+		return _fail("событие пришло без бипа: %s" % [_cues])
 	if not _settle_event():
 		return false
 	if _router.top_name() != "market":
@@ -292,12 +333,14 @@ func _clear_saves() -> void:
 		DirAccess.remove_absolute(folder.path_join(slot + "." + Saves.EXTENSION))
 	if _saves.has_past_lives():
 		DirAccess.remove_absolute(SAVES_ROOT.path_join(Saves.META_FILE))
+	if FileAccess.file_exists(SETTINGS_FILE):
+		DirAccess.remove_absolute(SETTINGS_FILE)
 
 
 func _finish(passed: bool) -> void:
 	_screen.free()
 	if passed:
-		print("ui_flow: заставка → меню → новая жизнь → рынок → покупка → пауза → событие → поездка → дела, связи, пейджер → сохранение → меню → загрузка → ironman → выход")
+		print("ui_flow: заставка с мелодией → меню → настройки → новая жизнь → рынок → бип отказа → покупка → пауза → событие → поездка → дела, связи, пейджер → сохранение → меню → загрузка → ironman → выход")
 		quit()
 
 

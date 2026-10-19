@@ -3,9 +3,10 @@
 use std::path::Path;
 use std::sync::Arc;
 
+use speculant_core::save::Storage;
 use speculant_core::time::FastForward;
-use speculant_core::view::Screen;
-use speculant_core::{Command, CommandError, Content, Game, LifeSettings, StateView};
+use speculant_core::view::{Screen, ToneView};
+use speculant_core::{Command, CommandError, Content, Game, LifeSettings, Lobby, StateView};
 
 const MARKET_FIXTURE: &str = include_str!("../../../design/etalons/market.view.json");
 /// Фикстуры макетов дизайн-книги и экраны, которые они показывают.
@@ -210,4 +211,29 @@ fn command_errors_serialize_with_their_kind() {
     let json = serde_json::to_value(CommandError::InvalidSpeed { speed: 9, max: 3 })
         .expect("ошибка сериализуется");
     assert_eq!(json["error"], "invalid_speed");
+}
+
+#[test]
+fn the_lobby_plays_the_boot_melody_with_its_pauses() {
+    let empty =
+        std::path::PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join("view-lobby-without-lives");
+    let melody = Lobby::open(content(), &Storage::new(empty))
+        .expect("каталог без прошлых жизней")
+        .view()
+        .boot_melody;
+    assert_eq!(
+        melody.first(),
+        Some(&ToneView {
+            hertz: Some(659),
+            milliseconds: 300,
+        })
+    );
+    assert_eq!(
+        melody.last(),
+        Some(&ToneView {
+            hertz: None,
+            milliseconds: 300,
+        }),
+        "мелодия кончается паузой — без частоты"
+    );
 }

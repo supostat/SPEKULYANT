@@ -1,8 +1,8 @@
 class_name MainMenuScreen
 extends RefCounted
 ## Главное меню лобби (§11.4, §13.3 п. 11): продолжить ironman-жизнь из её слота, начать новую,
-## загрузить жизнь свободного режима, открыть записную книжку и рекорды или выйти в DOS. Пункты,
-## которым нечего открыть, тусклые.
+## загрузить жизнь свободного режима, открыть записную книжку, рекорды и настройки или выйти в DOS.
+## Пункты, которым нечего открыть, тусклые.
 
 const TEXT := 7
 const BACKGROUND := 1
@@ -13,13 +13,13 @@ const TITLE_BACKGROUND := 4
 const VERSION_LINE := " версия 1.0 "
 const VERSION_FOREGROUND := 0
 const VERSION_BACKGROUND := 3
-const MENU_BOX := Rect2i(24, 6, 32, 12)
+const MENU_BOX := Rect2i(24, 6, 32, 13)
 const MENU_TITLE := "Главное меню"
 const MENU_COLUMN := 26
 const MENU_ROW := 8
 const MENU_WIDTH := 28
 const HINT := "↑↓, цифра, Enter"
-const HINT_ROW := 15
+const HINT_ROW := 16
 const HINT_FOREGROUND := 8
 const WARNING_ROW := 20
 const WARNING_FOREGROUND := 14
@@ -46,6 +46,7 @@ const ITEMS := [
 	["load", "Загрузить"],
 	["notebook", "Записная книжка"],
 	["records", "Рекорды"],
+	["settings", "Настройки"],
 	["quit", "Выход в DOS"],
 ]
 
@@ -98,6 +99,8 @@ func handle(action: Dictionary, view: Dictionary) -> Dictionary:
 			return {"push": "notebook"}
 		"records":
 			return {"push": "records"}
+		"settings":
+			return {"push": "settings"}
 	return {"push": "quit"}
 
 

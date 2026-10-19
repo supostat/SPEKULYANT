@@ -11,11 +11,18 @@ extends RefCounted
 ##   {"pop": true} — назад; {"home": true} — назад до экрана режима; {"redraw": true} — перерисовать;
 ##   {"new_life": {"biography", "ironman", "seed"}} или {"resume": слот} — начать жизнь;
 ##   {"lobby": имя} — в лобби, на экран `имя` поверх главного меню (или на само меню);
+##   {"toggle": ключ} — переключить настройку игрока;
 ##   {"quit": true} — выйти из игры.
 ## Отказ ядра начать сеанс возвращается верхнему экрану в answered(). Реальное время двигает мир
-## только под экранами, где оно идёт, — рынок, поездка, зона; в остальных оно стоит.
+## только под экранами, где оно идёт, — рынок, поездка, зона; в остальных оно стоит. Пищалке роутер
+## отдаёт мелодию заставки и бипы: событие легло поверх стека, на пейджер пришло новое сообщение,
+## ядро отказало.
 
 signal quit_requested
+## Бип интерфейса — Speaker.EVENT, Speaker.PAGER или Speaker.ERROR.
+signal sound_cue(cue_name: String)
+## Напев — мелодия заставки тонами снимка лобби.
+signal melody(tones: Array)
 
 const BOOT_SCREEN := "boot"
 const MENU_SCREEN := "main_menu"
@@ -30,20 +37,33 @@ const QUIT_COMMAND := {"command": "quit"}
 var _game: SpeculantGame
 var _screen: TextScreen
 var _saves: Saves
+var _settings: Settings
 var _stack: Array = []
 var _view: Dictionary = {}
 var _in_life := false
+## Сообщения пейджера, которые уже прозвучали.
+var _heard: Array = []
 
 
-func _init(game: SpeculantGame, screen: TextScreen, saves: Saves) -> void:
+func _init(game: SpeculantGame, screen: TextScreen, saves: Saves, settings: Settings) -> void:
 	_game = game
 	_screen = screen
 	_saves = saves
-	_stack.append(ScreenRegistry.create(BOOT_SCREEN))
+	_settings = settings
+
+
+## Сеанс открывается заставкой в лобби под мелодию; если каталог игрока не открылся — под бип отказа.
+## Сигналы подключаются до старта.
+func start() -> void:
+	_stack = [ScreenRegistry.create(BOOT_SCREEN)]
 	var answer := _start(_saves.lobby())
 	if answer.has("error"):
 		_stack.back().answered(answer)
+		sound_cue.emit(Speaker.ERROR)
+		refresh()
+		return
 	refresh()
+	melody.emit(_view["boot_melody"])
 
 
 ## Снимок ядра на экране — `StateView` жизни или `LobbyView` лобби — со слотами каталога.
@@ -73,10 +93,16 @@ func press(action: Dictionary) -> void:
 ## Свежий снимок ядра: в жизни стек встаёт на экран режима, событие ложится поверх стека или
 ## уходит с него, верхний экран сверяется с миром, и всё перерисовывается.
 func refresh() -> void:
+	_refresh(true)
+
+
+func _refresh(announce_pager: bool) -> void:
 	_view = JSON.parse_string(_game.view_json())
 	_saves.annotate(_view)
+	_settings.annotate(_view)
 	if _in_life:
 		_follow_mode()
+		_hear_pager(announce_pager)
 	var intent: Dictionary = _stack.back().follow(_view)
 	if intent.is_empty():
 		_draw()
@@ -96,13 +122,25 @@ func _follow_mode() -> void:
 	var event_on_top := top_name() == EVENT_SCREEN
 	if _view["pending_event"] != null and not event_on_top:
 		_stack.append(ScreenRegistry.create(EVENT_SCREEN))
+		sound_cue.emit(Speaker.EVENT)
 	elif _view["pending_event"] == null and event_on_top:
 		_stack.pop_back()
+
+
+## Новое последнее сообщение ленты — бип пейджера; первый снимок сеанса только запоминает ленту.
+func _hear_pager(announce: bool) -> void:
+	var pager: Variant = _view["pager"]
+	var feed: Array = [] if pager == null else pager["messages"]
+	if announce and not feed.is_empty() and not _heard.has(feed.back()):
+		sound_cue.emit(Speaker.PAGER)
+	_heard = feed
 
 
 func _follow(intent: Dictionary) -> void:
 	if intent.has("command"):
 		var answer: Dictionary = JSON.parse_string(_game.apply(JSON.stringify(intent["command"])))
+		if answer.has("error"):
+			sound_cue.emit(Speaker.ERROR)
 		_stack.back().answered(answer)
 		refresh()
 	elif intent.has("push"):
@@ -126,6 +164,9 @@ func _follow(intent: Dictionary) -> void:
 		_begin_life(_saves.resume(intent["resume"]))
 	elif intent.has("lobby"):
 		_open_lobby(intent["lobby"])
+	elif intent.has("toggle"):
+		_settings.toggle(intent["toggle"])
+		refresh()
 	elif intent.has("quit"):
 		_leave_life()
 		quit_requested.emit()
@@ -142,20 +183,18 @@ func _created(screen_name: String, arguments: Dictionary) -> RefCounted:
 func _begin_life(start_json: String) -> void:
 	var answer := _start(start_json)
 	if answer.has("error"):
-		_stack.back().answered(answer)
-		_draw()
+		_refuse(answer)
 		return
 	_in_life = true
 	_stack.clear()
-	refresh()
+	_refresh(false)
 
 
 func _open_lobby(screen_name: String) -> void:
 	_leave_life()
 	var answer := _start(_saves.lobby())
 	if answer.has("error"):
-		_stack.back().answered(answer)
-		_draw()
+		_refuse(answer)
 		return
 	_in_life = false
 	_stack = [ScreenRegistry.create(MENU_SCREEN)]
@@ -168,6 +207,13 @@ func _open_lobby(screen_name: String) -> void:
 func _leave_life() -> void:
 	if _in_life:
 		_game.apply(JSON.stringify(QUIT_COMMAND))
+
+
+## Ядро не открыло сеанс: отказ — экрану, откуда его открывали, и бип.
+func _refuse(answer: Dictionary) -> void:
+	sound_cue.emit(Speaker.ERROR)
+	_stack.back().answered(answer)
+	_draw()
 
 
 func _start(start_json: String) -> Dictionary:

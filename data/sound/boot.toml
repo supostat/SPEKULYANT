@@ -1,0 +1,29 @@
+# Мелодия заставки (§13.1 п. 5, §13.2): пищалка PC-speaker играет одним голосом, нота за нотой.
+# «Коробейники» — песня о бродячих торговцах на стихи Некрасова (1861), народный напев и
+# общественное достояние; на PC-speaker её помнит каждый, кто видел «Тетрис» 1984 года.
+#
+# pitch — нота научной нотацией в октавах 1–8 («E5», «F#4», «Bb3») или «rest» — пауза;
+# beats — длина ноты в долях; одна доля длится beat_ms миллисекунд. Здесь доля — восьмая.
+beat_ms = 150
+notes = [
+  { pitch = "E5", beats = 2 },
+  { pitch = "B4", beats = 1 },
+  { pitch = "C5", beats = 1 },
+  { pitch = "D5", beats = 2 },
+  { pitch = "C5", beats = 1 },
+  { pitch = "B4", beats = 1 },
+  { pitch = "A4", beats = 2 },
+  { pitch = "A4", beats = 1 },
+  { pitch = "C5", beats = 1 },
+  { pitch = "E5", beats = 2 },
+  { pitch = "D5", beats = 1 },
+  { pitch = "C5", beats = 1 },
+  { pitch = "B4", beats = 3 },
+  { pitch = "C5", beats = 1 },
+  { pitch = "D5", beats = 2 },
+  { pitch = "E5", beats = 2 },
+  { pitch = "C5", beats = 2 },
+  { pitch = "A4", beats = 2 },
+  { pitch = "A4", beats = 2 },
+  { pitch = "rest", beats = 2 },
+]

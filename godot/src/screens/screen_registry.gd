@@ -11,6 +11,7 @@ const SCREENS := {
 	"notebook": preload("res://src/screens/notebook.gd"),
 	"quit": preload("res://src/screens/quit.gd"),
 	"help": preload("res://src/screens/help.gd"),
+	"settings": preload("res://src/screens/settings.gd"),
 	"market": preload("res://src/screens/market.gd"),
 	"event": preload("res://src/screens/event.gd"),
 	"travel": preload("res://src/screens/travel.gd"),

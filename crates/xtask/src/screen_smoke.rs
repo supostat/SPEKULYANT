@@ -12,8 +12,9 @@ use crate::screen_file::{COLUMNS, ROWS, ScreenFile};
 use crate::screen_runner;
 
 /// Все экраны без макета и снимок, на котором их рисовать.
-const SCREENS: [(&str, Snapshot); 14] = [
+const SCREENS: [(&str, Snapshot); 15] = [
     ("main_menu", Snapshot::Lobby),
+    ("settings", Snapshot::Lobby),
     ("new_life", Snapshot::Lobby),
     ("records", Snapshot::Lobby),
     ("notebook", Snapshot::Lobby),

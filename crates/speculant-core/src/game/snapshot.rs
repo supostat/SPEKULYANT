@@ -8,7 +8,7 @@ mod zone;
 use std::cmp::Ordering;
 
 use super::Game;
-use crate::content::Content;
+use crate::content::{Content, Pitch};
 use crate::economy::{Currency, MoneyRules};
 use crate::meta::Meta;
 use crate::npc::Rival;
@@ -18,7 +18,8 @@ use crate::travel::Access;
 use crate::view::{
     ChoiceView, ContactView, DestinationView, EventView, FactionView, HeaderView, JourneyView,
     LevelView, LobbyView, MarketRowView, MarketView, MoneyPlaceView, MoneyView, OutcomeView,
-    PagerMessageView, PagerView, PocketItemView, PocketView, StateView, TimeView, TravelView,
+    PagerMessageView, PagerView, PocketItemView, PocketView, StateView, TimeView, ToneView,
+    TravelView,
 };
 
 const CASH_LABEL: &str = "Наличные";
@@ -99,12 +100,25 @@ pub(super) fn snapshot(game: &Game) -> StateView {
     }
 }
 
-/// Лобби: биографии, записная книжка и рекорды зависят только от данных и метапрогрессии.
+/// Лобби: биографии, записная книжка и рекорды зависят только от данных и метапрогрессии, мелодия
+/// заставки — от данных.
 pub(super) fn lobby(content: &Content, meta: &Meta) -> LobbyView {
     LobbyView {
         biographies: life::biographies(content, meta),
         notebook: meta::notebook(content, meta),
         records: meta::records(content, meta),
+        boot_melody: content
+            .boot_melody
+            .tones()
+            .into_iter()
+            .map(|(pitch, milliseconds)| ToneView {
+                hertz: match pitch {
+                    Pitch::Rest => None,
+                    Pitch::Hertz(hertz) => Some(hertz),
+                },
+                milliseconds,
+            })
+            .collect(),
     }
 }
 

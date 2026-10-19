@@ -8,7 +8,7 @@ use std::sync::Arc;
 use speculant_core::content::{Content, EventId};
 use speculant_core::save::Storage;
 use speculant_core::time::GameDate;
-use speculant_core::view::{NotebookEntryView, RecordView, StateView};
+use speculant_core::view::{NotebookEntryView, RecordView, StateView, ToneView};
 use speculant_core::{Command, CommandError, Game, LifeSettings, Lobby};
 
 const META: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/meta");
@@ -217,6 +217,14 @@ fn the_lobby_shows_what_past_lives_left_in_the_directory() {
         "закрытая — с условием"
     );
     assert!(empty.notebook.is_empty() && empty.records.free.is_empty());
+    assert_eq!(
+        empty.boot_melody,
+        [ToneView {
+            hertz: Some(440),
+            milliseconds: 100,
+        }],
+        "мелодия заставки фикстуры — одна ля"
+    );
 
     let mut life =
         Game::open(&student(7), Arc::clone(&content), storage.clone()).expect("жизнь начинается");

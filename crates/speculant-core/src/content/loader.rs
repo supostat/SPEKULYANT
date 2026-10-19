@@ -8,7 +8,7 @@ use super::{
     Biography, BiographyId, BusinessForm, BusinessFormId, BusinessKind, BusinessKindId, City,
     CityId, Content, ContentError, ContentFile, Ending, EndingId, EpochId, EpochProfile, Event,
     EventId, Faction, FactionId, Good, GoodId, Habit, HabitId, HistoryNode, HistoryTemplate,
-    Housing, HousingId, MoneyPlace, MoneyPlaceId, NpcId, NpcTemplate, Policy, Route,
+    Housing, HousingId, Melody, MoneyPlace, MoneyPlaceId, NpcId, NpcTemplate, Policy, Route,
     TimelineNodeId, ZoneService, ZoneServiceId,
 };
 use crate::business::{BusinessRules, PolicyKind};
@@ -33,6 +33,7 @@ const BUSINESS_RULES_FILE: &str = "business/rules.toml";
 const LIFE_FILE: &str = "life.toml";
 const ZONE_RULES_FILE: &str = "zone/rules.toml";
 const HISTORY_GENERATOR_FILE: &str = "history/generator.toml";
+const BOOT_MELODY_FILE: &str = "sound/boot.toml";
 const TOML_EXTENSION: &str = ".toml";
 
 /// Сущность, прочитанная из файла: идентификатор из имени файла и сам файл для мест ошибок.
@@ -55,6 +56,7 @@ pub(super) struct Parsed<'a> {
     pub life: Option<(&'a ContentFile, LifeRules)>,
     pub zone: Option<(&'a ContentFile, ZoneRules)>,
     pub history_generator: Option<(&'a ContentFile, HistoryGenerator)>,
+    pub boot_melody: Option<(&'a ContentFile, Melody)>,
     pub epochs: Vec<Entry<'a, EpochProfile>>,
     pub goods: Vec<Entry<'a, Good>>,
     pub cities: Vec<Entry<'a, City>>,
@@ -148,6 +150,13 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
             "нет правил генератора песочницы",
         ));
     }
+    if parsed.boot_melody.is_none() {
+        errors.push(ContentError::new(
+            BOOT_MELODY_FILE,
+            None,
+            "нет мелодии заставки",
+        ));
+    }
     let mut events = BTreeMap::new();
     for entry in &parsed.events {
         if events
@@ -175,6 +184,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         Some((_, life)),
         Some((_, zone)),
         Some((_, history_generator)),
+        Some((_, boot_melody)),
     ) = (
         parsed.market,
         parsed.money,
@@ -185,6 +195,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         parsed.life,
         parsed.zone,
         parsed.history_generator,
+        parsed.boot_melody,
     )
     else {
         unreachable!("без любого из файлов правил загрузка вернула ошибку выше");
@@ -200,6 +211,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         life,
         zone,
         history_generator,
+        boot_melody,
         epochs: keyed(&parsed.epochs, EpochId::new),
         goods: keyed(&parsed.goods, GoodId::new),
         cities: keyed(&parsed.cities, CityId::new),
@@ -333,10 +345,15 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         }
         ["zone", "services", name] => push_entry(file, name, &mut parsed.zone_services, errors),
         ["zone", "events", name] => push_event(file, name, None, parsed, errors),
+        ["sound", "boot.toml"] => {
+            if let Some(melody) = parse::<Melody>(file, errors) {
+                parsed.boot_melody = Some((file, melody));
+            }
+        }
         _ => errors.push(ContentError::new(
             &file.path,
             None,
-            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, {LIFE_FILE}, housing/, endings/, epochs/, biographies/, npc/, events/<эпоха>/, {ZONE_RULES_FILE}, zone/services/, zone/events/, {HISTORY_GENERATOR_FILE}, history/, history/post2004/, balance.toml)"),
+            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, {LIFE_FILE}, housing/, endings/, epochs/, biographies/, npc/, events/<эпоха>/, {ZONE_RULES_FILE}, zone/services/, zone/events/, {HISTORY_GENERATOR_FILE}, history/, history/post2004/, {BOOT_MELODY_FILE}, balance.toml)"),
         )),
     }
 }

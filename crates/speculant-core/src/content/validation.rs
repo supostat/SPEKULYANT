@@ -3,6 +3,7 @@
 mod business;
 mod history;
 mod life;
+mod sound;
 mod zone;
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -176,6 +177,7 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
     business::validate(parsed, &known, errors);
     life::validate(parsed, &known, errors);
     zone::validate(parsed, &known, errors);
+    sound::validate(parsed, errors);
     history::validate(parsed, &known, time, errors);
     for entry in &parsed.epochs {
         let mut report = Report {

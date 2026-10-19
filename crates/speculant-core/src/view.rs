@@ -19,6 +19,7 @@ mod records;
 mod screen;
 mod summary;
 mod time;
+mod tone;
 mod travel;
 mod zone;
 
@@ -43,6 +44,7 @@ pub use records::{RecordView, RecordsView};
 pub use screen::Screen;
 pub use summary::{LifeSummaryView, SummaryLineView};
 pub use time::TimeView;
+pub use tone::ToneView;
 pub use travel::{DestinationView, JourneyView, TravelView};
 pub use zone::{ZoneOfferView, ZoneServiceView, ZoneView};
 
