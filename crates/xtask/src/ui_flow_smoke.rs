@@ -1,0 +1,24 @@
+use anyhow::Result;
+
+use crate::build_godot;
+use crate::godot_check::{import_project, run_godot};
+use crate::godot_pin;
+
+const FLOW_TOOL: &str = "res://tools/ui_flow.gd";
+
+/// `cargo xtask ui-flow-smoke`: собирает мост и безголово гоняет `godot/tools/ui_flow.gd` —
+/// клавиатурный сценарий рынок → покупка → пауза → событие → исход → поездка → прибытие на
+/// настоящем ядре со сверкой буфера экрана после каждого шага. Любой провал — строка `ERROR:`.
+pub fn run() -> Result<()> {
+    let binary = godot_pin::fetch()?;
+    build_godot::build_host_debug()?;
+    import_project(&binary)?;
+    run_godot(
+        &binary,
+        &["--headless", "--path", "godot", "--script", FLOW_TOOL],
+    )?;
+    println!(
+        "ui-flow-smoke: рынок, покупка, пауза, событие, исход, поездка и прибытие с клавиатуры"
+    );
+    Ok(())
+}

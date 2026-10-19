@@ -19,7 +19,9 @@ mod project_root;
 mod screen_check;
 mod screen_file;
 mod screen_runner;
+mod screen_smoke;
 mod tools_manifest;
+mod ui_flow_smoke;
 
 use anyhow::{Result, bail};
 
@@ -38,7 +40,10 @@ const USAGE: &str = "\
   charset-check             строки godot/src/**/*.gd и data/** только из глифов шрифта
   etalons [--check]         снять эталоны шести макетов и палитру из дизайн-книги (Boa)
   screen-check <экран>      буфер экрана Godot против design/etalons/<экран>.screen
+  screen-smoke <экран>      экран без макета рисуется на снимке ядра, строка F-клавиш на месте
   screenshot <экран>        PNG экрана в .tools/out/ (оконный запуск)
+  ui-flow-smoke             безголовый клавиатурный сценарий: рынок → покупка → пауза →
+                            событие → исход → поездка → прибытие
   deps-check                ядро speculant-core без Godot; пин gdext согласован с tools.toml
   new-event <эпоха> <имя>   заготовка события в data/events/<эпоха>/<имя>.toml
   docs-check [--all-decided] маркеры DECIDED-15-N совпадают в документе и дизайн-книге
@@ -70,6 +75,8 @@ fn main() -> Result<()> {
         "charset-check" => charset_check::run(),
         "etalons" => etalons::run(flags.iter().any(|flag| flag == "--check")),
         "screen-check" => screen_check::run(single_argument(flags, "screen-check <экран>")?),
+        "screen-smoke" => screen_smoke::run(single_argument(flags, "screen-smoke <экран>")?),
+        "ui-flow-smoke" => ui_flow_smoke::run(),
         "screenshot" => {
             let png = screen_runner::screenshot(single_argument(flags, "screenshot <экран>")?)?;
             println!("screenshot: {}", png.display());

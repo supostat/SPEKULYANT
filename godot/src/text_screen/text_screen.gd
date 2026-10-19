@@ -26,12 +26,15 @@ const FKEY_LABEL_BACKGROUND := 3
 var _characters := PackedStringArray()
 var _foreground := PackedByteArray()
 var _background := PackedByteArray()
+## Номер F-клавиши в каждой колонке строки F-клавиш; 0 — колонка без клавиши или без подписи.
+var _fkey_columns := PackedInt32Array()
 
 
 func _init() -> void:
 	_characters.resize(COLUMNS * ROWS)
 	_foreground.resize(COLUMNS * ROWS)
 	_background.resize(COLUMNS * ROWS)
+	_fkey_columns.resize(COLUMNS)
 	clear(INITIAL_FOREGROUND, INITIAL_BACKGROUND)
 	size = CELL_SIZE * Vector2(COLUMNS, ROWS)
 	scale = ASPECT_CORRECTION
@@ -82,25 +85,46 @@ func shadow(column: int, row: int, width: int, height: int) -> void:
 
 
 ## Строка F-клавиш: номер клавиши белым на чёрном, подпись чёрным на бирюзовом, слот в девять колонок.
+## Слоты запоминаются: по ним мышь находит клавишу.
 func fkeys(keys: Array) -> void:
+	_fkey_columns.fill(0)
 	var column := 0
 	for key_and_label: Array in keys:
 		var key: String = key_and_label[0]
 		var label: String = key_and_label[1]
 		put(column, FKEY_ROW, key, FKEY_KEY_FOREGROUND, FKEY_KEY_BACKGROUND)
-		column += key.length()
 		var label_width := FKEY_SLOT_WIDTH - key.length()
-		put(column, FKEY_ROW, pad_right(label, label_width), FKEY_LABEL_FOREGROUND, FKEY_LABEL_BACKGROUND)
-		column += label_width
+		put(column + key.length(), FKEY_ROW, pad_right(label, label_width), FKEY_LABEL_FOREGROUND, FKEY_LABEL_BACKGROUND)
+		if not label.is_empty():
+			for slot_column in range(column, mini(column + FKEY_SLOT_WIDTH, COLUMNS)):
+				_fkey_columns[slot_column] = int(key)
+		column += FKEY_SLOT_WIDTH
 	if column < COLUMNS:
 		put(column, FKEY_ROW, " ".repeat(COLUMNS - column), FKEY_LABEL_FOREGROUND, FKEY_LABEL_BACKGROUND)
+
+
+## Номер F-клавиши под колонкой строки F-клавиш; 0 — там клавиши нет.
+func fkey_at(column: int) -> int:
+	return _fkey_columns[column] if column >= 0 and column < COLUMNS else 0
+
+
+## Клетка экрана под точкой окна; за пределами экрана — (-1, -1).
+func cell_at(point: Vector2) -> Vector2i:
+	var local := get_global_transform_with_canvas().affine_inverse() * point
+	var cell := Vector2i(floori(local.x / CELL_SIZE.x), floori(local.y / CELL_SIZE.y))
+	return cell if _is_inside(cell.x, cell.y) else Vector2i(-1, -1)
+
+
+## Текст строки экрана — по нему инструменты проверяют, что показано.
+func row_text(row: int) -> String:
+	return "".join(_characters.slice(row * COLUMNS, (row + 1) * COLUMNS))
 
 
 ## Буфер в формате .screen: 25 строк символов, пустая строка, 25 строк hex-цветов символов, пустая строка, 25 строк hex-цветов фона.
 func dump() -> String:
 	var lines := PackedStringArray()
 	for row in ROWS:
-		lines.append("".join(_characters.slice(row * COLUMNS, (row + 1) * COLUMNS)))
+		lines.append(row_text(row))
 	lines.append("")
 	for row in ROWS:
 		lines.append(_hex_row(_foreground, row))

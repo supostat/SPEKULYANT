@@ -39,6 +39,9 @@ jobs:
       - run: cargo xtask etalons --check
       - run: cargo xtask screen-check boot
       - run: cargo xtask screen-check market
+      - run: cargo xtask screen-check event
+      - run: cargo xtask screen-smoke travel
+      - run: cargo xtask ui-flow-smoke
       - run: cargo xtask bridge-smoke --full
       - name: PNG заставки под Xvfb
         if: runner.os == 'Linux'
