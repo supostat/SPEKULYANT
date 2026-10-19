@@ -38,6 +38,9 @@ pub struct BalanceRules {
 pub struct CoverageRules {
     /// Жизней в прогоне динамического покрытия валидатора.
     pub lives: NonZeroUsize,
+    /// Доля решений, в которых бот прогона покрытия выбирает наугад, не кончая жизнь, — чтобы
+    /// заглянуть в продолжения, которые манера бота сама не выберет; от 0 до 1.
+    pub curiosity: f64,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -57,9 +60,18 @@ impl BalanceFile {
     }
 
     pub fn parse(text: &str) -> Result<Self, BalanceFileError> {
-        toml::from_str(text).map_err(|error| BalanceFileError::Format {
+        let file: Self = toml::from_str(text).map_err(|error| BalanceFileError::Format {
             reason: error.to_string(),
-        })
+        })?;
+        if !(0.0..=1.0).contains(&file.coverage.curiosity) {
+            return Err(BalanceFileError::Format {
+                reason: format!(
+                    "[coverage] curiosity {}: нужна доля от 0 до 1",
+                    file.coverage.curiosity
+                ),
+            });
+        }
+        Ok(file)
     }
 }
 

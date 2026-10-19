@@ -1,0 +1,14 @@
+# Ждёт флага, который ставит только недостижимое событие.
+title = "Расчёт по сделке"
+weight = 1
+text = "Тебе приносят долю по тайной сделке."
+
+[conditions]
+flags_set = ["secret_deal"]
+
+[[choices]]
+text = "Взять долю"
+outcome = "Доля твоя."
+
+[choices.consequences]
+clear_flags = ["secret_deal"]

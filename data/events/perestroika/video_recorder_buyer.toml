@@ -1,5 +1,7 @@
 title = "Покупатель на видик"
 weight = 5
+# Редкое: нужен видеомагнитофон в кармане, а боты прогона их не держат.
+rare = true
 cooldown_days = 120
 price_of = "video_recorder"
 text = """

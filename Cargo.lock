@@ -1808,7 +1808,9 @@ name = "speculant-validate"
 version = "0.1.0"
 dependencies = [
  "notify",
+ "serde_json",
  "speculant-core",
+ "speculant-sim",
 ]
 
 [[package]]
@@ -2412,6 +2414,7 @@ dependencies = [
  "sha2",
  "speculant-core",
  "speculant-sim",
+ "speculant-validate",
  "toml",
  "ttf-parser",
  "ureq",

@@ -28,25 +28,7 @@ type Danger = (bool, bool, u32, u32, bool);
 impl ChoiceStyle {
     /// Номер выбора от 1 среди доступных.
     pub fn choose(self, game: &Game, event: &EventView, dice: &mut ChaCha8Rng) -> usize {
-        let pending = game
-            .events()
-            .pending()
-            .expect("бот выбирает в ожидающем событии");
-        let choices = &game.content().events[&pending.event].choices;
-        let available: Vec<(usize, &Choice)> = event
-            .choices
-            .iter()
-            .zip(choices)
-            .enumerate()
-            .filter(|(_, (shown, _))| shown.available)
-            .map(|(index, (_, choice))| (index, choice))
-            .collect();
-        assert!(
-            !available.is_empty(),
-            "у события {} нет доступного выбора",
-            pending.event
-        );
-        self.pick(game, &available, dice) + 1
+        self.pick(game, &available_choices(game, event), dice) + 1
     }
 
     /// Номер от нуля среди доступных выборов — пар «номер, выбор».
@@ -68,6 +50,30 @@ impl ChoiceStyle {
             }
         }
     }
+}
+
+/// Доступные выборы ожидающего события — пары «номер от нуля, выбор из данных»; хотя бы один есть
+/// всегда: это обещает правило выбора, доступного всегда.
+pub(crate) fn available_choices<'a>(game: &'a Game, event: &EventView) -> Vec<(usize, &'a Choice)> {
+    let pending = game
+        .events()
+        .pending()
+        .expect("бот выбирает в ожидающем событии");
+    let choices = &game.content().events[&pending.event].choices;
+    let available: Vec<(usize, &Choice)> = event
+        .choices
+        .iter()
+        .zip(choices)
+        .enumerate()
+        .filter(|(_, (shown, _))| shown.available)
+        .map(|(index, (_, choice))| (index, choice))
+        .collect();
+    assert!(
+        !available.is_empty(),
+        "у события {} нет доступного выбора",
+        pending.event
+    );
+    available
 }
 
 /// Самый денежный, а из равных — наименее опасный; `None`, если выбирать не из чего.

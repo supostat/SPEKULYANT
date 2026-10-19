@@ -1,0 +1,32 @@
+# Каждый выбор назначает продолжение, которого сам же и не допустит.
+title = "Заём"
+weight = 1
+text = "Сосед просит денег в долг."
+
+[[choices]]
+text = "Дать в долг"
+outcome = "Сосед обещает вернуть."
+
+[choices.consequences]
+set_flags = ["neighbour_owes"]
+
+[[choices.follow_ups]]
+event = "debt_forgiven"
+after_days = 30
+chance = 1.0
+
+[[choices]]
+text = "Простить старый долг"
+outcome = "Сосед благодарит."
+
+[choices.consequences]
+clear_flags = ["neighbour_owes"]
+
+[[choices.follow_ups]]
+event = "debt_returned"
+after_days = 30
+chance = 1.0
+
+[[choices]]
+text = "Отказать"
+outcome = "Сосед уходит ни с чем."

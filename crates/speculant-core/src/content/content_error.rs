@@ -9,7 +9,7 @@ pub struct ContentError {
 }
 
 impl ContentError {
-    pub(crate) fn new(file: &str, line: Option<usize>, message: impl Into<String>) -> Self {
+    pub fn new(file: &str, line: Option<usize>, message: impl Into<String>) -> Self {
         Self {
             file: file.to_owned(),
             line,

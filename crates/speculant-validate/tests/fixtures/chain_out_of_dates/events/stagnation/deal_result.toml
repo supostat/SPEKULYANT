@@ -1,0 +1,10 @@
+title = "Итог сделки"
+weight = 1
+text = "Сделка принесла плоды."
+
+[conditions]
+window = { from = "1990-01-01", until = "1991-01-01" }
+
+[[choices]]
+text = "Посчитать выручку"
+outcome = "Неплохо."

@@ -1,0 +1,23 @@
+# Продолжение минимального набора, помеченное редким: прогон покрытия может его не встретить.
+title = "Старый знакомый"
+weight = 20
+once = true
+rare = true
+text = "{npc} стоит у подъезда и улыбается так, что хочется уехать в другой город."
+
+[conditions]
+npc = "vodka_man"
+flags_set = ["snitched_1985"]
+
+[[choices]]
+text = "Откупиться"
+outcome = "Мужик пересчитывает деньги и уходит. Пока уходит."
+
+[choices.consequences]
+money = -200
+contacts = [{ npc = "vodka_man", relation = 1 }]
+clear_flags = ["snitched_1985"]
+
+[[choices]]
+text = "Сделать вид, что не узнал"
+outcome = "Мужик сплёвывает тебе под ноги. Обида осталась."

@@ -1,42 +1,73 @@
-//! CLI-валидатор контента: `speculant-validate <каталог data> [--watch]`.
-//! Печатает каждую ошибку как «файл:строка: сообщение»; с `--watch` перепроверяет каталог
-//! при каждом сохранении файла (решение 15.7).
+//! CLI-валидатор контента: `speculant-validate <каталог data> [--strict] [--coverage <файл>]
+//! [--watch]`. Печатает каждую ошибку как «файл:строка: сообщение»; с `--watch` перепроверяет
+//! каталог при каждом сохранении файла (решение 15.7).
 
-use std::path::{Path, PathBuf};
+mod arguments;
+
+use std::fs;
+use std::path::Path;
 use std::process::ExitCode;
 use std::sync::mpsc;
 use std::time::Duration;
 
 use notify::{RecursiveMode, Watcher};
 use speculant_core::Content;
+use speculant_core::content::{ContentError, ContentFile};
+use speculant_sim::{BalanceFile, Coverage};
+use speculant_validate::{coverage, strict};
 
-const USAGE: &str = "использование: speculant-validate <каталог data> [--watch]";
-const WATCH_FLAG: &str = "--watch";
+use crate::arguments::{Arguments, USAGE};
+
 const SAVE_SETTLE: Duration = Duration::from_millis(200);
 
 fn main() -> ExitCode {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
-    let watch = arguments.iter().any(|argument| argument == WATCH_FLAG);
-    let directories: Vec<&String> = arguments
-        .iter()
-        .filter(|argument| *argument != WATCH_FLAG)
-        .collect();
-    let [directory] = directories.as_slice() else {
-        eprintln!("{USAGE}");
-        return ExitCode::from(2);
+    let arguments = match Arguments::parse(&arguments) {
+        Ok(arguments) => arguments,
+        Err(message) => {
+            eprintln!("{message}\n{USAGE}");
+            return ExitCode::from(2);
+        }
     };
-    let directory = PathBuf::from(directory);
-    if watch {
-        watch_directory(&directory)
+    if arguments.watch {
+        watch_directory(&arguments)
     } else {
-        report(&directory)
+        report(&arguments)
     }
 }
 
-fn report(directory: &Path) -> ExitCode {
-    match Content::load(directory) {
-        Ok(content) => {
-            println!("{}", summary(&content));
+fn report(arguments: &Arguments) -> ExitCode {
+    let checked = Content::read_files(&arguments.directory).and_then(|files| {
+        let content = Content::from_files(files.clone())?;
+        let mut lines = vec![summary(&content)];
+        let mut errors = Vec::new();
+        if arguments.strict {
+            errors.extend(strict::check(&content, &files));
+            lines.push(format!(
+                "строгая проверка: события достижимы, мёртвых цепочек нет — событий {}",
+                content.events.len()
+            ));
+        }
+        if let Some(path) = &arguments.coverage {
+            match check_coverage(&content, &files, path, &arguments.directory) {
+                Ok((found, line)) => {
+                    errors.extend(found);
+                    lines.push(line);
+                }
+                Err(error) => errors.push(error),
+            }
+        }
+        if errors.is_empty() {
+            Ok(lines)
+        } else {
+            Err(errors)
+        }
+    });
+    match checked {
+        Ok(lines) => {
+            for line in lines {
+                println!("{line}");
+            }
             ExitCode::SUCCESS
         }
         Err(errors) => {
@@ -47,6 +78,28 @@ fn report(directory: &Path) -> ExitCode {
             ExitCode::FAILURE
         }
     }
+}
+
+/// Сверка с покрытием прогона: ошибки и строка итога — или ошибка про само покрытие.
+fn check_coverage(
+    content: &Content,
+    files: &[ContentFile],
+    path: &Path,
+    directory: &Path,
+) -> Result<(Vec<ContentError>, String), ContentError> {
+    let shown = path.display().to_string();
+    let unreadable = |reason: String| ContentError::new(&shown, None, reason);
+    let text =
+        fs::read_to_string(path).map_err(|error| unreadable(format!("не читается: {error}")))?;
+    let found: Coverage = serde_json::from_str(&text)
+        .map_err(|error| unreadable(format!("не разбирается как покрытие: {error}")))?;
+    let rules = BalanceFile::read(directory)
+        .map_err(|error| unreadable(error.to_string()))?
+        .coverage;
+    Ok((
+        coverage::check(content, files, &found, &shown, &rules),
+        coverage::summary(content, &found),
+    ))
 }
 
 fn summary(content: &Content) -> String {
@@ -74,7 +127,8 @@ fn summary(content: &Content) -> String {
 }
 
 /// Проверяет каталог сразу и после каждой серии изменений; серия — изменения без паузы в 200 мс.
-fn watch_directory(directory: &Path) -> ExitCode {
+fn watch_directory(arguments: &Arguments) -> ExitCode {
+    let directory = &arguments.directory;
     let (sender, receiver) = mpsc::channel();
     let mut watcher = match notify::recommended_watcher(sender) {
         Ok(watcher) => watcher,
@@ -93,11 +147,11 @@ fn watch_directory(directory: &Path) -> ExitCode {
         );
         return ExitCode::FAILURE;
     }
-    report(directory);
+    report(arguments);
     while receiver.recv().is_ok() {
         while receiver.recv_timeout(SAVE_SETTLE).is_ok() {}
         println!("— изменения в {}, проверяю заново —", directory.display());
-        report(directory);
+        report(arguments);
     }
     ExitCode::SUCCESS
 }

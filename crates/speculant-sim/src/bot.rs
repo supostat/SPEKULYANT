@@ -4,6 +4,7 @@
 
 mod arbitrage;
 mod choice_style;
+mod curiosity;
 mod deals;
 mod dice;
 mod enterprise;
@@ -18,6 +19,7 @@ use speculant_core::view::EventView;
 
 pub(crate) use arbitrage::Arbitrage;
 pub(crate) use choice_style::ChoiceStyle;
+pub(crate) use curiosity::Curiosity;
 pub(crate) use hoarding::Hoarding;
 pub(crate) use random_moves::RandomMoves;
 pub(crate) use saving::{PlacePreference, Saving};

@@ -23,6 +23,7 @@ fn settings(lives: usize, threads: usize) -> SimulationSettings {
         seed: 1,
         strategies: Strategy::ALL.to_vec(),
         threads,
+        curiosity: 0.0,
     }
 }
 
@@ -87,6 +88,7 @@ fn an_arbitrage_trader_ends_the_stagnation_richer_than_he_was_born() {
         strategy: Strategy::Arbitrage,
         biography: BiographyId::new("sailor"),
         seed: 11,
+        curiosity: 0.0,
     };
     let born = Game::new_life(
         &LifeSettings {

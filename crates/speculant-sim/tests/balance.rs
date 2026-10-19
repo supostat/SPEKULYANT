@@ -90,20 +90,37 @@ fn the_balance_file_of_the_data_carries_calibrated_thresholds_for_every_epoch() 
         "стратегия выше общей медианы ещё не ломает"
     );
     assert!(file.coverage.lives >= file.balance.lives);
+    assert!(
+        file.coverage.curiosity > 0.0 && file.coverage.curiosity < 1.0,
+        "боты покрытия любопытны, но не играют наугад"
+    );
 }
 
 #[test]
 fn a_run_of_no_lives_is_refused() {
     let text = "[balance]\nseed = 1\nlives = 0\nbreaking_medians = 3.0\n\
-                [balance.mortality]\n[balance.quiet_days]\n[coverage]\nlives = 5\n";
+                [balance.mortality]\n[balance.quiet_days]\n[coverage]\nlives = 5\ncuriosity = 0.1\n";
     assert!(BalanceFile::parse(text).is_err());
 }
 
 #[test]
 fn an_unknown_threshold_in_the_balance_file_is_refused() {
     let text = "[balance]\nseed = 1\nlives = 2\nbreaking_medians = 3.0\nbandits = 1\n\
-                [balance.mortality]\n[balance.quiet_days]\n[coverage]\nlives = 5\n";
+                [balance.mortality]\n[balance.quiet_days]\n[coverage]\nlives = 5\ncuriosity = 0.1\n";
     assert!(BalanceFile::parse(text).is_err());
+}
+
+#[test]
+fn curiosity_beyond_a_share_is_refused() {
+    let text = "[balance]\nseed = 1\nlives = 2\nbreaking_medians = 3.0\n\
+                [balance.mortality]\n[balance.quiet_days]\n[coverage]\nlives = 5\ncuriosity = 1.5\n";
+    assert_eq!(
+        BalanceFile::parse(text).map_err(|error| error.to_string()),
+        Err(
+            "balance.toml не разбирается: [coverage] curiosity 1.5: нужна доля от 0 до 1"
+                .to_owned()
+        )
+    );
 }
 
 #[test]

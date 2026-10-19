@@ -1,0 +1,10 @@
+# Шаблон песочницы начинает событие, которое живёт только до 2000 года.
+title = "Валютный шок"
+weight = 1
+rest_days = 365
+
+[[outcomes]]
+weight = 1
+news = "Рубль рухнул."
+price_shocks = [{ good = "jeans", factor = 1.3, days = 60 }]
+event = "exchange_queue"

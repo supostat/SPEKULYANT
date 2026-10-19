@@ -6,6 +6,7 @@ use speculant_sim::{SimulationSettings, Strategy};
 pub const USAGE: &str = "\
 Использование: speculant-sim --lives <N> --seed <S> [--strategy <стратегия>] [--threads <N>]
                      [--data <каталог>] [--report <файл.json>] [--coverage <файл.json>]
+                     [--curiosity <доля>]
 
   --lives      сколько жизней прожить
   --seed       сид прогона: из него — сиды всех жизней
@@ -14,12 +15,14 @@ pub const USAGE: &str = "\
   --threads    потоков (по умолчанию — сколько ядер)
   --data       каталог данных (по умолчанию data)
   --report     записать отчёт в JSON
-  --coverage   записать покрытие событий в JSON для валидатора";
+  --coverage   записать покрытие событий в JSON для валидатора
+  --curiosity  доля решений, в которых бот выбирает наугад, не кончая жизнь (по умолчанию 0;
+               прогон покрытия берёт [coverage] curiosity из balance.toml)";
 
 const DEFAULT_DATA: &str = "data";
 
 /// Разобранная командная строка симулятора.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub struct Arguments {
     pub settings: SimulationSettings,
     pub data: PathBuf,
@@ -33,6 +36,7 @@ pub enum ArgumentError {
     Unknown { argument: String },
     NoValue { flag: String },
     NotPositive { flag: String, value: String },
+    NotShare { flag: String, value: String },
     UnknownStrategy { strategy: String },
 }
 
@@ -49,11 +53,12 @@ impl Arguments {
         let mut data = PathBuf::from(DEFAULT_DATA);
         let mut report = None;
         let mut coverage = None;
+        let mut curiosity = 0.0;
         let mut arguments = arguments.into_iter();
         while let Some(flag) = arguments.next() {
             let value = match flag.as_str() {
                 "--lives" | "--seed" | "--strategy" | "--threads" | "--data" | "--report"
-                | "--coverage" => arguments
+                | "--coverage" | "--curiosity" => arguments
                     .next()
                     .ok_or_else(|| ArgumentError::NoValue { flag: flag.clone() })?,
                 _ => return Err(ArgumentError::Unknown { argument: flag }),
@@ -69,6 +74,7 @@ impl Arguments {
                 "--threads" => threads = positive(&flag, &value)?,
                 "--data" => data = PathBuf::from(value),
                 "--report" => report = Some(PathBuf::from(value)),
+                "--curiosity" => curiosity = share(&flag, &value)?,
                 _ => coverage = Some(PathBuf::from(value)),
             }
         }
@@ -78,6 +84,7 @@ impl Arguments {
                 seed: seed.ok_or(ArgumentError::Missing { flag: "--seed" })?,
                 strategies,
                 threads,
+                curiosity,
             },
             data,
             report,
@@ -91,6 +98,17 @@ fn number(flag: &str, value: &str) -> Result<u64, ArgumentError> {
         flag: flag.to_owned(),
         value: value.to_owned(),
     })
+}
+
+fn share(flag: &str, value: &str) -> Result<f64, ArgumentError> {
+    value
+        .parse()
+        .ok()
+        .filter(|share: &f64| (0.0..=1.0).contains(share))
+        .ok_or_else(|| ArgumentError::NotShare {
+            flag: flag.to_owned(),
+            value: value.to_owned(),
+        })
 }
 
 fn positive(flag: &str, value: &str) -> Result<usize, ArgumentError> {
@@ -112,6 +130,9 @@ impl fmt::Display for ArgumentError {
             Self::NoValue { flag } => write!(formatter, "у {flag} нет значения"),
             Self::NotPositive { flag, value } => {
                 write!(formatter, "{flag} {value}: нужно целое число больше нуля")
+            }
+            Self::NotShare { flag, value } => {
+                write!(formatter, "{flag} {value}: нужна доля от 0 до 1")
             }
             Self::UnknownStrategy { strategy } => {
                 write!(formatter, "стратегии {strategy} нет")
@@ -140,6 +161,7 @@ mod tests {
                 seed: 1,
                 strategies: Strategy::ALL.to_vec(),
                 threads: CORES,
+                curiosity: 0.0,
             }
         );
         assert_eq!(arguments.data, PathBuf::from("data"));
@@ -150,11 +172,12 @@ mod tests {
     fn every_flag_lands_in_its_place() {
         let arguments = parse(
             "--seed 9 --lives 12 --strategy hoarder --threads 2 --data other \
-             --report report.json --coverage coverage.json",
+             --report report.json --coverage coverage.json --curiosity 0.1",
         )
         .expect("строка верна");
         assert_eq!(arguments.settings.strategies, vec![Strategy::Hoarder]);
         assert_eq!(arguments.settings.threads, 2);
+        assert_eq!(arguments.settings.curiosity, 0.1);
         assert_eq!(arguments.data, PathBuf::from("other"));
         assert_eq!(arguments.report, Some(PathBuf::from("report.json")));
         assert_eq!(arguments.coverage, Some(PathBuf::from("coverage.json")));
@@ -185,6 +208,13 @@ mod tests {
             parse("--lives 1 --seed 1 --strategy gambler").err(),
             Some(ArgumentError::UnknownStrategy {
                 strategy: "gambler".to_owned()
+            })
+        );
+        assert_eq!(
+            parse("--lives 1 --seed 1 --curiosity 1.5").err(),
+            Some(ArgumentError::NotShare {
+                flag: "--curiosity".to_owned(),
+                value: "1.5".to_owned()
             })
         );
         assert_eq!(

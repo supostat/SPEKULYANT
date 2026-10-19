@@ -7,11 +7,13 @@ use speculant_core::rng::WorldRng;
 use speculant_core::time::GameDate;
 use speculant_core::{Command, Content, Game, LifeSettings};
 
-use crate::bot::Bot;
+use crate::bot::{Bot, Curiosity};
 use crate::{LifeOutcome, LifePlan};
 
 /// Поток случая бота: он не сдвигает потоков мира с тем же сидом.
 const BOT_STREAM: &str = "bot";
+/// Поток любопытства — свой, чтобы без любопытства жизнь шла так же, как до него.
+const CURIOSITY_STREAM: &str = "curiosity";
 /// На первой скорости за длительность дня проходит ровно день, в зоне — её неделя.
 const SPEED: u8 = 1;
 
@@ -35,6 +37,9 @@ pub fn play_life(content: &Arc<Content>, plan: &LifePlan) -> LifeOutcome {
     let mut game = Game::new_life(&settings, Arc::clone(content))
         .expect("бот берёт биографию, открытую с начала");
     let mut bot = plan.strategy.bot();
+    let curiosity = Curiosity {
+        share: plan.curiosity,
+    };
     let mut dice = WorldRng::new(plan.seed);
     let day = content.time.clock.day_milliseconds_at(SPEED);
     let epoch_ends: Vec<GameDate> = content
@@ -53,7 +58,7 @@ pub fn play_life(content: &Arc<Content>, plan: &LifePlan) -> LifeOutcome {
             continue;
         }
         if game.events().pending().is_some() {
-            settle_event(&mut game, &bot, &mut dice);
+            settle_event(&mut game, &bot, curiosity, &mut dice);
             continue;
         }
         if game.zone().is_some() {
@@ -86,14 +91,16 @@ pub fn play_life(content: &Arc<Content>, plan: &LifePlan) -> LifeOutcome {
     }
 }
 
-/// Бот выбирает, если выбор ещё не сделан, и читает исход.
-fn settle_event(game: &mut Game, bot: &Bot, dice: &mut WorldRng) {
+/// Бот выбирает — из любопытства или своей манерой, — если выбор ещё не сделан, и читает исход.
+fn settle_event(game: &mut Game, bot: &Bot, curiosity: Curiosity, dice: &mut WorldRng) {
     let event = game
         .view()
         .pending_event
         .expect("событие ждёт ответа — проверено выше");
     if event.outcome.is_none() {
-        let choice = bot.choose(game, &event, dice.stream(BOT_STREAM));
+        let choice = curiosity
+            .pick(game, &event, dice.stream(CURIOSITY_STREAM))
+            .unwrap_or_else(|| bot.choose(game, &event, dice.stream(BOT_STREAM)));
         game.apply(Command::Choose { choice })
             .expect("бот выбирает доступный выбор");
     }

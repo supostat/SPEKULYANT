@@ -1,0 +1,13 @@
+title = "Долг вернули"
+weight = 1
+text = "Сосед приносит деньги."
+
+[conditions]
+flags_set = ["neighbour_owes"]
+
+[[choices]]
+text = "Взять деньги"
+outcome = "Долг закрыт."
+
+[choices.consequences]
+clear_flags = ["neighbour_owes"]

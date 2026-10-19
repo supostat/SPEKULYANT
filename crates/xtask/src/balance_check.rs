@@ -27,6 +27,7 @@ pub fn run(scope: &str) -> Result<()> {
         seed: rules.seed,
         strategies: Strategy::ALL.to_vec(),
         threads: thread::available_parallelism().map_or(1, usize::from),
+        curiosity: 0.0,
     };
     let report = Report::build(&content, settings.seed, &simulate(&content, &settings));
     let violations = check(&report, &rules, &CheckScope::parse(scope))?;

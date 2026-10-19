@@ -6,6 +6,7 @@ mod bridge_smoke;
 mod build_godot;
 mod charset_check;
 mod content_count;
+mod coverage_check;
 mod deps_check;
 mod docs_check;
 mod etalons;
@@ -43,7 +44,9 @@ const USAGE: &str = "\
                             (events:<эпоха>, zone-events), шаблонов (post2004-templates)
                             — не меньше порога [volume] из data/balance.toml
   balance-check <эпоха|all> прогон [balance] lives жизней всеми стратегиями и сверка эпохи
-                            или всех эпох с порогами [balance] из data/balance.toml";
+                            или всех эпох с порогами [balance] из data/balance.toml
+  coverage-check            прогон [coverage] lives жизней, строгая валидация data/ и сверка
+                            покрытия: каждое событие сработало или помечено rare";
 
 fn main() -> Result<()> {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
@@ -75,6 +78,7 @@ fn main() -> Result<()> {
         "docs-check" => docs_check::run(flags.iter().any(|flag| flag == "--all-decided")),
         "content-count" => content_count::run(single_argument(flags, "content-count <вид>")?),
         "balance-check" => balance_check::run(single_argument(flags, "balance-check <эпоха|all>")?),
+        "coverage-check" => coverage_check::run(),
         unknown => bail!("неизвестная команда xtask: {unknown}\n{USAGE}"),
     }
 }

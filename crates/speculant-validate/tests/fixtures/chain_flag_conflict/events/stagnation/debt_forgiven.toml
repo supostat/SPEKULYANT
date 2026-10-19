@@ -1,0 +1,10 @@
+title = "Долг прощён"
+weight = 1
+text = "Сосед напоминает, что ничего не должен."
+
+[conditions]
+flags_unset = ["neighbour_owes"]
+
+[[choices]]
+text = "Согласиться"
+outcome = "Мир."

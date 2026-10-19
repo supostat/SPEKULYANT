@@ -17,13 +17,16 @@ use crate::{LifeOutcome, LifePlan, Strategy};
 /// Поток, из которого прогон тянет сиды жизней.
 const LIVES_STREAM: &str = "lives";
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SimulationSettings {
     pub lives: usize,
     pub seed: u64,
     /// Стратегии по кругу: жизнь `n` играет стратегией `n` по модулю их числа.
     pub strategies: Vec<Strategy>,
     pub threads: usize,
+    /// Доля решений, в которых бот выбирает наугад, не кончая жизнь: ноль в замере баланса,
+    /// `[coverage] curiosity` в прогоне покрытия.
+    pub curiosity: f64,
 }
 
 /// Планы жизней: стратегии по кругу, биографии, открытые с начала, — по кругу внутри каждой
@@ -43,6 +46,10 @@ pub fn plan_lives(content: &Content, settings: &SimulationSettings) -> Vec<LifeP
         !biographies.is_empty(),
         "хотя бы одна биография открыта с начала"
     );
+    assert!(
+        (0.0..=1.0).contains(&settings.curiosity),
+        "любопытство — доля от нуля до единицы"
+    );
     let mut seeds = WorldRng::new(settings.seed);
     let strategies = settings.strategies.len();
     (0..settings.lives)
@@ -51,6 +58,7 @@ pub fn plan_lives(content: &Content, settings: &SimulationSettings) -> Vec<LifeP
             strategy: settings.strategies[index % strategies],
             biography: biographies[(index / strategies) % biographies.len()].clone(),
             seed: seeds.stream(LIVES_STREAM).next_u64(),
+            curiosity: settings.curiosity,
         })
         .collect()
 }

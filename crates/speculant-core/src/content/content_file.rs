@@ -27,12 +27,12 @@ impl ContentFile {
     }
 
     /// Первая строка, содержащая `needle`.
-    pub(crate) fn line_of(&self, needle: &str) -> Option<usize> {
+    pub fn line_of(&self, needle: &str) -> Option<usize> {
         self.nth_line_of(needle, 0)
     }
 
     /// Строка `index`-го (с нуля) вхождения `needle`.
-    pub(crate) fn nth_line_of(&self, needle: &str, index: usize) -> Option<usize> {
+    pub fn nth_line_of(&self, needle: &str, index: usize) -> Option<usize> {
         self.text
             .lines()
             .enumerate()
