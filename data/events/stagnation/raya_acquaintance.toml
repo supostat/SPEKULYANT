@@ -1,0 +1,22 @@
+title = "Знакомство с завмагом"
+weight = 4
+once = true
+text = """
+{npc}, заведующая гастрономом, ищет югославские сапоги. Говорят, она умеет быть \
+благодарной."""
+
+[conditions]
+npc = "shop_manager_raya"
+
+[[choices]]
+text = "Достать сапоги"
+outcome = "Рая примеряет и тает: «Заходи с чёрного хода, золотко»."
+
+[choices.consequences]
+money = -90
+contacts = [{ npc = "shop_manager_raya", relation = 2 }]
+set_flags = ["blat_raya"]
+
+[[choices]]
+text = "Не связываться"
+outcome = "Рая найдёт другого."

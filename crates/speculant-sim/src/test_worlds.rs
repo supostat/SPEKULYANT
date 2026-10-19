@@ -36,7 +36,7 @@ pub(crate) fn date(year: i32, month: u32, day: u32) -> GameDate {
     GameDate::from_ymd(year, month, day).expect("дата существует")
 }
 
-/// Живёт до даты по дню; событие, если придёт, закрывает первым доступным выбором.
+/// Живёт до даты по дню; событие, если придёт, закрывает безобидным выбором.
 pub(crate) fn live_until(game: &mut Game, until: GameDate) {
     let day = game.content().time.clock.day_milliseconds_at(SPEED);
     while game.today() < until {
@@ -46,21 +46,33 @@ pub(crate) fn live_until(game: &mut Game, until: GameDate) {
             until.long()
         );
         if game.events().pending().is_some() {
-            settle_with_first_choice(game);
+            settle_harmlessly(game);
             continue;
         }
         game.advance(day);
     }
 }
 
-fn settle_with_first_choice(game: &mut Game) {
-    let event = game.view().pending_event.expect("событие ждёт");
+/// Закрывает ожидающее событие первым доступным выбором, который не забирает ни денег, ни
+/// товара, не даёт срока и не кончает жизнь, — тест сам распоряжается кошельком и карманом.
+pub(crate) fn settle_harmlessly(game: &mut Game) {
+    let pending = game.events().pending().expect("событие ждёт");
+    let choices = &game.content().events[&pending.event].choices;
+    let event = game.view().pending_event.expect("событие показано");
     if event.outcome.is_none() {
         let choice = event
             .choices
             .iter()
-            .position(|choice| choice.available)
-            .expect("у события есть доступный выбор")
+            .zip(choices)
+            .position(|(shown, choice)| {
+                let consequences = &choice.consequences;
+                shown.available
+                    && consequences.money.is_none_or(|money| !money.is_negative())
+                    && consequences.goods.iter().all(|change| change.change >= 0)
+                    && consequences.sentence_months.is_none()
+                    && consequences.end_life.is_none()
+            })
+            .expect("у события есть безобидный выбор")
             + 1;
         game.apply(Command::Choose { choice })
             .expect("выбор доступен");

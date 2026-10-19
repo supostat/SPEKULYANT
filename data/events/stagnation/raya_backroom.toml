@@ -1,0 +1,36 @@
+title = "С чёрного хода"
+weight = 7
+cooldown_days = 60
+text = "{npc} оставила тебе «под прилавком»: икру, сервелат и индийский кофе."
+
+[conditions]
+npc = "shop_manager_raya"
+flags_set = ["blat_raya"]
+
+[[choices]]
+text = "Взять икру и сервелат"
+outcome = "Свёрток в газете «Правда» — самое надёжное в стране."
+
+[choices.consequences]
+money = -60
+goods = [{ good = "cervelat", change = 3 }, { good = "caviar", change = 1 }]
+
+[[choices.follow_ups]]
+event = "raya_audit"
+after_days = 45
+chance = 0.15
+
+[[choices]]
+text = "Взять кофе"
+outcome = "Рая подмигивает."
+
+[choices.consequences]
+money = -40
+goods = [{ good = "coffee", change = 4 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Рая обижается: дефицит не предлагают дважды."
+
+[choices.consequences]
+contacts = [{ npc = "shop_manager_raya", relation = -1 }]

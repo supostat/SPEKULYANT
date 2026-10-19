@@ -1,0 +1,23 @@
+title = "Фестиваль молодёжи"
+weight = 8
+once = true
+text = "В Москве фестиваль: иностранцы на каждом углу, меняют джинсы на значки и матрёшек."
+
+[conditions]
+timeline = "festival_1985"
+flags_set = ["festival_open"]
+cities = ["moscow"]
+window = { from = "1985-07-27", until = "1985-08-10" }
+
+[[choices]]
+text = "Менять значки на джинсы"
+outcome = "Три пары за мешок значков с Лениным. Обмен века."
+
+[choices.consequences]
+money = -30
+goods = [{ good = "jeans", change = 3 }]
+reputation = [{ faction = "traders", change = 1 }, { faction = "militia", change = -1 }]
+
+[[choices]]
+text = "Просто гулять"
+outcome = "Ты целуешься с кубинкой у Ленинских гор. Вспомнишь в старости."

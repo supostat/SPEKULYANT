@@ -1,0 +1,19 @@
+title = "Сахар по талонам"
+weight = 6
+cooldown_days = 90
+text = "Сахар пропал: весь ушёл на самогон. Бабушки у подъезда продают талоны."
+
+[conditions]
+flags_set = ["sugar_shortage"]
+
+[[choices]]
+text = "Скупить талоны и сахар"
+outcome = "Два мешка в кладовке. Самогонщики будут ласковы."
+
+[choices.consequences]
+money = -100
+goods = [{ good = "sugar", change = 2 }]
+
+[[choices]]
+text = "Пить чай без сахара"
+outcome = "Говорят, так даже полезнее."

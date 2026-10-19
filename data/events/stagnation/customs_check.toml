@@ -1,0 +1,24 @@
+title = "Таможенный досмотр"
+weight = 5
+cooldown_days = 120
+text = """
+{npc} перетряхивает багаж экипажа. Твой знакомый матрос бледнеет: в мешке — твой заказ."""
+
+[conditions]
+npc = "customs_gusev"
+cities = ["leningrad", "riga"]
+
+[[choices]]
+text = "Поделиться с таможней"
+outcome = "Гусев находит в мешке только тельняшки."
+
+[choices.consequences]
+money = -100
+contacts = [{ npc = "customs_gusev", relation = 1 }]
+
+[[choices]]
+text = "Сделать вид, что мешок чужой"
+outcome = "Матрос остаётся один на один с Гусевым. Заказа больше нет."
+
+[choices.consequences]
+reputation = [{ faction = "traders", change = -1 }]

@@ -1,0 +1,26 @@
+title = "ОБХСС в цеху"
+weight = 1
+incident = "inspection"
+text = "В «{business}» пришли с проверкой: накладные, сырьё, откуда ткань."
+
+[[choices]]
+text = "Закрыть дело на две недели"
+outcome = "Двери на замке, станки под брезентом."
+
+[choices.consequences]
+business = { closed_days = 14 }
+
+[[choices]]
+text = "Откупиться"
+outcome = "Проверяющие пишут «нарушений не выявлено»."
+
+[choices.consequences]
+money = -500
+
+[[choices]]
+text = "Бросить дело"
+outcome = "Цех ничей. Ты — тоже."
+
+[choices.consequences]
+business = { lost = true }
+reputation = [{ faction = "militia", change = 1 }]

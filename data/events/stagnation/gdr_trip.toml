@@ -1,0 +1,26 @@
+title = "Путёвка в ГДР"
+weight = 3
+once = true
+text = """
+Райком распределяет путёвку в ГДР по линии молодёжного туризма. Зорин намекает, что может \
+вписать тебя."""
+
+[conditions]
+npc = "raikom_zorin"
+reputation = [{ faction = "officials", at_least = 1 }]
+
+[[choices]]
+text = "Поехать и привезти шмоток"
+outcome = "Неделя в Дрездене, два чемодана обратно."
+
+[choices.consequences]
+money = -300
+goods = [{ good = "jeans", change = 2 }, { good = "sneakers", change = 1 }]
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Уступить путёвку"
+outcome = "Зорин кивает: не забудет."
+
+[choices.consequences]
+contacts = [{ npc = "raikom_zorin", favours = 1 }]

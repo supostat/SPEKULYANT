@@ -1,0 +1,23 @@
+title = "Нетрудовые доходы"
+weight = 6
+cooldown_days = 120
+text = """
+По указу о нетрудовых доходах на рынке ломают частные теплицы и проверяют всех, кто \
+продаёт больше двух огурцов."""
+
+[conditions]
+flags_set = ["unearned_war"]
+
+[[choices]]
+text = "Убрать товар до лучших времён"
+outcome = "Неделя без торговли. Цены на рынке подскочили."
+
+[choices.consequences]
+price_shocks = [{ good = "bananas", factor = 1.3, days = 30 }, { good = "cervelat", factor = 1.2, days = 30 }]
+
+[[choices]]
+text = "Торговать как ни в чём не бывало"
+outcome = "Проверяющий записывает тебя в протокол."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -2 }]

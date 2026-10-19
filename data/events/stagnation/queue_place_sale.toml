@@ -1,0 +1,21 @@
+title = "Место в очереди"
+weight = 5
+cooldown_days = 60
+text = """
+Ты стоишь в очереди за коврами с утра. Женщина в норковой шапке предлагает купить твоё \
+место."""
+
+[[choices]]
+text = "Продать"
+outcome = "Пятнадцать рублей за полдня стояния. Очередь шипит."
+
+[choices.consequences]
+money = 15
+reputation = [{ faction = "people", change = -1 }]
+
+[[choices]]
+text = "Стоять дальше"
+outcome = "Ковров не хватило, но очередь тебя зауважала."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }]

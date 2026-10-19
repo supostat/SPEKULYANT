@@ -1,0 +1,47 @@
+title = "Проверка ОБХСС"
+weight = 1
+text = """
+Двое в штатском показывают удостоверения: «Откуда у вас, гражданин, такие средства при \
+зарплате сто двадцать?»"""
+
+[conditions]
+flags_set = ["obkhss_watch"]
+
+[[choices]]
+text = "Показать чеки комиссионки"
+outcome = "Бумаги в порядке. Почти."
+
+[choices.conditions]
+reputation = [{ faction = "militia", at_least = 0 }]
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 1 }]
+clear_flags = ["obkhss_watch"]
+
+[[choices]]
+text = "Дать взятку"
+outcome = "Средства становятся скромнее, вопросы — тоже."
+
+[choices.consequences]
+money = -300
+clear_flags = ["obkhss_watch"]
+
+[[choices]]
+text = "Отпираться"
+outcome = "Протокол подписан. Дело ушло в суд: два года за спекуляцию."
+
+[choices.consequences]
+sentence_months = 24
+clear_flags = ["obkhss_watch"]
+
+[[choices]]
+text = "Сказать, что выиграл в «Спортлото»"
+outcome = "Проверяющие смеются, но уходят. Дело не закрыто."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -2 }]
+
+[[choices.follow_ups]]
+event = "obkhss_visit"
+after_days = 60
+chance = 0.3

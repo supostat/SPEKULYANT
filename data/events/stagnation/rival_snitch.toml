@@ -1,0 +1,29 @@
+title = "Донос конкурента"
+weight = 4
+cooldown_days = 180
+text = "Знакомый мент предупреждает: {npc} написал на тебя заявление. Чем ты ему помешал?"
+
+[conditions]
+rival = { strategy = "trader", relation_at_most = -1 }
+
+[[choices]]
+text = "Откупиться от проверки"
+outcome = "Заявление теряется в канцелярии."
+
+[choices.consequences]
+money = -200
+
+[[choices]]
+text = "Затаиться"
+outcome = "Проверка ничего не находит, но ты на заметке."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -1 }]
+
+[[choices]]
+text = "Ответить тем же"
+outcome = "Теперь на него тоже есть бумага. Война."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 1 }]
+rival = { relation = -2 }

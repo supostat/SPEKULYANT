@@ -1,0 +1,25 @@
+title = "Слух о радиации"
+weight = 8
+once = true
+text = """
+По городу слух: от радиации помогают кагор и «Столичная». Магазины опустели к обеду."""
+
+[conditions]
+timeline = "chernobyl_1986"
+window = { from = "1986-04-26", until = "1986-08-01" }
+
+[[choices]]
+text = "Продать коньяк паникёрам"
+outcome = "Паникёры платят вдвое."
+
+[choices.consequences]
+money = 40
+goods = [{ good = "cognac", change = -2 }]
+reputation = [{ faction = "people", change = -1 }]
+
+[[choices]]
+text = "Объяснять, что это чушь"
+outcome = "Тебя не слушают, но запоминают как честного."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }]

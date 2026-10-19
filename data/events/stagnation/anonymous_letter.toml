@@ -1,0 +1,34 @@
+title = "Анонимка"
+weight = 1
+once = true
+text = """
+Сёмин показывает тетрадный листок: «Сосед из сорок второй спекулирует, прошу принять меры. \
+Доброжелатель». Почерк Клавин."""
+
+[conditions]
+flags_set = ["klava_offended"]
+
+[[choices]]
+text = "Отдать участковому бутылку коньяка"
+outcome = "Листок исчезает в печке."
+
+[choices.consequences]
+goods = [{ good = "cognac", change = -1 }]
+reputation = [{ faction = "militia", change = 1 }]
+clear_flags = ["klava_offended"]
+
+[[choices]]
+text = "Перевезти товар к знакомому"
+outcome = "Пока Сёмин проверяет сигнал, проверять нечего."
+
+[choices.consequences]
+money = -30
+clear_flags = ["klava_offended"]
+
+[[choices]]
+text = "Ничего не делать"
+outcome = "Сигнал ушёл выше."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -2 }]
+clear_flags = ["klava_offended"]

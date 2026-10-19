@@ -1,0 +1,27 @@
+title = "Вырубка виноградников"
+weight = 4
+once = true
+text = """
+По указу рубят лозу: в Кахетии старики плачут на виноградниках. Коньяк скоро станет \
+золотым."""
+
+[conditions]
+timeline = "dry_law"
+cities = ["tbilisi"]
+
+[[choices]]
+text = "Скупить коньяк, пока есть"
+outcome = "Подвал у тёти Нино заставлен ящиками."
+
+[choices.consequences]
+money = -150
+goods = [{ good = "cognac", change = 10 }]
+price_shocks = [{ good = "cognac", factor = 1.5, days = 240 }]
+
+[[choices]]
+text = "Пожалеть стариков"
+outcome = "Ты пьёшь с ними за лозу. Цены растут без тебя."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }]
+price_shocks = [{ good = "cognac", factor = 1.5, days = 240 }]

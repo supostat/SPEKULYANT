@@ -1,0 +1,14 @@
+title = "Фестиваль молодёжи"
+window = { from = "1985-07-27", until = "1985-07-28" }
+
+[[outcomes]]
+weight = 3
+news = "В Москве открылся фестиваль молодёжи и студентов: иностранцы на каждом углу."
+price_shocks = [{ good = "jeans", city = "moscow", factor = 0.8, days = 30 }, { good = "chewing_gum", city = "moscow", factor = 0.7, days = 30 }]
+event = "festival_foreigners"
+set_flags = ["festival_open"]
+
+[[outcomes]]
+weight = 1
+news = "Перед фестивалем Москву зачистили: фарцовщиков выслали за сто первый километр."
+price_shocks = [{ good = "jeans", city = "moscow", factor = 1.3, days = 30 }]

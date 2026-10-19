@@ -96,7 +96,7 @@ mod tests {
     use speculant_core::rng::WorldRng;
 
     use super::RandomMoves;
-    use crate::test_worlds::{new_life, real_data};
+    use crate::test_worlds::{new_life, real_data, settle_harmlessly};
 
     #[test]
     fn a_random_player_buys_sells_and_travels_only_as_the_rules_allow() {
@@ -107,7 +107,10 @@ mod tests {
         let day = game.content().time.clock.day_milliseconds_at(1);
         let (mut bought, mut sold, mut traveled) = (false, false, false);
         for _ in 0..120 {
-            if game.events().pending().is_none() && game.journey().is_none() {
+            if game.events().pending().is_some() {
+                settle_harmlessly(&mut game);
+            }
+            if game.journey().is_none() {
                 let held: u32 = game.player().pocket().goods().map(|(_, count)| count).sum();
                 moves.make(&mut game, dice);
                 let now: u32 = game.player().pocket().goods().map(|(_, count)| count).sum();

@@ -1,0 +1,34 @@
+title = "Откуда чеки?"
+weight = 1
+once = true
+text = """
+Повестка в ОБХСС. Следователь листает папку: «Чеки получают моряки и дипломаты. Вы моряк? \
+Дипломат?»"""
+
+[conditions]
+flags_set = ["berezka_checks"]
+
+[[choices]]
+text = "Сказать, что чеки от брата-моряка"
+outcome = "Следователь записывает. Брата у тебя нет, и он это знает."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -1 }]
+clear_flags = ["berezka_checks"]
+
+[[choices]]
+text = "Положить в папку конверт"
+outcome = "Папка закрывается. Конверт тоже."
+
+[choices.consequences]
+money = -300
+reputation = [{ faction = "militia", change = 1 }]
+clear_flags = ["berezka_checks"]
+
+[[choices]]
+text = "Молчать"
+outcome = "Следователь вздыхает и ставит в деле галочку."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -2 }]
+clear_flags = ["berezka_checks"]

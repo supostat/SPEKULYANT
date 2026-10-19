@@ -1,0 +1,9 @@
+title = "Чернобыль"
+window = { from = "1986-04-26", until = "1986-04-27" }
+scale = { from = 0.8, to = 1.3 }
+
+[[outcomes]]
+weight = 1
+news = "Авария на Чернобыльской АЭС. Говорят шёпотом, верят слухам."
+price_shocks = [{ good = "cognac", factor = 1.3, days = 120 }, { good = "vodka", factor = 1.2, days = 90 }]
+event = "red_wine_rumour"

@@ -1,0 +1,21 @@
+title = "Предательство"
+weight = 1
+incident = "betrayal"
+text = """
+{manager} написал в ОБХСС про «{business}» — видно, решил, что без тебя дело пойдёт лучше."""
+
+[[choices]]
+text = "Уволить и замести следы"
+outcome = "Бумаги сожжены, управляющий — на улице."
+
+[choices.consequences]
+business = { manager_leaves = true }
+reputation = [{ faction = "militia", change = -1 }]
+
+[[choices]]
+text = "Откупиться и уволить"
+outcome = "Дорого, но тихо."
+
+[choices.consequences]
+money = -400
+business = { manager_leaves = true }

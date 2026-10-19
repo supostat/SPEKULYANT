@@ -1,0 +1,23 @@
+title = "Коллекционер"
+weight = 6
+cooldown_days = 90
+price_of = "records"
+text = """
+Очкарик с портфелем ищет «битлов» на «Мелодии» и фирменный винил. Говорят, платит вдвое \
+против толкучки, где пластинка идёт по {price}"""
+
+[conditions]
+goods = [{ good = "records", at_least = 1 }]
+
+[[choices]]
+text = "Продать пластинку за девяносто"
+outcome = "Очкарик гладит конверт, как кошку."
+
+[choices.consequences]
+money = 90
+goods = [{ good = "records", change = -1 }]
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Оставить себе"
+outcome = "Музыка тоже нужна."

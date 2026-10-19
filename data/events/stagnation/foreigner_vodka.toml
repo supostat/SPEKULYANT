@@ -1,0 +1,21 @@
+title = "Просьба туриста"
+weight = 5
+cooldown_days = 90
+text = """
+Немец из тургруппы просит купить ему в обычном магазине «Столичную» и икру: в «Берёзке» \
+дорого, а рублей у него нет — только марки."""
+
+[conditions]
+cities = ["moscow", "leningrad", "riga", "tbilisi"]
+
+[[choices]]
+text = "Купить и взять марками"
+outcome = "Немец благодарит по-русски. Марки ты сбудешь Жоре."
+
+[choices.consequences]
+money = 30
+reputation = [{ faction = "traders", change = 1 }, { faction = "militia", change = -1 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Немец уходит искать другого русского."

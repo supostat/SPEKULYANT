@@ -234,7 +234,17 @@ fn endings_and_coverage_are_counted_over_all_lives() {
         report.coverage.saturated_at, 3,
         "событие впервые — в третьей жизни"
     );
-    assert_eq!(report.coverage.never_fired().count(), 0);
+    assert_eq!(
+        report.coverage.never_fired().count(),
+        report.coverage.events.len() - 1,
+        "кроме райкома, в этих жизнях не случилось ничего"
+    );
+    assert!(
+        report
+            .coverage
+            .never_fired()
+            .all(|event| event.as_str() != RAIKOM)
+    );
 }
 
 #[test]

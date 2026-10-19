@@ -1,0 +1,28 @@
+title = "Видик через чеки"
+weight = 3
+once = true
+text = """
+Знакомый моряка продаёт чеки «Внешпосылторга»: на них в «Берёзке» стоит видеомагнитофон, \
+за который на толкучке дают тысячу двести."""
+
+[conditions]
+money = { at_least = 900 }
+
+[[choices]]
+text = "Купить чеки и видик"
+outcome = "Продавщица «Берёзки» долго смотрит на тебя, потом на чеки."
+
+[choices.consequences]
+money = -900
+goods = [{ good = "video_recorder", change = 1 }]
+reputation = [{ faction = "traders", change = 1 }]
+set_flags = ["berezka_checks"]
+
+[[choices.follow_ups]]
+event = "checks_traced"
+after_days = 30
+chance = 0.25
+
+[[choices]]
+text = "Не связываться с чеками"
+outcome = "Чеки — это статья. Пусть рискуют другие."

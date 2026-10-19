@@ -1,0 +1,28 @@
+title = "Драка у винного"
+weight = 5
+cooldown_days = 120
+text = "Без пяти два у винного магазина толпа. Кто-то лезет без очереди, и начинается."
+
+[conditions]
+timeline = "dry_law"
+
+[[choices]]
+text = "Разнять"
+outcome = "Получил по уху, но мужики жмут руку."
+
+[choices.consequences]
+health = -3
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Пробиться вперёд в суматохе"
+outcome = "Ящик в руках, фингал под глазом."
+
+[choices.consequences]
+money = -120
+goods = [{ good = "vodka", change = 1 }]
+health = -2
+
+[[choices]]
+text = "Уйти"
+outcome = "Милиция приезжает через десять минут."

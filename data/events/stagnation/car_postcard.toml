@@ -1,0 +1,32 @@
+title = "Открытка на «Жигули»"
+weight = 3
+once = true
+text = """
+Профком выделил тебе открытку на «Жигули» по госцене — очередь подошла за чужие заслуги. \
+Грузин с рынка готов купить открытку прямо сейчас."""
+
+[conditions]
+reputation = [{ faction = "officials", at_least = 1 }]
+
+[[choices]]
+text = "Выкупить машину"
+outcome = "Девять тысяч — и ключи на брелоке с Гагариным."
+
+[choices.consequences]
+money = -9000
+goods = [{ good = "zhiguli", change = 1 }]
+
+[[choices]]
+text = "Продать открытку"
+outcome = "Грузин считает сотенными. Профком сделает вид, что не знает."
+
+[choices.consequences]
+money = 2000
+reputation = [{ faction = "officials", change = -1 }]
+
+[[choices]]
+text = "Отказаться в пользу ветерана"
+outcome = "Ветеран плачет. В профкоме тебя ставят в пример."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = 1 }, { faction = "people", change = 1 }]

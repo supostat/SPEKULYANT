@@ -1,0 +1,28 @@
+title = "Самогонщик"
+weight = 6
+cooldown_days = 120
+text = """
+Из-за соседской двери тянет брагой. Сосед предлагает литр «своей» — для подарков и нужных \
+людей."""
+
+[conditions]
+timeline = "dry_law"
+
+[[choices]]
+text = "Купить литр для нужных людей"
+outcome = "Самогон мутный, но нужные люди не жалуются."
+
+[choices.consequences]
+money = -10
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Донести"
+outcome = "Соседа штрафуют, аппарат конфискуют. На кухне с тобой больше не здороваются."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 1 }, { faction = "people", change = -2 }]
+
+[[choices]]
+text = "Не вмешиваться"
+outcome = "Брагой пахнет весь подъезд."

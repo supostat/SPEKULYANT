@@ -1,0 +1,23 @@
+title = "Скандал на кухне"
+weight = 7
+cooldown_days = 45
+text = "На общей кухне опять делят конфорки. Соседи ждут, на чью сторону ты встанешь."
+
+[[choices]]
+text = "Помириться бутылкой"
+outcome = "Пьют за мир. Конфорки поделены до следующей субботы."
+
+[choices.consequences]
+money = -5
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Вызвать участкового"
+outcome = "Соседи присмирели и запомнили."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 1 }, { faction = "people", change = -1 }]
+
+[[choices]]
+text = "Уйти к себе"
+outcome = "За стеной гремят кастрюли."

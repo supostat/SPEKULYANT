@@ -1,0 +1,15 @@
+title = "Сахарный дефицит"
+window = { from = "1987-03-01", until = "1987-07-01" }
+scale = { from = 0.8, to = 1.5 }
+
+[[outcomes]]
+weight = 3
+news = "Сахар пропал из магазинов: весь ушёл на самогон."
+price_shocks = [{ good = "sugar", factor = 2.0, days = 180 }]
+event = "sugar_coupons"
+set_flags = ["sugar_shortage"]
+
+[[outcomes]]
+weight = 1
+news = "Сахар продают по два килограмма в руки."
+price_shocks = [{ good = "sugar", factor = 1.4, days = 90 }]

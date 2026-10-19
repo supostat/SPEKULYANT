@@ -1,0 +1,27 @@
+title = "Пакет от валютчика"
+weight = 3
+once = true
+text = """
+{npc} просит подержать у себя пакет: «Там зелёные. Сто рублей за неделю, и ты ничего не \
+знаешь»."""
+
+[conditions]
+npc = "zhora_valyutchik"
+
+[[choices]]
+text = "Взять пакет"
+outcome = "Неделю пакет лежит под ванной. Жора забирает его и платит."
+
+[choices.consequences]
+money = 100
+reputation = [{ faction = "traders", change = 1 }]
+set_flags = ["currency_deal"]
+
+[[choices.follow_ups]]
+event = "article_88"
+after_days = 45
+chance = 0.35
+
+[[choices]]
+text = "Отказаться"
+outcome = "Статья восемьдесят восьмая — это не шутки."

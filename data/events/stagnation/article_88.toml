@@ -1,0 +1,34 @@
+title = "Статья восемьдесят восьмая"
+weight = 1
+once = true
+text = """
+Жору взяли с поличным. На допросе он назвал всех, у кого хранил валюту. Следователь \
+вызывает тебя."""
+
+[conditions]
+flags_set = ["currency_deal"]
+
+[[choices]]
+text = "Дать показания на Жору"
+outcome = "Тебя отпускают свидетелем. Толкучка этого не простит."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 2 }, { faction = "traders", change = -3 }]
+clear_flags = ["currency_deal"]
+
+[[choices]]
+text = "Заплатить следователю"
+outcome = "Твоя фамилия исчезает из протокола."
+
+[choices.consequences]
+money = -1500
+reputation = [{ faction = "militia", change = -1 }]
+clear_flags = ["currency_deal"]
+
+[[choices]]
+text = "Всё отрицать"
+outcome = "Суд даёт пять лет за пособничество в валютных операциях."
+
+[choices.consequences]
+sentence_months = 60
+clear_flags = ["currency_deal"]

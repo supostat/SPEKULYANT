@@ -1,78 +1,146 @@
 # Маршруты (§4, решение 15.1): дни в пути и билет в рублях 1984 года.
-# Закрытые города и «по блату» решают сами города; дорожные события
-# встанут на маршруты вместе с событиями эпох.
+# Закрытые города и «по блату» решают сами города; road_events — дорожные
+# события эпох (road = true) с весами на маршруте.
 
 [[routes]]
 from = "moscow"
 to = "leningrad"
 days = 1
 fare = 15
+road_events = [
+  { event = "conductor_nina", weight = 3 },
+  { event = "transport_militia", weight = 2 },
+  { event = "card_sharps", weight = 1 },
+  { event = "fellow_traveller", weight = 3 },
+]
 
 [[routes]]
 from = "leningrad"
 to = "moscow"
 days = 1
 fare = 15
+road_events = [
+  { event = "conductor_nina", weight = 3 },
+  { event = "transport_militia", weight = 2 },
+  { event = "card_sharps", weight = 1 },
+  { event = "fellow_traveller", weight = 3 },
+]
 
 [[routes]]
 from = "moscow"
 to = "gorky"
 days = 1
 fare = 8
+road_events = [
+  { event = "conductor_nina", weight = 3 },
+  { event = "transport_militia", weight = 2 },
+  { event = "card_sharps", weight = 1 },
+  { event = "fellow_traveller", weight = 3 },
+]
 
 [[routes]]
 from = "gorky"
 to = "moscow"
 days = 1
 fare = 8
+road_events = [
+  { event = "conductor_nina", weight = 3 },
+  { event = "transport_militia", weight = 2 },
+  { event = "card_sharps", weight = 1 },
+  { event = "fellow_traveller", weight = 3 },
+]
 
 [[routes]]
 from = "moscow"
 to = "riga"
 days = 1
 fare = 15
+road_events = [
+  { event = "conductor_nina", weight = 3 },
+  { event = "transport_militia", weight = 2 },
+  { event = "card_sharps", weight = 1 },
+  { event = "fellow_traveller", weight = 3 },
+]
 
 [[routes]]
 from = "riga"
 to = "moscow"
 days = 1
 fare = 15
+road_events = [
+  { event = "conductor_nina", weight = 3 },
+  { event = "transport_militia", weight = 2 },
+  { event = "card_sharps", weight = 1 },
+  { event = "fellow_traveller", weight = 3 },
+]
 
 [[routes]]
 from = "moscow"
 to = "tashkent"
 days = 4
 fare = 60
+road_events = [
+  { event = "conductor_nina", weight = 3 },
+  { event = "transport_militia", weight = 2 },
+  { event = "card_sharps", weight = 1 },
+  { event = "fellow_traveller", weight = 3 },
+]
 
 [[routes]]
 from = "tashkent"
 to = "moscow"
 days = 4
 fare = 60
+road_events = [
+  { event = "conductor_nina", weight = 3 },
+  { event = "transport_militia", weight = 2 },
+  { event = "card_sharps", weight = 1 },
+  { event = "fellow_traveller", weight = 3 },
+]
 
 [[routes]]
 from = "moscow"
 to = "tbilisi"
 days = 3
 fare = 45
+road_events = [
+  { event = "conductor_nina", weight = 3 },
+  { event = "transport_militia", weight = 2 },
+  { event = "card_sharps", weight = 1 },
+  { event = "fellow_traveller", weight = 3 },
+]
 
 [[routes]]
 from = "tbilisi"
 to = "moscow"
 days = 3
 fare = 45
+road_events = [
+  { event = "conductor_nina", weight = 3 },
+  { event = "transport_militia", weight = 2 },
+  { event = "card_sharps", weight = 1 },
+  { event = "fellow_traveller", weight = 3 },
+]
 
 [[routes]]
 from = "moscow"
 to = "berlin"
 days = 2
 fare = 80
+road_events = [
+  { event = "gdr_customs", weight = 3 },
+  { event = "fellow_traveller", weight = 1 },
+]
 
 [[routes]]
 from = "berlin"
 to = "moscow"
 days = 2
 fare = 80
+road_events = [
+  { event = "gdr_customs", weight = 3 },
+  { event = "fellow_traveller", weight = 1 },
+]
 
 [[routes]]
 from = "moscow"
@@ -115,24 +183,44 @@ from = "leningrad"
 to = "riga"
 days = 1
 fare = 12
+road_events = [
+  { event = "conductor_nina", weight = 3 },
+  { event = "transport_militia", weight = 2 },
+  { event = "card_sharps", weight = 1 },
+  { event = "fellow_traveller", weight = 3 },
+]
 
 [[routes]]
 from = "riga"
 to = "leningrad"
 days = 1
 fare = 12
+road_events = [
+  { event = "conductor_nina", weight = 3 },
+  { event = "transport_militia", weight = 2 },
+  { event = "card_sharps", weight = 1 },
+  { event = "fellow_traveller", weight = 3 },
+]
 
 [[routes]]
 from = "leningrad"
 to = "berlin"
 days = 2
 fare = 85
+road_events = [
+  { event = "gdr_customs", weight = 3 },
+  { event = "fellow_traveller", weight = 1 },
+]
 
 [[routes]]
 from = "berlin"
 to = "leningrad"
 days = 2
 fare = 85
+road_events = [
+  { event = "gdr_customs", weight = 3 },
+  { event = "fellow_traveller", weight = 1 },
+]
 
 [[routes]]
 from = "warsaw"

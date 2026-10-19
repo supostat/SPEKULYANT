@@ -1,0 +1,21 @@
+title = "Таможня на границе"
+weight = 3
+cooldown_days = 30
+road = true
+text = """
+Брест. Таможенник листает декларацию и смотрит на твой чемодан. В носках у тебя банка \
+икры."""
+
+[[choices]]
+text = "Подарить таможеннику икру"
+outcome = "Таможенник прячет банку в карман и ставит штамп."
+
+[choices.consequences]
+goods = [{ good = "caviar", change = -1 }]
+
+[[choices]]
+text = "Выложить всё по описи"
+outcome = "Чист. Таможенник даже разочарован."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 1 }]

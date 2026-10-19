@@ -1,0 +1,31 @@
+title = "Подошла очередь"
+weight = 1
+once = true
+text = "Твой номер выкрикнули: импортный холодильник по госцене ждёт на складе до вечера."
+
+[conditions]
+flags_set = ["fridge_queue"]
+
+[[choices]]
+text = "Выкупить"
+outcome = "Грузчики хотят на бутылку. Холодильник твой."
+
+[choices.consequences]
+money = -700
+goods = [{ good = "fridge", change = 1 }]
+clear_flags = ["fridge_queue"]
+
+[[choices]]
+text = "Продать номер"
+outcome = "Армянин из хвоста очереди платит не торгуясь."
+
+[choices.consequences]
+money = 120
+clear_flags = ["fridge_queue"]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Номер переходит следующему."
+
+[choices.consequences]
+clear_flags = ["fridge_queue"]

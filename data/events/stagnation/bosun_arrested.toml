@@ -1,0 +1,25 @@
+title = "Михалыча взяли"
+weight = 1
+once = true
+text = "{npc} попался на таможне с двойным дном в рундуке. Жена просит помочь с передачей."
+
+[conditions]
+npc = "bosun"
+flags_set = ["bosun_smuggles"]
+
+[[choices]]
+text = "Собрать передачу"
+outcome = "Михалыч узнает, кто не забыл."
+
+[choices.consequences]
+money = -50
+contacts = [{ npc = "bosun", relation = 2, away_days = 365 }]
+clear_flags = ["bosun_smuggles"]
+
+[[choices]]
+text = "Забыть о нём"
+outcome = "Михалыч узнает и это."
+
+[choices.consequences]
+contacts = [{ npc = "bosun", relation = -2, away_days = 365 }]
+clear_flags = ["bosun_smuggles"]

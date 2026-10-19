@@ -1,0 +1,28 @@
+title = "Транспортная милиция"
+weight = 2
+cooldown_days = 30
+road = true
+text = """
+Ночью в купе входит наряд: «Документы и багаж к осмотру». Сержант светит фонариком в твой \
+чемодан."""
+
+[[choices]]
+text = "Открыть чемодан"
+outcome = "Сержант листает паспорт и уходит. Повезло."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 1 }]
+
+[[choices]]
+text = "Сунуть четвертак"
+outcome = "Фонарик гаснет."
+
+[choices.consequences]
+money = -25
+
+[[choices]]
+text = "Возмущаться"
+outcome = "Сержант записывает фамилию. На всякий случай."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -1 }]

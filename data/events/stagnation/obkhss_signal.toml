@@ -1,0 +1,34 @@
+title = "Сигнал"
+weight = 4
+cooldown_days = 180
+text = "Знакомая из профкома шепчет: на тебя поступил сигнал в ОБХСС. Пока проверяют."
+
+[conditions]
+money = { at_least = 1000 }
+
+[[choices]]
+text = "Отнести в кабинет коробку конфет"
+outcome = "Коробку принимают. В ней, кроме конфет, сто пятьдесят рублей."
+
+[choices.consequences]
+money = -150
+reputation = [{ faction = "militia", change = 1 }]
+
+[[choices]]
+text = "Залечь на дно"
+outcome = "Неделю торгуешь осторожно. Сигнал пока лежит в папке."
+
+[choices.consequences]
+reputation = [{ faction = "traders", change = -1 }]
+
+[[choices]]
+text = "Ничего не делать"
+outcome = "Сигналы, бывает, теряются."
+
+[choices.consequences]
+set_flags = ["obkhss_watch"]
+
+[[choices.follow_ups]]
+event = "obkhss_visit"
+after_days = 14
+chance = 0.5

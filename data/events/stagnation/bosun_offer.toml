@@ -1,0 +1,36 @@
+title = "Михалыч из рейса"
+weight = 6
+cooldown_days = 120
+text = """
+{npc} вернулся из Гамбурга и звонит из автомата: «Кроссовки „Адидас“, три пары. Для своих \
+— по-свойски»."""
+
+[conditions]
+npc = "bosun"
+
+[[choices]]
+text = "Взять все три"
+outcome = "Михалыч доволен: свои люди."
+
+[choices.consequences]
+money = -250
+goods = [{ good = "sneakers", change = 3 }]
+contacts = [{ npc = "bosun", relation = 1 }]
+set_flags = ["bosun_smuggles"]
+
+[[choices.follow_ups]]
+event = "bosun_arrested"
+after_days = 60
+chance = 0.1
+
+[[choices]]
+text = "Взять в долг"
+outcome = "Михалыч записывает в блокнот. Долг — тоже связь."
+
+[choices.consequences]
+goods = [{ good = "sneakers", change = 2 }]
+contacts = [{ npc = "bosun", favours = -1 }]
+
+[[choices]]
+text = "Не сейчас"
+outcome = "Михалыч не обижается: пойдёт к другим."

@@ -1,0 +1,26 @@
+title = "Дело о тунеядстве"
+weight = 1
+once = true
+text = """
+Повестка в народный суд: «за систематическое уклонение от общественно полезного труда»."""
+
+[conditions]
+flags_set = ["parasite"]
+flags_unset = ["watchman"]
+
+[[choices]]
+text = "Срочно устроиться задним числом"
+outcome = "Кадровичка за сто рублей находит тебя в приказе за прошлый месяц."
+
+[choices.consequences]
+money = -100
+set_flags = ["watchman"]
+clear_flags = ["parasite"]
+
+[[choices]]
+text = "Пойти под суд"
+outcome = "Год исправительных работ — далеко от Москвы."
+
+[choices.consequences]
+sentence_months = 12
+clear_flags = ["parasite"]

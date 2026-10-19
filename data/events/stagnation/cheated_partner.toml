@@ -1,0 +1,30 @@
+title = "Кинутый партнёр"
+weight = 5
+once = true
+text = "{npc} ждёт у подъезда с двумя друзьями. Полгода назад ты обошёлся с ним некрасиво."
+
+[conditions]
+rival = { relation_at_most = -2, offended_days = 180 }
+
+[[choices]]
+text = "Вернуть долг с процентами"
+outcome = "Он пересчитывает и уходит. Друзья — тоже."
+
+[choices.consequences]
+money = -250
+rival = { relation = 2 }
+
+[[choices]]
+text = "Драться"
+outcome = "Утро ты встречаешь в травмпункте."
+
+[choices.consequences]
+health = -15
+reputation = [{ faction = "bandits", change = -1 }]
+
+[[choices]]
+text = "Сбежать через чёрный ход"
+outcome = "Ушёл. Но он знает, где ты живёшь."
+
+[choices.consequences]
+rival = { relation = -1 }

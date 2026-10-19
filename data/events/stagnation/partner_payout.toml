@@ -1,0 +1,16 @@
+title = "Доля с кассет"
+weight = 1
+once = true
+text = "Партнёр приносит конверт: кассеты ушли за неделю."
+
+[conditions]
+flags_set = ["partner_share"]
+
+[[choices]]
+text = "Забрать долю"
+outcome = "Четыреста двадцать вместо трёхсот. Бизнес."
+
+[choices.consequences]
+money = 420
+reputation = [{ faction = "traders", change = 1 }]
+clear_flags = ["partner_share"]

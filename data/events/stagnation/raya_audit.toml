@@ -1,0 +1,25 @@
+title = "Ревизия в гастрономе"
+weight = 1
+once = true
+text = """
+{npc} звонит в слезах: ревизия, недостача на триста рублей. Если не закрыть — посадят."""
+
+[conditions]
+npc = "shop_manager_raya"
+flags_set = ["blat_raya"]
+
+[[choices]]
+text = "Закрыть недостачу"
+outcome = "Рая будет помнить это всю жизнь."
+
+[choices.consequences]
+money = -300
+contacts = [{ npc = "shop_manager_raya", relation = 3, favours = 2 }]
+
+[[choices]]
+text = "Отойти в сторону"
+outcome = "Раю переводят в овощной. Чёрный ход закрыт."
+
+[choices.consequences]
+contacts = [{ npc = "shop_manager_raya", relation = -3 }]
+clear_flags = ["blat_raya"]

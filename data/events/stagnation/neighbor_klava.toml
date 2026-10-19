@@ -1,0 +1,30 @@
+title = "Соседка в глазке"
+weight = 6
+cooldown_days = 90
+text = """
+{npc} ловит на площадке: «Что это ты всё коробки таскаешь? Я ведь могу и спросить, где \
+следует»."""
+
+[conditions]
+npc = "neighbor_klava"
+
+[[choices]]
+text = "Подарить коробку конфет"
+outcome = "Клава сразу добреет: «Да я так, по-соседски»."
+
+[choices.consequences]
+money = -10
+contacts = [{ npc = "neighbor_klava", relation = 1 }]
+
+[[choices]]
+text = "Нагрубить"
+outcome = "Клава поджимает губы. Это не конец."
+
+[choices.consequences]
+contacts = [{ npc = "neighbor_klava", relation = -2 }]
+set_flags = ["klava_offended"]
+
+[[choices.follow_ups]]
+event = "anonymous_letter"
+after_days = 20
+chance = 0.4

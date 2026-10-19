@@ -1,0 +1,17 @@
+title = "Капкан"
+weight = 5
+text = "У каждого выбора здесь условие или цена: тот, кому они не по силам, застрял бы навсегда."
+
+[[choices]]
+text = "Заплатить"
+outcome = "Заплачено."
+
+[choices.consequences]
+money = -100
+
+[[choices]]
+text = "Уйти дворами"
+outcome = "Ушёл."
+
+[choices.conditions]
+cities = ["moscow"]

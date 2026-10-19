@@ -1,0 +1,18 @@
+title = "Попутчик"
+weight = 3
+cooldown_days = 30
+road = true
+text = """
+Командировочный из Свердловска достаёт курицу и бутылку: «В дороге без этого нельзя»."""
+
+[[choices]]
+text = "Выпить с ним"
+outcome = "К утру вы друзья навек и знаете всё о его заводе."
+
+[choices.consequences]
+health = -1
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Отказаться и лечь спать"
+outcome = "Попутчик пьёт один и поёт тихо."

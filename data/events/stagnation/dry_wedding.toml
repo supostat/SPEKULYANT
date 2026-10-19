@@ -1,0 +1,22 @@
+title = "Безалкогольная свадьба"
+weight = 5
+cooldown_days = 120
+text = """
+Комсомольская свадьба — с лимонадом, по новому указу. Гости в туалете ищут, у кого есть."""
+
+[conditions]
+timeline = "dry_law"
+goods = [{ good = "vodka", at_least = 1 }]
+
+[[choices]]
+text = "Продать ящик втридорога"
+outcome = "Свадьба оживает. Жених платит не считая."
+
+[choices.consequences]
+money = 320
+goods = [{ good = "vodka", change = -1 }]
+reputation = [{ faction = "militia", change = -1 }]
+
+[[choices]]
+text = "Не связываться"
+outcome = "Гости пьют лимонад и смотрят грустно."

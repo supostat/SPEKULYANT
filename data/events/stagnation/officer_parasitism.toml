@@ -1,0 +1,37 @@
+title = "Тунеядство"
+weight = 4
+once = true
+text = """
+{npc} напоминает: кто нигде не работает, тот тунеядец, а это статья двести девятая."""
+
+[conditions]
+npc = "officer_syomin"
+
+[[choices]]
+text = "Устроиться сторожем"
+outcome = "Сутки через трое в будке. Зарплата маленькая, алиби большое."
+
+[choices.consequences]
+money = 70
+reputation = [{ faction = "militia", change = 1 }]
+set_flags = ["watchman"]
+
+[[choices]]
+text = "Купить справку с места работы"
+outcome = "Справка красивая, с печатью."
+
+[choices.consequences]
+money = -50
+
+[[choices]]
+text = "Послать участкового"
+outcome = "Сёмин краснеет и уходит. Обещает вернуться."
+
+[choices.consequences]
+contacts = [{ npc = "officer_syomin", relation = -2 }]
+set_flags = ["parasite"]
+
+[[choices.follow_ups]]
+event = "parasitism_case"
+after_days = 30
+chance = 0.5

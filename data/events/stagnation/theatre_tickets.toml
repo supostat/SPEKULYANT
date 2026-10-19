@@ -1,0 +1,17 @@
+title = "Билеты на Таганку"
+weight = 5
+cooldown_days = 120
+text = """
+Нужному человеку из исполкома нужны два билета на Таганку. У тебя есть знакомая кассирша."""
+
+[[choices]]
+text = "Достать билеты"
+outcome = "Нужный человек запомнил твоё имя."
+
+[choices.consequences]
+money = -20
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Сказать, что не можешь"
+outcome = "Нужный человек найдёт другого."

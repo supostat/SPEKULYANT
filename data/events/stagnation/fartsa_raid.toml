@@ -1,0 +1,29 @@
+title = "Облава"
+weight = 5
+text = """
+Свисток, и вдоль Калининского бегут фарцовщики. У тебя под курткой пакет с джинсами."""
+
+[conditions]
+goods = [{ good = "jeans", at_least = 1 }]
+
+[[choices]]
+text = "Сунуть пакет в урну"
+outcome = "Пакет остаётся в урне. Дворник сегодня будет щеголять."
+
+[choices.consequences]
+goods = [{ good = "jeans", change = -1 }]
+
+[[choices]]
+text = "Бежать дворами"
+outcome = "Ушёл, но подвернул ногу на обледенелой лестнице."
+
+[choices.consequences]
+health = -2
+
+[[choices]]
+text = "Сунуть дружиннику трёшку"
+outcome = "Дружинник отворачивается и смотрит на небо."
+
+[choices.consequences]
+money = -3
+reputation = [{ faction = "militia", change = -1 }]

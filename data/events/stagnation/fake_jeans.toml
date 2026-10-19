@@ -1,0 +1,37 @@
+title = "Самострок"
+weight = 1
+once = true
+text = """
+Покупатель выворачивает джинсы наизнанку и смеётся: лейбл пришит криво, строчка местная. \
+Самострок из Малаховки."""
+
+[conditions]
+goods = [{ good = "jeans", at_least = 1 }]
+flags_set = ["stasik_batch"]
+
+[[choices]]
+text = "Продать как фирму, глядя в глаза"
+outcome = "Покупатель берёт, но толкучка запомнит."
+
+[choices.consequences]
+money = 60
+goods = [{ good = "jeans", change = -1 }]
+reputation = [{ faction = "traders", change = -2 }]
+clear_flags = ["stasik_batch"]
+
+[[choices]]
+text = "Признаться и отдать за полцены"
+outcome = "Убыток, зато руки чистые."
+
+[choices.consequences]
+money = 50
+goods = [{ good = "jeans", change = -1 }]
+reputation = [{ faction = "traders", change = 1 }]
+clear_flags = ["stasik_batch"]
+
+[[choices]]
+text = "Оставить себе"
+outcome = "Ходить в самостроке тоже надо уметь."
+
+[choices.consequences]
+clear_flags = ["stasik_batch"]

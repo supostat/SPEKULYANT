@@ -147,6 +147,7 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "events/stagnation/greedy.toml:3: отдых события в ноль дней — это каждый день",
         "events/stagnation/lost_luggage.toml:3: дорожное событие lost_luggage не стоит ни на одном маршруте",
         "events/stagnation/rival_misuse.toml:5: выбор 1: последствие rival без соперника в условиях события",
+        "events/stagnation/trap.toml:5: нет выбора, доступного всегда",
         "events/stagnation/greedy.toml:4: подстановка {price} в событии без price_of",
         "events/stagnation/greedy.toml:4: подстановка {sum} в событии без sum",
         "events/stagnation/greedy.toml:10: последствие для vodka_man ничего не меняет",
@@ -171,6 +172,36 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         );
     }
     assert_eq!(errors.len(), expected.len(), "лишние ошибки: {errors:#?}");
+}
+
+/// Событие-взнос: условия обещают 50 рублей и пару джинсов, единственный выбор забирает
+/// `money` рублей и `jeans` пар.
+fn fee_event(money: i64, jeans: i32) -> ContentFile {
+    let text = format!(
+        "title = \"Взнос\"\nweight = 1\ntext = \"Взнос.\"\n\n[conditions]\n\
+         money = {{ at_least = 50 }}\ngoods = [{{ good = \"jeans\", at_least = 1 }}]\n\n\
+         [[choices]]\ntext = \"Отдать\"\noutcome = \"Отдал.\"\n\n[choices.consequences]\n\
+         money = -{money}\ngoods = [{{ good = \"jeans\", change = -{jeans} }}]\n"
+    );
+    ContentFile::new("events/stagnation/fee.toml", text)
+}
+
+#[test]
+fn a_choice_that_takes_only_what_the_event_promises_is_always_open() {
+    let with_fee = |money, jeans| {
+        let mut files = Content::read_files(Path::new(CONTENT_MIN)).expect("набор читается");
+        files.push(fee_event(money, jeans));
+        files
+    };
+    assert!(Content::from_files(with_fee(50, 1)).is_ok());
+    for (money, jeans) in [(60, 1), (50, 2)] {
+        let errors = errors_of(with_fee(money, jeans));
+        assert!(
+            errors.iter().any(|error| error
+                .starts_with("events/stagnation/fee.toml:9: нет выбора, доступного всегда")),
+            "{money} р. и {jeans} пар: {errors:#?}"
+        );
+    }
 }
 
 #[test]

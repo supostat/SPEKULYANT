@@ -1,0 +1,22 @@
+title = "Запись на холодильник"
+weight = 4
+once = true
+text = """
+В мебельном записывают на импортные холодильники: номер на ладони, отмечаться каждое \
+воскресенье."""
+
+[[choices]]
+text = "Записаться"
+outcome = "Ты двести сорок первый. Отмечаться — до победного."
+
+[choices.consequences]
+set_flags = ["fridge_queue"]
+
+[[choices.follow_ups]]
+event = "fridge_turn"
+after_days = 30
+chance = 0.7
+
+[[choices]]
+text = "Не записываться"
+outcome = "Холодильник подождёт."

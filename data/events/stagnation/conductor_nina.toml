@@ -1,0 +1,31 @@
+title = "Проводница"
+weight = 3
+cooldown_days = 30
+road = true
+text = """
+{npc} разносит чай и между делом предлагает колготки: «Из Риги. Для твоей — или на \
+продажу»."""
+
+[conditions]
+npc = "conductor_nina"
+
+[[choices]]
+text = "Взять пять пар"
+outcome = "Нина довольна: свой человек в вагоне — это надолго."
+
+[choices.consequences]
+money = -40
+goods = [{ good = "tights", change = 5 }]
+contacts = [{ npc = "conductor_nina", relation = 1 }]
+
+[[choices]]
+text = "Предложить ей свои джинсы"
+outcome = "Нина берёт для сына и платит не торгуясь."
+
+[choices.consequences]
+money = 170
+goods = [{ good = "jeans", change = -1 }]
+
+[[choices]]
+text = "Пить чай и спать"
+outcome = "Стук колёс убаюкивает."

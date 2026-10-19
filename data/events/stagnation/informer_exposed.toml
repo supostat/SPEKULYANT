@@ -1,0 +1,31 @@
+title = "Стукач"
+weight = 1
+once = true
+text = "На толкучке на тебя смотрят иначе. Кто-то видел, как ты выходил от майора."
+
+[conditions]
+flags_set = ["informer"]
+
+[[choices]]
+text = "Отпираться"
+outcome = "Вечером у подъезда тебя встречают трое. Разговор короткий."
+
+[choices.consequences]
+reputation = [{ faction = "traders", change = -2 }]
+health = -10
+
+[[choices]]
+text = "Откупиться — проставиться всем"
+outcome = "Стол накрыт, обиды смыты. Почти."
+
+[choices.consequences]
+money = -300
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Признаться и больше не стучать"
+outcome = "Майор будет недоволен. Толкучка — тоже, но меньше."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -2 }, { faction = "traders", change = -1 }]
+clear_flags = ["informer"]

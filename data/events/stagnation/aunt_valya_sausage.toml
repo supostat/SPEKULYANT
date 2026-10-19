@@ -1,0 +1,21 @@
+title = "Сервелат от Тёти Вали"
+weight = 5
+cooldown_days = 90
+text = """
+{npc} подмигивает из-за прилавка: «Сервелат с мясокомбината, без бумажек. Бери оптом — \
+отдам по-родственному»."""
+
+[conditions]
+npc = "aunt_valya"
+
+[[choices]]
+text = "Взять шесть батонов"
+outcome = "Сервелат пахнет так, что оглядываются прохожие."
+
+[choices.consequences]
+money = -45
+goods = [{ good = "cervelat", change = 6 }]
+
+[[choices]]
+text = "Не брать"
+outcome = "Тётя Валя пожимает плечами."

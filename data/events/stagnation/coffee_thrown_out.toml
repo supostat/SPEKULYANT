@@ -1,0 +1,25 @@
+title = "Растворимый кофе"
+weight = 7
+cooldown_days = 60
+text = "В «Чай-кофе» выбросили индийский растворимый. Продавщица отпускает не глядя."
+
+[[choices]]
+text = "Взять десять банок"
+outcome = "Очередь сзади ропщет. Продавщица делает вид, что не слышит."
+
+[choices.consequences]
+money = -80
+goods = [{ good = "coffee", change = 10 }]
+reputation = [{ faction = "people", change = -1 }]
+
+[[choices]]
+text = "Взять две банки себе"
+outcome = "Утро будет бодрым."
+
+[choices.consequences]
+money = -16
+goods = [{ good = "coffee", change = 2 }]
+
+[[choices]]
+text = "Пройти"
+outcome = "Кофе кончится к обеду и без тебя."

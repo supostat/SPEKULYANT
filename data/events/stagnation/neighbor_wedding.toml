@@ -1,0 +1,30 @@
+title = "Соседская свадьба"
+weight = 5
+cooldown_days = 180
+text = """
+Сосед женит сына, а к столу ничего нет. Просит выручить: сервелат и хоть что-нибудь из \
+дефицита."""
+
+[[choices]]
+text = "Продать сервелат по-соседски"
+outcome = "Сосед платит и зовёт на свадьбу."
+
+[choices.consequences]
+money = 30
+goods = [{ good = "cervelat", change = -2 }]
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Подарить коньяк"
+outcome = "Тебя сажают рядом с невестой."
+
+[choices.consequences]
+goods = [{ good = "cognac", change = -1 }]
+reputation = [{ faction = "people", change = 2 }]
+
+[[choices]]
+text = "Сказать, что ничего нет"
+outcome = "Сосед не верит, но молчит."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = -1 }]

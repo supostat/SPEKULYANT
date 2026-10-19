@@ -28,6 +28,30 @@ fn new_game(seed: u64) -> Game {
     Game::new_life(&settings, Arc::new(content)).expect("жизнь начинается")
 }
 
+/// Событие `data/` закрывается первым доступным выбором, который не берёт денег, не даёт срока и
+/// не кончает жизнь, — такой есть у каждого события, и сценарий остаётся при своих деньгах и воле.
+fn settle_harmlessly(game: &mut Game) {
+    let pending = game.events().pending().expect("событие ждёт ответа");
+    let choices = &game.content().events[&pending.event].choices;
+    let shown = game.view().pending_event.expect("событие показано");
+    let choice = shown
+        .choices
+        .iter()
+        .zip(choices)
+        .position(|(shown, choice)| {
+            let consequences = &choice.consequences;
+            shown.available
+                && consequences.money.is_none_or(|money| !money.is_negative())
+                && consequences.sentence_months.is_none()
+                && consequences.end_life.is_none()
+        })
+        .expect("у события есть безобидный выбор")
+        + 1;
+    game.apply(Command::Choose { choice })
+        .expect("доступный выбор принимается");
+    game.apply(Command::Continue).expect("исход прочитан");
+}
+
 /// Действия игрока в сценарии: в какой день что сделать.
 fn scripted_command(day: i32) -> Option<Command> {
     match day {
@@ -54,13 +78,17 @@ fn scripted_command(day: i32) -> Option<Command> {
 }
 
 /// Сценарий игрока: кадры по 16 мс, сделки, вклад, смена скорости, пауза посреди года — до
-/// 400-го дня.
+/// 400-го дня; события закрываются безобидным выбором.
 fn play_scripted_life(seed: u64) -> String {
     let mut game = new_game(seed);
     let mut paused_frames = 0;
     let mut paused = false;
     let mut acted_on = -1;
     while game.today().day_index() < DAYS {
+        if game.events().pending().is_some() {
+            settle_harmlessly(&mut game);
+            continue;
+        }
         let day = game.today().day_index();
         if day != acted_on {
             acted_on = day;
@@ -112,11 +140,14 @@ fn another_seed_gives_another_market() {
 fn frame_size_does_not_change_history() {
     let mut fine = new_game(7);
     let mut coarse = new_game(7);
-    for _ in 0..(1800 * 400 / FRAME_MILLISECONDS) {
-        fine.advance(FRAME_MILLISECONDS);
-    }
-    for _ in 0..720 {
-        coarse.advance(1000);
+    for (game, frame) in [(&mut fine, FRAME_MILLISECONDS), (&mut coarse, 1000)] {
+        while game.today().day_index() < DAYS {
+            if game.events().pending().is_some() {
+                settle_harmlessly(game);
+            } else {
+                game.advance(frame);
+            }
+        }
     }
     assert_eq!(fine.today(), coarse.today());
     assert_eq!(fine.today().day_index(), DAYS);
@@ -288,11 +319,16 @@ fn the_same_seed_gives_the_same_business_history() {
     );
 }
 
-/// История `data/` по сиду: таймлайн и мир до 1 июля 1985 года — через окно сухого закона.
+/// История `data/` по сиду: таймлайн и мир до 1 июля 1985 года — через окно сухого закона;
+/// события закрываются безобидным выбором.
 fn live_through_the_dry_law(seed: u64) -> (Game, String) {
     let mut game = new_game(seed);
     while game.today() < GameDate::from_ymd(1985, 7, 1).expect("дата существует") {
-        assert!(game.advance(1800), "в data/ нет событий — время идёт");
+        if game.events().pending().is_some() {
+            settle_harmlessly(&mut game);
+        } else {
+            game.advance(1800);
+        }
     }
     let view = serde_json::to_string(&game.view()).expect("снимок сериализуется");
     (game, view)

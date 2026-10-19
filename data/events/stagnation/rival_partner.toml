@@ -1,0 +1,29 @@
+title = "Предложение доли"
+weight = 4
+cooldown_days = 180
+text = """
+{npc} зовёт в долю: партия кассет из Прибалтики, деньги вернутся через месяц с наваром."""
+
+[conditions]
+rival = { strategy = "trader", relation_at_least = 0 }
+
+[[choices]]
+text = "Вложить триста"
+outcome = "Деньги ушли. Теперь ждать."
+
+[choices.consequences]
+money = -300
+rival = { relation = 1 }
+set_flags = ["partner_share"]
+
+[[choices.follow_ups]]
+event = "partner_payout"
+after_days = 30
+chance = 0.7
+
+[[choices]]
+text = "Отказаться"
+outcome = "Партнёр обижается: значит, не доверяешь."
+
+[choices.consequences]
+rival = { relation = -1 }

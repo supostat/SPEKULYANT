@@ -1,0 +1,28 @@
+title = "Посылка из Аккры"
+weight = 6
+cooldown_days = 120
+text = "{npc} вернулся с каникул с чемоданом жвачки и кассет TDK. В общежитии уже очередь."
+
+[conditions]
+npc = "kofi"
+
+[[choices]]
+text = "Взять всё оптом"
+outcome = "Кофи доволен: оптом — это по-капиталистически."
+
+[choices.consequences]
+money = -90
+goods = [{ good = "chewing_gum", change = 2 }, { good = "audiocassette", change = 3 }]
+contacts = [{ npc = "kofi", relation = 1 }]
+
+[[choices]]
+text = "Взять пару блоков жвачки"
+outcome = "Кофи пожимает плечами и отсчитывает два блока."
+
+[choices.consequences]
+money = -40
+goods = [{ good = "chewing_gum", change = 2 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Кофи распродаёт всё за вечер соседям по этажу."

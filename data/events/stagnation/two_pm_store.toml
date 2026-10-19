@@ -1,0 +1,27 @@
+title = "С двух часов"
+weight = 8
+cooldown_days = 45
+text = "Водку продают с двух. В час сорок у дверей уже давка, в два пятнадцать — пусто."
+
+[conditions]
+timeline = "dry_law"
+
+[[choices]]
+text = "Отстоять за ящиком"
+outcome = "Ящик в руках, рёбра помяты."
+
+[choices.consequences]
+money = -110
+goods = [{ good = "vodka", change = 1 }]
+
+[[choices]]
+text = "Перекупить у первых в очереди"
+outcome = "Дороже, зато без давки."
+
+[choices.consequences]
+money = -150
+goods = [{ good = "vodka", change = 1 }]
+
+[[choices]]
+text = "Уйти"
+outcome = "Лучше уж кефир."

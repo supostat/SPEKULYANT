@@ -1,0 +1,32 @@
+title = "Предложение майора"
+weight = 3
+once = true
+text = """
+{npc} угощает в пельменной: «Ты парень толковый. Рассказывай мне иногда, кто чем торгует, \
+— и тебя никто не тронет»."""
+
+[conditions]
+npc = "major_glebov"
+reputation = [{ faction = "traders", at_least = 1 }]
+
+[[choices]]
+text = "Согласиться"
+outcome = "Майор жмёт руку. Теперь у тебя есть крыша и куратор."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 2 }, { faction = "traders", change = -1 }]
+set_flags = ["informer"]
+contacts = [{ npc = "major_glebov", relation = 2 }]
+
+[[choices.follow_ups]]
+event = "informer_exposed"
+after_days = 120
+chance = 0.4
+
+[[choices]]
+text = "Отказаться"
+outcome = "Майор доедает пельмени и говорит, что запомнит."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -1 }]
+contacts = [{ npc = "major_glebov", relation = -1 }]

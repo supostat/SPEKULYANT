@@ -1,0 +1,33 @@
+title = "Рейд дружинников"
+weight = 5
+cooldown_days = 90
+text = """
+На выходе из метро дружинники с красными повязками проверяют сумки у всех, кто похож на \
+спекулянта. Ты похож."""
+
+[conditions]
+money = { at_least = 200 }
+
+[[choices]]
+text = "Показать комсомольский билет"
+outcome = "Командир дружины отдаёт честь, хотя это и не положено."
+
+[choices.conditions]
+reputation = [{ faction = "officials", at_least = 1 }]
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Рвануть в переход"
+outcome = "Оторвался, но разбил колено."
+
+[choices.consequences]
+health = -2
+
+[[choices]]
+text = "Сунуть червонец"
+outcome = "Повязка отворачивается."
+
+[choices.consequences]
+money = -10

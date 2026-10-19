@@ -1,0 +1,22 @@
+title = "Участковый на чай"
+weight = 7
+cooldown_days = 60
+text = "{npc} заходит «по-соседски» и долго разглядывает коробки в углу."
+
+[conditions]
+npc = "officer_syomin"
+
+[[choices]]
+text = "Налить и угостить"
+outcome = "Сёмин пьёт, крякает и коробок больше не видит."
+
+[choices.consequences]
+money = -10
+contacts = [{ npc = "officer_syomin", relation = 1 }]
+
+[[choices]]
+text = "Сказать, что спешишь"
+outcome = "Сёмин уходит и записывает что-то в блокнот."
+
+[choices.consequences]
+contacts = [{ npc = "officer_syomin", relation = -1 }]

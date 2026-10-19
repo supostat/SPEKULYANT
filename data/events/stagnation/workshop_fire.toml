@@ -1,0 +1,21 @@
+title = "Пожар"
+weight = 1
+incident = "fire"
+text = """
+Ночью в «{business}» загорелась проводка. Пожарные приехали, когда тушить было почти \
+нечего."""
+
+[[choices]]
+text = "Восстановить"
+outcome = "Новые станки, новая проводка, старые долги."
+
+[choices.consequences]
+money = -400
+business = { closed_days = 30 }
+
+[[choices]]
+text = "Списать дело"
+outcome = "На пепелище не торгуют."
+
+[choices.consequences]
+business = { lost = true }

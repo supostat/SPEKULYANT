@@ -1,0 +1,24 @@
+title = "Залили сверху"
+weight = 4
+cooldown_days = 180
+text = "Ночью с потолка полило: у соседей сверху сорвало кран. Пластинки в углу плавают."
+
+[conditions]
+goods = [{ good = "records", at_least = 1 }]
+
+[[choices]]
+text = "Требовать возмещения"
+outcome = "Сосед отдаёт двадцать рублей и обиду в придачу."
+
+[choices.consequences]
+money = 20
+goods = [{ good = "records", change = -1 }]
+reputation = [{ faction = "people", change = -1 }]
+
+[[choices]]
+text = "Махнуть рукой"
+outcome = "Пластинку не спасти, соседа — можно."
+
+[choices.consequences]
+goods = [{ good = "records", change = -1 }]
+reputation = [{ faction = "people", change = 1 }]

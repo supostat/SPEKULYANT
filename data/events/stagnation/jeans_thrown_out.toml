@@ -1,0 +1,30 @@
+title = "«Ли» в ЦУМе"
+weight = 6
+cooldown_days = 90
+price_of = "jeans"
+text = """
+Слух по городу: в универмаге выбросили настоящие «Ли» по сто рублей. На толкучке они идут \
+по {price}"""
+
+[conditions]
+cities = ["moscow", "leningrad"]
+
+[[choices]]
+text = "Встать в очередь с ночи"
+outcome = "К утру номер на ладони — тридцать седьмой. Хватило."
+
+[choices.consequences]
+money = -100
+goods = [{ good = "jeans", change = 1 }]
+
+[[choices]]
+text = "Купить место у студента"
+outcome = "Студент уходит с двадцаткой, ты — с джинсами."
+
+[choices.consequences]
+money = -120
+goods = [{ good = "jeans", change = 1 }]
+
+[[choices]]
+text = "Не стоять"
+outcome = "К обеду джинсы кончились."

@@ -1,0 +1,20 @@
+title = "Облава на толкучке"
+weight = 5
+cooldown_days = 60
+text = "Милицейский «уазик» въезжает прямо в ряды. Торговцы бросают товар и разбегаются."
+
+[[choices]]
+text = "Переждать в подъезде"
+outcome = """
+Через неделю толкучка возвращается, но цены подросли: товар пропал вместе с продавцами."""
+
+[choices.consequences]
+price_shocks = [{ good = "jeans", factor = 1.3, days = 10 }, { good = "records", factor = 1.3, days = 10 }]
+
+[[choices]]
+text = "Подобрать брошенное"
+outcome = "Две пластинки в подоле — и ты уже за углом."
+
+[choices.consequences]
+goods = [{ good = "records", change = 2 }]
+reputation = [{ faction = "traders", change = -1 }]

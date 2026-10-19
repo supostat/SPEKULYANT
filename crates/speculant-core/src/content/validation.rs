@@ -10,7 +10,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use super::loader::{Entry, Parsed};
 use super::{
     Biography, BusinessChange, Choice, City, Conditions, Consequences, ContentError, ContentFile,
-    EpochProfile, Event, Faction, Good, MoneyPlace, NpcTemplate, PriceShock,
+    EpochProfile, Event, Faction, Good, GoodId, MoneyPlace, NpcTemplate, PriceShock,
 };
 use crate::economy::{MarketRules, MoneyRules, RubleCurve};
 use crate::events::EventRules;
@@ -847,6 +847,17 @@ fn check_event(event: &Event, known: &Known, report: &mut Report<'_, '_>) {
     }
     if event.choices.is_empty() {
         report.at(None, "у события нет ни одного выбора".to_owned());
+    } else if !event
+        .choices
+        .iter()
+        .any(|choice| is_always_open(choice, &event.conditions))
+    {
+        report.at(
+            report.file.line_of("[[choices]]"),
+            "нет выбора, доступного всегда — без условий и не забирающего деньги, товар и запас \
+             зоны сверх того, что обещают условия события: без него событие может запереть время"
+                .to_owned(),
+        );
     }
     if event.cooldown_days == Some(0) {
         report.at(
@@ -938,6 +949,32 @@ fn check_event(event: &Event, known: &Known, report: &mut Report<'_, '_>) {
             );
         }
     }
+}
+
+/// Выбор доступен всегда, когда событие случилось: у него нет своих условий, а деньги и товар он
+/// забирает не больше, чем обещают условия события; запаса зоны не забирает вовсе.
+fn is_always_open(choice: &Choice, promised: &Conditions) -> bool {
+    let consequences = &choice.consequences;
+    let money_promised = promised.money.map_or(0, |money| money.at_least.kopecks());
+    let goods_promised = |good: &GoodId| {
+        promised
+            .goods
+            .iter()
+            .filter(|needed| &needed.good == good)
+            .map(|needed| i64::from(needed.at_least))
+            .sum::<i64>()
+    };
+    choice.conditions == Conditions::default()
+        && consequences
+            .money
+            .is_none_or(|money| -money.kopecks() <= money_promised)
+        && consequences
+            .goods
+            .iter()
+            .all(|change| -i64::from(change.change) <= goods_promised(&change.good))
+        && consequences
+            .zone
+            .is_none_or(|change| change.price().is_empty())
 }
 
 fn check_choice(

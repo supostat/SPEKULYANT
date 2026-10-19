@@ -1,0 +1,29 @@
+title = "Партия от Стасика"
+weight = 4
+cooldown_days = 180
+text = """
+{npc} отводит в подворотню: «Пять пар „Вранглера“, только из Хельсинки. Всё за семьсот. \
+Себе в убыток»."""
+
+[conditions]
+npc = "fartsa_stasik"
+money = { at_least = 700 }
+
+[[choices]]
+text = "Взять партию"
+outcome = "Пакеты тяжёлые и пахнут чужой страной."
+
+[choices.consequences]
+money = -700
+goods = [{ good = "jeans", change = 5 }]
+reputation = [{ faction = "traders", change = 1 }]
+set_flags = ["stasik_batch"]
+
+[[choices.follow_ups]]
+event = "fake_jeans"
+after_days = 10
+chance = 0.3
+
+[[choices]]
+text = "Сказать, что денег нет"
+outcome = "Стасик сплёвывает: «Ну и сиди без штанов»."

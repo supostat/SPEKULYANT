@@ -1,0 +1,22 @@
+title = "Патент"
+weight = 5
+once = true
+text = """
+По новому закону об индивидуальной трудовой деятельности можно взять патент: таксовать, \
+шить, чинить — легально."""
+
+[conditions]
+flags_set = ["individual_labour"]
+
+[[choices]]
+text = "Оформить патент"
+outcome = "Бумага с печатью: ты теперь частник. Почти буржуй."
+
+[choices.consequences]
+money = -50
+reputation = [{ faction = "officials", change = 1 }, { faction = "militia", change = 1 }]
+set_flags = ["watchman"]
+
+[[choices]]
+text = "Работать как раньше"
+outcome = "Без бумаг дешевле. И опаснее."

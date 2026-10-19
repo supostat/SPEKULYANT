@@ -1,0 +1,48 @@
+# Пример §10.2: лето 1985 года, начало антиалкогольной кампании.
+title = "Ящик «Столичной»"
+weight = 10
+once = true
+sum = 600
+text = """
+У магазина «Вино-Водка» мужик в спецовке тянет тебя за рукав: «Есть ящик „Столичной“, со \
+свадьбы остался. {sum}, и я тебя не знаю»."""
+
+[conditions]
+epochs = ["stagnation"]
+window = { from = "1985-05-17", until = "1985-09-01" }
+cities = ["moscow"]
+npc = "vodka_man"
+money = { at_least = 600 }
+timeline = "dry_law"
+
+[[choices]]
+text = "Взять за {sum} наличными"
+outcome = """
+Ящик твой. Через месяц водку начнут продавать с двух часов, и цена на толкучке вырастет \
+втрое."""
+
+[choices.consequences]
+money = -600
+goods = [{ good = "vodka", change = 1 }]
+reputation = [{ faction = "traders", change = 1 }]
+price_shocks = [{ good = "vodka", factor = 3.0, days = 120 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Через час мужика забирает патруль. Ничего не меняется."
+
+[[choices]]
+text = "Сдать участковому"
+outcome = """
+Участковый доволен и записывает твою фамилию. Мужик тебя запомнил, и это не последняя \
+встреча."""
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 2 }, { faction = "traders", change = -3 }]
+contacts = [{ npc = "vodka_man", relation = -3 }]
+set_flags = ["snitched_1985"]
+
+[[choices.follow_ups]]
+event = "vodka_man_returns"
+after_days = 180
+chance = 0.5

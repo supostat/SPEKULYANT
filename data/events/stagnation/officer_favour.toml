@@ -1,0 +1,24 @@
+title = "Сапоги для дочки"
+weight = 5
+cooldown_days = 180
+text = """
+{npc} мнётся: дочке на выпускной нужны сапоги, финские, а в магазинах — сам знаешь."""
+
+[conditions]
+npc = "officer_syomin"
+
+[[choices]]
+text = "Достать"
+outcome = "Сапоги сидят как влитые. Сёмин твой должник."
+
+[choices.consequences]
+money = -80
+reputation = [{ faction = "militia", change = 1 }]
+contacts = [{ npc = "officer_syomin", relation = 1, favours = 1 }]
+
+[[choices]]
+text = "Развести руками"
+outcome = "Сёмин кивает. Понял."
+
+[choices.consequences]
+contacts = [{ npc = "officer_syomin", relation = -1 }]

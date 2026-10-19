@@ -1,0 +1,22 @@
+title = "Завтра облава"
+weight = 5
+cooldown_days = 120
+text = "На инструктаже дружины объявили: завтра в десять облава на толкучке у вокзала."
+
+[conditions]
+flags_set = ["druzhinnik"]
+
+[[choices]]
+text = "Предупредить своих"
+outcome = "Толкучка пустеет к девяти. Фарцовщики знают, кому сказать спасибо."
+
+[choices.consequences]
+money = 50
+reputation = [{ faction = "traders", change = 2 }, { faction = "militia", change = -1 }]
+
+[[choices]]
+text = "Промолчать"
+outcome = "Облава удалась. Командир хвалит."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 1 }]

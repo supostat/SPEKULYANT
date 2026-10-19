@@ -1,0 +1,24 @@
+title = "Смотрящий"
+weight = 6
+cooldown_days = 60
+text = """
+На рынке подходит небритый человек: «Место платное. Червонец в неделю — и никто не \
+тронет»."""
+
+[conditions]
+cities = ["tashkent", "tbilisi", "gorky", "moscow"]
+
+[[choices]]
+text = "Заплатить"
+outcome = "Небритый кивает. Теперь ты свой."
+
+[choices.consequences]
+money = -10
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Вечером тебя вежливо предупреждают: в следующий раз будет по-другому."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = -2 }]

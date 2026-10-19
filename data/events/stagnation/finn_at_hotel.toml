@@ -1,0 +1,32 @@
+title = "Финн у «Интуриста»"
+weight = 8
+cooldown_days = 60
+price_of = "jeans"
+text = """
+У входа в гостиницу финн в лыжной шапке шепчет: «Джинс, фирма, сто двадцать». На толкучке \
+такие идут по {price}"""
+
+[conditions]
+cities = ["moscow", "leningrad", "riga"]
+
+[[choices]]
+text = "Взять пару за сто двадцать"
+outcome = "Финн суёт свёрток и растворяется в толпе туристов."
+
+[choices.consequences]
+money = -120
+goods = [{ good = "jeans", change = 1 }]
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Взять три пары, если отдаст за триста"
+outcome = "Финн торгуется для вида и соглашается: ему ещё на водку."
+
+[choices.consequences]
+money = -300
+goods = [{ good = "jeans", change = 3 }]
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Пройти мимо"
+outcome = "У дверей скучает человек в сером. Может, и к лучшему."

@@ -1,0 +1,29 @@
+title = "Товар из загранки"
+weight = 6
+cooldown_days = 90
+text = """
+Матрос с сухогруза сбывает привезённое прямо у проходной порта: жвачка, колготки, даже \
+видик."""
+
+[conditions]
+cities = ["leningrad", "riga"]
+
+[[choices]]
+text = "Взять жвачку и колготки"
+outcome = "Матрос пересчитывает рубли и оглядывается на проходную."
+
+[choices.consequences]
+money = -200
+goods = [{ good = "chewing_gum", change = 4 }, { good = "tights", change = 10 }]
+
+[[choices]]
+text = "Взять видик"
+outcome = "Видик завёрнут в тельняшку. Тельняшка в подарок."
+
+[choices.consequences]
+money = -900
+goods = [{ good = "video_recorder", change = 1 }]
+
+[[choices]]
+text = "Не брать"
+outcome = "У проходной уже собирается очередь."

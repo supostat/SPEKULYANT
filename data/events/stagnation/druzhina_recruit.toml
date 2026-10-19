@@ -1,0 +1,19 @@
+title = "Запись в дружину"
+weight = 3
+once = true
+text = "Комсорг записывает всех в добровольную народную дружину: отказ будет отмечен."
+
+[[choices]]
+text = "Записаться"
+outcome = "Тебе выдают повязку. Теперь ты знаешь, когда будут облавы."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 1 }, { faction = "traders", change = -1 }]
+set_flags = ["druzhinnik"]
+
+[[choices]]
+text = "Отказаться"
+outcome = "В личном деле появляется пометка."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]

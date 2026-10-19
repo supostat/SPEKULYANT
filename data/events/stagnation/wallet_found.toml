@@ -1,0 +1,18 @@
+title = "Кошелёк в троллейбусе"
+weight = 5
+cooldown_days = 180
+text = "На сиденье троллейбуса забыт кошелёк: двадцать пять рублей и проездной."
+
+[[choices]]
+text = "Отнести в милицию"
+outcome = "Дежурный долго не верит, потом благодарит."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 1 }]
+
+[[choices]]
+text = "Оставить себе"
+outcome = "Двадцать пять рублей на дороге не валяются. Валяются, оказывается."
+
+[choices.consequences]
+money = 25

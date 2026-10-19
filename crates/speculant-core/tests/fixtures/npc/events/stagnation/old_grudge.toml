@@ -12,3 +12,7 @@ outcome = "Откупился."
 [choices.consequences]
 money = -50
 rival = { relation = 3 }
+
+[[choices]]
+text = "Не открывать дверь"
+outcome = "Он уходит. Обида остаётся."
