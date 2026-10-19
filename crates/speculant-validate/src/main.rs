@@ -51,7 +51,7 @@ fn report(directory: &Path) -> ExitCode {
 
 fn summary(content: &Content) -> String {
     format!(
-        "контент валиден: эпох {}, товаров {}, городов {}, маршрутов {}, мест хранения денег {}, фракций {}, биографий {}, людей {}, событий {}",
+        "контент валиден: эпох {}, товаров {}, городов {}, маршрутов {}, мест хранения денег {}, фракций {}, биографий {}, людей {}, типов дел {}, форм собственности {}, политик {}, привычек {}, событий {}",
         content.time.epochs.epochs().len(),
         content.goods.len(),
         content.cities.len(),
@@ -60,6 +60,10 @@ fn summary(content: &Content) -> String {
         content.factions.len(),
         content.biographies.len(),
         content.npcs.len(),
+        content.business_kinds.len(),
+        content.business_forms.len(),
+        content.policies.len(),
+        content.habits.len(),
         content.events.len()
     )
 }
@@ -111,7 +115,7 @@ mod tests {
         let content = Content::load(Path::new(CONTENT_MIN)).expect("минимальный набор валиден");
         assert_eq!(
             summary(&content),
-            "контент валиден: эпох 1, товаров 3, городов 2, маршрутов 2, мест хранения денег 1, фракций 3, биографий 1, людей 1, событий 2"
+            "контент валиден: эпох 1, товаров 3, городов 2, маршрутов 2, мест хранения денег 1, фракций 3, биографий 1, людей 2, типов дел 1, форм собственности 1, политик 1, привычек 1, событий 3"
         );
     }
 }

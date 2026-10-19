@@ -1,0 +1,14 @@
+title = "Наезд"
+weight = 1
+incident = "racket"
+text = "{manager} звонит: «Хозяин, пришли крепкие ребята, хотят долю». Дело: {business}."
+
+[[choices]]
+text = "Платить им десятую часть"
+outcome = "У дела «{business}» теперь есть крыша."
+consequences = { business = { policies = [{ policy = "roof", option = "да, 10%" }] }, reputation = [{ faction = "bandits", change = 1 }] }
+
+[[choices]]
+text = "Послать"
+outcome = "Ночью точку разгромили."
+consequences = { business = { closed_days = 5 }, reputation = [{ faction = "bandits", change = -1 }] }

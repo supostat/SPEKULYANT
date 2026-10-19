@@ -177,7 +177,8 @@ impl Contact {
         self.debt.min(0).unsigned_abs()
     }
 
-    fn record(&mut self, today: GameDate, what: &str) {
+    /// Запись в истории знакомства: «14.03.1986: что было».
+    pub fn record(&mut self, today: GameDate, what: &str) {
         self.history.push(format!("{}: {what}", today.numeric()));
     }
 }

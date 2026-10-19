@@ -84,6 +84,51 @@ pub enum CommandError {
     },
     Traveling,
     NotTraveling,
+    UnknownBusinessKind {
+        kind: String,
+    },
+    BusinessNotYet {
+        kind: String,
+        title: String,
+    },
+    MaxPoints {
+        kind: String,
+        title: String,
+        max: u32,
+    },
+    UnknownBusiness {
+        business: String,
+    },
+    UnknownCandidate {
+        candidate: String,
+    },
+    ManagerInPlace {
+        business: String,
+        name: String,
+    },
+    CandidateBusy {
+        candidate: String,
+        name: String,
+        business: String,
+    },
+    CandidateRefuses {
+        candidate: String,
+        name: String,
+        reason: String,
+    },
+    NotManager {
+        business: String,
+        employee: String,
+    },
+    UnknownPolicy {
+        business: String,
+        policy: String,
+    },
+    NoSuchPolicyOption {
+        policy: String,
+        option: usize,
+        count: usize,
+    },
     NotSimulatedYet {
         command: String,
     },
@@ -144,6 +189,38 @@ impl fmt::Display for CommandError {
             }
             Self::Traveling => write!(formatter, "ты в дороге"),
             Self::NotTraveling => write!(formatter, "ты никуда не едешь"),
+            Self::UnknownBusinessKind { kind } => write!(formatter, "дела {kind} не бывает"),
+            Self::BusinessNotYet { title, .. } => {
+                write!(formatter, "{title}: сейчас такое дело не открыть")
+            }
+            Self::MaxPoints { title, max, .. } => {
+                write!(formatter, "{title}: больше {max} точек в городе не держат")
+            }
+            Self::UnknownBusiness { business } => write!(formatter, "дела {business} у тебя нет"),
+            Self::UnknownCandidate { candidate } => {
+                write!(formatter, "{candidate} в управляющие не нанимается")
+            }
+            Self::ManagerInPlace { business, name } => {
+                write!(formatter, "{business}: управляющий уже есть — {name}")
+            }
+            Self::CandidateBusy { name, business, .. } => {
+                write!(formatter, "{name} уже управляет делом «{business}»")
+            }
+            Self::CandidateRefuses { name, reason, .. } => write!(formatter, "{name}: {reason}"),
+            Self::NotManager { business, employee } => {
+                write!(formatter, "{employee} не управляет делом {business}")
+            }
+            Self::UnknownPolicy { business, policy } => {
+                write!(formatter, "у дела {business} нет политики {policy}")
+            }
+            Self::NoSuchPolicyOption {
+                policy,
+                option,
+                count,
+            } => write!(
+                formatter,
+                "у политики {policy} нет варианта {option}: вариантов {count}, с нуля"
+            ),
             Self::NotSimulatedYet { command } => {
                 write!(formatter, "команда {command} ещё не симулируется ядром")
             }

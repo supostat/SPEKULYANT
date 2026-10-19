@@ -1,0 +1,11 @@
+# Продажи точки в месяц — штуки товара по средней цене города; делу остаётся margin.
+title = "Ларьки"
+forms = ["cooperative", "partnership", "company"]
+point_cost = 5000
+max_points = 5
+rent = 30
+wages = 60
+goods = { cigarettes = 600, vodka = 10, chewing_gum = 30 }
+margin = 0.25
+raid = 1
+policies = ["markup", "roof", "purchase", "night_trade", "inspection", "wage"]

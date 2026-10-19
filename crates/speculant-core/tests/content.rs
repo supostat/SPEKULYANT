@@ -4,6 +4,7 @@
 use std::path::Path;
 
 use speculant_core::Content;
+use speculant_core::business::Incident;
 use speculant_core::content::{ContentError, ContentFile, EpochId, EventId, GoodId};
 use speculant_core::economy::Real;
 use speculant_core::time::GameDate;
@@ -37,8 +38,18 @@ fn the_minimal_set_loads_every_kind_of_content() {
     assert_eq!(content.money.denomination.factor, 1000);
     assert!((content.market.spread - 0.08).abs() < f64::EPSILON);
     assert_eq!(content.biographies.len(), 1);
-    assert_eq!(content.npcs.len(), 1);
-    assert_eq!(content.events.len(), 2);
+    assert_eq!(content.npcs.len(), 2);
+    assert_eq!(content.business.trait_scale, 5);
+    assert_eq!(content.business_forms.len(), 1);
+    assert_eq!(content.business_kinds.len(), 1);
+    assert_eq!(content.policies.len(), 1);
+    assert_eq!(content.habits.len(), 1);
+    assert_eq!(content.events.len(), 3);
+    assert_eq!(
+        content.events[&EventId::new("workshop_raid")].incident,
+        Some(Incident::Inspection),
+        "событие происшествия знает своё происшествие"
+    );
 }
 
 #[test]
@@ -87,6 +98,24 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         .collect();
     let expected = [
         "biographies/student.toml:3: стартового города kiev нет в cities/",
+        "business/forms/cooperative.toml:3: racket_share = 1.5: доля от 0 до 1",
+        "business/habits/drunk.toml:2: skill_loss_chance = 2: доля от 0 до 1",
+        "business/kinds/kiosks.toml:2: формы собственности guild нет в business/forms/",
+        "business/kinds/kiosks.toml:4: у дела должна быть хотя бы одна точка",
+        "business/kinds/kiosks.toml:6: товара caviar нет в goods/",
+        "business/kinds/kiosks.toml:8: политики markup нет в business/policies/",
+        "business/kinds/stall.toml:2: с 1990-01-01 у дела нет формы собственности",
+        "business/policies/discount.toml: политики discount нет: политики ядра — markup, roof,",
+        "business/policies/roof.toml:2: варианта по умолчанию «иногда» нет среди вариантов",
+        "business/policies/roof.toml:8: поле wage_percent бывает только у политики wage",
+        "business/policies/roof.toml:8: у варианта «да, 10%» нет поля roof_percent",
+        "events/stagnation/bad_incident.toml:3: дорожное событие bad_incident не стоит ни на одном",
+        "events/stagnation/bad_incident.toml:4: событие происшествия с делом не бывает дорожным",
+        "events/stagnation/bad_incident.toml:9: у политики roof нет варианта «да, 50%»",
+        "events/stagnation/business_misuse.toml:3: подстановка {manager} в событии без происшествия",
+        "events/stagnation/business_misuse.toml:5: выбор 1: последствие business бывает только у события происшествия",
+        "npc/foreman.toml:7: skill = 9: черта от 1 до 5",
+        "npc/foreman.toml:10: привычки lazy нет в business/habits/",
         "cities/leningrad.toml:4: unknown field `population`",
         "cities/moscow.toml:4: категории electronics нет ни у одного товара",
         "economy/market.toml:1: spread = 1.5: доля должна быть больше 0 и меньше 1",

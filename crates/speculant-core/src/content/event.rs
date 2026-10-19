@@ -1,10 +1,11 @@
 use serde::Deserialize;
 
 use super::{Conditions, Consequences, EpochId, EventId, GoodId};
+use crate::business::Incident;
 use crate::economy::Real;
 
-/// Событие (§10.1): условия, вес среди подходящих, текст с подстановками `{npc}`, `{price}`, `{sum}`
-/// и выборы с последствиями и отложенными продолжениями.
+/// Событие (§10.1): условия, вес среди подходящих, текст с подстановками `{npc}`, `{price}`, `{sum}`,
+/// `{business}`, `{manager}` и выборы с последствиями и отложенными продолжениями.
 #[derive(Clone, Debug, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Event {
@@ -15,6 +16,10 @@ pub struct Event {
     /// Дорожное событие (§4): случается только в пути и только на маршрутах, где оно стоит.
     #[serde(default)]
     pub road: bool,
+    /// Событие происшествия с делом (§7.3): приходит, только когда дело попало в это
+    /// происшествие и политика его не закрыла, — не в розыгрыше дня. Подстановки `{business}` и
+    /// `{manager}` — это дело и его управляющий.
+    pub incident: Option<Incident>,
     /// Сколько дней повторяемое событие отдыхает после того, как случилось; без поля — по
     /// правилам событий.
     pub cooldown_days: Option<u32>,

@@ -15,6 +15,20 @@ const MONTHS_GENITIVE: [&str; 12] = [
     "ноября",
     "декабря",
 ];
+const MONTHS_NOMINATIVE: [&str; 12] = [
+    "январь",
+    "февраль",
+    "март",
+    "апрель",
+    "май",
+    "июнь",
+    "июль",
+    "август",
+    "сентябрь",
+    "октябрь",
+    "ноябрь",
+    "декабрь",
+];
 const WEEKDAYS_SHORT: [&str; 7] = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"];
 const UNIX_DAY_OF_START: i64 = days_from_civil(1984, 1, 1);
 const UNIX_EPOCH_WEEKDAY: i64 = 3;
@@ -91,6 +105,30 @@ impl GameDate {
 
     pub fn day_of_month(self) -> u32 {
         self.year_month_day().2
+    }
+
+    /// Сколько дней в месяце этой даты.
+    pub fn days_in_month(self) -> u32 {
+        let (year, month, _) = self.year_month_day();
+        let (next_year, next_month) = if month == 12 {
+            (year + 1, 1)
+        } else {
+            (year, month + 1)
+        };
+        let days = days_from_civil(i64::from(next_year), next_month, 1)
+            - days_from_civil(i64::from(year), month, 1);
+        u32::try_from(days).expect("в месяце 28–31 день")
+    }
+
+    /// Вчерашний день.
+    pub fn previous(self) -> Self {
+        Self { day: self.day - 1 }
+    }
+
+    /// Месяц и год так, как их пишет заголовок отчёта: «август 1995».
+    pub fn month_and_year(self) -> String {
+        let (year, month, _) = self.year_month_day();
+        format!("{} {year}", MONTHS_NOMINATIVE[month as usize - 1])
     }
 
     /// Короткое русское имя дня недели: «пн» … «вс».

@@ -1,0 +1,8 @@
+title = "Ларьки"
+forms = ["cooperative", "guild"]
+point_cost = 3000
+max_points = 0
+wages = 100
+goods = { caviar = 5 }
+margin = 0.3
+policies = ["markup", "roof"]

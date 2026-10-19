@@ -1,8 +1,11 @@
+use std::collections::BTreeMap;
+
 use rand_chacha::ChaCha8Rng;
 use rand_chacha::rand_core::Rng;
 
 use super::{Fate, Strategy, StrategyRules};
-use crate::content::{CityId, Content, GoodId, NpcId};
+use crate::business::{MonthlyBudget, Operation, Policies};
+use crate::content::{BusinessKindId, CityId, Content, GoodId, NpcId};
 use crate::economy::{Currency, Markets, Money, Real, Trader};
 use crate::events::EventEngine;
 use crate::reputation::Contact;
@@ -12,8 +15,8 @@ const MONTHS_IN_YEAR: f64 = 12.0;
 const PERCENT: f64 = 100.0;
 
 /// Соперник (§8): человек из шаблона со стратегией, деньгами и карманом, своим городом, для
-/// челнока — вторым городом, судьбой и памятью об игроке. Торгует через тот же `Trader` и те же
-/// рынки, что игрок.
+/// челнока — вторым городом, точками своих дел в своём городе, судьбой и памятью об игроке.
+/// Торгует через тот же `Trader` и те же рынки, что игрок, и ведёт дела по тем же расчётам.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Rival {
     npc: NpcId,
@@ -23,6 +26,7 @@ pub struct Rival {
     city: CityId,
     partner_city: Option<CityId>,
     journey: Option<(CityId, GameDate)>,
+    businesses: BTreeMap<BusinessKindId, u32>,
     fate: Fate,
     memory: Contact,
 }
@@ -45,6 +49,7 @@ impl Rival {
             home,
             partner_city,
             journey: None,
+            businesses: BTreeMap::new(),
             fate: Fate::Active,
         }
     }
@@ -82,6 +87,15 @@ impl Rival {
         self.fate
     }
 
+    /// Точки дел в своём городе по типам.
+    pub fn businesses(&self) -> &BTreeMap<BusinessKindId, u32> {
+        &self.businesses
+    }
+
+    pub fn business_points(&self, kind: &BusinessKindId) -> u32 {
+        self.businesses.get(kind).copied().unwrap_or_default()
+    }
+
     /// Что он помнит об игроке: отношение, обида, долг, история.
     pub fn memory(&self) -> &Contact {
         &self.memory
@@ -91,7 +105,8 @@ impl Rival {
         &mut self.memory
     }
 
-    /// Капитал в рублях 1984 года: деньги и товар по средней цене его города.
+    /// Капитал в рублях 1984 года: деньги, товар по средней цене его города и точки дел по цене
+    /// открытия.
     pub fn capital(&self, content: &Content, markets: &Markets, today: GameDate) -> Real {
         let money = self.trader.money().real_total(&content.money, today);
         let goods: f64 = self
@@ -105,10 +120,18 @@ impl Rival {
                 price * f64::from(quantity)
             })
             .sum();
-        Real::from_kopecks(money.kopecks() + goods.round() as i64)
+        let businesses: i64 = self
+            .businesses
+            .iter()
+            .map(|(kind, points)| {
+                content.business_kinds[kind].point_cost.kopecks() * i64::from(*points)
+            })
+            .sum();
+        Real::from_kopecks(money.kopecks() + goods.round() as i64 + businesses)
     }
 
-    /// День соперника: выход из зоны, доход, проценты, судьба, торговля и проверка на разорение.
+    /// День соперника: выход из зоны, доход, проценты, судьба, торговля, первого числа — месяц
+    /// дел, и проверка на разорение.
     /// Все розыгрыши идут подряд из одного потока, поэтому день одного соперника не зависит от
     /// того, торговал ли другой.
     pub fn live_day(
@@ -149,9 +172,92 @@ impl Rival {
                 None => self.trade_at_home(content, markets, rng, rules.lot, today),
             }
         }
+        if today.day_of_month() == 1 {
+            self.run_businesses(content, markets, today);
+            if rules.business_chance > 0.0 && EventEngine::roll(rng, rules.business_chance) {
+                self.open_business(content, rng, today);
+            }
+        }
         if self.capital(content, markets, today) < content.rival_rules.ruin_below {
             self.fate = Fate::Ruined;
         }
+    }
+
+    /// Месяц дел по расчёту игрока, только грубее: политики по умолчанию, управляющий средней
+    /// хватки, без происшествий и конкуренции. Убыток, который не покрыть наличными, закрывает
+    /// дело.
+    fn run_businesses(&mut self, content: &Content, markets: &Markets, today: GameDate) {
+        let owned: Vec<(BusinessKindId, u32)> = self
+            .businesses
+            .iter()
+            .map(|(kind, points)| (kind.clone(), *points))
+            .collect();
+        for (kind_id, points) in owned {
+            let kind = &content.business_kinds[&kind_id];
+            let policies = Policies::defaults(kind, content);
+            let operation = Operation {
+                points,
+                revenue_percent: policies
+                    .chosen(content)
+                    .map(|(_, option)| option.revenue)
+                    .sum(),
+                skill: content.business.neutral_trait,
+                wage_percent: policies.wage_percent(content),
+                competitors: 0,
+            };
+            let budget = MonthlyBudget::plan(content, markets, kind, &self.home, operation, today);
+            let (_, form) = kind
+                .form_on(&content.business_forms, today)
+                .expect("у открытого дела всегда есть форма собственности");
+            let roof = f64::from(policies.roof_percent(content)) / PERCENT;
+            let profit = budget.income * (1.0 - roof - form.tax) - budget.rent - budget.wages;
+            let amount = content.money.from_real(
+                Real::from_kopecks(profit.abs().round() as i64),
+                Currency::Ruble,
+                today,
+            );
+            if profit >= 0.0 {
+                self.trader.receive_cash(amount);
+            } else if self.trader.money().cash().covers(amount) {
+                self.trader.pay_cash(amount);
+            } else {
+                self.businesses.remove(&kind_id);
+            }
+        }
+    }
+
+    /// Точка дела, на которое хватает денег с запасом правил, — тип выбирает случай из тех, что
+    /// сейчас можно открыть и где точек ещё не предел.
+    fn open_business(&mut self, content: &Content, rng: &mut ChaCha8Rng, today: GameDate) {
+        let reserve = 1.0 + content.business.rival_reserve;
+        let cash = self.trader.money().cash();
+        let affordable: Vec<&BusinessKindId> = content
+            .business_kinds
+            .iter()
+            .filter(|(id, kind)| {
+                let with_reserve =
+                    Real::from_kopecks((kind.point_cost.kopecks() as f64 * reserve).round() as i64);
+                kind.form_on(&content.business_forms, today).is_some()
+                    && self.business_points(id) < kind.max_points
+                    && cash.covers(
+                        content
+                            .money
+                            .from_real(with_reserve, Currency::Ruble, today),
+                    )
+            })
+            .map(|(id, _)| id)
+            .collect();
+        if affordable.is_empty() {
+            return;
+        }
+        let kind = affordable[(rng.next_u64() % affordable.len() as u64) as usize].clone();
+        let cost = content.money.from_real(
+            content.business_kinds[&kind].point_cost,
+            Currency::Ruble,
+            today,
+        );
+        self.trader.pay_cash(cost);
+        *self.businesses.entry(kind).or_default() += 1;
     }
 
     /// Гибель, зона и депутатство — каждый день со своими вероятностями; `true`, если судьба

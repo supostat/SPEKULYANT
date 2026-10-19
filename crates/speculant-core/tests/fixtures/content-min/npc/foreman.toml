@@ -1,0 +1,10 @@
+name = "Бригадир Петрович"
+role = "закройщик"
+faction = "people"
+description = "Шьёт ночами, днём спит."
+
+[employee]
+skill = 4
+honesty = 3
+loyalty = 3
+habits = ["drinks_on_fridays"]

@@ -4,7 +4,8 @@ use rand_chacha::ChaCha8Rng;
 use rand_chacha::rand_core::Rng;
 
 use super::{JournalEntry, PendingEvent, Resolution, ScheduledEvent, Situation};
-use crate::content::{EventId, FlagId, NpcId, RoadEvent};
+use crate::business::Incident;
+use crate::content::{EventId, FlagId, RoadEvent};
 use crate::time::GameDate;
 
 /// Сколько старших бит случайного числа даёт равномерную долю от нуля до единицы.
@@ -41,9 +42,32 @@ impl EventEngine {
     /// Событие готово прийти сегодня: оно подходит к положению дел, однократное ещё не случалось,
     /// а повторяемое отдохнуло свой срок.
     pub fn is_ready(&self, event: &EventId, situation: &Situation<'_>) -> bool {
+        self.has_rested(event, situation)
+            && situation.allows_event(&situation.content.events[event])
+    }
+
+    /// Готовые сегодня события про это происшествие с делом, с весами.
+    pub fn ready_incident_events(
+        &self,
+        situation: &Situation<'_>,
+        incident: Incident,
+    ) -> Vec<(EventId, u32)> {
+        situation
+            .content
+            .events
+            .iter()
+            .filter(|(id, event)| {
+                self.has_rested(id, situation) && situation.allows_incident_event(event, incident)
+            })
+            .map(|(id, event)| (id.clone(), event.weight))
+            .collect()
+    }
+
+    /// Однократное событие ещё не случалось, повторяемое отдохнуло свой срок.
+    fn has_rested(&self, event: &EventId, situation: &Situation<'_>) -> bool {
         let content = situation.content;
         let data = &content.events[event];
-        let rested = match self.last_happened.get(event) {
+        match self.last_happened.get(event) {
             None => true,
             Some(_) if data.once => false,
             Some(last) => {
@@ -52,8 +76,7 @@ impl EventEngine {
                     .unwrap_or(content.event_rules.cooldown_days);
                 situation.today >= last.after_days(rest)
             }
-        };
-        rested && situation.allows_event(data)
+        }
     }
 
     /// Готовые сегодня события с их весами — по порядку идентификаторов.
@@ -82,9 +105,12 @@ impl EventEngine {
 
     /// Случилось ли то, что случается с вероятностью `probability`.
     pub fn roll(rng: &mut ChaCha8Rng, probability: f64) -> bool {
-        let fraction = (rng.next_u64() >> (u64::BITS - FRACTION_BITS)) as f64
-            / (1_u64 << FRACTION_BITS) as f64;
-        fraction < probability
+        Self::fraction(rng) < probability
+    }
+
+    /// Равномерная доля от нуля включительно до единицы.
+    pub fn fraction(rng: &mut ChaCha8Rng) -> f64 {
+        (rng.next_u64() >> (u64::BITS - FRACTION_BITS)) as f64 / (1_u64 << FRACTION_BITS) as f64
     }
 
     /// Одно событие из готовых, с вероятностью по весу; `None`, если готовых нет.
@@ -118,23 +144,23 @@ impl EventEngine {
         self.scheduled.push(ScheduledEvent { event, due });
     }
 
-    /// Событие случилось и остановило время; `rival` — участвующий соперник, если он есть.
-    pub fn start(&mut self, event: EventId, today: GameDate, rival: Option<NpcId>) {
+    /// Событие случилось и остановило время: участники и подстановки уже выбраны, выбора ещё нет.
+    pub fn start(&mut self, pending: PendingEvent, today: GameDate) {
         assert!(
             self.pending.is_none(),
             "новое событие приходит только после того, как прочитан исход прошлого"
         );
-        self.last_happened.insert(event.clone(), today);
+        assert!(
+            pending.resolution.is_none(),
+            "событие начинается без выбора"
+        );
+        self.last_happened.insert(pending.event.clone(), today);
         self.journal.push(JournalEntry {
             date: today,
-            event: event.clone(),
+            event: pending.event.clone(),
             choice: None,
         });
-        self.pending = Some(PendingEvent {
-            event,
-            rival,
-            resolution: None,
-        });
+        self.pending = Some(pending);
     }
 
     /// Выбор сделан, последствия применены: событие показывает исход.

@@ -5,9 +5,10 @@ use std::sync::Arc;
 use rand_chacha::rand_core::Rng;
 
 use super::Game;
+use crate::business::{BusinessId, Incident};
 use crate::command_error::CommandError;
 use crate::content::EventId;
-use crate::events::{EventEngine, Resolution};
+use crate::events::{EventEngine, PendingEvent, Resolution, Substitutions};
 use crate::time::GameDate;
 
 const EVENTS_STREAM: &str = "events";
@@ -30,7 +31,7 @@ impl Game {
                 event: event.to_string(),
             });
         }
-        self.begin_event(event.clone(), today);
+        self.begin_event(event.clone(), today, None);
         Ok(())
     }
 
@@ -47,7 +48,7 @@ impl Game {
             if started {
                 self.events.schedule(event, date.next());
             } else {
-                self.begin_event(event, date);
+                self.begin_event(event, date, None);
                 started = true;
             }
         }
@@ -61,7 +62,28 @@ impl Game {
         let ready = self.events.ready_events(&self.situation(date));
         match EventEngine::pick(self.rng.stream(EVENTS_STREAM), &ready) {
             Some(event) => {
-                self.begin_event(event, date);
+                self.begin_event(event, date, None);
+                true
+            }
+            None => false,
+        }
+    }
+
+    /// Событие происшествия с делом, которое вышло за политики; `true`, если оно случилось. Из
+    /// готовых событий про это происшествие сид выбирает одно по весам; готовых нет — происшествие
+    /// проходит без последствий.
+    pub(super) fn start_incident_event(
+        &mut self,
+        business: &BusinessId,
+        incident: Incident,
+        date: GameDate,
+    ) -> bool {
+        let ready = self
+            .events
+            .ready_incident_events(&self.situation(date), incident);
+        match EventEngine::pick(self.rng.stream(EVENTS_STREAM), &ready) {
+            Some(event) => {
+                self.begin_event(event, date, Some(business.clone()));
                 true
             }
             None => false,
@@ -69,8 +91,13 @@ impl Game {
     }
 
     /// Начинает готовое событие; если в нём участвует соперник, сид выбирает одного из
-    /// подходящих.
-    pub(super) fn begin_event(&mut self, event: EventId, today: GameDate) {
+    /// подходящих. Подстановки снимаются сейчас — с участниками и делом этого дня.
+    pub(super) fn begin_event(
+        &mut self,
+        event: EventId,
+        today: GameDate,
+        business: Option<BusinessId>,
+    ) {
         let rival = self.content.events[&event]
             .conditions
             .rival
@@ -82,7 +109,23 @@ impl Game {
                     matching[usize::try_from(index).expect("номер меньше числа соперников")].clone()
                 })
             });
-        self.events.start(event, today, rival);
+        let substitutions = Substitutions::for_event(
+            &self.content.events[&event],
+            rival.as_ref(),
+            business.as_ref().map(|id| &self.businesses[id]),
+            &self.situation(today),
+            &self.markets,
+        );
+        self.events.start(
+            PendingEvent {
+                event,
+                rival,
+                business,
+                substitutions,
+                resolution: None,
+            },
+            today,
+        );
     }
 
     /// Выбор `number` (от 1) в ожидающем событии: последствия применяются сразу, продолжения
@@ -107,8 +150,14 @@ impl Game {
             return Err(CommandError::ChoiceUnavailable { choice: number });
         }
         let rival = pending.rival.clone();
-        let effects =
-            self.apply_consequences(&choice.consequences, &event.title, rival.as_ref(), today);
+        let business = pending.business.clone();
+        let effects = self.apply_consequences(
+            &choice.consequences,
+            &event.title,
+            rival.as_ref(),
+            business.as_ref(),
+            today,
+        );
         for follow_up in &choice.follow_ups {
             if EventEngine::roll(self.rng.stream(EVENTS_STREAM), follow_up.chance) {
                 self.events.schedule(

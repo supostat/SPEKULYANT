@@ -1,0 +1,10 @@
+name = "Гена Кабанов"
+role = "бывший экспедитор овощебазы"
+faction = "traders"
+description = "Управляющий с макета."
+
+[employee]
+skill = 4
+honesty = 3
+loyalty = 2
+habits = ["drinks_on_fridays", "brother_in_militia"]

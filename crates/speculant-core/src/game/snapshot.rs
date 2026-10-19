@@ -1,11 +1,12 @@
 //! Снимок мира для интерфейса: состояние жизни строками, готовыми к показу (§13.3). Подсистемы,
-//! которых ещё нет в мире (дела, зона), отдают пустые окна.
+//! которых ещё нет в мире (зона, пейджер, книжка), отдают пустые окна.
+
+mod business;
 
 use std::cmp::Ordering;
 
 use super::Game;
 use crate::economy::{Currency, MoneyRules};
-use crate::events::Substitutions;
 use crate::npc::Rival;
 use crate::reputation::{Availability, Contact};
 use crate::time::GameDate;
@@ -51,8 +52,9 @@ pub(super) fn snapshot(game: &Game) -> StateView {
         messages: game.messages.clone(),
         pending_event: pending_event(game, today),
         pager: None,
-        businesses: Vec::new(),
-        manager: None,
+        businesses: business::businesses(game, today),
+        candidates: business::candidates(game, today),
+        business_kinds: business::kinds(game, today),
         contacts: game
             .contacts
             .values()
@@ -73,8 +75,7 @@ fn pending_event(game: &Game, today: GameDate) -> Option<EventView> {
     let pending = game.events.pending()?;
     let event = &game.content.events[&pending.event];
     let situation = game.situation(today);
-    let substitutions =
-        Substitutions::for_event(event, pending.rival.as_ref(), &situation, &game.markets);
+    let substitutions = &pending.substitutions;
     Some(EventView {
         title: event.title.clone(),
         text: substitutions.apply(&event.text),

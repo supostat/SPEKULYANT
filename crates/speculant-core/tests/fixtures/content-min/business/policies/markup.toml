@@ -1,0 +1,9 @@
+title = "Наценка"
+default = "30%"
+
+[[options]]
+label = "20%"
+revenue = -8
+
+[[options]]
+label = "30%"

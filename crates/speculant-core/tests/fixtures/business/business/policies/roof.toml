@@ -1,0 +1,16 @@
+title = "Платить крыше"
+default = "нет"
+
+[[options]]
+label = "нет"
+roof_percent = 0
+
+[[options]]
+label = "да, 10%"
+roof_percent = 10
+raid = -1
+
+[[options]]
+label = "да, 15%"
+roof_percent = 15
+raid = -2

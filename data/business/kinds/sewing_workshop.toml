@@ -1,0 +1,11 @@
+# Варёнки: в застой — подпольно, с кооперацией — легально; импорт девяностых их добивает.
+title = "Цех варёнок"
+forms = ["workshop", "cooperative", "partnership", "company"]
+point_cost = 1500
+max_points = 3
+rent = 40
+wages = 200
+goods = { jeans = 15 }
+margin = 0.4
+theft = 1
+policies = ["markup", "roof", "purchase", "inspection", "wage"]

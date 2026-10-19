@@ -1,11 +1,13 @@
 //! Проверки контента после разбора: ссылки, флаги, окна дат, кривые, выборы и подстановки.
 
-use std::collections::BTreeSet;
+mod business;
+
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::loader::{Entry, Parsed};
 use super::{
-    Biography, Choice, City, Conditions, ContentError, ContentFile, EpochProfile, Event, Faction,
-    Good, MoneyPlace, NpcTemplate,
+    Biography, BusinessChange, Choice, City, Conditions, ContentError, ContentFile, EpochProfile,
+    Event, Faction, Good, MoneyPlace, NpcTemplate,
 };
 use crate::economy::{MarketRules, MoneyRules, RubleCurve};
 use crate::events::EventRules;
@@ -13,10 +15,11 @@ use crate::npc::RivalRules;
 use crate::reputation::ReputationRules;
 use crate::time::{GameDate, TimeRules};
 
-const PLACEHOLDERS: [&str; 3] = ["npc", "price", "sum"];
+const PLACEHOLDERS: [&str; 5] = ["npc", "price", "sum", "business", "manager"];
 const NPC_PLACEHOLDER: &str = "npc";
 const PRICE_PLACEHOLDER: &str = "price";
 const SUM_PLACEHOLDER: &str = "sum";
+const BUSINESS_PLACEHOLDERS: [&str; 2] = ["business", "manager"];
 const FIRST_YEAR: i32 = 1984;
 /// Индекс цен 1984 года — единица: реальные цены считаются в рублях 1984 года.
 const BASE_INDEX: f64 = 1.0;
@@ -35,14 +38,22 @@ struct Known {
     flags_set: BTreeSet<String>,
     /// Предел уровней репутации, если правила разобрались.
     reputation_limit: Option<i32>,
+    business_forms: BTreeSet<String>,
+    habits: BTreeSet<String>,
+    /// Подписи вариантов каждой политики.
+    policies: BTreeMap<String, BTreeSet<String>>,
+    /// Шкала черт сотрудников, если правила дел разобрались.
+    trait_scale: Option<u8>,
 }
 
-/// Чем событие наполняет подстановки: участником, товаром для цены, суммой.
+/// Чем событие наполняет подстановки: участником, товаром для цены, суммой, делом происшествия и
+/// его управляющим.
 #[derive(Clone, Copy)]
 struct Sources {
     npc: bool,
     price: bool,
     sum: bool,
+    business: bool,
 }
 
 /// Отчёт об ошибках одного файла.
@@ -103,7 +114,27 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
             .reputation
             .as_ref()
             .map(|(_, rules)| i32::from(rules.limit)),
+        business_forms: ids(&parsed.business_forms),
+        habits: ids(&parsed.habits),
+        policies: parsed
+            .policies
+            .iter()
+            .map(|entry| {
+                let labels = entry
+                    .value
+                    .options
+                    .iter()
+                    .map(|option| option.label.clone())
+                    .collect();
+                (entry.id.clone(), labels)
+            })
+            .collect(),
+        trait_scale: parsed
+            .business_rules
+            .as_ref()
+            .map(|(_, rules)| rules.trait_scale),
     };
+    business::validate(parsed, &known, errors);
     for entry in &parsed.epochs {
         let mut report = Report {
             file: entry.file,
@@ -450,6 +481,16 @@ fn check_npc(
         ),
         (None, None) => {}
     }
+    if let Some(traits) = &npc.employee {
+        if npc.strategy.is_some() {
+            report.at(
+                report.file.line_of("[employee]"),
+                "соперник со стратегией не нанимается: employee только у людей без strategy"
+                    .to_owned(),
+            );
+        }
+        business::check_employee(traits, known, report);
+    }
 }
 
 fn check_rival_rules(rules: &RivalRules, report: &mut Report<'_, '_>) {
@@ -480,6 +521,7 @@ fn check_rival_rules(rules: &RivalRules, report: &mut Report<'_, '_>) {
             ("prison_chance", parameters.prison_chance),
             ("death_chance", parameters.death_chance),
             ("deputy_chance", parameters.deputy_chance),
+            ("business_chance", parameters.business_chance),
         ];
         for (key, chance) in chances {
             if !(0.0..=1.0).contains(&chance) {
@@ -779,11 +821,27 @@ fn check_event(event: &Event, known: &Known, report: &mut Report<'_, '_>) {
             "сумма события должна быть больше нуля".to_owned(),
         );
     }
+    if event.incident.is_some() {
+        let line = report.file.line_of("incident");
+        if event.road {
+            report.at(
+                line,
+                "событие происшествия с делом не бывает дорожным".to_owned(),
+            );
+        }
+        if event.epoch.is_none() {
+            report.at(
+                line,
+                "в зоне дел нет: событие происшествия — только в events/<эпоха>/".to_owned(),
+            );
+        }
+    }
     check_conditions(&event.conditions, known, report);
     let sources = Sources {
         npc: event.conditions.npc.is_some() || event.conditions.rival.is_some(),
         price: event.price_of.is_some(),
         sum: event.sum.is_some(),
+        business: event.incident.is_some(),
     };
     check_placeholders(&event.text, sources, report);
     let has_rival = event.conditions.rival.is_some();
@@ -803,6 +861,15 @@ fn check_event(event: &Event, known: &Known, report: &mut Report<'_, '_>) {
                 report.file.nth_line_of("[[choices]]", index),
                 format!(
                     "выбор {}: последствие rival без соперника в условиях события",
+                    index + 1
+                ),
+            );
+        }
+        if choice.consequences.business.is_some() && event.incident.is_none() {
+            report.at(
+                report.file.nth_line_of("[[choices]]", index),
+                format!(
+                    "выбор {}: последствие business бывает только у события происшествия incident",
                     index + 1
                 ),
             );
@@ -866,6 +933,9 @@ fn check_choice(
             );
         }
     }
+    if let Some(change) = &consequences.business {
+        check_business_change(change, index, known, report);
+    }
     for shock in &consequences.price_shocks {
         check_reference(
             &known.goods,
@@ -906,6 +976,43 @@ fn check_choice(
                     follow_up.event
                 ),
             );
+        }
+    }
+}
+
+/// Перемена в деле: варианты политик по подписям из данных, закрытие на срок больше нуля, и
+/// что-то в деле должно меняться.
+fn check_business_change(
+    change: &BusinessChange,
+    index: usize,
+    known: &Known,
+    report: &mut Report<'_, '_>,
+) {
+    let choice_line = report.file.nth_line_of("[[choices]]", index);
+    if !change.changes_anything() {
+        report.at(
+            choice_line,
+            format!("выбор {}: последствие business ничего не меняет", index + 1),
+        );
+    }
+    if change.closed_days == Some(0) {
+        report.at(
+            report.file.line_of("closed_days"),
+            format!("выбор {}: закрыть дело на ноль дней нельзя", index + 1),
+        );
+    }
+    for setting in &change.policies {
+        let policy = setting.policy.id();
+        match known.policies.get(policy) {
+            None => report.at(
+                report.file.line_of(policy),
+                format!("политики {policy} нет в business/policies/"),
+            ),
+            Some(labels) if !labels.contains(&setting.option) => report.at(
+                report.file.line_of(&format!("\"{}\"", setting.option)),
+                format!("у политики {policy} нет варианта «{}»", setting.option),
+            ),
+            Some(_) => {}
         }
     }
 }
@@ -1020,7 +1127,8 @@ fn check_reference(
 }
 
 /// Подстановки `{имя}` в тексте: только известные и только те, которым событие даёт значение —
-/// `{npc}` при условии `npc`, `{price}` при `price_of`, `{sum}` при `sum`.
+/// `{npc}` при условии `npc`, `{price}` при `price_of`, `{sum}` при `sum`, `{business}` и
+/// `{manager}` у события происшествия.
 fn check_placeholders(text: &str, sources: Sources, report: &mut Report<'_, '_>) {
     let mut rest = text;
     while let Some(start) = rest.find('{') {
@@ -1037,7 +1145,9 @@ fn check_placeholders(text: &str, sources: Sources, report: &mut Report<'_, '_>)
         if !PLACEHOLDERS.contains(&name) {
             report.at(
                 line,
-                format!("подстановки {{{name}}} нет, есть {{npc}}, {{price}}, {{sum}}"),
+                format!(
+                    "подстановки {{{name}}} нет, есть {{npc}}, {{price}}, {{sum}}, {{business}}, {{manager}}"
+                ),
             );
         } else if name == NPC_PLACEHOLDER && !sources.npc {
             report.at(
@@ -1051,6 +1161,11 @@ fn check_placeholders(text: &str, sources: Sources, report: &mut Report<'_, '_>)
             );
         } else if name == SUM_PLACEHOLDER && !sources.sum {
             report.at(line, "подстановка {sum} в событии без sum".to_owned());
+        } else if BUSINESS_PLACEHOLDERS.contains(&name) && !sources.business {
+            report.at(
+                line,
+                format!("подстановка {{{name}}} в событии без происшествия incident"),
+            );
         }
         rest = &after[end + 1..];
     }

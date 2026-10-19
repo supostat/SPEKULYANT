@@ -1,0 +1,10 @@
+# Челночный рейс как дело: точка — бригада челноков со своим товаром.
+title = "Челночный рейс"
+forms = ["cooperative", "partnership", "company"]
+point_cost = 4000
+max_points = 3
+wages = 250
+goods = { jeans = 30, sneakers = 20, videocassette = 60 }
+margin = 0.35
+theft = 1
+policies = ["markup", "roof", "purchase", "inspection", "wage"]

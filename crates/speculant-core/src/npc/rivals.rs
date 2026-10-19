@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use rand_chacha::rand_core::Rng;
 
 use super::{Rival, Strategy};
-use crate::content::{CityId, Content, NpcId, RivalCondition};
+use crate::content::{BusinessKindId, CityId, Content, NpcId, RivalCondition};
 use crate::economy::{Currency, Markets};
 use crate::rng::WorldRng;
 use crate::time::GameDate;
@@ -117,6 +117,15 @@ impl Rivals {
         for rival in self.rivals.values_mut() {
             rival.live_day(content, markets, stream, today);
         }
+    }
+
+    /// Сколько точек этого типа держат в городе соперники, которые в деле.
+    pub fn business_points(&self, kind: &BusinessKindId, city: &CityId) -> u32 {
+        self.rivals
+            .values()
+            .filter(|rival| rival.fate().is_active() && rival.home() == city)
+            .map(|rival| rival.business_points(kind))
+            .sum()
     }
 
     /// Соперники в деле, подходящие под условие события: стратегия, отношение к игроку и давность

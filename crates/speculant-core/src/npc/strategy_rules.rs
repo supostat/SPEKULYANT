@@ -25,4 +25,7 @@ pub struct StrategyRules {
     pub death_chance: f64,
     #[serde(default)]
     pub deputy_chance: f64,
+    /// Вероятность в месяц открыть точку своего дела, если хватает денег.
+    #[serde(default)]
+    pub business_chance: f64,
 }

@@ -1,9 +1,10 @@
 use serde::Deserialize;
 
 use super::{CityId, FactionId, FlagId, GoodId, NpcId};
+use crate::business::PolicyKind;
 use crate::economy::Real;
 
-/// Последствия выбора (§10.1): деньги, товар, репутация, связи, флаги, сдвиг цен.
+/// Последствия выбора (§10.1): деньги, товар, репутация, связи, флаги, сдвиг цен, перемены в деле.
 #[derive(Clone, Debug, Default, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Consequences {
@@ -22,6 +23,8 @@ pub struct Consequences {
     pub clear_flags: Vec<FlagId>,
     #[serde(default)]
     pub price_shocks: Vec<PriceShock>,
+    /// Перемена в деле, с которым случилось происшествие события.
+    pub business: Option<BusinessChange>,
 }
 
 impl Consequences {
@@ -85,4 +88,33 @@ pub struct PriceShock {
     pub city: Option<CityId>,
     pub factor: f64,
     pub days: Option<u32>,
+}
+
+/// Перемена в деле происшествия (§7.3): новые варианты политик, уход управляющего, закрытие на
+/// `closed_days` дней, потеря дела.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct BusinessChange {
+    #[serde(default)]
+    pub policies: Vec<PolicySetting>,
+    #[serde(default)]
+    pub manager_leaves: bool,
+    pub closed_days: Option<u32>,
+    #[serde(default)]
+    pub lost: bool,
+}
+
+/// Вариант политики по подписи: «крыше — да, 20%».
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PolicySetting {
+    pub policy: PolicyKind,
+    pub option: String,
+}
+
+impl BusinessChange {
+    /// Последствие что-то меняет.
+    pub fn changes_anything(&self) -> bool {
+        !self.policies.is_empty() || self.manager_leaves || self.closed_days.is_some() || self.lost
+    }
 }

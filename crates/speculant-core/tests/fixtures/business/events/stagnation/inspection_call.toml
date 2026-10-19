@@ -1,0 +1,13 @@
+title = "Проверка"
+weight = 1
+incident = "inspection"
+text = "{manager} звонит: пришла проверка, что делать?"
+
+[[choices]]
+text = "Приехать и договориться"
+outcome = "Договорились."
+consequences = { money = -50 }
+
+[[choices]]
+text = "Пусть закрываются"
+consequences = { business = { closed_days = 3 } }

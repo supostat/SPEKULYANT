@@ -2,6 +2,7 @@
 //! Крейт не зависит от Godot: его гоняют симулятор, валидатор и мост gdext.
 //! Наружу ядро отдаёт `StateView` — снимок мира, готовый к показу, — и принимает `Command`.
 
+pub mod business;
 pub mod command;
 pub mod command_error;
 pub mod content;

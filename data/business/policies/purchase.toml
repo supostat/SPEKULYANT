@@ -1,0 +1,14 @@
+title = "Закупка"
+default = "сам, на рынке"
+
+[[options]]
+label = "сам, на рынке"
+
+[[options]]
+label = "у оптовика"
+
+[[options]]
+label = "через управляющего"
+revenue = -6
+theft = 1
+loyalty = 1

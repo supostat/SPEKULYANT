@@ -1,5 +1,5 @@
-# Соперники (§8): сколько их в мире и как живёт каждая стратегия. Вероятности — на день;
-# калибровка — в фазе симулятора.
+# Соперники (§8): сколько их в мире и как живёт каждая стратегия. Вероятности — на день, кроме
+# business_chance — шанса в месяц открыть точку своего дела; калибровка — в фазе симулятора.
 
 min_rivals = 10
 max_rivals = 15
@@ -11,12 +11,14 @@ trade_chance = 0.5
 lot = 3
 prison_chance = 0.0001
 death_chance = 0.00003
+business_chance = 0.05
 
 [strategies.shuttle]
 trade_chance = 0.6
 lot = 4
 prison_chance = 0.00005
 death_chance = 0.00005
+business_chance = 0.03
 
 [strategies.racketeer]
 daily_income = 3
@@ -31,3 +33,4 @@ deputy_chance = 0.0002
 annual_percent = 25
 prison_chance = 0.0001
 deputy_chance = 0.0001
+business_chance = 0.03

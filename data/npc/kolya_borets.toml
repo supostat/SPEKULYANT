@@ -1,0 +1,10 @@
+name = "Коля Борец"
+role = "мастер спорта по классической борьбе"
+faction = "bandits"
+description = "С ним не спорят ни покупатели, ни соседи по рынку."
+
+[employee]
+skill = 3
+honesty = 3
+loyalty = 4
+habits = ["former_wrestler"]

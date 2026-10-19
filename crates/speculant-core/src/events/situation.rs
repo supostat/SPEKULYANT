@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use crate::business::Incident;
 use crate::content::{Choice, CityId, Conditions, Consequences, Content, Event, FlagId, NpcId};
 use crate::economy::{Currency, Money, Real, Trader};
 use crate::npc::Rivals;
@@ -23,15 +24,28 @@ pub struct Situation<'a> {
 impl Situation<'_> {
     /// Событие может случиться: оно из каталога текущей эпохи, дорожное — только в пути, обычное —
     /// только не в пути, и его условия выполнены. События зоны (без эпохи) в обычной жизни не
-    /// случаются.
+    /// случаются, события происшествий с делами приходят только от дел.
     pub fn allows_event(&self, event: &Event) -> bool {
+        self.in_current_epoch(event)
+            && event.incident.is_none()
+            && event.road == self.on_road
+            && self.allows(&event.conditions)
+    }
+
+    /// Событие происшествия может прийти: оно из каталога текущей эпохи, про это происшествие, и
+    /// его условия выполнены — дома и в дороге: управляющий найдёт хозяина и на пейджере.
+    pub fn allows_incident_event(&self, event: &Event, incident: Incident) -> bool {
+        self.in_current_epoch(event)
+            && event.incident == Some(incident)
+            && self.allows(&event.conditions)
+    }
+
+    fn in_current_epoch(&self, event: &Event) -> bool {
         let epoch = &self.content.time.epochs.epoch_on(self.today).id;
         event
             .epoch
             .as_ref()
             .is_some_and(|own| own.as_str() == epoch)
-            && event.road == self.on_road
-            && self.allows(&event.conditions)
     }
 
     /// Выбор доступен: его условия выполнены, и у игрока есть деньги и товар, которые он отдаёт.

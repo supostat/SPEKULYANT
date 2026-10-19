@@ -1,0 +1,25 @@
+# Тихие дела: без колебаний выручки и без происшествий — тесты включают то, что проверяют.
+risk_levels = [
+  { name = "низкий", monthly_chance = 0 },
+  { name = "умеренный", monthly_chance = 0 },
+  { name = "средний", monthly_chance = 0 },
+  { name = "высокий", monthly_chance = 0 },
+  { name = "очень высокий", monthly_chance = 0 },
+]
+alarm_level = 3
+base_raid = 2
+base_theft = 2
+trait_scale = 5
+neutral_trait = 3
+skill_step = 0.1
+revenue_noise = 0
+theft_share = 0.15
+bribe_share = 0.1
+closure_days = 3
+roof_raise_chance = 0
+fire_chance = 0
+departure_chances = [0, 0, 0, 0, 0]
+betrayal_chances = [0, 0, 0, 0, 0]
+fired_relation = -2
+competition = 0.1
+rival_reserve = 1

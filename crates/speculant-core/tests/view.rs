@@ -70,18 +70,21 @@ fn every_command_survives_a_json_round_trip_under_its_own_name() {
         Command::OpenScreen {
             screen: Screen::Pager,
         },
+        Command::OpenBusiness {
+            kind: "kiosks".to_owned(),
+        },
         Command::SetPolicy {
-            business: "kiosks".to_owned(),
+            business: "kiosks@moscow".to_owned(),
             policy: "markup".to_owned(),
             option: 1,
         },
         Command::Hire {
-            business: "kiosks".to_owned(),
-            candidate: "gena".to_owned(),
+            business: "kiosks@moscow".to_owned(),
+            candidate: "gena_kabanov".to_owned(),
         },
         Command::Fire {
-            business: "kiosks".to_owned(),
-            employee: "gena".to_owned(),
+            business: "kiosks@moscow".to_owned(),
+            employee: "gena_kabanov".to_owned(),
         },
         Command::Call {
             contact: "lena".to_owned(),

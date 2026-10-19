@@ -102,7 +102,7 @@ impl Game {
             .ready_road_events(&self.situation(date), &self.route_of(journey).road_events);
         match EventEngine::pick(self.rng.stream(EVENTS_STREAM), &ready) {
             Some(event) => {
-                self.begin_event(event, date);
+                self.begin_event(event, date, None);
                 true
             }
             None => false,

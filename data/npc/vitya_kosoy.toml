@@ -1,0 +1,10 @@
+name = "Витя Косой"
+role = "фарцовщик с Калининского"
+faction = "traders"
+description = "Продаст что угодно кому угодно. Сдачу считает в свою пользу."
+
+[employee]
+skill = 4
+honesty = 1
+loyalty = 2
+habits = ["gambler"]

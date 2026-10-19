@@ -5,10 +5,12 @@ use serde::de::DeserializeOwned;
 
 use super::validation;
 use super::{
-    Biography, BiographyId, City, CityId, Content, ContentError, ContentFile, EpochId,
-    EpochProfile, Event, EventId, Faction, FactionId, Good, GoodId, MoneyPlace, MoneyPlaceId,
-    NpcId, NpcTemplate, Route,
+    Biography, BiographyId, BusinessForm, BusinessFormId, BusinessKind, BusinessKindId, City,
+    CityId, Content, ContentError, ContentFile, EpochId, EpochProfile, Event, EventId, Faction,
+    FactionId, Good, GoodId, Habit, HabitId, MoneyPlace, MoneyPlaceId, NpcId, NpcTemplate, Policy,
+    Route,
 };
+use crate::business::{BusinessRules, PolicyKind};
 use crate::economy::{MarketRules, MoneyRules};
 use crate::events::EventRules;
 use crate::npc::RivalRules;
@@ -22,6 +24,7 @@ const ROUTES_FILE: &str = "routes.toml";
 const REPUTATION_FILE: &str = "reputation.toml";
 const EVENT_RULES_FILE: &str = "event_rules.toml";
 const RIVALS_FILE: &str = "rivals.toml";
+const BUSINESS_RULES_FILE: &str = "business/rules.toml";
 const TOML_EXTENSION: &str = ".toml";
 
 /// Сущность, прочитанная из файла: идентификатор из имени файла и сам файл для мест ошибок.
@@ -40,6 +43,7 @@ pub(super) struct Parsed<'a> {
     pub reputation: Option<(&'a ContentFile, ReputationRules)>,
     pub event_rules: Option<(&'a ContentFile, EventRules)>,
     pub rival_rules: Option<(&'a ContentFile, RivalRules)>,
+    pub business_rules: Option<(&'a ContentFile, BusinessRules)>,
     pub epochs: Vec<Entry<'a, EpochProfile>>,
     pub goods: Vec<Entry<'a, Good>>,
     pub cities: Vec<Entry<'a, City>>,
@@ -48,6 +52,10 @@ pub(super) struct Parsed<'a> {
     pub factions: Vec<Entry<'a, Faction>>,
     pub biographies: Vec<Entry<'a, Biography>>,
     pub npcs: Vec<Entry<'a, NpcTemplate>>,
+    pub business_forms: Vec<Entry<'a, BusinessForm>>,
+    pub business_kinds: Vec<Entry<'a, BusinessKind>>,
+    pub policies: Vec<Entry<'a, Policy>>,
+    pub habits: Vec<Entry<'a, Habit>>,
     pub events: Vec<Entry<'a, Event>>,
 }
 
@@ -104,6 +112,13 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
             "нет правил соперников",
         ));
     }
+    if parsed.business_rules.is_none() {
+        errors.push(ContentError::new(
+            BUSINESS_RULES_FILE,
+            None,
+            "нет правил дел",
+        ));
+    }
     let mut events = BTreeMap::new();
     for entry in &parsed.events {
         if events
@@ -127,12 +142,14 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         Some((_, reputation)),
         Some((_, event_rules)),
         Some((_, rival_rules)),
+        Some((_, business)),
     ) = (
         parsed.market,
         parsed.money,
         parsed.reputation,
         parsed.event_rules,
         parsed.rival_rules,
+        parsed.business_rules,
     )
     else {
         unreachable!("без любого из файлов правил загрузка вернула ошибку выше");
@@ -144,6 +161,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         reputation,
         event_rules,
         rival_rules,
+        business,
         epochs: keyed(&parsed.epochs, EpochId::new),
         goods: keyed(&parsed.goods, GoodId::new),
         cities: keyed(&parsed.cities, CityId::new),
@@ -152,6 +170,18 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         factions: keyed(&parsed.factions, FactionId::new),
         biographies: keyed(&parsed.biographies, BiographyId::new),
         npcs: keyed(&parsed.npcs, NpcId::new),
+        business_forms: keyed(&parsed.business_forms, BusinessFormId::new),
+        business_kinds: keyed(&parsed.business_kinds, BusinessKindId::new),
+        policies: parsed
+            .policies
+            .iter()
+            .map(|entry| {
+                let kind = PolicyKind::from_id(&entry.id)
+                    .expect("файл политики с чужим именем загрузка отвергла выше");
+                (kind, entry.value.clone())
+            })
+            .collect(),
+        habits: keyed(&parsed.habits, HabitId::new),
         events,
     })
 }
@@ -199,6 +229,15 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
                 parsed.rival_rules = Some((file, rules));
             }
         }
+        ["business", "rules.toml"] => {
+            if let Some(rules) = parse::<BusinessRules>(file, errors) {
+                parsed.business_rules = Some((file, rules));
+            }
+        }
+        ["business", "forms", name] => push_entry(file, name, &mut parsed.business_forms, errors),
+        ["business", "kinds", name] => push_entry(file, name, &mut parsed.business_kinds, errors),
+        ["business", "habits", name] => push_entry(file, name, &mut parsed.habits, errors),
+        ["business", "policies", name] => push_entry(file, name, &mut parsed.policies, errors),
         ["routes.toml"] => {
             if let Some(routes) = parse::<RoutesFile>(file, errors) {
                 parsed.routes = Some((file, routes.routes));
@@ -216,7 +255,7 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         _ => errors.push(ContentError::new(
             &file.path,
             None,
-            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, epochs/, biographies/, npc/, events/<эпоха>/, zone/events/)"),
+            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, epochs/, biographies/, npc/, events/<эпоха>/, zone/events/)"),
         )),
     }
 }

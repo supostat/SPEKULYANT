@@ -1,8 +1,9 @@
-//! Последствия выбора (§10.1): деньги, товар, репутация, связи, флаги и сдвиг цен — и строка
-//! того, что изменилось, для окна исхода.
+//! Последствия выбора (§10.1): деньги, товар, репутация, связи, флаги, сдвиг цен и перемены в деле
+//! — и строка того, что изменилось, для окна исхода.
 
 use super::Game;
-use crate::content::{Consequences, ContactChange, NpcId};
+use crate::business::BusinessId;
+use crate::content::{BusinessChange, Consequences, ContactChange, Content, NpcId};
 use crate::economy::{Currency, Real};
 use crate::reputation::Contact;
 use crate::time::GameDate;
@@ -13,18 +14,23 @@ const CONTACT_OWES: &str = "за ним услуг";
 const PLAYER_OWES: &str = "за тобой услуг";
 const AWAY_UNTIL: &str = "не на связи до";
 const LOST: &str = "потерян";
+const MANAGER_LEAVES: &str = "уходит";
+const CLOSED_UNTIL: &str = "закрыто до";
+const BUSINESS_LOST: &str = "дело потеряно";
 const PLUS: char = '+';
 const MINUS: char = '−';
 
 impl Game {
     /// Применяет последствия и возвращает строку перемен: «Торговцы +1. Деньги −600 р.». Флаги и
     /// сдвиги цен игроку не показываются — о них говорит текст исхода. `rival` — участвующий в
-    /// событии соперник, к которому относится последствие `rival`.
+    /// событии соперник, к которому относится последствие `rival`; `business` — дело
+    /// происшествия, к которому относится последствие `business`.
     pub(super) fn apply_consequences(
         &mut self,
         consequences: &Consequences,
         what: &str,
         rival: Option<&NpcId>,
+        business: Option<&BusinessId>,
         today: GameDate,
     ) -> String {
         let content = std::sync::Arc::clone(&self.content);
@@ -97,6 +103,9 @@ impl Game {
                 change.favours,
             );
         }
+        if let (Some(change), Some(id)) = (&consequences.business, business) {
+            self.change_business(&content, change, id, today, &mut effects);
+        }
         for flag in &consequences.set_flags {
             self.events.set_flag(flag.clone());
         }
@@ -116,6 +125,53 @@ impl Game {
             NOTHING_CHANGED.to_owned()
         } else {
             sentences(&effects)
+        }
+    }
+}
+
+impl Game {
+    /// Перемена в деле происшествия: варианты политик, которые у этого дела есть, уход
+    /// управляющего, закрытие на срок, потеря дела.
+    fn change_business(
+        &mut self,
+        content: &Content,
+        change: &BusinessChange,
+        id: &BusinessId,
+        today: GameDate,
+        effects: &mut Vec<String>,
+    ) {
+        let business = self
+            .businesses
+            .get_mut(id)
+            .expect("дело происшествия живо, пока событие ждёт ответа");
+        let name = business.name(content);
+        for setting in &change.policies {
+            if !business.kind(content).has_policy(setting.policy) {
+                continue;
+            }
+            let policy = &content.policies[&setting.policy];
+            let option = policy
+                .option_index(&setting.option)
+                .expect("вариант политики есть в данных — это проверяет загрузка");
+            business.set_policy(setting.policy, option);
+            effects.push(format!("{name}: {} — {}", policy.title, setting.option));
+        }
+        if change.manager_leaves
+            && let Some(manager) = business.dismiss()
+        {
+            let person = &content.npcs[manager.employee().npc()].name;
+            effects.push(format!("{name}: {person} {MANAGER_LEAVES}"));
+        }
+        if let Some(days) = change.closed_days {
+            business.close_for(days, today);
+            let until = business
+                .closed_until()
+                .expect("дело только что закрыли до даты");
+            effects.push(format!("{name}: {CLOSED_UNTIL} {}", until.numeric()));
+        }
+        if change.lost {
+            self.businesses.remove(id);
+            effects.push(format!("{name}: {BUSINESS_LOST}"));
         }
     }
 }
@@ -152,7 +208,7 @@ fn relation_effects(effects: &mut Vec<String>, name: &str, relation: i32, favour
 }
 
 /// Число со знаком так, как его пишет окно исхода: «+1», «−3».
-fn signed(value: i32) -> String {
+pub(super) fn signed(value: i32) -> String {
     let sign = if value < 0 { MINUS } else { PLUS };
     format!("{sign}{}", value.unsigned_abs())
 }

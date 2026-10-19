@@ -1,0 +1,6 @@
+name = "Миша Рыжий"
+role = "делец"
+faction = "traders"
+strategy = "trader"
+capital = 50000
+description = "Открывает палатку за палаткой."

@@ -1,0 +1,16 @@
+title = "Зарплата"
+default = "по рынку"
+
+[[options]]
+label = "ниже рынка"
+wage_percent = 90
+
+[[options]]
+label = "по рынку"
+wage_percent = 100
+theft = -1
+
+[[options]]
+label = "+10% к рынку"
+wage_percent = 110
+theft = -2

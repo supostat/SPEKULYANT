@@ -20,7 +20,10 @@ mod travel;
 mod zone;
 
 pub use biography::BiographyView;
-pub use business::{BusinessView, ForecastView, ManagerView, PolicyView};
+pub use business::{
+    BusinessKindView, BusinessView, CandidateView, ForecastView, ManagerView, PolicyView,
+    ReportView,
+};
 pub use contact::ContactView;
 pub use event::{ChoiceView, EventView, OutcomeView};
 pub use faction::FactionView;
@@ -52,7 +55,8 @@ pub struct StateView {
     pub pending_event: Option<EventView>,
     pub pager: Option<PagerView>,
     pub businesses: Vec<BusinessView>,
-    pub manager: Option<ManagerView>,
+    pub candidates: Vec<CandidateView>,
+    pub business_kinds: Vec<BusinessKindView>,
     pub contacts: Vec<ContactView>,
     pub factions: Vec<FactionView>,
     pub money: MoneyView,

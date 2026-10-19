@@ -1,0 +1,9 @@
+title = "Пожар"
+weight = 1
+incident = "fire"
+text = "{business} сгорело дотла."
+
+[[choices]]
+text = "Смотреть на пепелище"
+outcome = "{manager} разводит руками над тем, что было делом «{business}»."
+consequences = { business = { lost = true } }

@@ -1,0 +1,8 @@
+title = "Сдал"
+weight = 1
+incident = "betrayal"
+text = "{manager} рассказал ОБХСС всё, что знал."
+
+[[choices]]
+text = "Что тут скажешь"
+consequences = { business = { manager_leaves = true }, reputation = [{ faction = "militia", change = -1 }] }

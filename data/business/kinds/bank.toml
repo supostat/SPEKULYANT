@@ -1,0 +1,9 @@
+title = "Банк"
+forms = ["bank"]
+point_cost = 100000
+max_points = 1
+rent = 500
+wages = 1500
+income = 5000
+raid = 1
+policies = ["roof", "inspection", "wage"]

@@ -1,0 +1,7 @@
+title = "Палатка"
+forms = ["temporary"]
+point_cost = 1000
+max_points = 1
+wages = 50
+income = 300
+policies = ["roof"]

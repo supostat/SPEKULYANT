@@ -42,15 +42,23 @@ pub enum Command {
     OpenScreen {
         screen: Screen,
     },
+    /// Открыть точку дела этого типа в городе, где игрок сейчас: первая открывает дело, следующие
+    /// расширяют его.
+    OpenBusiness {
+        kind: String,
+    },
+    /// Вариант политики дела — номер от нуля, как `selected` в снимке.
     SetPolicy {
         business: String,
         policy: String,
         option: usize,
     },
+    /// Нанять управляющим человека из кандидатов снимка.
     Hire {
         business: String,
         candidate: String,
     },
+    /// Уволить управляющего дела.
     Fire {
         business: String,
         employee: String,
@@ -101,6 +109,7 @@ impl Command {
             Self::Choose { .. } => "choose",
             Self::Continue => "continue",
             Self::OpenScreen { .. } => "open_screen",
+            Self::OpenBusiness { .. } => "open_business",
             Self::SetPolicy { .. } => "set_policy",
             Self::Hire { .. } => "hire",
             Self::Fire { .. } => "fire",

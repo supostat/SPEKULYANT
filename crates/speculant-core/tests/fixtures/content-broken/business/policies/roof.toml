@@ -1,0 +1,10 @@
+title = "Платить крыше"
+default = "иногда"
+
+[[options]]
+label = "нет"
+roof_percent = 0
+
+[[options]]
+label = "да, 10%"
+wage_percent = 100

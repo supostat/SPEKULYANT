@@ -1,0 +1,9 @@
+title = "Наезд в пути"
+weight = 1
+road = true
+incident = "racket"
+text = "{manager} звонит из {business}."
+
+[[choices]]
+text = "Платить"
+consequences = { business = { policies = [{ policy = "roof", option = "да, 50%" }] } }

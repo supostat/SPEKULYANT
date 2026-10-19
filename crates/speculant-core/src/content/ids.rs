@@ -67,3 +67,15 @@ content_id!(
     /// Узел исторического таймлайна (§3.6); узлы описывает генератор истории.
     TimelineNodeId
 );
+content_id!(
+    /// Тип дела — имя файла в `data/business/kinds/`.
+    BusinessKindId
+);
+content_id!(
+    /// Форма собственности — имя файла в `data/business/forms/`.
+    BusinessFormId
+);
+content_id!(
+    /// Привычка сотрудника — имя файла в `data/business/habits/`.
+    HabitId
+);

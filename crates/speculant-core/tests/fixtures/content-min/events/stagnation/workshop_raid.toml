@@ -1,0 +1,8 @@
+title = "ОБХСС в цеху"
+weight = 1
+incident = "inspection"
+text = "{manager} звонит из цеха «{business}»: пришли с проверкой."
+
+[[choices]]
+text = "Закрыть цех на неделю"
+consequences = { business = { closed_days = 7 } }

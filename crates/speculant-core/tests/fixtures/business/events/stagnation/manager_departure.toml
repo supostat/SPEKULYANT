@@ -1,0 +1,13 @@
+title = "Управляющий уходит"
+weight = 1
+incident = "departure"
+text = "{manager} говорит, что его зовут к конкурентам."
+
+[[choices]]
+text = "Отпустить"
+outcome = "{manager} собирает вещи."
+consequences = { business = { manager_leaves = true } }
+
+[[choices]]
+text = "Прибавить зарплату"
+consequences = { business = { policies = [{ policy = "wage", option = "+10% к рынку" }] } }

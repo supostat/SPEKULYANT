@@ -1,5 +1,6 @@
 //! Фасад ядра: интерфейс и симулятор видят мир только через `Game`.
 
+mod business_flow;
 mod consequences;
 mod event_flow;
 mod snapshot;
@@ -8,6 +9,7 @@ mod travel_flow;
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
+use crate::business::{Business, BusinessId};
 use crate::command::{Command, LifeSettings};
 use crate::command_error::CommandError;
 use crate::content::{BiographyId, CityId, Content, GoodId, MoneyPlaceId, NpcId};
@@ -38,6 +40,7 @@ pub struct Game {
     reputation: FactionReputation,
     contacts: BTreeMap<NpcId, Contact>,
     rivals: Rivals,
+    businesses: BTreeMap<BusinessId, Business>,
     events: EventEngine,
     journey: Option<Journey>,
     messages: Vec<String>,
@@ -76,6 +79,7 @@ impl Game {
                 .map(|npc| (npc.clone(), Contact::new(npc.clone())))
                 .collect(),
             rivals,
+            businesses: BTreeMap::new(),
             events: EventEngine::default(),
             journey: None,
             messages: Vec::new(),
@@ -122,6 +126,11 @@ impl Game {
         &self.rivals
     }
 
+    /// Дела игрока.
+    pub fn businesses(&self) -> &BTreeMap<BusinessId, Business> {
+        &self.businesses
+    }
+
     /// Флаги прошлых решений, ожидающее событие, отложенные продолжения.
     pub fn events(&self) -> &EventEngine {
         &self.events
@@ -144,8 +153,8 @@ impl Game {
 
     /// Двигает мир на `milliseconds` реального времени; `true`, если наступил хотя бы один день.
     /// Каждый день рынки приходят в себя и колеблются по сиду, вклады получают проценты,
-    /// репутация дрейфует к нулю в темпе эпохи, а затем может случиться событие — дома или в
-    /// дороге. Событие и прибытие останавливают перемотку, и остаток реального времени сгорает;
+    /// репутация дрейфует к нулю в темпе эпохи, соперники и дела живут свой день, а затем может
+    /// случиться событие — дома или в дороге. Событие и прибытие останавливают перемотку, и остаток реального времени сгорает;
     /// событие держит время, пока игрок не прочтёт исход.
     pub fn advance(&mut self, milliseconds: u32) -> bool {
         if self.events.pending().is_some() {
@@ -232,6 +241,17 @@ impl Game {
             }
             Command::Choose { choice } => self.choose(choice)?,
             Command::Continue => self.close_event()?,
+            Command::OpenBusiness { kind } => self.open_business(&kind)?,
+            Command::SetPolicy {
+                business,
+                policy,
+                option,
+            } => self.set_policy(&business, &policy, option)?,
+            Command::Hire {
+                business,
+                candidate,
+            } => self.hire(&business, &candidate)?,
+            Command::Fire { business, employee } => self.fire(&business, &employee)?,
             other => {
                 return Err(CommandError::NotSimulatedYet {
                     command: other.name().to_owned(),
@@ -241,10 +261,11 @@ impl Game {
         Ok(())
     }
 
-    /// День мира; `true`, если он кончился событием или прибытием. Соперники живут свой день до
-    /// событий. В пути вместо событий дня
-    /// разыгрываются дорожные события маршрута, а в последний день пути игрок приезжает — если в
-    /// этот день случилось событие, то после того, как прочтёт его исход.
+    /// День мира; `true`, если он кончился событием или прибытием. Соперники и дела живут свой
+    /// день до событий; происшествие с делом, которое вышло за политики, занимает место события
+    /// дня. В пути вместо событий дня разыгрываются дорожные события маршрута, а в последний день
+    /// пути игрок приезжает — если в этот день случилось событие, то после того, как прочтёт его
+    /// исход.
     fn live_day(&mut self, date: GameDate) -> bool {
         self.markets.next_day(&self.content, &mut self.rng, date);
         self.player.next_day(&self.content, date);
@@ -252,6 +273,9 @@ impl Game {
         self.reputation.next_day(drift_days);
         self.rivals
             .next_day(&self.content, &mut self.markets, &mut self.rng, date);
+        if self.live_businesses(date) {
+            return true;
+        }
         let Some(journey) = self.journey.clone() else {
             return self.start_day_event(date);
         };
@@ -313,6 +337,7 @@ fn waits_for_event(command: &Command) -> bool {
             | Command::Withdraw { .. }
             | Command::Travel { .. }
             | Command::FastForward { .. }
+            | Command::OpenBusiness { .. }
             | Command::SetPolicy { .. }
             | Command::Hire { .. }
             | Command::Fire { .. }
@@ -320,7 +345,8 @@ fn waits_for_event(command: &Command) -> bool {
     )
 }
 
-/// В дороге нет ни толкучки, ни сберкассы, и второй поездки не начать.
+/// В дороге нет ни толкучки, ни сберкассы, точку не открыть, и второй поездки не начать.
+/// Управлять делами можно и с дороги — по пейджеру.
 fn needs_a_city(command: &Command) -> bool {
     matches!(
         command,
@@ -329,5 +355,6 @@ fn needs_a_city(command: &Command) -> bool {
             | Command::Deposit { .. }
             | Command::Withdraw { .. }
             | Command::Travel { .. }
+            | Command::OpenBusiness { .. }
     )
 }

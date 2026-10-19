@@ -1,0 +1,10 @@
+name = "Бригадир"
+role = "бригадир"
+faction = "traders"
+description = "Командует."
+
+[employee]
+skill = 9
+honesty = 3
+loyalty = 3
+habits = ["lazy"]

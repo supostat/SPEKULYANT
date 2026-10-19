@@ -1,0 +1,7 @@
+title = "Не по делу"
+weight = 1
+text = "{manager} машет рукой."
+
+[[choices]]
+text = "Закрыть лавочку"
+consequences = { business = { lost = true } }

@@ -1,10 +1,11 @@
 use serde::Deserialize;
 
-use super::FactionId;
+use super::{EmployeeTraits, FactionId};
 use crate::economy::Real;
 use crate::npc::Strategy;
 
-/// Шаблон соперника или знакомого (§8, §9): из пула шаблонов сид выбирает состав мира.
+/// Шаблон соперника, знакомого или того, кого можно нанять (§7.2, §8, §9): из пула шаблонов сид
+/// выбирает состав соперников мира.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct NpcTemplate {
@@ -16,5 +17,7 @@ pub struct NpcTemplate {
     pub strategy: Option<Strategy>,
     /// Стартовый капитал соперника в рублях 1984 года; есть только у соперников.
     pub capital: Option<Real>,
+    /// Черты, если человека можно нанять управляющим; соперник не нанимается.
+    pub employee: Option<EmployeeTraits>,
     pub description: String,
 }

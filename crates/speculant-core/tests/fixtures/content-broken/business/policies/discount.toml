@@ -1,0 +1,8 @@
+title = "Скидка"
+default = "нет"
+
+[[options]]
+label = "нет"
+
+[[options]]
+label = "да"

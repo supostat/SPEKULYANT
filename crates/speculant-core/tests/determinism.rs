@@ -9,10 +9,13 @@ use speculant_core::{Command, Content, Game, LifeSettings};
 const DATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../data");
 const EVENTS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/events");
 const RIVALS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/npc");
+const BUSINESSES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/business");
 /// До конца августа 1985 года — через окно ящика «Столичной».
 const EVENTFUL_DAYS: i32 = 600;
 const FRAME_MILLISECONDS: u32 = 16;
 const DAYS: i32 = 400;
+/// Год своего дела — до 1 января 1985 года.
+const BUSINESS_DAYS: i32 = 366;
 
 fn new_game(seed: u64) -> Game {
     let content = Content::load(Path::new(DATA)).expect("data/ валиден");
@@ -225,5 +228,61 @@ fn the_same_seed_gives_the_same_rivals_and_their_deals() {
         first.1,
         live_among_rivals(8).1,
         "другой сид — другие соперники"
+    );
+}
+
+/// Год своего дела: палатка с управляющим, выручка с колебанием, наезды, проверки и уход
+/// управляющего с шансами правил; на каждое событие — первый выбор. Итог — снимок мира с делом и
+/// его отчётом.
+fn run_a_business(seed: u64) -> String {
+    let mut content = Content::load(Path::new(BUSINESSES)).expect("фикстура дел валидна");
+    content.business.revenue_noise = 0.1;
+    for (level, chance) in content
+        .business
+        .risk_levels
+        .iter_mut()
+        .zip([0.05, 0.1, 0.2, 0.3, 0.5])
+    {
+        level.monthly_chance = chance;
+    }
+    content.business.departure_chances = vec![0.1, 0.05, 0.02, 0.01, 0.0];
+    let settings = LifeSettings {
+        biography: "student".to_owned(),
+        ironman: true,
+        seed,
+    };
+    let mut game = Game::new_life(&settings, Arc::new(content)).expect("жизнь начинается");
+    game.apply(Command::OpenBusiness {
+        kind: "stall".to_owned(),
+    })
+    .expect("палатка открывается");
+    game.apply(Command::Hire {
+        business: "stall@moscow".to_owned(),
+        candidate: "gena_kabanov".to_owned(),
+    })
+    .expect("Гена свободен");
+    while game.today().day_index() < BUSINESS_DAYS {
+        game.advance(FRAME_MILLISECONDS);
+        if game.events().pending().is_some() {
+            game.apply(Command::Choose { choice: 1 })
+                .expect("первый выбор доступен");
+            game.apply(Command::Continue).expect("исход прочитан");
+        }
+    }
+    serde_json::to_string(&game.view()).expect("снимок сериализуется")
+}
+
+#[test]
+fn the_same_seed_gives_the_same_business_history() {
+    let first = run_a_business(7);
+    assert_eq!(first, run_a_business(7));
+    assert!(
+        first.contains("\"month\":\"декабрь 1984\""),
+        "дело дожило до отчёта за декабрь"
+    );
+    assert_ne!(
+        first,
+        run_a_business(8),
+        "другой сид — другая выручка и другие беды"
     );
 }
