@@ -5,9 +5,11 @@ window = { from = "1992-10-01", until = "1992-12-31" }
 [[outcomes]]
 weight = 3
 news = "Ваучеры раздали: за бутылку водки отдают охотно."
+event = "voucher_buyers"
 set_flags = ["voucher_bust"]
 
 [[outcomes]]
 weight = 1
 news = "Ваучеры раздали: умные скупают их пачками."
+event = "voucher_buyers"
 set_flags = ["voucher_boom"]

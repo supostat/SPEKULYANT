@@ -1,0 +1,19 @@
+title = "Баулы из Пекина"
+weight = 6
+cooldown_days = 60
+text = "{npc} вернулся из Пекина: пуховики, кроссовки «Абибас», плееры. Всё по весу."
+
+[conditions]
+npc = "grisha_kitaets"
+
+[[choices]]
+text = "Взять кроссовки и плееры"
+outcome = "«Абибас» — почти «Адидас». Почти."
+
+[choices.consequences]
+money = -120
+goods = [{ good = "sneakers", change = 4 }, { good = "cassette_player", change = 2 }]
+
+[[choices]]
+text = "Не брать"
+outcome = "Гриша пожимает плечами: в Пекине ещё много."

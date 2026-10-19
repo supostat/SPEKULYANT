@@ -1,0 +1,33 @@
+title = "Вкладчики у дверей"
+weight = 1
+once = true
+text = """
+Вкладчики твоей «финансовой компании» штурмуют офис. Среди них — люди с пистолетами."""
+
+[conditions]
+flags_set = ["pyramid_founder"]
+
+[[choices]]
+text = "Вернуть часть денег"
+outcome = "Толпа редеет. Пистолеты остаются."
+
+[choices.consequences]
+money = -2500
+reputation = [{ faction = "people", change = 1 }]
+clear_flags = ["pyramid_founder"]
+
+[[choices]]
+text = "Бежать с кассой"
+outcome = "Кипр, новое имя, новая жизнь."
+
+[choices.consequences]
+end_life = "emigration"
+
+[[choices]]
+text = "Выйти к вкладчикам"
+outcome = "Ты объясняешь про временные трудности. Тебе не верят."
+
+[choices.consequences]
+health = -8
+reputation = [{ faction = "people", change = -2 }]
+clear_flags = ["pyramid_founder"]

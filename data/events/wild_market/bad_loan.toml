@@ -1,0 +1,29 @@
+title = "Невозвратный кредит"
+weight = 1
+once = true
+text = "Знакомые, взявшие кредит, пропали вместе с фирмой. Дыра в балансе."
+
+[conditions]
+flags_set = ["own_bank"]
+
+[[choices]]
+text = "Закрыть дыру своими"
+outcome = "Банк жив. Твои сбережения — нет."
+
+[choices.consequences]
+money = -1500
+
+[[choices]]
+text = "Нанять коллекторов"
+outcome = "Коллекторы находят должников. Половину."
+
+[choices.consequences]
+money = -400
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Списать кредит и молчать"
+outcome = "Дыра в балансе остаётся. Аудиторы пока не смотрят."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]

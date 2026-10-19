@@ -1,0 +1,23 @@
+title = "Партнёр исчез"
+weight = 1
+once = true
+text = "Телефон партнёра молчит, офис пуст, секретарша не знает ничего."
+
+[conditions]
+flags_set = ["partner_prepaid"]
+
+[[choices]]
+text = "Найти его через бандитов"
+outcome = "Бандиты находят. Отдают половину, половину берут себе."
+
+[choices.consequences]
+money = 200
+reputation = [{ faction = "bandits", change = 1 }]
+clear_flags = ["partner_prepaid"]
+
+[[choices]]
+text = "Подать в суд"
+outcome = "Суд идёт три года. Партнёр — в Германии."
+
+[choices.consequences]
+clear_flags = ["partner_prepaid"]

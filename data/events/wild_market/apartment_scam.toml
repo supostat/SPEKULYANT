@@ -1,0 +1,25 @@
+title = "Квартира пенсионерки"
+weight = 3
+cooldown_days = 365
+text = """
+Знакомый риелтор предлагает «схему»: одинокая пенсионерка, квартира в центре, пожизненная \
+рента."""
+
+[[choices]]
+text = "Участвовать"
+outcome = "Схема работает. Старушку ты больше не видел."
+
+[choices.consequences]
+money = 1500
+reputation = [{ faction = "people", change = -3 }, { faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Предупредить пенсионерку"
+outcome = "Пенсионерка плачет и печёт тебе пирожки."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 2 }, { faction = "bandits", change = -1 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Риелтор находит другого."

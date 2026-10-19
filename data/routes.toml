@@ -13,6 +13,8 @@ road_events = [
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
   { event = "train_racket", weight = 2 },
+  { event = "highway_racket", weight = 2 },
+  { event = "train_robbery", weight = 1 },
 ]
 
 [[routes]]
@@ -26,6 +28,8 @@ road_events = [
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
   { event = "train_racket", weight = 2 },
+  { event = "highway_racket", weight = 2 },
+  { event = "train_robbery", weight = 1 },
 ]
 
 [[routes]]
@@ -39,6 +43,8 @@ road_events = [
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
   { event = "train_racket", weight = 2 },
+  { event = "highway_racket", weight = 2 },
+  { event = "train_robbery", weight = 1 },
 ]
 
 [[routes]]
@@ -52,6 +58,8 @@ road_events = [
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
   { event = "train_racket", weight = 2 },
+  { event = "highway_racket", weight = 2 },
+  { event = "train_robbery", weight = 1 },
 ]
 
 [[routes]]
@@ -65,6 +73,8 @@ road_events = [
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
   { event = "train_racket", weight = 2 },
+  { event = "highway_racket", weight = 2 },
+  { event = "train_robbery", weight = 1 },
 ]
 
 [[routes]]
@@ -78,6 +88,8 @@ road_events = [
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
   { event = "train_racket", weight = 2 },
+  { event = "highway_racket", weight = 2 },
+  { event = "train_robbery", weight = 1 },
 ]
 
 [[routes]]
@@ -91,6 +103,8 @@ road_events = [
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
   { event = "train_racket", weight = 2 },
+  { event = "highway_racket", weight = 2 },
+  { event = "train_robbery", weight = 1 },
 ]
 
 [[routes]]
@@ -104,6 +118,8 @@ road_events = [
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
   { event = "train_racket", weight = 2 },
+  { event = "highway_racket", weight = 2 },
+  { event = "train_robbery", weight = 1 },
 ]
 
 [[routes]]
@@ -117,6 +133,8 @@ road_events = [
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
   { event = "train_racket", weight = 2 },
+  { event = "highway_racket", weight = 2 },
+  { event = "train_robbery", weight = 1 },
 ]
 
 [[routes]]
@@ -130,6 +148,8 @@ road_events = [
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
   { event = "train_racket", weight = 2 },
+  { event = "highway_racket", weight = 2 },
+  { event = "train_robbery", weight = 1 },
 ]
 
 [[routes]]
@@ -160,6 +180,7 @@ fare = 50
 road_events = [
   { event = "polish_border", weight = 3 },
   { event = "shuttle_bus", weight = 3 },
+  { event = "highway_racket", weight = 3 },
 ]
 
 [[routes]]
@@ -170,6 +191,7 @@ fare = 50
 road_events = [
   { event = "polish_border", weight = 3 },
   { event = "shuttle_bus", weight = 3 },
+  { event = "highway_racket", weight = 3 },
 ]
 
 [[routes]]
@@ -177,24 +199,38 @@ from = "moscow"
 to = "istanbul"
 days = 3
 fare = 150
+road_events = [
+  { event = "turkish_customs", weight = 3 },
+]
 
 [[routes]]
 from = "istanbul"
 to = "moscow"
 days = 3
 fare = 150
+road_events = [
+  { event = "turkish_customs", weight = 3 },
+]
 
 [[routes]]
 from = "moscow"
 to = "beijing"
 days = 6
 fare = 120
+road_events = [
+  { event = "beijing_train", weight = 3 },
+  { event = "train_robbery", weight = 1 },
+]
 
 [[routes]]
 from = "beijing"
 to = "moscow"
 days = 6
 fare = 120
+road_events = [
+  { event = "beijing_train", weight = 3 },
+  { event = "train_robbery", weight = 1 },
+]
 
 [[routes]]
 from = "leningrad"
@@ -207,6 +243,8 @@ road_events = [
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
   { event = "train_racket", weight = 2 },
+  { event = "highway_racket", weight = 2 },
+  { event = "train_robbery", weight = 1 },
 ]
 
 [[routes]]
@@ -220,6 +258,8 @@ road_events = [
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
   { event = "train_racket", weight = 2 },
+  { event = "highway_racket", weight = 2 },
+  { event = "train_robbery", weight = 1 },
 ]
 
 [[routes]]
@@ -250,6 +290,7 @@ fare = 25
 road_events = [
   { event = "polish_border", weight = 3 },
   { event = "shuttle_bus", weight = 3 },
+  { event = "highway_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -260,6 +301,7 @@ fare = 25
 road_events = [
   { event = "polish_border", weight = 3 },
   { event = "shuttle_bus", weight = 3 },
+  { event = "highway_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -267,21 +309,33 @@ from = "tbilisi"
 to = "istanbul"
 days = 2
 fare = 60
+road_events = [
+  { event = "turkish_customs", weight = 3 },
+]
 
 [[routes]]
 from = "istanbul"
 to = "tbilisi"
 days = 2
 fare = 60
+road_events = [
+  { event = "turkish_customs", weight = 3 },
+]
 
 [[routes]]
 from = "tashkent"
 to = "beijing"
 days = 5
 fare = 90
+road_events = [
+  { event = "beijing_train", weight = 3 },
+]
 
 [[routes]]
 from = "beijing"
 to = "tashkent"
 days = 5
 fare = 90
+road_events = [
+  { event = "beijing_train", weight = 3 },
+]

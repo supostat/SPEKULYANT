@@ -1,0 +1,19 @@
+title = "Управляющий сдал"
+weight = 1
+incident = "betrayal"
+text = "{manager} привёл в «{business}» чужую крышу: теперь он с ними."
+
+[[choices]]
+text = "Выкупить дело у новой крыши"
+outcome = "Дорого, но дело твоё."
+
+[choices.consequences]
+money = -600
+business = { manager_leaves = true }
+
+[[choices]]
+text = "Отдать дело"
+outcome = "Дело ушло. Управляющий — вместе с ним."
+
+[choices.consequences]
+business = { lost = true }

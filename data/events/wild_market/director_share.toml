@@ -1,0 +1,28 @@
+title = "Директор приватизирует"
+weight = 4
+once = true
+text = """
+Директор знакомого завода тихо скупает акции у рабочих. Предлагает войти в долю: нужен \
+человек с наличными."""
+
+[conditions]
+money = { at_least = 1500 }
+window = { from = "1993-01-01" }
+
+[[choices]]
+text = "Войти в долю"
+outcome = "Рабочим платят зарплату акциями, акции идут к вам."
+
+[choices.consequences]
+money = -1500
+reputation = [{ faction = "people", change = -2 }, { faction = "officials", change = 1 }]
+set_flags = ["plant_shares"]
+
+[[choices.follow_ups]]
+event = "plant_dividend"
+after_days = 365
+chance = 0.7
+
+[[choices]]
+text = "Отказаться"
+outcome = "Директор находит другого. Рабочие — нет."

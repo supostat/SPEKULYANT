@@ -1,0 +1,8 @@
+title = "Октябрь 1993 года"
+window = { from = "1993-10-03", until = "1993-10-05" }
+
+[[outcomes]]
+weight = 1
+news = "Танки стреляют по Белому дому: Верховный Совет разогнан."
+price_shocks = [{ good = "vodka", city = "moscow", factor = 1.3, days = 14 }]
+event = "october_1993_events"

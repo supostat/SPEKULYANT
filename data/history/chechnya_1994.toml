@@ -1,0 +1,7 @@
+title = "Чечня"
+window = { from = "1994-12-11", until = "1994-12-12" }
+
+[[outcomes]]
+weight = 1
+news = "Войска вошли в Чечню. Говорят — на неделю."
+event = "chechnya_draft"

@@ -1,0 +1,26 @@
+title = "ГКО"
+weight = 5
+cooldown_days = 120
+text = """
+Банкир советует: государственные обязательства — самое надёжное, что есть. Доходность — \
+сто процентов."""
+
+[conditions]
+window = { from = "1993-05-01", until = "1998-08-01" }
+
+[[choices]]
+text = "Вложиться через банкира"
+outcome = "Купоны капают каждый месяц."
+
+[choices.consequences]
+money = -300
+set_flags = ["gko_owner"]
+
+[[choices.follow_ups]]
+event = "gko_coupon"
+after_days = 90
+chance = 0.9
+
+[[choices]]
+text = "Не вкладываться"
+outcome = "Банкир пожимает плечами."

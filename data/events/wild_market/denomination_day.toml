@@ -1,0 +1,21 @@
+title = "Новые рубли"
+weight = 10
+once = true
+text = """
+Деноминация: три нуля долой. Старые купюры принимают, но продавцы путаются и округляют в \
+свою пользу."""
+
+[conditions]
+timeline = "denomination"
+
+[[choices]]
+text = "Пересчитать всё заново"
+outcome = "Калькулятор сломался от нулей. Ты — нет."
+
+[[choices]]
+text = "Округлять в свою пользу тоже"
+outcome = "Пара покупателей ругается. Пара — нет."
+
+[choices.consequences]
+money = 20
+reputation = [{ faction = "people", change = -1 }]

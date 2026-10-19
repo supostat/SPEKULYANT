@@ -1,0 +1,22 @@
+title = "Ограбление в поезде"
+weight = 2
+cooldown_days = 60
+road = true
+text = "Ночью в купе брызгают газом. Утром у половины вагона нет денег."
+
+[conditions]
+money = { at_least = 500 }
+
+[[choices]]
+text = "Проверить сумку"
+outcome = "Сумка вскрыта. Хорошо, что деньги в носке."
+
+[choices.consequences]
+money = -100
+
+[[choices]]
+text = "Поднять шум"
+outcome = "Проводник разводит руками. Милиции в поезде нет."
+
+[choices.consequences]
+money = -150

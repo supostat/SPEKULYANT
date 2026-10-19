@@ -1,0 +1,36 @@
+title = "Предупреждение"
+weight = 1
+text = "У ларька разбили стекло, на прилавке — гильза. Старший звонит: «Подумал?»"
+
+[conditions]
+flags_set = ["roof_refused"]
+
+[[choices]]
+text = "Заплатить вдвойне"
+outcome = "Старший доволен. Больше не трогают."
+
+[choices.consequences]
+money = -250
+reputation = [{ faction = "bandits", change = 1 }]
+clear_flags = ["roof_refused"]
+
+[[choices]]
+text = "Снова отказать"
+outcome = "Старший кладёт трубку. Молча."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = -2 }]
+set_flags = ["roof_war"]
+clear_flags = ["roof_refused"]
+
+[[choices.follow_ups]]
+event = "hitman"
+after_days = 30
+chance = 0.35
+
+[[choices]]
+text = "Уехать из города на время"
+outcome = "Когда возвращаешься, у ребят уже другие дела."
+
+[choices.consequences]
+clear_flags = ["roof_refused"]

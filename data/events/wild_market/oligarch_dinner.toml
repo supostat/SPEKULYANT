@@ -1,0 +1,24 @@
+title = "Ужин с олигархом"
+weight = 2
+once = true
+text = """
+Банкир из первой десятки зовёт на ужин: ему нужен человек, который «решает вопросы» в \
+провинции."""
+
+[conditions]
+reputation = [{ faction = "officials", at_least = 2 }]
+
+[[choices]]
+text = "Стать его человеком"
+outcome = "Ты в обойме. Обойма — это навсегда."
+
+[choices.consequences]
+money = 1000
+reputation = [{ faction = "officials", change = 2 }, { faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Банкир улыбается. Таких отказов он не прощает."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]

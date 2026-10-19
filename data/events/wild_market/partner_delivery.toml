@@ -1,0 +1,15 @@
+title = "Вагон пришёл"
+weight = 1
+once = true
+text = "Вагон сахара пришёл. Партнёр честный — такие ещё бывают."
+
+[conditions]
+flags_set = ["partner_prepaid"]
+
+[[choices]]
+text = "Продать сахар оптом"
+outcome = "Предоплата вернулась вдвое."
+
+[choices.consequences]
+money = 1500
+clear_flags = ["partner_prepaid"]

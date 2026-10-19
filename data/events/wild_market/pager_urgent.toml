@@ -1,0 +1,19 @@
+title = "«Срочно перезвони»"
+weight = 7
+cooldown_days = 45
+text = "Пейджер: «СРОЧНО ПЕРЕЗВОНИ. ПАРТИЯ ПРИШЛА. ВОВА»."
+
+[conditions]
+goods = [{ good = "pager", at_least = 1 }]
+
+[[choices]]
+text = "Перезвонить и забрать партию"
+outcome = "Партия — жвачка и кофе. Вова в долю."
+
+[choices.consequences]
+money = -50
+goods = [{ good = "chewing_gum", change = 5 }, { good = "coffee", change = 5 }]
+
+[[choices]]
+text = "Не перезванивать"
+outcome = "Вова перезванивает другим."

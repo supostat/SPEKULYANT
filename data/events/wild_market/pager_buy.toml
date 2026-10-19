@@ -1,0 +1,22 @@
+title = "Пейджер"
+weight = 6
+once = true
+text = """
+Без пейджера в деловых кругах ты никто. «Мотороле» пищит на поясе у каждого, кто что-то \
+значит."""
+
+[conditions]
+window = { from = "1994-01-01" }
+
+[[choices]]
+text = "Купить пейджер"
+outcome = "Пейджер пищит. Ты — деловой человек."
+
+[choices.consequences]
+money = -60
+goods = [{ good = "pager", change = 1 }]
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Обойтись телефоном-автоматом"
+outcome = "Двушки в кармане, очереди у автоматов."

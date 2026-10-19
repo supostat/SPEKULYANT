@@ -1,0 +1,35 @@
+title = "Маски-шоу"
+weight = 4
+cooldown_days = 180
+text = "Налоговая полиция в масках кладёт всех лицом в пол и выносит бухгалтерию."
+
+[conditions]
+flags_set = ["tax_police"]
+
+[[choices]]
+text = "Договориться с майором"
+outcome = "Бухгалтерия возвращается. Без двух папок."
+
+[choices.consequences]
+money = -500
+reputation = [{ faction = "militia", change = -1 }]
+
+[[choices]]
+text = "Требовать адвоката"
+outcome = "Адвокат приходит через три дня. Дело заведено."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -1 }]
+set_flags = ["tax_case"]
+
+[[choices.follow_ups]]
+event = "tax_case_court"
+after_days = 60
+chance = 0.4
+
+[[choices]]
+text = "Показать вторую бухгалтерию, белую"
+outcome = "В белой бухгалтерии всё чисто. Почти."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]

@@ -1,0 +1,21 @@
+title = "Таможня во Внукове"
+weight = 5
+cooldown_days = 90
+text = "Таможенник во Внукове взвешивает баулы: «Перевес. Платите пошлину или делимся»."
+
+[conditions]
+goods = [{ good = "leather_jacket", at_least = 1 }]
+
+[[choices]]
+text = "Поделиться курткой"
+outcome = "Таможенник примеряет её прямо у стойки."
+
+[choices.consequences]
+goods = [{ good = "leather_jacket", change = -1 }]
+
+[[choices]]
+text = "Заплатить пошлину"
+outcome = "Квитанция, печать, очередь."
+
+[choices.consequences]
+money = -60

@@ -1,0 +1,19 @@
+title = "Сообщение от неё"
+weight = 5
+cooldown_days = 90
+text = "Пейджер: «СКУЧАЮ. ПРИХОДИ В ВОСЕМЬ. ЛЕНА». Ты не знаешь никакой Лены."
+
+[conditions]
+goods = [{ good = "pager", at_least = 1 }]
+
+[[choices]]
+text = "Прийти в восемь"
+outcome = "Лена оказалась ошибкой оператора. Но ужин был хорош."
+
+[choices.consequences]
+money = -20
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Не ходить"
+outcome = "Где-то Лена ждёт другого."

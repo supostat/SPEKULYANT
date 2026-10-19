@@ -5,6 +5,7 @@ scale = { from = 0.8, to = 1.4 }
 [[outcomes]]
 weight = 1
 news = "Дефолт: рубль упал втрое, банки закрыли двери."
+event = "default_panic"
 price_shocks = [
   { good = "sneakers", factor = 1.6, days = 120 },
   { good = "cigarettes", factor = 1.6, days = 120 },

@@ -1,0 +1,29 @@
+title = "Счётчик"
+weight = 4
+cooldown_days = 180
+text = "Ты задолжал не тем людям: «Счётчик включён. Каждый день — плюс десять процентов»."
+
+[conditions]
+reputation = [{ faction = "bandits", at_most = -4 }]
+
+[[choices]]
+text = "Отдать всё, что есть"
+outcome = "Счётчик выключен. Ты — тоже на время."
+
+[choices.consequences]
+money = -600
+reputation = [{ faction = "bandits", change = 2 }]
+
+[[choices]]
+text = "Объявить себя банкротом и исчезнуть"
+outcome = "Ты уезжаешь с одной сумкой. Навсегда."
+
+[choices.consequences]
+end_life = "ruin"
+
+[[choices]]
+text = "Прятаться у друзей"
+outcome = "Месяц на чужих диванах. Счётчик тикает без тебя."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = -1 }]

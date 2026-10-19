@@ -1,0 +1,23 @@
+title = "Палёная водка"
+weight = 5
+cooldown_days = 120
+text = "Оптовик привёз «Абсолют» по цене «Пшеничной». Этикетка подозрительно ровная."
+
+[[choices]]
+text = "Взять и продавать"
+outcome = "Покупатели не жалуются. Пока."
+
+[choices.consequences]
+money = -50
+goods = [{ good = "vodka", change = 2 }]
+reputation = [{ faction = "people", change = -1 }]
+set_flags = ["fake_vodka_sold"]
+
+[[choices.follow_ups]]
+event = "poisoned_customer"
+after_days = 30
+chance = 0.3
+
+[[choices]]
+text = "Отказаться"
+outcome = "Оптовик уезжает к соседям."

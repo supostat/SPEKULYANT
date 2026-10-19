@@ -1,0 +1,24 @@
+title = "Похороны авторитета"
+weight = 4
+cooldown_days = 365
+text = """
+Хоронят авторитета: кортеж «Мерседесов» на полгорода, венки от «братвы». Твоя крыша просит \
+скинуться."""
+
+[conditions]
+reputation = [{ faction = "bandits", at_least = 1 }]
+
+[[choices]]
+text = "Скинуться"
+outcome = "Венок с твоим именем стоит в первом ряду."
+
+[choices.consequences]
+money = -100
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Не скидываться"
+outcome = "Это заметили."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = -1 }]

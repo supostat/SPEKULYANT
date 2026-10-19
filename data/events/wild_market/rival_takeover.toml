@@ -1,0 +1,31 @@
+title = "Рейдер"
+weight = 4
+cooldown_days = 365
+text = """
+{npc} подал в арбитраж на твоё имущество: поддельные долговые расписки, свой судья."""
+
+[conditions]
+rival = { relation_at_most = -1 }
+window = { from = "1994-01-01" }
+
+[[choices]]
+text = "Нанять своего судью"
+outcome = "Судья против судьи. Твой оказался дороже."
+
+[choices.consequences]
+money = -700
+
+[[choices]]
+text = "Договориться миром"
+outcome = "{npc} получает часть, ты — спокойствие."
+
+[choices.consequences]
+money = -300
+rival = { relation = 2 }
+
+[[choices]]
+text = "Ничего не делать"
+outcome = "Суд идёт. Пока идёт."
+
+[choices.consequences]
+rival = { relation = -1 }

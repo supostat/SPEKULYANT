@@ -1,0 +1,27 @@
+title = "«Голосуй или проиграешь»"
+weight = 8
+once = true
+text = """
+Ельцин или Зюганов. Штаб предлагает работу: раздавать листовки и возить людей на участки."""
+
+[conditions]
+timeline = "elections_1996"
+
+[[choices]]
+text = "Работать на штаб Ельцина"
+outcome = "Платят наличными из коробки из-под ксерокса."
+
+[choices.consequences]
+money = 150
+reputation = [{ faction = "officials", change = 1 }, { faction = "people", change = -1 }]
+
+[[choices]]
+text = "Агитировать за коммунистов"
+outcome = "Бабушки у подъезда тебя обожают."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }, { faction = "officials", change = -1 }]
+
+[[choices]]
+text = "Не участвовать"
+outcome = "Выборы проходят без тебя."

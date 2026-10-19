@@ -1,0 +1,19 @@
+title = "Октябрь в Москве"
+weight = 10
+once = true
+text = "Танки стреляют по Белому дому. В центре снайперы, у Останкина бой."
+
+[conditions]
+timeline = "october_1993"
+
+[[choices]]
+text = "Сидеть дома"
+outcome = "Ты смотришь CNN. Как и весь мир."
+
+[[choices]]
+text = "Пойти смотреть с моста"
+outcome = "С моста видно, как горит Белый дом. Пули свистят рядом."
+
+[choices.consequences]
+health = -3
+reputation = [{ faction = "people", change = 1 }]

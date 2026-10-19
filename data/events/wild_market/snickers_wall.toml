@@ -1,0 +1,16 @@
+title = "Стена «Сникерсов»"
+weight = 6
+cooldown_days = 60
+text = "Оптовик с «Газели» продаёт «Сникерсы», «Марсы» и «Баунти» коробками."
+
+[[choices]]
+text = "Взять три блока"
+outcome = "Ларёк теперь выглядит как реклама по телевизору."
+
+[choices.consequences]
+money = -25
+goods = [{ good = "snickers", change = 3 }]
+
+[[choices]]
+text = "Не брать"
+outcome = "«Газель» уезжает к соседнему ларьку."

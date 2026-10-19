@@ -1,0 +1,28 @@
+title = "Дефолт"
+weight = 10
+once = true
+text = """
+Правительство не платит по ГКО, рубль падает втрое. Банки закрывают двери, магазины \
+переписывают ценники каждый час."""
+
+[conditions]
+timeline = "default_1998"
+
+[[choices]]
+text = "Скупить товар по старым ценникам"
+outcome = "К вечеру он стоит втрое."
+
+[choices.consequences]
+money = -200
+goods = [{ good = "cognac", change = 6 }, { good = "coffee", change = 10 }]
+
+[[choices]]
+text = "Снять что можно из банка"
+outcome = "Снял треть. Остальное — в банке, который закрылся."
+
+[choices.consequences]
+money = -100
+
+[[choices]]
+text = "Ждать"
+outcome = "Рубль падает без твоего участия."

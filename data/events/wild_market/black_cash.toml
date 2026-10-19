@@ -1,0 +1,19 @@
+title = "Чёрный нал"
+weight = 5
+cooldown_days = 90
+text = "Знакомый банкир обналичивает безнал под шесть процентов. Все так делают."
+
+[[choices]]
+text = "Провести через него выручку"
+outcome = "Налоги сэкономлены. Банкир — тоже доволен."
+
+[choices.consequences]
+money = 150
+reputation = [{ faction = "officials", change = -1 }]
+
+[[choices]]
+text = "Платить налоги"
+outcome = "Бухгалтер смотрит на тебя как на сумасшедшего."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = 1 }]

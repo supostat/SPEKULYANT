@@ -1,0 +1,18 @@
+title = "Проверка"
+weight = 1
+incident = "inspection"
+text = "В «{business}» пришли пожарные, санэпидстанция и налоговая. Одновременно."
+
+[[choices]]
+text = "Накрыть стол"
+outcome = "Проверяющие уходят сытыми и довольными."
+
+[choices.consequences]
+money = -250
+
+[[choices]]
+text = "Закрыться на ремонт"
+outcome = "Ремонт — лучший способ пережить проверку."
+
+[choices.consequences]
+business = { closed_days = 10 }

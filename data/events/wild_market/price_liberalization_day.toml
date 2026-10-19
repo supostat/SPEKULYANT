@@ -1,0 +1,19 @@
+title = "Цены отпущены"
+weight = 10
+once = true
+text = """
+Второго января цены отпустили: полки полны, ценники в десять раз больше, кошельки пусты."""
+
+[conditions]
+timeline = "price_liberalization"
+
+[[choices]]
+text = "Распродать запасы по новым ценам"
+outcome = "Всё, что лежало в кладовке, — золото."
+
+[choices.consequences]
+money = 200
+
+[[choices]]
+text = "Смотреть на ценники"
+outcome = "Колбаса стоит как месячная зарплата."

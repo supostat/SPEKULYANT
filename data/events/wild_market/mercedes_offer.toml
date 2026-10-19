@@ -1,0 +1,20 @@
+title = "«Шестисотый»"
+weight = 4
+cooldown_days = 365
+text = "Перегонщик из Германии продаёт «Мерседес-600» с не очень чистыми документами."
+
+[conditions]
+money = { at_least = 25000 }
+
+[[choices]]
+text = "Купить"
+outcome = "Теперь гаишники отдают тебе честь, а бандиты — завидуют."
+
+[choices.consequences]
+money = -24000
+goods = [{ good = "mercedes", change = 1 }]
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Не покупать"
+outcome = "«Шестисотый» уезжает к депутату."

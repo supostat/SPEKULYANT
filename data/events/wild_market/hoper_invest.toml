@@ -1,0 +1,24 @@
+title = "«Хопёр-Инвест»"
+weight = 5
+cooldown_days = 180
+text = "Реклама «Хопёр-Инвеста»: «Мы работаем, вы отдыхаете». Проценты — триста годовых."
+
+[conditions]
+window = { from = "1993-01-01", until = "1997-01-01" }
+
+[[choices]]
+text = "Вложить"
+outcome = "Офис красивый, договор длинный."
+
+[choices.consequences]
+money = -200
+set_flags = ["hoper"]
+
+[[choices.follow_ups]]
+event = "hoper_gone"
+after_days = 120
+chance = 0.8
+
+[[choices]]
+text = "Не вкладывать"
+outcome = "Реклама крутится дальше."

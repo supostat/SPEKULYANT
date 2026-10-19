@@ -5,4 +5,5 @@ window = { from = "1998-01-01", until = "1998-01-02" }
 [[outcomes]]
 weight = 1
 news = "Деноминация: у рубля три нуля долой."
+event = "denomination_day"
 set_flags = ["denominated"]

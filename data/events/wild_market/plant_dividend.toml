@@ -1,0 +1,22 @@
+title = "Завод заработал"
+weight = 1
+once = true
+text = "Новый директор завода оказался из толковых: акции выросли, дивиденды платят."
+
+[conditions]
+flags_set = ["plant_shares"]
+
+[[choices]]
+text = "Продать акции"
+outcome = "Ваучеры обернулись настоящими деньгами."
+
+[choices.consequences]
+money = 2500
+clear_flags = ["plant_shares"]
+
+[[choices]]
+text = "Держать"
+outcome = "Акции пусть растут дальше."
+
+[choices.consequences]
+money = 300

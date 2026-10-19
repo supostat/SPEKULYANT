@@ -1,0 +1,24 @@
+title = "После дефолта"
+weight = 6
+cooldown_days = 60
+text = """
+После дефолта закрываются фирмы, на рынке — бывшие менеджеры в галстуках продают свои \
+вещи."""
+
+[conditions]
+flags_set = ["default_1998"]
+
+[[choices]]
+text = "Скупить вещи за бесценок"
+outcome = "Хрусталь и плеер — за копейки."
+
+[choices.consequences]
+money = -40
+goods = [{ good = "crystal_vase", change = 2 }, { good = "cassette_player", change = 1 }]
+
+[[choices]]
+text = "Нанять менеджера к себе"
+outcome = "Он работает за еду и благодарен."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }]

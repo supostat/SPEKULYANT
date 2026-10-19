@@ -1,0 +1,20 @@
+title = "Стадион Десятилетия"
+weight = 5
+cooldown_days = 90
+text = """
+Поляки на Стадионе берут у русских всё: утюги, водку, сигареты. Платят злотыми и \
+косметикой."""
+
+[conditions]
+cities = ["warsaw"]
+
+[[choices]]
+text = "Сдать сигареты и водку"
+outcome = "Злотые, шампунь, жвачка — бартер века."
+
+[choices.consequences]
+goods = [{ good = "cigarettes", change = -10 }, { good = "shampoo", change = 10 }, { good = "chewing_gum", change = 5 }]
+
+[[choices]]
+text = "Просто посмотреть"
+outcome = "Стадион шумит на всех языках Европы."

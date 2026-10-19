@@ -1,0 +1,25 @@
+title = "Предложение Серого"
+weight = 4
+cooldown_days = 180
+text = "{npc} предлагает вложиться в «общак» под процент: «Деньги работают, ты отдыхаешь»."
+
+[conditions]
+npc = "racket_sery"
+
+[[choices]]
+text = "Вложить пятьсот"
+outcome = "Серый записывает в тетрадку. Тетрадке верят все."
+
+[choices.consequences]
+money = -500
+reputation = [{ faction = "bandits", change = 1 }]
+set_flags = ["obshchak_share"]
+
+[[choices.follow_ups]]
+event = "obshchak_payout"
+after_days = 90
+chance = 0.75
+
+[[choices]]
+text = "Отказаться"
+outcome = "Серый кивает: «Дело хозяйское»."

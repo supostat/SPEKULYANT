@@ -1,0 +1,19 @@
+title = "Ночная водка"
+weight = 7
+cooldown_days = 30
+text = "Ночью в ларёк стучат: «Водки и сигарет, сколько стоит — плевать»."
+
+[conditions]
+goods = [{ good = "vodka", at_least = 1 }]
+
+[[choices]]
+text = "Продать по ночной цене"
+outcome = "Ночная цена — двойная."
+
+[choices.consequences]
+money = 60
+goods = [{ good = "vodka", change = -1 }]
+
+[[choices]]
+text = "Не открывать"
+outcome = "Стучат долго, потом уходят."

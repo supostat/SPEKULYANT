@@ -1,0 +1,28 @@
+title = "Своя пирамида"
+weight = 3
+once = true
+text = """
+Знакомый предлагает запустить свою «финансовую компанию»: реклама, проценты, офис. Деньги \
+несут сами."""
+
+[conditions]
+window = { from = "1993-01-01", until = "1995-01-01" }
+money = { at_least = 1000 }
+
+[[choices]]
+text = "Запустить"
+outcome = "Через полгода в офисе очередь вкладчиков. Пора уезжать."
+
+[choices.consequences]
+money = 4000
+reputation = [{ faction = "people", change = -3 }]
+set_flags = ["pyramid_founder"]
+
+[[choices.follow_ups]]
+event = "pyramid_collapse"
+after_days = 180
+chance = 1.0
+
+[[choices]]
+text = "Отказаться"
+outcome = "Знакомый запускает без тебя. Через год его ищут все."

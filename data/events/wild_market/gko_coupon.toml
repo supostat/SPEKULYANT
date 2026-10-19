@@ -1,0 +1,22 @@
+title = "Купон ГКО"
+weight = 1
+once = true
+text = "Банкир приносит доход по ГКО: государство пока платит."
+
+[conditions]
+flags_set = ["gko_owner"]
+
+[[choices]]
+text = "Забрать и выйти"
+outcome = "Доход забран. Государству ты больше ничего не должен."
+
+[choices.consequences]
+money = 420
+clear_flags = ["gko_owner"]
+
+[[choices]]
+text = "Реинвестировать"
+outcome = "Деньги остаются в бумагах государства."
+
+[choices.consequences]
+money = 100

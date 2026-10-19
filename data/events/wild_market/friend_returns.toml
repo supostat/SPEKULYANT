@@ -1,0 +1,15 @@
+title = "Друг вернул"
+weight = 1
+once = true
+text = "Друг вернул долг. Не вдвое, но вернул — по нынешним временам почти чудо."
+
+[conditions]
+flags_set = ["friend_loan"]
+
+[[choices]]
+text = "Взять деньги"
+outcome = "Дружба выдержала девяностые."
+
+[choices.consequences]
+money = 400
+clear_flags = ["friend_loan"]

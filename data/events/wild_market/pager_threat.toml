@@ -1,0 +1,27 @@
+title = "Сообщение без подписи"
+weight = 4
+cooldown_days = 120
+text = "Пейджер: «ТЫ ЗНАЕШЬ ЗА ЧТО. ЖДИ». Без подписи."
+
+[conditions]
+goods = [{ good = "pager", at_least = 1 }]
+reputation = [{ faction = "bandits", at_most = -1 }]
+
+[[choices]]
+text = "Позвонить своей крыше"
+outcome = "Крыша разбирается. За отдельную плату."
+
+[choices.consequences]
+money = -150
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Выбросить пейджер в реку"
+outcome = "Пейджер утонул. Проблема — нет."
+
+[choices.consequences]
+goods = [{ good = "pager", change = -1 }]
+
+[[choices]]
+text = "Не обращать внимания"
+outcome = "Ты ждёшь. Никто не приходит. Пока."

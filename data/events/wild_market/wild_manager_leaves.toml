@@ -1,0 +1,18 @@
+title = "Управляющий уходит"
+weight = 1
+incident = "departure"
+text = "{manager} уходит из «{business}»: конкуренты предложили вдвое."
+
+[[choices]]
+text = "Перебить предложение"
+outcome = "Управляющий остаётся. За вдвое."
+
+[choices.consequences]
+money = -250
+
+[[choices]]
+text = "Отпустить"
+outcome = "Дело стоит, пока ищешь нового."
+
+[choices.consequences]
+business = { manager_leaves = true }

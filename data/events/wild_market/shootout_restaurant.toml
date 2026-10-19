@@ -1,0 +1,15 @@
+title = "Разборка в ресторане"
+weight = 2
+cooldown_days = 365
+text = "В ресторане, где ты ужинаешь, начинается стрельба: делят бензоколонку."
+
+[[choices]]
+text = "Нырнуть под стол"
+outcome = "Ты лежишь под столом до приезда ОМОНа. Цел."
+
+[[choices]]
+text = "Выбежать через кухню"
+outcome = "Повар выбегает следом. Вы оба целы."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }]

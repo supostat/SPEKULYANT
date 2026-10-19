@@ -1,0 +1,19 @@
+title = "Поезд в Пекин"
+weight = 3
+cooldown_days = 30
+road = true
+text = "Шесть суток в поезде. В купе — челноки, в тамбуре — пограничники Монголии."
+
+[[choices]]
+text = "Поделиться с пограничниками"
+outcome = "Пограничники берут водку и уходят."
+
+[choices.consequences]
+money = -20
+
+[[choices]]
+text = "Играть в карты с соседями"
+outcome = "Шесть суток — это много партий."
+
+[choices.consequences]
+reputation = [{ faction = "traders", change = 1 }]

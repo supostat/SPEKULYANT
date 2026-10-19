@@ -1,0 +1,22 @@
+title = "Загул"
+weight = 4
+cooldown_days = 120
+text = "Удачная сделка, баня, девочки, ящик водки. Утром ты не помнишь, где машина."
+
+[conditions]
+money = { at_least = 2000 }
+
+[[choices]]
+text = "Продолжить загул"
+outcome = "Третий день. Сердце колет."
+
+[choices.consequences]
+money = -200
+health = -6
+
+[[choices]]
+text = "Остановиться"
+outcome = "Машину находят у бани. Ты — дома."
+
+[choices.consequences]
+money = -50

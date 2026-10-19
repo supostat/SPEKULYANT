@@ -1,0 +1,15 @@
+title = "Проценты из общака"
+weight = 1
+once = true
+text = "Серый присылает конверт: деньги поработали."
+
+[conditions]
+flags_set = ["obshchak_share"]
+
+[[choices]]
+text = "Забрать"
+outcome = "Восемьсот вместо пятисот. Тетрадке можно верить."
+
+[choices.consequences]
+money = 800
+clear_flags = ["obshchak_share"]

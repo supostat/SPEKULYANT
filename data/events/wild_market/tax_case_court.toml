@@ -1,0 +1,31 @@
+title = "Уклонение от налогов"
+weight = 1
+once = true
+text = "Дело об уклонении от налогов дошло до суда. Следователь намекает, что всё решаемо."
+
+[conditions]
+flags_set = ["tax_case"]
+
+[[choices]]
+text = "Решить"
+outcome = "Дело закрыто за отсутствием состава."
+
+[choices.consequences]
+money = -1200
+clear_flags = ["tax_case"]
+
+[[choices]]
+text = "Судиться"
+outcome = "Три года общего режима."
+
+[choices.consequences]
+sentence_months = 36
+clear_flags = ["tax_case"]
+
+[[choices]]
+text = "Уехать за границу, пока не поздно"
+outcome = "Самолёт, паспорт, новая жизнь."
+
+[choices.consequences]
+end_life = "emigration"
+clear_flags = ["tax_case"]

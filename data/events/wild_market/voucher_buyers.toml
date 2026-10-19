@@ -1,0 +1,26 @@
+title = "Скупка ваучеров"
+weight = 7
+cooldown_days = 60
+text = "У метро скупают ваучеры: бабушки продают их за бутылку водки."
+
+[conditions]
+timeline = "vouchers"
+
+[[choices]]
+text = "Скупать ваучеры"
+outcome = "Пачка ваучеров в барсетке. Будущее — в бумаге."
+
+[choices.consequences]
+money = -100
+set_flags = ["voucher_stack"]
+
+[[choices]]
+text = "Продать свой"
+outcome = "Бутылка водки и чувство обмана."
+
+[choices.consequences]
+money = 8
+
+[[choices]]
+text = "Пройти мимо"
+outcome = "Скупщики не пропадут."

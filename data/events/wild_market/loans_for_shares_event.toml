@@ -1,0 +1,23 @@
+title = "Залоговые аукционы"
+weight = 6
+once = true
+text = """
+Нефть и никель уходят банкам за кредиты правительству. Знакомый банкир зовёт посмотреть, \
+как делается история."""
+
+[conditions]
+timeline = "loans_for_shares_1995"
+
+[[choices]]
+text = "Пойти и смотреть"
+outcome = "Ты видишь, как за минуту уходит то, что строили полвека."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Возмущаться в газету"
+outcome = "Газета печатает. Никто не читает."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }, { faction = "officials", change = -1 }]

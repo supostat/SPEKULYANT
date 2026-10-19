@@ -1,0 +1,20 @@
+title = "Курс МММ растёт"
+weight = 6
+cooldown_days = 30
+text = "Курс билетов МММ вырос вдвое. В офисе на Варшавке очередь на продажу и на покупку."
+
+[conditions]
+flags_set = ["mmm_tickets"]
+window = { until = "1994-08-01", from = "1993-06-01" }
+
+[[choices]]
+text = "Продать билеты"
+outcome = "Удвоил. Соседи завидуют."
+
+[choices.consequences]
+money = 600
+clear_flags = ["mmm_tickets"]
+
+[[choices]]
+text = "Держать"
+outcome = "Курс растёт. Зачем продавать?"

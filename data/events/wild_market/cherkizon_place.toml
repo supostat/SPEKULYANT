@@ -1,0 +1,19 @@
+title = "Место на Черкизоне"
+weight = 5
+once = true
+text = "На Черкизовском рынке продают контейнер с местом в ряду. Говорят, золотое."
+
+[conditions]
+cities = ["moscow"]
+
+[[choices]]
+text = "Купить контейнер"
+outcome = "Контейнер ржавый, место — золотое."
+
+[choices.consequences]
+money = -800
+set_flags = ["cherkizon"]
+
+[[choices]]
+text = "Не связываться"
+outcome = "Контейнер уходит вьетнамцам."

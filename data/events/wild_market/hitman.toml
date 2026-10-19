@@ -1,0 +1,31 @@
+title = "Киллер"
+weight = 1
+once = true
+text = """
+У подъезда стоит «девятка» с тонированными стёклами. Сосед шепчет: тебя ждут второй день."""
+
+[conditions]
+flags_set = ["roof_war"]
+
+[[choices]]
+text = "Откупиться через знакомого авторитета"
+outcome = "Авторитет берёт много, но слово держит."
+
+[choices.consequences]
+money = -1500
+reputation = [{ faction = "bandits", change = 1 }]
+clear_flags = ["roof_war"]
+
+[[choices]]
+text = "Бежать за границу"
+outcome = "Самолёт до Тель-Авива. Назад — никогда."
+
+[choices.consequences]
+end_life = "emigration"
+
+[[choices]]
+text = "Выйти как ни в чём не бывало"
+outcome = "Выстрел из «девятки» слышит весь двор."
+
+[choices.consequences]
+end_life = "death_bandits"

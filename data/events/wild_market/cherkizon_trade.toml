@@ -1,0 +1,23 @@
+title = "Торговый день"
+weight = 7
+cooldown_days = 30
+text = """
+На Черкизоне с шести утра: челноки, оптовики, азербайджанцы с фруктами и милиция с \
+дубинками."""
+
+[conditions]
+flags_set = ["cherkizon"]
+
+[[choices]]
+text = "Отработать день"
+outcome = "Выручка в барсетке, ноги гудят."
+
+[choices.consequences]
+money = 90
+
+[[choices]]
+text = "Сдать контейнер в субаренду"
+outcome = "Субарендатор платит сразу."
+
+[choices.consequences]
+money = 40

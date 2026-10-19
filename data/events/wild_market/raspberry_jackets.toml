@@ -1,0 +1,18 @@
+title = "Малиновые пиджаки"
+weight = 6
+cooldown_days = 90
+text = """
+В ресторане за соседним столом гуляют малиновые пиджаки. Один машет тебе: «Братан, \
+садись»."""
+
+[[choices]]
+text = "Сесть за стол"
+outcome = "Ты пьёшь с ними до утра. Теперь тебя знают."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = 1 }]
+health = -1
+
+[[choices]]
+text = "Вежливо отказаться"
+outcome = "Пиджак не обижается. Сегодня."

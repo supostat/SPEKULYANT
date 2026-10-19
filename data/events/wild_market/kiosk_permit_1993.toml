@@ -1,0 +1,21 @@
+title = "Разрешение префектуры"
+weight = 5
+cooldown_days = 180
+text = """
+Префектура требует переоформить разрешение на торговлю. Новые бланки, новые печати, новые \
+люди."""
+
+[[choices]]
+text = "Оформить через знакомого"
+outcome = "Бумага готова за день."
+
+[choices.consequences]
+money = -80
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Торговать по старому"
+outcome = "Пока не трогают."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]

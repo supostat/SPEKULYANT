@@ -5,6 +5,7 @@ scale = { from = 0.7, to = 1.5 }
 [[outcomes]]
 weight = 1
 news = "Чёрный вторник: доллар за день подскочил на четверть."
+event = "black_tuesday_panic"
 price_shocks = [
   { good = "sneakers", factor = 1.25, days = 60 },
   { good = "cigarettes", factor = 1.25, days = 60 },

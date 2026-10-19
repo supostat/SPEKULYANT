@@ -1,0 +1,14 @@
+title = "Выборы президента"
+window = { from = "1996-06-16", until = "1996-06-17" }
+
+[[outcomes]]
+weight = 3
+news = "Ельцин побеждает во втором туре: «Голосуй или проиграешь» сработало."
+event = "elections_1996_campaign"
+set_flags = ["yeltsin_won"]
+
+[[outcomes]]
+weight = 1
+news = "Второй тур напряжённый до последнего: у Белого дома снова дежурят."
+event = "elections_1996_campaign"
+set_flags = ["yeltsin_won"]

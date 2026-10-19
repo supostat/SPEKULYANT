@@ -1,0 +1,19 @@
+title = "Подожгли"
+weight = 1
+incident = "fire"
+text = "Ночью «{business}» облили бензином. Свидетелей нет."
+
+[[choices]]
+text = "Отстроить"
+outcome = "Новые стены, старые враги."
+
+[choices.consequences]
+money = -500
+business = { closed_days = 30 }
+
+[[choices]]
+text = "Бросить"
+outcome = "Пепелище и страховки нет."
+
+[choices.consequences]
+business = { lost = true }

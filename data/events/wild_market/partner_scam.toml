@@ -1,0 +1,30 @@
+title = "Партнёр по поставке"
+weight = 5
+cooldown_days = 180
+text = """
+Партнёр предлагает общую поставку: ты платишь предоплату, он везёт вагон сахара с Кубы."""
+
+[conditions]
+money = { at_least = 800 }
+
+[[choices]]
+text = "Внести предоплату"
+outcome = "Партнёр уезжает в порт с твоими деньгами."
+
+[choices.consequences]
+money = -800
+set_flags = ["partner_prepaid"]
+
+[[choices.follow_ups]]
+event = "partner_delivery"
+after_days = 45
+chance = 0.5
+
+[[choices.follow_ups]]
+event = "partner_vanished"
+after_days = 45
+chance = 0.5
+
+[[choices]]
+text = "Отказаться"
+outcome = "Партнёр находит других доверчивых."

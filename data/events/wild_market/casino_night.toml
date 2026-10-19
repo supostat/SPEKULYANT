@@ -1,0 +1,22 @@
+title = "Казино"
+weight = 5
+cooldown_days = 90
+text = "Казино в бывшем кинотеатре: рулетка, крупье в бабочке, охрана с автоматами."
+
+[[choices]]
+text = "Поставить на красное"
+outcome = "Выпало зеро. Казино всегда в плюсе."
+
+[choices.consequences]
+money = -100
+
+[[choices]]
+text = "Посидеть в баре"
+outcome = "Бармен рассказывает, кто здесь кого крышует."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Не заходить"
+outcome = "Охрана провожает взглядом."

@@ -1,0 +1,19 @@
+title = "Спирт «Рояль»"
+weight = 6
+cooldown_days = 90
+text = "Голландский спирт «Рояль» идёт фурами. Разбавляешь водой — и ты производитель."
+
+[conditions]
+window = { from = "1992-01-01", until = "1996-01-01" }
+
+[[choices]]
+text = "Взять ящик спирта"
+outcome = "Литры в коробке с короной."
+
+[choices.consequences]
+money = -30
+goods = [{ good = "royal_spirit", change = 12 }]
+
+[[choices]]
+text = "Не связываться"
+outcome = "Говорят, в нём что-то не то."

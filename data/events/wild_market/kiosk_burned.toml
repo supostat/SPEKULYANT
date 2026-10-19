@@ -1,0 +1,20 @@
+title = "Сгоревший ларёк"
+weight = 4
+cooldown_days = 180
+text = """
+Ночью у метро сгорели три ларька. Утром хозяева четвёртого звонят тебе: продают дёшево."""
+
+[[choices]]
+text = "Скупить товар погорельцев"
+outcome = "Закопчённые коробки, целые бутылки."
+
+[choices.consequences]
+money = -60
+goods = [{ good = "vodka", change = 1 }, { good = "cigarettes", change = 10 }]
+
+[[choices]]
+text = "Посочувствовать"
+outcome = "Сочувствие тоже кое-чего стоит."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }]

@@ -1,0 +1,18 @@
+title = "Чёрный вторник"
+weight = 10
+once = true
+text = "Доллар за день вырос на четверть. В обменниках очереди, в банках — паника."
+
+[conditions]
+timeline = "black_tuesday"
+
+[[choices]]
+text = "Скупить доллары с утра"
+outcome = "К вечеру ты богаче на четверть."
+
+[choices.consequences]
+money = 150
+
+[[choices]]
+text = "Ничего не делать"
+outcome = "Рубли подешевели, пока ты ничего не делал."

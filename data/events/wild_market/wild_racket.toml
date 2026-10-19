@@ -1,0 +1,26 @@
+title = "Наезд бригады"
+weight = 1
+incident = "racket"
+text = "На «{business}» наехала чужая бригада: «Работаете на нашей земле»."
+
+[[choices]]
+text = "Платить новым"
+outcome = "Две крыши — это вдвое дороже."
+
+[choices.consequences]
+money = -300
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Позвать свою крышу"
+outcome = "Крыши договорились. Ты платишь за стрелку."
+
+[choices.consequences]
+money = -150
+
+[[choices]]
+text = "Закрыться"
+outcome = "Точка стоит, пока бригады выясняют."
+
+[choices.consequences]
+business = { closed_days = 14 }

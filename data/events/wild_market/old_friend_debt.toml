@@ -1,0 +1,24 @@
+title = "Старый друг"
+weight = 5
+cooldown_days = 180
+text = "Старый друг просит в долг: «Через месяц верну вдвое, клянусь»."
+
+[[choices]]
+text = "Дать в долг"
+outcome = "Друг обнимает и уходит."
+
+[choices.consequences]
+money = -300
+set_flags = ["friend_loan"]
+
+[[choices.follow_ups]]
+event = "friend_returns"
+after_days = 30
+chance = 0.4
+
+[[choices]]
+text = "Отказать"
+outcome = "Друг обижается. Возможно, навсегда."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = -1 }]

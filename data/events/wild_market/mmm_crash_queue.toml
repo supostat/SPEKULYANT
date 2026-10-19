@@ -1,0 +1,26 @@
+title = "МММ лопнула"
+weight = 10
+once = true
+text = """
+У офиса МММ на Варшавке толпа: выплаты прекращены. Билеты стоят бумагу, на которой \
+напечатаны."""
+
+[conditions]
+timeline = "mmm"
+flags_set = ["mmm_collapsed"]
+
+[[choices]]
+text = "Стоять в толпе"
+outcome = "Толпа стоит неделю. Выплат нет."
+
+[choices.consequences]
+clear_flags = ["mmm_tickets"]
+
+[[choices]]
+text = "Скупить билеты за копейки у отчаявшихся"
+outcome = "Вдруг пирамида оживёт?"
+
+[choices.consequences]
+money = -30
+set_flags = ["mmm_tickets"]
+reputation = [{ faction = "people", change = -1 }]

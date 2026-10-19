@@ -1,0 +1,18 @@
+title = "Напарник для поездки"
+weight = 5
+cooldown_days = 120
+text = """
+Знакомая челночница ищет напарника в Стамбул: вдвоём таможня берёт меньше, а баулов можно \
+вывезти вдвое больше."""
+
+[[choices]]
+text = "Скинуться на поездку"
+outcome = "Через две недели она приносит твою долю товаром."
+
+[choices.consequences]
+money = -200
+goods = [{ good = "leather_jacket", change = 2 }, { good = "tights", change = 10 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Она едет с другим."

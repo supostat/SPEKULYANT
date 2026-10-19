@@ -1,0 +1,23 @@
+title = "Отравился"
+weight = 1
+once = true
+text = "Покупатель палёного «Абсолюта» попал в реанимацию. Его брат ищет, кто продал."
+
+[conditions]
+flags_set = ["fake_vodka_sold"]
+
+[[choices]]
+text = "Оплатить лечение"
+outcome = "Брат берёт деньги и молчит."
+
+[choices.consequences]
+money = -300
+clear_flags = ["fake_vodka_sold"]
+
+[[choices]]
+text = "Всё отрицать"
+outcome = "Брат обещает разобраться. С бандитами из своего района."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = -2 }, { faction = "people", change = -1 }]
+clear_flags = ["fake_vodka_sold"]

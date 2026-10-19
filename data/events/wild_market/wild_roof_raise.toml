@@ -1,0 +1,26 @@
+title = "Крыша просит больше"
+weight = 1
+incident = "roof_raise"
+text = "Крыша «{business}» объясняет: инфляция, ставка растёт вдвое."
+
+[[choices]]
+text = "Платить"
+outcome = "Крыша довольна."
+
+[choices.consequences]
+money = -250
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Торговаться"
+outcome = "Сошлись на полуторной."
+
+[choices.consequences]
+money = -150
+
+[[choices]]
+text = "Отказать"
+outcome = "Крыша обижается. Обиженная крыша опаснее налоговой."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = -2 }]

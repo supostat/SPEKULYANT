@@ -1,0 +1,23 @@
+title = "Офис закрыт"
+weight = 1
+once = true
+text = """
+Офис «Хопёр-Инвеста» закрыт. На двери — листок: «Временно по техническим причинам»."""
+
+[conditions]
+flags_set = ["hoper"]
+
+[[choices]]
+text = "Записаться в общество обманутых вкладчиков"
+outcome = "Общество собирается по вторникам."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }]
+clear_flags = ["hoper"]
+
+[[choices]]
+text = "Забыть"
+outcome = "Двести рублей — это урок."
+
+[choices.consequences]
+clear_flags = ["hoper"]

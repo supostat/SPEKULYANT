@@ -1,0 +1,21 @@
+title = "Стрелка"
+weight = 4
+cooldown_days = 180
+text = "Две крыши не поделили твой ряд на рынке. Тебя зовут на стрелку как сторону."
+
+[conditions]
+reputation = [{ faction = "bandits", at_least = 1 }]
+
+[[choices]]
+text = "Поехать со своей крышей"
+outcome = "Стрелка прошла без стрельбы. Ряд — ваш."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = 2 }]
+
+[[choices]]
+text = "Не поехать"
+outcome = "Ряд отдают другим. Тебя — тоже."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = -1 }]

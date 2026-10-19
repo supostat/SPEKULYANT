@@ -1,0 +1,39 @@
+title = "Крыша"
+weight = 7
+cooldown_days = 90
+text = """
+Бритые ребята в кожанках объясняют: торговать без крыши — небезопасно. Крыша — это они."""
+
+[conditions]
+money = { at_least = 300 }
+
+[[choices]]
+text = "Платить"
+outcome = "Ребята уходят. Теперь ты под ними."
+
+[choices.consequences]
+money = -120
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Сослаться на свою крышу"
+outcome = "Ребята созваниваются по мобиле и уходят."
+
+[choices.conditions]
+reputation = [{ faction = "bandits", at_least = 2 }]
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "«Ну смотри», — говорит старший."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = -1 }]
+set_flags = ["roof_refused"]
+
+[[choices.follow_ups]]
+event = "roof_warning"
+after_days = 15
+chance = 0.6

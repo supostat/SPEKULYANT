@@ -1,0 +1,21 @@
+title = "Своя лицензия"
+weight = 3
+once = true
+text = """
+В ЦБ продают банковскую лицензию «под ключ». Уставной капитал можно занести наличными."""
+
+[conditions]
+money = { at_least = 10000 }
+
+[[choices]]
+text = "Купить лицензию"
+outcome = "Теперь ты банкир. Осталось найти вкладчиков."
+
+[choices.consequences]
+money = -8000
+reputation = [{ faction = "officials", change = 2 }]
+set_flags = ["own_bank"]
+
+[[choices]]
+text = "Не связываться"
+outcome = "Банков в стране и без тебя две тысячи."

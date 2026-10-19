@@ -1,0 +1,19 @@
+title = "Бойцы на рынке"
+weight = 6
+cooldown_days = 60
+text = "Бойцы бригады обходят ряды и собирают «на охрану». Твоя очередь."
+
+[[choices]]
+text = "Сдать на охрану"
+outcome = "Боец кивает и идёт дальше."
+
+[choices.consequences]
+money = -30
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Сказать, что уже заплатил"
+outcome = "Боец проверяет по тетрадке. Верит."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = -1 }]

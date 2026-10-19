@@ -1,0 +1,26 @@
+title = "Вкладчики"
+weight = 6
+cooldown_days = 60
+text = "В твой банк несут деньги: процент выше, чем у соседей, а офис — солиднее."
+
+[conditions]
+flags_set = ["own_bank"]
+
+[[choices]]
+text = "Крутить деньги в ГКО"
+outcome = "Маржа банка — твоя прибыль."
+
+[choices.consequences]
+money = 600
+
+[[choices]]
+text = "Выдать кредит знакомым"
+outcome = "Знакомые обещают вернуть."
+
+[choices.consequences]
+money = 300
+
+[[choices.follow_ups]]
+event = "bad_loan"
+after_days = 90
+chance = 0.4

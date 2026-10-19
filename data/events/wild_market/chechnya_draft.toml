@@ -1,0 +1,19 @@
+title = "Повестка"
+weight = 6
+once = true
+text = "Племяннику пришла повестка: Чечня. Сестра плачет и просит помочь."
+
+[conditions]
+timeline = "chechnya_1994"
+
+[[choices]]
+text = "Откупить через военкомат"
+outcome = "Военком берёт и вычёркивает фамилию."
+
+[choices.consequences]
+money = -400
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Ничего не делать"
+outcome = "Племянник уходит. Возвращается через год — другим."

@@ -1,0 +1,21 @@
+title = "Мобила-кирпич"
+weight = 4
+once = true
+text = "Мобильный телефон — статус: кирпич размером с батон и тарифом как зарплата врача."
+
+[conditions]
+window = { from = "1994-06-01" }
+money = { at_least = 1500 }
+
+[[choices]]
+text = "Купить"
+outcome = "Ты говоришь по мобиле в ресторане. Все оборачиваются."
+
+[choices.consequences]
+money = -1200
+goods = [{ good = "mobile_phone", change = 1 }]
+reputation = [{ faction = "bandits", change = 1 }, { faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Не покупать"
+outcome = "Пейджера пока хватает."

@@ -1,0 +1,22 @@
+title = "ГКО сгорели"
+weight = 1
+once = true
+text = "Твои ГКО заморожены: государство платит бумагой с отсрочкой на годы."
+
+[conditions]
+flags_set = ["gko_owner", "default_1998"]
+
+[[choices]]
+text = "Продать бумаги за десятую часть"
+outcome = "Хоть что-то."
+
+[choices.consequences]
+money = 30
+clear_flags = ["gko_owner"]
+
+[[choices]]
+text = "Ждать реструктуризации"
+outcome = "Ждать придётся долго."
+
+[choices.consequences]
+clear_flags = ["gko_owner"]

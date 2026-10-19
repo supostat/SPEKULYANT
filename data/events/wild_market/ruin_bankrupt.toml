@@ -1,0 +1,30 @@
+title = "Долги"
+weight = 2
+once = true
+text = """
+Кредиторы, поставщики и крыша пришли в один день. Денег нет, товара нет, друзей тоже."""
+
+[conditions]
+reputation = [{ faction = "bandits", at_most = -5 }]
+
+[[choices]]
+text = "Отдать всё, что есть"
+outcome = "Ты начинаешь с нуля. Но живой."
+
+[choices.consequences]
+money = -300
+reputation = [{ faction = "bandits", change = 2 }]
+
+[[choices]]
+text = "Исчезнуть"
+outcome = "Ты уезжаешь ночным поездом. Навсегда."
+
+[choices.consequences]
+end_life = "ruin"
+
+[[choices]]
+text = "Отдать квартиру и начать заново"
+outcome = "Комната в общежитии и долги закрыты."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = 3 }, { faction = "people", change = -1 }]

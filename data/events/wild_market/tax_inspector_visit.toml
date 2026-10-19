@@ -1,0 +1,27 @@
+title = "Налоговый инспектор"
+weight = 6
+cooldown_days = 90
+text = """
+Инспектор налоговой листает твои бумаги: «Ну, всё как у всех. Значит, есть нарушения»."""
+
+[[choices]]
+text = "Подарок к Новому году"
+outcome = "Инспектор любит коньяк и праздники."
+
+[choices.consequences]
+money = -60
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Заплатить штраф"
+outcome = "Квитанция — тоже память."
+
+[choices.consequences]
+money = -90
+
+[[choices]]
+text = "Спорить"
+outcome = "Инспектор записывает тебя в «трудные»."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]

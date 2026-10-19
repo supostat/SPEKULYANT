@@ -1,0 +1,29 @@
+title = "Беженцы"
+weight = 4
+cooldown_days = 180
+text = "На рынке беженцы с юга продают последнее: ковры, золото, посуду."
+
+[conditions]
+cities = ["moscow", "tashkent", "tbilisi"]
+
+[[choices]]
+text = "Купить золото по честной цене"
+outcome = "Женщина благодарит. Золото настоящее."
+
+[choices.consequences]
+money = -300
+goods = [{ good = "gold", change = 10 }]
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Сбить цену до копеек"
+outcome = "Купил дёшево. Смотреть ей в глаза не хочется."
+
+[choices.consequences]
+money = -150
+goods = [{ good = "gold", change = 10 }]
+reputation = [{ faction = "people", change = -2 }]
+
+[[choices]]
+text = "Пройти"
+outcome = "Рынок полон чужого горя."

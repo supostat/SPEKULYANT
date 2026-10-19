@@ -1,0 +1,16 @@
+title = "Фальшивые доллары"
+weight = 4
+cooldown_days = 180
+text = "Знакомый предлагает сотенные доллары по половине цены: «Ливанские, не отличишь»."
+
+[[choices]]
+text = "Взять пачку"
+outcome = "В обменнике купюру просвечивают и зовут охрану."
+
+[choices.consequences]
+money = -200
+reputation = [{ faction = "militia", change = -2 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Знакомого берут через неделю."

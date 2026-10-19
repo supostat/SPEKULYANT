@@ -1,0 +1,21 @@
+title = "Кожа из Стамбула"
+weight = 7
+cooldown_days = 60
+text = """
+Челночница вернулась из Стамбула с баулами кожаных курток. Отдаёт оптом, пока не растащили \
+по рынкам."""
+
+[conditions]
+npc = "natasha_turetskaya"
+
+[[choices]]
+text = "Взять пять курток"
+outcome = "Куртки пахнут Лалели и деньгами."
+
+[choices.consequences]
+money = -280
+goods = [{ good = "leather_jacket", change = 5 }]
+
+[[choices]]
+text = "Не брать"
+outcome = "Наташа уходит на Черкизовский."

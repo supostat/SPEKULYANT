@@ -1,0 +1,28 @@
+title = "Лопнул банк"
+weight = 6
+cooldown_days = 180
+text = "Банк, в который ты носил деньги, закрыл двери. На двери объявление, у двери толпа."
+
+[conditions]
+window = { from = "1994-01-01" }
+
+[[choices]]
+text = "Стоять в толпе вкладчиков"
+outcome = "Через месяц выплатили десятую часть."
+
+[choices.consequences]
+money = 10
+
+[[choices]]
+text = "Найти знакомого в банке"
+outcome = "Знакомый выводит твои деньги до банкротства. За долю."
+
+[choices.conditions]
+reputation = [{ faction = "officials", at_least = 1 }]
+
+[choices.consequences]
+money = 200
+
+[[choices]]
+text = "Махнуть рукой"
+outcome = "Банк лопнул. Жизнь продолжается."

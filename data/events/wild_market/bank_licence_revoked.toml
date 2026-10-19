@@ -1,0 +1,31 @@
+title = "Отзыв лицензии"
+weight = 2
+once = true
+text = "ЦБ отзывает лицензию у твоего банка. Вкладчики у дверей, следователи у сейфа."
+
+[conditions]
+flags_set = ["own_bank"]
+window = { from = "1995-01-01" }
+
+[[choices]]
+text = "Договориться в ЦБ"
+outcome = "Лицензию «временно приостановили». Временно."
+
+[choices.consequences]
+money = -3000
+clear_flags = ["own_bank"]
+
+[[choices]]
+text = "Объявить банкротство"
+outcome = "Банк лопнул. Ты остался."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = -3 }]
+clear_flags = ["own_bank"]
+
+[[choices]]
+text = "Улететь с остатками"
+outcome = "Вкладчики узнают из газет."
+
+[choices.consequences]
+end_life = "emigration"

@@ -1,0 +1,37 @@
+title = "Чековый аукцион"
+weight = 5
+once = true
+text = """
+Чековый аукцион: за ваучеры продают акции завода. Говорят, завод стоит дороже всего \
+района."""
+
+[conditions]
+flags_set = ["voucher_stack"]
+
+[[choices]]
+text = "Вложить ваучеры в завод"
+outcome = "Ты теперь акционер. Завод пока стоит."
+
+[choices.consequences]
+set_flags = ["plant_shares"]
+clear_flags = ["voucher_stack"]
+
+[[choices.follow_ups]]
+event = "plant_dividend"
+after_days = 365
+chance = 0.5
+
+[[choices]]
+text = "Вложить в чековый фонд"
+outcome = "Фонд обещает дивиденды. Офис фонда — в подвале."
+
+[choices.consequences]
+clear_flags = ["voucher_stack"]
+
+[[choices]]
+text = "Перепродать ваучеры оптовику"
+outcome = "Оптовик платит вдвое против бабушек."
+
+[choices.consequences]
+money = 180
+clear_flags = ["voucher_stack"]

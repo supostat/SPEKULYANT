@@ -1,0 +1,26 @@
+title = "Гаишник с палочкой"
+weight = 6
+cooldown_days = 60
+text = "Гаишник машет палочкой: «Нарушаем. Будем оформлять или договоримся?»"
+
+[[choices]]
+text = "Договориться"
+outcome = "Полтинник исчезает в рукаве."
+
+[choices.consequences]
+money = -15
+
+[[choices]]
+text = "Оформлять"
+outcome = "Протокол, штраф, полдня в ГАИ."
+
+[choices.consequences]
+money = -25
+reputation = [{ faction = "militia", change = 1 }]
+
+[[choices]]
+text = "Сделать вид, что не понимаешь"
+outcome = "Гаишник машет палочкой: «Езжай уже»."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -1 }]
