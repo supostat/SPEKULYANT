@@ -13,6 +13,7 @@ mod manager;
 mod month_ledger;
 mod month_report;
 mod monthly_budget;
+mod oversight;
 mod policies;
 mod policy_kind;
 
@@ -27,6 +28,7 @@ pub use manager::Manager;
 pub use month_ledger::MonthLedger;
 pub use month_report::MonthReport;
 pub use monthly_budget::{MonthlyBudget, Operation};
+pub use oversight::Oversight;
 pub use policies::Policies;
 pub use policy_kind::PolicyKind;
 
@@ -36,8 +38,11 @@ use crate::content::{BusinessForm, BusinessKind, Content};
 use crate::economy::{Currency, Markets, Money, Real};
 use crate::events::EventEngine;
 use crate::time::GameDate;
+use crate::zone::TrusteeConduct;
 
 const PERCENT: f64 = 100.0;
+/// Исчезнувшее доверенное лицо уносит всю выручку месяца.
+const WHOLE_INCOME: f64 = 1.0;
 
 /// Дело игрока (§7): тип в городе, точки, варианты политик, управляющий, закрытие до даты, учёт
 /// месяца и последний отчёт. Без управляющего дело стоит и только платит аренду.
@@ -215,13 +220,16 @@ impl Business {
     }
 
     /// Расчёт прошлого месяца первого числа: выручка за рабочие дни с колебанием, доля крыше и
-    /// налог с неё, аренда за все дни, зарплата за дни с управляющим, откупы, недостача, если
-    /// управляющий проворовался, — и итог. Привычки управляющего могут стоить ему деления хватки.
+    /// налог с неё, аренда за все дни, зарплата за дни с управляющим, откупы, недостача — и итог.
+    /// При хозяине недостача бывает, если управляющий проворовался по прогнозу; пока хозяин сидит,
+    /// её решает поведение доверенного лица. Привычки управляющего могут стоить ему деления
+    /// хватки.
     pub fn settle(
         &mut self,
         content: &Content,
         markets: &Markets,
         competitors: u32,
+        oversight: Oversight,
         rng: &mut ChaCha8Rng,
         today: GameDate,
     ) -> MonthReport {
@@ -231,12 +239,18 @@ impl Business {
         let budget = self.budget(content, markets, competitors, today);
         let noise = 1.0 + (2.0 * EventEngine::fraction(rng) - 1.0) * rules.revenue_noise;
         let income = budget.income * f64::from(ledger.working_days) / month_days * noise;
-        let forecast = self.forecast(content, today);
-        let stolen_share = match forecast {
-            Some(forecast) if EventEngine::roll(rng, rules.risk(forecast.theft).monthly_chance) => {
-                rules.theft_share
-            }
-            _ => 0.0,
+        let stolen_share = match oversight {
+            Oversight::Owner => match self.forecast(content, today) {
+                Some(forecast)
+                    if EventEngine::roll(rng, rules.risk(forecast.theft).monthly_chance) =>
+                {
+                    rules.theft_share
+                }
+                _ => 0.0,
+            },
+            Oversight::Trustee(TrusteeConduct::Honest) => 0.0,
+            Oversight::Trustee(TrusteeConduct::Steals) => content.zone.trustees.steal_share,
+            Oversight::Trustee(TrusteeConduct::Vanishes) => WHOLE_INCOME,
         };
         let mut skill_lost = false;
         if let Some(manager) = &mut self.manager {
@@ -317,10 +331,10 @@ impl Business {
                     Incident::RoofRaise if has_roof => rules.roof_raise_chance,
                     Incident::RoofRaise => 0.0,
                     Incident::Departure => {
-                        BusinessRules::by_loyalty(&rules.departure_chances, forecast.loyalty)
+                        BusinessRules::by_trait(&rules.departure_chances, forecast.loyalty)
                     }
                     Incident::Betrayal => {
-                        BusinessRules::by_loyalty(&rules.betrayal_chances, forecast.loyalty)
+                        BusinessRules::by_trait(&rules.betrayal_chances, forecast.loyalty)
                     }
                     Incident::Fire => rules.fire_chance,
                 };

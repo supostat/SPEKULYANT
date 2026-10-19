@@ -74,6 +74,20 @@ pub enum Command {
     Retire {
         ending: String,
     },
+    /// В зоне: ходить на промзону или нет.
+    SetWork {
+        work: bool,
+    },
+    /// В зоне: услуга за сигареты и чай.
+    UseService {
+        service: String,
+    },
+    /// В зоне: передача с воли за наличные.
+    OrderParcel,
+    /// В зоне: просьба об УДО.
+    ApplyForParole,
+    /// В зоне: выход за взятку наличными.
+    BribeForRelease,
     /// Положить в место хранения `amount` целых единиц его валюты на ценнике дня: рубли — из
     /// наличных, чеки и доллары — купленные на наличные по курсу.
     Deposit {
@@ -124,6 +138,11 @@ impl Command {
             Self::Call { .. } => "call",
             Self::BuyHousing { .. } => "buy_housing",
             Self::Retire { .. } => "retire",
+            Self::SetWork { .. } => "set_work",
+            Self::UseService { .. } => "use_service",
+            Self::OrderParcel => "order_parcel",
+            Self::ApplyForParole => "apply_for_parole",
+            Self::BribeForRelease => "bribe_for_release",
             Self::Deposit { .. } => "deposit",
             Self::Withdraw { .. } => "withdraw",
             Self::Save { .. } => "save",

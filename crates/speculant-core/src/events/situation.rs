@@ -6,9 +6,11 @@ use crate::economy::{Currency, Money, Real, Trader};
 use crate::npc::Rivals;
 use crate::reputation::{Contact, FactionReputation};
 use crate::time::GameDate;
+use crate::zone::Zone;
 
 /// Положение дел, над которым считаются условия событий (§10.1): день, город (в пути — город
-/// отправления), дорога, деньги и карман, репутация, связи, соперники и флаги прошлых решений.
+/// отправления), дорога, деньги и карман, репутация, связи, соперники, флаги прошлых решений и
+/// зона, если игрок сидит.
 pub struct Situation<'a> {
     pub content: &'a Content,
     pub today: GameDate,
@@ -19,21 +21,27 @@ pub struct Situation<'a> {
     pub contacts: &'a BTreeMap<NpcId, Contact>,
     pub rivals: &'a Rivals,
     pub flags: &'a BTreeSet<FlagId>,
+    pub zone: Option<&'a Zone>,
 }
 
 impl Situation<'_> {
-    /// Событие может случиться: оно из каталога текущей эпохи, дорожное — только в пути, обычное —
-    /// только не в пути, и его условия выполнены. События зоны (без эпохи) в обычной жизни не
-    /// случаются, события происшествий с делами приходят только от дел.
+    /// Событие может случиться: на воле — из каталога текущей эпохи, в зоне — из каталога зоны;
+    /// дорожное — только в пути, обычное — только не в пути, и его условия выполнены. События
+    /// происшествий с делами приходят только от дел.
     pub fn allows_event(&self, event: &Event) -> bool {
-        self.in_current_epoch(event)
+        let in_place = match self.zone {
+            Some(_) => event.epoch.is_none(),
+            None => self.in_current_epoch(event),
+        };
+        in_place
             && event.incident.is_none()
             && event.road == self.on_road
             && self.allows(&event.conditions)
     }
 
     /// Событие происшествия может прийти: оно из каталога текущей эпохи, про это происшествие, и
-    /// его условия выполнены — дома и в дороге: управляющий найдёт хозяина и на пейджере.
+    /// его условия выполнены — дома, в дороге и в зоне: управляющий найдёт хозяина и на пейджере,
+    /// и на свидании.
     pub fn allows_incident_event(&self, event: &Event, incident: Incident) -> bool {
         self.in_current_epoch(event)
             && event.incident == Some(incident)
@@ -54,8 +62,8 @@ impl Situation<'_> {
     }
 
     /// Условия выполнены; пустые условия выполняются всегда. Окно дат включает `from` и не
-    /// включает `until`. Узлы таймлайна появятся с генератором истории, до тех пор условие
-    /// `timeline` не выполняется.
+    /// включает `until`. Условие авторитета выполняется только в зоне. Узлы таймлайна появятся с
+    /// генератором истории, до тех пор условие `timeline` не выполняется.
     pub fn allows(&self, conditions: &Conditions) -> bool {
         let epoch = &self.content.time.epochs.epoch_on(self.today).id;
         let cash = self.player.money().cash();
@@ -95,6 +103,13 @@ impl Situation<'_> {
         let rival_present = conditions
             .rival
             .is_none_or(|rival| !self.rivals.matching(&rival, self.today).is_empty());
+        let authority_fits = conditions.authority.is_none_or(|bounds| {
+            self.zone.is_some_and(|zone| {
+                let authority = zone.authority();
+                bounds.at_least.is_none_or(|least| authority >= least)
+                    && bounds.at_most.is_none_or(|most| authority <= most)
+            })
+        });
         in_epoch
             && in_window
             && in_city
@@ -104,10 +119,12 @@ impl Situation<'_> {
             && flags_fit
             && npc_reachable
             && rival_present
+            && authority_fits
             && conditions.timeline.is_none()
     }
 
-    /// Деньги, которые выбор забирает, есть наличными, а товар, который он забирает, — в кармане.
+    /// Деньги, которые выбор забирает, есть наличными, товар — в кармане, а сигареты и чай — в
+    /// запасе зоны.
     fn affords(&self, consequences: &Consequences) -> bool {
         let pays = consequences.money.is_none_or(|money| {
             !money.is_negative() || self.player.money().cash().covers(self.cost(money))
@@ -116,7 +133,11 @@ impl Situation<'_> {
             change.change >= 0
                 || self.player.pocket().quantity(&change.good) >= change.change.unsigned_abs()
         });
-        pays && gives_goods
+        let gives_stash = consequences.zone.is_none_or(|change| {
+            self.zone
+                .is_some_and(|zone| zone.stash().covers(change.price()))
+        });
+        pays && gives_goods && gives_stash
     }
 
     fn cost(&self, money: Real) -> Money {

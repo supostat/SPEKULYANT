@@ -5,12 +5,15 @@
 use std::sync::Arc;
 
 use super::Game;
-use crate::business::{Business, BusinessId, Employee, Handling, MonthReport, PolicyKind};
+use crate::business::{
+    Business, BusinessId, Employee, Handling, MonthReport, Oversight, PolicyKind,
+};
 use crate::command_error::CommandError;
 use crate::content::{BusinessKindId, NpcId};
 use crate::economy::{Currency, Money};
 use crate::reputation::{Contact, ContactRefusal};
 use crate::time::GameDate;
+use crate::zone::TrusteeConduct;
 
 const BUSINESS_STREAM: &str = "business";
 const OPENED: &str = "Открыл";
@@ -27,6 +30,7 @@ const OUT_OF: &str = "из";
 const RAID_BY_ROOF: &str = "наезд — крыша разобралась";
 const INSPECTION_BRIBED: &str = "проверка — откупились за";
 const INSPECTION_CLOSED: &str = "проверка — закрылись до";
+const VANISHED: &str = "исчез с выручкой";
 
 impl Game {
     /// Точка дела в городе игрока: дело открывается в форме собственности дня, вторая и следующие
@@ -219,15 +223,23 @@ impl Game {
         let mut out_of_policy = Vec::new();
         for id in ids {
             let competitors = self.rivals.business_points(&id.kind, &id.city);
-            let business = self.businesses.get_mut(&id).expect("дело из списка ключей");
-            if date.day_of_month() == 1 && business.ledger().days > 0 {
-                let report = business.settle(
-                    &content,
-                    &self.markets,
-                    competitors,
-                    self.rng.stream(BUSINESS_STREAM),
-                    date,
-                );
+            if date.day_of_month() == 1 && self.businesses[&id].ledger().days > 0 {
+                let oversight = self.oversight(&id, date);
+                let report = self
+                    .businesses
+                    .get_mut(&id)
+                    .expect("дело из списка ключей")
+                    .settle(
+                        &content,
+                        &self.markets,
+                        competitors,
+                        oversight,
+                        self.rng.stream(BUSINESS_STREAM),
+                        date,
+                    );
+                if oversight == Oversight::Trustee(TrusteeConduct::Vanishes) {
+                    self.trustee_vanishes(&id, date, &mut messages);
+                }
                 if !self.pay_month(&id, report, &mut messages) {
                     continue;
                 }
@@ -260,6 +272,43 @@ impl Game {
         out_of_policy
             .into_iter()
             .any(|(id, incident)| self.start_incident_event(&id, incident, date))
+    }
+
+    /// Кто смотрел за делом месяц: на воле — хозяин; пока хозяин сидит, управляющий ведёт дело по
+    /// своей лояльности и честности — честно, воруя или исчезнув с выручкой (§12).
+    fn oversight(&mut self, id: &BusinessId, date: GameDate) -> Oversight {
+        let business = &self.businesses[id];
+        let (Some(_), Some(manager), Some(forecast)) = (
+            &self.zone,
+            business.manager(),
+            business.forecast(&self.content, date),
+        ) else {
+            return Oversight::Owner;
+        };
+        let honesty = manager.employee().honesty();
+        Oversight::Trustee(TrusteeConduct::draw(
+            &self.content.zone.trustees,
+            forecast.loyalty,
+            honesty,
+            self.rng.stream(BUSINESS_STREAM),
+        ))
+    }
+
+    /// Доверенное лицо исчезло с выручкой месяца: дело остаётся без управляющего, а его самого
+    /// больше не найти.
+    fn trustee_vanishes(&mut self, id: &BusinessId, date: GameDate, messages: &mut Vec<String>) {
+        let content = Arc::clone(&self.content);
+        let business = self.businesses.get_mut(id).expect("дело из списка ключей");
+        let name = business.name(&content);
+        let manager = business
+            .dismiss()
+            .expect("исчезает только управляющий, который был");
+        let npc = manager.employee().npc().clone();
+        messages.push(format!("{name}: {} {VANISHED}", content.npcs[&npc].name));
+        self.contacts
+            .entry(npc.clone())
+            .or_insert_with(|| Contact::new(npc))
+            .lose(date, &format!("{name}: {VANISHED}"));
     }
 
     /// Итог месяца хозяину: прибыль — в наличные, убыток — из наличных; убыток, который не

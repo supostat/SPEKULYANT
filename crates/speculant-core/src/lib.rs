@@ -1,5 +1,5 @@
 //! Ядро симуляции «Спекулянта»: время, экономика, репутация, события, поездки, соперники, дела,
-//! жизнь персонажа.
+//! жизнь персонажа, зона.
 //! Крейт не зависит от Godot: его гоняют симулятор, валидатор и мост gdext.
 //! Наружу ядро отдаёт `StateView` — снимок мира, готовый к показу, — и принимает `Command`.
 
@@ -17,6 +17,7 @@ pub mod rng;
 pub mod time;
 pub mod travel;
 pub mod view;
+pub mod zone;
 
 pub use command::{Command, LifeSettings};
 pub use command_error::CommandError;

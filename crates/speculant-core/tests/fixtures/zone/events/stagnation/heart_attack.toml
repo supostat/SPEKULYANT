@@ -1,0 +1,7 @@
+title = "Сердце"
+weight = 1
+text = "Прихватило сердце."
+
+[[choices]]
+text = "Лечь"
+consequences = { end_life = "death_health" }

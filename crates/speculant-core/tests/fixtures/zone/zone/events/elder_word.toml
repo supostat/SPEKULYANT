@@ -1,0 +1,11 @@
+title = "Слово смотрящего"
+weight = 1
+text = "Смотрящий зовёт поговорить."
+
+[conditions]
+authority = { at_least = 3 }
+
+[[choices]]
+text = "Выслушать"
+outcome = "Теперь ты при деле."
+consequences = { zone = { authority = 1 } }

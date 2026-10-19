@@ -36,11 +36,16 @@ impl Game {
         Ok(())
     }
 
-    /// Событие дня; `true`, если оно случилось. Сначала — продолжения, чей срок пришёл: первое
-    /// готовое начинается, остальные готовые ждут завтрашнего дня, а неготовые пропадают —
-    /// момент упущен. Если продолжений нет, день разыгрывается: с шансом правил случается одно
-    /// из готовых событий по весам.
+    /// Событие дня; `true`, если оно случилось. Сначала — продолжения, чей срок пришёл; если их
+    /// нет, день разыгрывается с шансом правил событий.
     pub(super) fn start_day_event(&mut self, date: GameDate) -> bool {
+        let daily_chance = self.content.event_rules.daily_chance;
+        self.start_due_follow_up(date) || self.draw_event(date, daily_chance)
+    }
+
+    /// Продолжения, чей срок пришёл; `true`, если одно началось. Первое готовое начинается,
+    /// остальные готовые ждут завтрашнего дня, а неготовые пропадают — момент упущен.
+    pub(super) fn start_due_follow_up(&mut self, date: GameDate) -> bool {
         let mut started = false;
         for event in self.events.take_due(date) {
             if !self.events.is_ready(&event, &self.situation(date)) {
@@ -53,11 +58,13 @@ impl Game {
                 started = true;
             }
         }
-        if started {
-            return true;
-        }
-        let daily_chance = self.content.event_rules.daily_chance;
-        if !EventEngine::roll(self.rng.stream(EVENTS_STREAM), daily_chance) {
+        started
+    }
+
+    /// Розыгрыш: с шансом `chance` случается одно из готовых событий по весам; `true`, если
+    /// случилось.
+    pub(super) fn draw_event(&mut self, date: GameDate, chance: f64) -> bool {
+        if !EventEngine::roll(self.rng.stream(EVENTS_STREAM), chance) {
             return false;
         }
         let ready = self.events.ready_events(&self.situation(date));
@@ -175,7 +182,8 @@ impl Game {
     }
 
     /// Исход прочитан — событие закрывается, время идёт; случилось оно в последний день пути —
-    /// игрок наконец приезжает. Если исход кончил жизнь, открываются итоги.
+    /// игрок наконец приезжает. Если исход кончил жизнь, открываются итоги; в зоне — экран зоны,
+    /// а если исход выпустил на волю — рынок.
     pub(super) fn close_event(&mut self) -> Result<(), CommandError> {
         let pending = self.events.pending().ok_or(CommandError::NoPendingEvent)?;
         if pending.resolution.is_none() {
@@ -185,6 +193,13 @@ impl Game {
         if self.summary.is_some() {
             self.screen = Screen::Summary;
             return Ok(());
+        }
+        if self.zone.is_some() {
+            self.screen = Screen::Zone;
+            return Ok(());
+        }
+        if self.screen == Screen::Zone {
+            self.screen = Screen::Market;
         }
         self.arrive_if_due(self.today());
         Ok(())

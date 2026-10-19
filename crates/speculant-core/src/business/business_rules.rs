@@ -63,8 +63,8 @@ impl BusinessRules {
         u8::try_from(level.clamp(1, i32::from(self.trait_scale))).expect("шкала черт меньше 256")
     }
 
-    /// Шанс в месяц по делению лояльности.
-    pub fn by_loyalty(chances: &[f64], loyalty: u8) -> f64 {
-        chances[usize::from(loyalty) - 1]
+    /// Шанс в месяц по делению черты: лояльности, честности.
+    pub fn by_trait(chances: &[f64], level: u8) -> f64 {
+        chances[usize::from(level) - 1]
     }
 }

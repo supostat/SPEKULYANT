@@ -4,8 +4,10 @@ mod business_flow;
 mod consequences;
 mod event_flow;
 mod life_flow;
+mod russian_count;
 mod snapshot;
 mod travel_flow;
+mod zone_flow;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
@@ -23,6 +25,7 @@ use crate::rng::WorldRng;
 use crate::time::{Clock, FastForward, GameDate, MAX_SPEED};
 use crate::travel::Journey;
 use crate::view::{Screen, StateView};
+use crate::zone::Zone;
 
 /// Сколько последних сообщений помнит лента.
 const MESSAGE_LOG_LENGTH: usize = 20;
@@ -52,6 +55,8 @@ pub struct Game {
     businesses: BTreeMap<BusinessId, Business>,
     events: EventEngine,
     journey: Option<Journey>,
+    /// Отсидка, пока игрок в зоне.
+    zone: Option<Zone>,
     messages: Vec<String>,
     screen: Screen,
 }
@@ -117,6 +122,7 @@ impl Game {
             businesses: BTreeMap::new(),
             events: EventEngine::default(),
             journey: None,
+            zone: None,
             messages: Vec::new(),
             screen: Screen::Market,
             content,
@@ -191,6 +197,11 @@ impl Game {
         self.journey.as_ref()
     }
 
+    /// Отсидка, если игрок в зоне.
+    pub fn zone(&self) -> Option<&Zone> {
+        self.zone.as_ref()
+    }
+
     /// Перемотка, если она идёт.
     pub fn fast_forward(&self) -> Option<FastForward> {
         self.clock.fast_forward()
@@ -199,8 +210,9 @@ impl Game {
     /// Двигает мир на `milliseconds` реального времени; `true`, если наступил хотя бы один день.
     /// Каждый день рынки приходят в себя и колеблются по сиду, вклады получают проценты,
     /// репутация дрейфует к нулю в темпе эпохи, соперники и дела живут свой день, а затем может
-    /// случиться событие — дома или в дороге. Событие и прибытие останавливают перемотку, и остаток реального времени сгорает;
-    /// событие держит время, пока игрок не прочтёт исход.
+    /// случиться событие — дома, в дороге или в зоне, где неделя идёт за время одного дня.
+    /// Событие, прибытие и выход на волю останавливают перемотку, и остаток реального времени
+    /// сгорает; событие держит время, пока игрок не прочтёт исход.
     pub fn advance(&mut self, milliseconds: u32) -> bool {
         if self.events.pending().is_some() || self.summary.is_some() {
             return false;
@@ -228,6 +240,9 @@ impl Game {
         }
         if self.journey.is_some() && needs_a_city(&command) {
             return Err(CommandError::Traveling);
+        }
+        if self.zone.is_some() && needs_freedom(&command) {
+            return Err(CommandError::InZone);
         }
         match command {
             Command::NewLife(settings) => {
@@ -309,6 +324,11 @@ impl Game {
             Command::Fire { business, employee } => self.fire(&business, &employee)?,
             Command::BuyHousing { housing } => self.buy_housing(&housing)?,
             Command::Retire { ending } => self.retire(&ending)?,
+            Command::SetWork { work } => self.set_work(work)?,
+            Command::UseService { service } => self.use_service(&service)?,
+            Command::OrderParcel => self.order_parcel()?,
+            Command::ApplyForParole => self.apply_for_parole()?,
+            Command::BribeForRelease => self.bribe_for_release()?,
             other => {
                 return Err(CommandError::NotSimulatedYet {
                     command: other.name().to_owned(),
@@ -318,11 +338,11 @@ impl Game {
         Ok(())
     }
 
-    /// День мира; `true`, если он кончился событием или прибытием. Соперники и дела живут свой
-    /// день до событий; происшествие с делом, которое вышло за политики, занимает место события
-    /// дня. В пути вместо событий дня разыгрываются дорожные события маршрута, а в последний день
-    /// пути игрок приезжает — если в этот день случилось событие, то после того, как прочтёт его
-    /// исход.
+    /// День мира; `true`, если он кончился событием, прибытием или выходом на волю. Соперники и
+    /// дела живут свой день до событий; происшествие с делом, которое вышло за политики, занимает
+    /// место события дня — оно находит хозяина и в зоне. В зоне вместо событий дня живёт зона. В
+    /// пути вместо событий дня разыгрываются дорожные события маршрута, а в последний день пути
+    /// игрок приезжает — если в этот день случилось событие, то после того, как прочтёт его исход.
     fn live_day(&mut self, date: GameDate) -> bool {
         self.markets.next_day(&self.content, &mut self.rng, date);
         self.player.next_day(&self.content, date);
@@ -332,6 +352,9 @@ impl Game {
             .next_day(&self.content, &mut self.markets, &mut self.rng, date);
         if self.live_character(date) || self.live_businesses(date) {
             return true;
+        }
+        if self.zone.is_some() {
+            return self.live_zone_day(date);
         }
         let Some(journey) = self.journey.clone() else {
             return self.start_day_event(date);
@@ -354,6 +377,7 @@ impl Game {
             contacts: &self.contacts,
             rivals: &self.rivals,
             flags: self.events.flags(),
+            zone: self.zone.as_ref(),
         }
     }
 
@@ -402,6 +426,11 @@ fn changes_the_world(command: &Command) -> bool {
             | Command::Call { .. }
             | Command::BuyHousing { .. }
             | Command::Retire { .. }
+            | Command::SetWork { .. }
+            | Command::UseService { .. }
+            | Command::OrderParcel
+            | Command::ApplyForParole
+            | Command::BribeForRelease
     )
 }
 
@@ -416,6 +445,26 @@ fn needs_a_city(command: &Command) -> bool {
             | Command::Withdraw { .. }
             | Command::Travel { .. }
             | Command::OpenBusiness { .. }
+            | Command::BuyHousing { .. }
+            | Command::Retire { .. }
+    )
+}
+
+/// Из зоны не поторгуешь, не съездишь, денег не положишь и не снимешь, делами не распорядишься,
+/// никому не позвонишь, жилья не купишь и на покой не уйдёшь.
+fn needs_freedom(command: &Command) -> bool {
+    matches!(
+        command,
+        Command::Buy { .. }
+            | Command::Sell { .. }
+            | Command::Deposit { .. }
+            | Command::Withdraw { .. }
+            | Command::Travel { .. }
+            | Command::OpenBusiness { .. }
+            | Command::SetPolicy { .. }
+            | Command::Hire { .. }
+            | Command::Fire { .. }
+            | Command::Call { .. }
             | Command::BuyHousing { .. }
             | Command::Retire { .. }
     )

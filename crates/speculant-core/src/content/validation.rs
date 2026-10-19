@@ -2,13 +2,14 @@
 
 mod business;
 mod life;
+mod zone;
 
 use std::collections::{BTreeMap, BTreeSet};
 
 use super::loader::{Entry, Parsed};
 use super::{
-    Biography, BusinessChange, Choice, City, Conditions, ContentError, ContentFile, EpochProfile,
-    Event, Faction, Good, MoneyPlace, NpcTemplate,
+    Biography, BusinessChange, Choice, City, Conditions, Consequences, ContentError, ContentFile,
+    EpochProfile, Event, Faction, Good, MoneyPlace, NpcTemplate,
 };
 use crate::economy::{MarketRules, MoneyRules, RubleCurve};
 use crate::events::EventRules;
@@ -47,6 +48,8 @@ struct Known {
     policies: BTreeMap<String, BTreeSet<String>>,
     /// Шкала черт сотрудников, если правила дел разобрались.
     trait_scale: Option<u8>,
+    /// Уровней авторитета в зоне, если правила зоны разобрались.
+    authority_levels: Option<usize>,
 }
 
 /// Чем событие наполняет подстановки: участником, товаром для цены, суммой, делом происшествия и
@@ -112,6 +115,12 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
                     .iter()
                     .map(|flag| flag.as_str().to_owned())
             })
+            .chain(
+                parsed
+                    .zone
+                    .iter()
+                    .map(|(_, rules)| rules.release_flag.as_str().to_owned()),
+            )
             .collect(),
         reputation_limit: parsed
             .reputation
@@ -138,9 +147,14 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
             .business_rules
             .as_ref()
             .map(|(_, rules)| rules.trait_scale),
+        authority_levels: parsed
+            .zone
+            .as_ref()
+            .map(|(_, rules)| rules.authority_levels.len()),
     };
     business::validate(parsed, &known, errors);
     life::validate(parsed, &known, errors);
+    zone::validate(parsed, &known, errors);
     for entry in &parsed.epochs {
         let mut report = Report {
             file: entry.file,
@@ -843,6 +857,25 @@ fn check_event(event: &Event, known: &Known, report: &mut Report<'_, '_>) {
             );
         }
     }
+    let in_zone = event.epoch.is_none();
+    if in_zone && event.road {
+        report.at(
+            report.file.line_of("road"),
+            "в зоне дорог нет: событие зоны не бывает дорожным".to_owned(),
+        );
+    }
+    let authority_outside = !in_zone
+        && (event.conditions.authority.is_some()
+            || event
+                .choices
+                .iter()
+                .any(|choice| choice.conditions.authority.is_some()));
+    if authority_outside {
+        report.at(
+            report.file.line_of("authority"),
+            "условие authority — только у событий зоны в zone/events/".to_owned(),
+        );
+    }
     check_conditions(&event.conditions, known, report);
     let sources = Sources {
         npc: event.conditions.npc.is_some() || event.conditions.rival.is_some(),
@@ -872,6 +905,7 @@ fn check_event(event: &Event, known: &Known, report: &mut Report<'_, '_>) {
                 ),
             );
         }
+        check_zone_consequences(&choice.consequences, index, in_zone, report);
         if choice.consequences.business.is_some() && event.incident.is_none() {
             report.at(
                 report.file.nth_line_of("[[choices]]", index),
@@ -991,6 +1025,55 @@ fn check_choice(
                     "продолжение {} не может прийти через ноль дней",
                     follow_up.event
                 ),
+            );
+        }
+    }
+}
+
+/// Срок и перемены в зоне: срок дают только на воле и от месяца — в зоне к сроку прибавляет
+/// `zone.term_months`; вместе с финалом срока не бывает; перемена в зоне — только у события зоны и
+/// что-то меняет.
+fn check_zone_consequences(
+    consequences: &Consequences,
+    index: usize,
+    in_zone: bool,
+    report: &mut Report<'_, '_>,
+) {
+    let choice_line = report.file.nth_line_of("[[choices]]", index);
+    let number = index + 1;
+    if let Some(months) = consequences.sentence_months {
+        if in_zone {
+            report.at(
+                choice_line,
+                format!(
+                    "выбор {number}: в зоне срок прибавляет zone.term_months, а не sentence_months"
+                ),
+            );
+        }
+        if months == 0 {
+            report.at(
+                report.file.line_of("sentence_months"),
+                format!("выбор {number}: срок — от месяца"),
+            );
+        }
+        if consequences.end_life.is_some() {
+            report.at(
+                choice_line,
+                format!("выбор {number}: либо срок, либо финал end_life"),
+            );
+        }
+    }
+    if let Some(change) = &consequences.zone {
+        if !in_zone {
+            report.at(
+                choice_line,
+                format!("выбор {number}: последствие zone — только у событий зоны в zone/events/"),
+            );
+        }
+        if !change.changes_anything() {
+            report.at(
+                choice_line,
+                format!("выбор {number}: последствие zone ничего не меняет"),
             );
         }
     }
@@ -1118,6 +1201,30 @@ fn check_conditions(conditions: &Conditions, known: &Known, report: &mut Report<
                 );
             }
             _ => {}
+        }
+    }
+    if let Some(authority) = &conditions.authority {
+        let authority_line = report.file.line_of("authority");
+        match (authority.at_least, authority.at_most) {
+            (None, None) => report.at(authority_line, "условие авторитета без границы".to_owned()),
+            (Some(low), Some(high)) if low > high => report.at(
+                authority_line,
+                "у условия авторитета нижняя граница выше верхней".to_owned(),
+            ),
+            _ => {}
+        }
+        if let Some(levels) = known.authority_levels {
+            for bound in [authority.at_least, authority.at_most]
+                .into_iter()
+                .flatten()
+            {
+                if !(1..=levels).contains(&usize::from(bound)) {
+                    report.at(
+                        authority_line,
+                        format!("граница авторитета {bound}: уровни — от 1 до {levels}"),
+                    );
+                }
+            }
         }
     }
     if let Some(money) = &conditions.money

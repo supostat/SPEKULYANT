@@ -3,6 +3,10 @@ use serde::{Deserialize, Serialize};
 use super::{GameDate, TimeRulesError};
 
 pub const MAX_SPEED: u8 = 3;
+/// Короче миллисекунды день не бывает даже в зоне на перемотке.
+const SHORTEST_DAY_MILLISECONDS: u64 = 1;
+/// На воле за длительность дня проходит один день.
+const FREEDOM_PACE: u32 = 1;
 
 /// Длительность игрового дня в миллисекундах реального времени на каждой скорости и при перемотке.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -62,10 +66,12 @@ pub struct InvalidSpeed {
 }
 
 /// Часы мира: превращают реальное время в игровые дни по скорости, стоят на паузе, перематывают.
+/// Темп — сколько дней проходит за длительность одного дня: в зоне это неделя (§12).
 #[derive(Clone, Debug)]
 pub struct Clock {
     settings: ClockSettings,
     today: GameDate,
+    pace: u32,
     speed: u8,
     paused: bool,
     fast_forward: Option<FastForward>,
@@ -77,6 +83,7 @@ impl Clock {
         Self {
             settings,
             today,
+            pace: FREEDOM_PACE,
             speed: 1,
             paused: false,
             fast_forward: None,
@@ -108,6 +115,17 @@ impl Clock {
         self.speed = speed;
         self.fast_forward = None;
         Ok(())
+    }
+
+    /// В зоне за длительность одного дня проходит её неделя.
+    pub fn set_zone_pace(&mut self, week_days: u32) {
+        assert!(week_days > 0, "время не стоит и в зоне");
+        self.pace = week_days;
+    }
+
+    /// На воле — темп одного дня.
+    pub fn set_freedom_pace(&mut self) {
+        self.pace = FREEDOM_PACE;
     }
 
     /// Пауза останавливает и ход времени, и перемотку.
@@ -142,11 +160,14 @@ impl Clock {
     }
 
     /// Следующий наступивший день, если накопленного времени на него хватает; недобранный до
-    /// целого дня остаток копится дальше.
+    /// целого дня остаток копится дальше. В темпе зоны день короче во столько раз, сколько дней в
+    /// её неделе.
     pub fn next_day(&mut self) -> Option<DayTick> {
-        let day_length = self
+        let day_length = (self
             .settings
-            .day_milliseconds(self.speed, self.fast_forward.is_some());
+            .day_milliseconds(self.speed, self.fast_forward.is_some())
+            / u64::from(self.pace))
+        .max(SHORTEST_DAY_MILLISECONDS);
         if self.paused || self.carried_milliseconds < day_length {
             return None;
         }

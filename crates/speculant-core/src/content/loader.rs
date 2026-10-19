@@ -8,7 +8,7 @@ use super::{
     Biography, BiographyId, BusinessForm, BusinessFormId, BusinessKind, BusinessKindId, City,
     CityId, Content, ContentError, ContentFile, Ending, EndingId, EpochId, EpochProfile, Event,
     EventId, Faction, FactionId, Good, GoodId, Habit, HabitId, Housing, HousingId, MoneyPlace,
-    MoneyPlaceId, NpcId, NpcTemplate, Policy, Route,
+    MoneyPlaceId, NpcId, NpcTemplate, Policy, Route, ZoneService, ZoneServiceId,
 };
 use crate::business::{BusinessRules, PolicyKind};
 use crate::economy::{MarketRules, MoneyRules};
@@ -17,6 +17,7 @@ use crate::life::LifeRules;
 use crate::npc::RivalRules;
 use crate::reputation::ReputationRules;
 use crate::time::TimeRules;
+use crate::zone::ZoneRules;
 
 const TIME_FILE: &str = "epochs/time.toml";
 const MARKET_FILE: &str = "economy/market.toml";
@@ -27,6 +28,7 @@ const EVENT_RULES_FILE: &str = "event_rules.toml";
 const RIVALS_FILE: &str = "rivals.toml";
 const BUSINESS_RULES_FILE: &str = "business/rules.toml";
 const LIFE_FILE: &str = "life.toml";
+const ZONE_RULES_FILE: &str = "zone/rules.toml";
 const TOML_EXTENSION: &str = ".toml";
 
 /// Сущность, прочитанная из файла: идентификатор из имени файла и сам файл для мест ошибок.
@@ -47,6 +49,7 @@ pub(super) struct Parsed<'a> {
     pub rival_rules: Option<(&'a ContentFile, RivalRules)>,
     pub business_rules: Option<(&'a ContentFile, BusinessRules)>,
     pub life: Option<(&'a ContentFile, LifeRules)>,
+    pub zone: Option<(&'a ContentFile, ZoneRules)>,
     pub epochs: Vec<Entry<'a, EpochProfile>>,
     pub goods: Vec<Entry<'a, Good>>,
     pub cities: Vec<Entry<'a, City>>,
@@ -62,6 +65,7 @@ pub(super) struct Parsed<'a> {
     pub policies: Vec<Entry<'a, Policy>>,
     pub habits: Vec<Entry<'a, Habit>>,
     pub events: Vec<Entry<'a, Event>>,
+    pub zone_services: Vec<Entry<'a, ZoneService>>,
 }
 
 #[derive(Deserialize)]
@@ -127,6 +131,9 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
     if parsed.life.is_none() {
         errors.push(ContentError::new(LIFE_FILE, None, "нет правил жизни"));
     }
+    if parsed.zone.is_none() {
+        errors.push(ContentError::new(ZONE_RULES_FILE, None, "нет правил зоны"));
+    }
     let mut events = BTreeMap::new();
     for entry in &parsed.events {
         if events
@@ -152,6 +159,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         Some((_, rival_rules)),
         Some((_, business)),
         Some((_, life)),
+        Some((_, zone)),
     ) = (
         parsed.market,
         parsed.money,
@@ -160,6 +168,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         parsed.rival_rules,
         parsed.business_rules,
         parsed.life,
+        parsed.zone,
     )
     else {
         unreachable!("без любого из файлов правил загрузка вернула ошибку выше");
@@ -173,6 +182,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         rival_rules,
         business,
         life,
+        zone,
         epochs: keyed(&parsed.epochs, EpochId::new),
         goods: keyed(&parsed.goods, GoodId::new),
         cities: keyed(&parsed.cities, CityId::new),
@@ -196,6 +206,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
             .collect(),
         habits: keyed(&parsed.habits, HabitId::new),
         events,
+        zone_services: keyed(&parsed.zone_services, ZoneServiceId::new),
     })
 }
 
@@ -271,11 +282,17 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         ["biographies", name] => push_entry(file, name, &mut parsed.biographies, errors),
         ["npc", name] => push_entry(file, name, &mut parsed.npcs, errors),
         ["events", epoch, name] => push_event(file, name, Some(EpochId::new(*epoch)), parsed, errors),
+        ["zone", "rules.toml"] => {
+            if let Some(rules) = parse::<ZoneRules>(file, errors) {
+                parsed.zone = Some((file, rules));
+            }
+        }
+        ["zone", "services", name] => push_entry(file, name, &mut parsed.zone_services, errors),
         ["zone", "events", name] => push_event(file, name, None, parsed, errors),
         _ => errors.push(ContentError::new(
             &file.path,
             None,
-            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, {LIFE_FILE}, housing/, endings/, epochs/, biographies/, npc/, events/<эпоха>/, zone/events/)"),
+            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, {LIFE_FILE}, housing/, endings/, epochs/, biographies/, npc/, events/<эпоха>/, {ZONE_RULES_FILE}, zone/services/, zone/events/)"),
         )),
     }
 }

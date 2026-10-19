@@ -1,7 +1,7 @@
 //! Контент как данные (§10, §14.1): товары, города, маршруты, эпохи, правила толкучки, индекс цен
 //! и курсы, места хранения денег, фракции и правила репутации, биографии, жильё, финалы и правила
 //! жизни, шаблоны NPC, дела — формы, типы, политики, привычки и правила, — события и правила их
-//! розыгрыша. Формат — TOML, файл на сущность в `data/`, имя файла — идентификатор (решение 15.7).
+//! розыгрыша, правила зоны и её услуги. Формат — TOML, файл на сущность в `data/`, имя файла — идентификатор (решение 15.7).
 //! Загрузка проверяет схему и ссылки и возвращает все ошибки сразу, каждая — «файл:строка».
 
 mod biography;
@@ -28,6 +28,7 @@ mod policy;
 mod road_event;
 mod route;
 mod validation;
+mod zone_service;
 
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -37,11 +38,12 @@ pub use business_form::BusinessForm;
 pub use business_kind::BusinessKind;
 pub use city::City;
 pub use conditions::{
-    Conditions, DateWindow, GoodCondition, MoneyCondition, ReputationCondition, RivalCondition,
+    AuthorityCondition, Conditions, DateWindow, GoodCondition, MoneyCondition, ReputationCondition,
+    RivalCondition,
 };
 pub use consequences::{
     BusinessChange, Consequences, ContactChange, GoodChange, PolicySetting, PriceShock,
-    ReputationChange, RivalChange,
+    ReputationChange, RivalChange, ZoneChange,
 };
 pub use content_error::ContentError;
 pub use content_file::ContentFile;
@@ -55,13 +57,14 @@ pub use habit::Habit;
 pub use housing::Housing;
 pub use ids::{
     BiographyId, BusinessFormId, BusinessKindId, CityId, EndingId, EpochId, EventId, FactionId,
-    FlagId, GoodId, HabitId, HousingId, MoneyPlaceId, NpcId, TimelineNodeId,
+    FlagId, GoodId, HabitId, HousingId, MoneyPlaceId, NpcId, TimelineNodeId, ZoneServiceId,
 };
 pub use money_place::{InterestPoint, MoneyPlace};
 pub use npc_template::NpcTemplate;
 pub use policy::{Policy, PolicyOption};
 pub use road_event::RoadEvent;
 pub use route::Route;
+pub use zone_service::ZoneService;
 
 use crate::business::{BusinessRules, PolicyKind};
 use crate::economy::{MarketRules, MoneyRules};
@@ -70,6 +73,7 @@ use crate::life::LifeRules;
 use crate::npc::RivalRules;
 use crate::reputation::ReputationRules;
 use crate::time::{GameDate, TimeRules};
+use crate::zone::{Camp, ZoneRules};
 
 #[derive(Clone, Debug)]
 pub struct Content {
@@ -81,6 +85,7 @@ pub struct Content {
     pub rival_rules: RivalRules,
     pub business: BusinessRules,
     pub life: LifeRules,
+    pub zone: ZoneRules,
     pub epochs: BTreeMap<EpochId, EpochProfile>,
     pub goods: BTreeMap<GoodId, Good>,
     pub cities: BTreeMap<CityId, City>,
@@ -96,6 +101,7 @@ pub struct Content {
     pub policies: BTreeMap<PolicyKind, Policy>,
     pub habits: BTreeMap<HabitId, Habit>,
     pub events: BTreeMap<EventId, Event>,
+    pub zone_services: BTreeMap<ZoneServiceId, ZoneService>,
 }
 
 impl Content {
@@ -121,5 +127,10 @@ impl Content {
         self.epochs
             .get(&EpochId::new(epoch.id.as_str()))
             .expect("у каждой эпохи календаря есть описание")
+    }
+
+    /// Зона эпохи, в которой лежит день; у каждой эпохи календаря она есть — это проверяет загрузка.
+    pub fn camp_on(&self, date: GameDate) -> &Camp {
+        self.zone.camp_on(&self.time.epochs.epoch_on(date).id)
     }
 }

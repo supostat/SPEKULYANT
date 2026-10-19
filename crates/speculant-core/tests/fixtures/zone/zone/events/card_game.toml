@@ -1,0 +1,13 @@
+title = "Карты в бараке"
+weight = 1
+text = "В бараке играют на интерес."
+
+[[choices]]
+text = "Выиграть по-честному"
+outcome = "Повезло."
+consequences = { zone = { cigarettes = 10, authority = 1 } }
+
+[[choices]]
+text = "Поставить пачку чая"
+outcome = "Чай ушёл, зато уважение осталось."
+consequences = { zone = { tea = -1, authority = 1 } }

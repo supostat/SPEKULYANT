@@ -1,0 +1,9 @@
+title = "Дело о хищении"
+weight = 1
+incident = "inspection"
+text = "Следователь нашёл в бумагах дела «{business}» твою подпись."
+
+[[choices]]
+text = "Взять вину на себя"
+outcome = "Ещё полгода."
+consequences = { sentence_months = 6 }

@@ -1,7 +1,7 @@
 //! Жизнь в снимке: персонаж, жильё, добровольные уходы, биографии на экране выбора и итоги.
 
 use super::super::Game;
-use super::russian_count::count;
+use super::super::russian_count::{MONTHS_IN_YEAR, YEARS, count, term};
 use crate::economy::Currency;
 use crate::life::{DealRecord, LifeSummary};
 use crate::time::GameDate;
@@ -9,9 +9,6 @@ use crate::view::{
     BiographyView, CharacterView, ExitView, HomeView, LifeSummaryView, SummaryLineView,
 };
 
-const YEARS: [&str; 3] = ["год", "года", "лет"];
-const MONTHS: [&str; 3] = ["месяц", "месяца", "месяцев"];
-const MONTHS_IN_YEAR: u32 = 12;
 const LESS_THAN_A_MONTH: &str = "меньше месяца";
 const NOTHING: &str = "—";
 const BEST_DEAL: &str = "Лучшая сделка";
@@ -60,13 +57,14 @@ pub(super) fn homes(game: &Game, today: GameDate) -> Vec<HomeView> {
                 available: !is_current
                     && housing.is_on_sale(today)
                     && affordable
-                    && game.journey.is_none(),
+                    && game.journey.is_none()
+                    && game.zone.is_none(),
             }
         })
         .collect()
 }
 
-/// Добровольные уходы; доступны, когда открыты и игрок в городе.
+/// Добровольные уходы; доступны, когда открыты и игрок в городе, а не в дороге и не в зоне.
 pub(super) fn exits(game: &Game, today: GameDate) -> Vec<ExitView> {
     game.content
         .endings
@@ -75,7 +73,7 @@ pub(super) fn exits(game: &Game, today: GameDate) -> Vec<ExitView> {
         .map(|(id, ending)| ExitView {
             ending: id.to_string(),
             title: ending.title.clone(),
-            available: ending.is_open_on(today) && game.journey.is_none(),
+            available: ending.is_open_on(today) && game.journey.is_none() && game.zone.is_none(),
         })
         .collect()
 }
@@ -166,10 +164,8 @@ fn lived(ended: GameDate) -> String {
     let start = GameDate::START;
     let years = u32::try_from(ended.year() - start.year()).expect("жизнь кончается не раньше 1984");
     let months = years * MONTHS_IN_YEAR + ended.month() - start.month();
-    match (months / MONTHS_IN_YEAR, months % MONTHS_IN_YEAR) {
-        (0, 0) => LESS_THAN_A_MONTH.to_owned(),
-        (0, months) => count(months, MONTHS),
-        (years, 0) => count(years, YEARS),
-        (years, months) => format!("{} {}", count(years, YEARS), count(months, MONTHS)),
+    if months == 0 {
+        return LESS_THAN_A_MONTH.to_owned();
     }
+    term(months)
 }

@@ -107,6 +107,25 @@ pub enum CommandError {
     },
     Traveling,
     NotTraveling,
+    InZone,
+    NotInZone,
+    UnknownService {
+        service: String,
+    },
+    StashTooSmall {
+        title: String,
+        needed: String,
+        stash: String,
+    },
+    ParcelTooSoon {
+        from: String,
+    },
+    ParoleTooEarly {
+        from: String,
+    },
+    NoBribe {
+        camp: String,
+    },
     UnknownBusinessKind {
         kind: String,
     },
@@ -227,6 +246,17 @@ impl fmt::Display for CommandError {
             }
             Self::Traveling => write!(formatter, "ты в дороге"),
             Self::NotTraveling => write!(formatter, "ты никуда не едешь"),
+            Self::InZone => write!(formatter, "ты в зоне"),
+            Self::NotInZone => write!(formatter, "ты на воле"),
+            Self::UnknownService { service } => write!(formatter, "услуги {service} в зоне нет"),
+            Self::StashTooSmall {
+                title,
+                needed,
+                stash,
+            } => write!(formatter, "{title}: нужно {needed}, а у тебя {stash}"),
+            Self::ParcelTooSoon { from } => write!(formatter, "следующая передача — с {from}"),
+            Self::ParoleTooEarly { from } => write!(formatter, "просить об УДО можно с {from}"),
+            Self::NoBribe { camp } => write!(formatter, "{camp}: здесь на волю не продают"),
             Self::UnknownBusinessKind { kind } => write!(formatter, "дела {kind} не бывает"),
             Self::BusinessNotYet { title, .. } => {
                 write!(formatter, "{title}: сейчас такое дело не открыть")

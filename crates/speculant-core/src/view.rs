@@ -40,7 +40,7 @@ pub use screen::Screen;
 pub use summary::{LifeSummaryView, SummaryLineView};
 pub use time::TimeView;
 pub use travel::{DestinationView, JourneyView, TravelView};
-pub use zone::ZoneView;
+pub use zone::{ZoneOfferView, ZoneServiceView, ZoneView};
 
 use serde::{Deserialize, Serialize};
 

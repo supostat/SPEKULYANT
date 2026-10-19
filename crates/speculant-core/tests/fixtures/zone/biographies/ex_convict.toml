@@ -1,0 +1,11 @@
+title = "Бывший сиделец"
+description = "Вышел с зоны, знает людей оттуда."
+start_city = "moscow"
+start_cash = 10000
+contacts = []
+age = { from = 25, to = 30 }
+housing = "dorm_bed"
+obituary = "Вышел с зоны и начал заново."
+starts_unlocked = false
+unlocked_by_flag = "released_from_zone"
+unlock_hint = "Открывается после выхода с зоны"

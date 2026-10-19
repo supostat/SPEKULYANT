@@ -1,0 +1,4 @@
+title = "ООО"
+from = "1995-01-01"
+racket_share = 0.5
+tax = 0.12

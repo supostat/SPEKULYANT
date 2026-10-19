@@ -1,9 +1,9 @@
 //! Снимок мира для интерфейса: состояние жизни строками, готовыми к показу (§13.3). Подсистемы,
-//! которых ещё нет в мире (зона, пейджер, книжка), отдают пустые окна.
+//! которых ещё нет в мире (пейджер, книжка), отдают пустые окна.
 
 mod business;
 mod life;
-mod russian_count;
+mod zone;
 
 use std::cmp::Ordering;
 
@@ -28,6 +28,7 @@ const CHECKS_RATE_LABEL: &str = "Чек ВПТ";
 const DOLLAR_RATE_LABEL: &str = "Доллар";
 const CONTACTS_POCKET_LABEL: &str = "Связей";
 const ON_THE_ROAD: &str = "В дороге";
+const IN_ZONE: &str = "В зоне";
 const WELL_DISPOSED: &str = "расположен";
 const ACQUAINTED: &str = "знакомый";
 const OFFENDED: &str = "обижен";
@@ -71,7 +72,7 @@ pub(super) fn snapshot(game: &Game) -> StateView {
         factions: factions(game, today),
         money: money(game, today),
         notebook: Vec::new(),
-        zone: None,
+        zone: game.zone.as_ref().map(|zone| zone::zone(game, zone, today)),
         summary: game
             .summary
             .as_ref()
@@ -130,9 +131,10 @@ fn header(game: &Game, today: GameDate) -> HeaderView {
             rate(rules, Currency::Dollar, today)
         ));
     }
-    let city = match game.journey {
-        Some(_) => ON_THE_ROAD.to_owned(),
-        None => game.content.cities[&game.city].name.clone(),
+    let city = match (&game.journey, &game.zone) {
+        (_, Some(_)) => IN_ZONE.to_owned(),
+        (Some(_), None) => ON_THE_ROAD.to_owned(),
+        (None, None) => game.content.cities[&game.city].name.clone(),
     };
     HeaderView {
         city,
@@ -142,9 +144,15 @@ fn header(game: &Game, today: GameDate) -> HeaderView {
 }
 
 /// Толкучка города: товары, которые уже появились, с ценниками следующей штуки и запасом. В
-/// дороге толкучки нет.
+/// дороге и в зоне толкучки нет.
 fn market(game: &Game, today: GameDate) -> MarketView {
     let content = &game.content;
+    if game.zone.is_some() {
+        return MarketView {
+            place: content.camp_on(today).title.clone(),
+            goods: Vec::new(),
+        };
+    }
     if let Some(journey) = &game.journey {
         return MarketView {
             place: format!(
@@ -175,9 +183,15 @@ fn market(game: &Game, today: GameDate) -> MarketView {
 }
 
 /// Поездка: в пути — откуда, куда и когда приезд; дома — открытые направления из города с днями
-/// и ценой в номинале дня. Закрытые города не показываются.
+/// и ценой в номинале дня. Закрытые города не показываются, из зоны не ездят.
 fn travel(game: &Game, today: GameDate) -> TravelView {
     let content = &game.content;
+    if game.zone.is_some() {
+        return TravelView {
+            journey: None,
+            destinations: Vec::new(),
+        };
+    }
     if let Some(journey) = &game.journey {
         let days_left = journey.arrives.day_index() - today.day_index();
         return TravelView {

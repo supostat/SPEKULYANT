@@ -1,0 +1,11 @@
+title = "Драка в столовой"
+weight = 1
+text = "Первоходу указали его место."
+
+[conditions]
+authority = { at_most = 2 }
+
+[[choices]]
+text = "Ответить"
+outcome = "Отбился, но в изолятор и к сроку полгода."
+consequences = { health = -10, zone = { authority = 1, term_months = 6 } }

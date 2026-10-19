@@ -1,0 +1,38 @@
+# Зона фикстуры: правила по образцу data/zone/rules.toml.
+week_days = 7
+longest_sentence_months = 120
+life_ending = "prison"
+event_chance = 0.25
+health_loss_chance = 0.15
+health_loss = 2
+authority_levels = ["первоход", "мужик", "уважаемый", "блатной", "авторитет"]
+start_authority = 1
+idle_authority_chance = 0.04
+parole_max_authority = 3
+parole_retry_weeks = 26
+release_flag = "released_from_zone"
+ties_faction = "bandits"
+ties = [0, 0, 1, 2, 3]
+
+[parcel]
+price = 30.0
+contents = { cigarettes = 20, tea = 5 }
+
+[trustees]
+vanish_chances = [0.25, 0.12, 0.05, 0.02, 0.0]
+steal_chances = [0.6, 0.35, 0.15, 0.05, 0.0]
+steal_share = 0.5
+
+[camps.stagnation]
+title = "ИТК общего режима"
+work_pay = 4
+parcel_weeks = 13
+parole_after = 0.5
+parole_chance = 0.6
+
+[camps.perestroika]
+title = "ИТК общего режима"
+work_pay = 4
+parcel_weeks = 13
+parole_after = 0.5
+parole_chance = 0.6

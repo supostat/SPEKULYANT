@@ -30,6 +30,7 @@ const MONTHS_NOMINATIVE: [&str; 12] = [
     "декабрь",
 ];
 const WEEKDAYS_SHORT: [&str; 7] = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"];
+const MONTHS_IN_YEAR: i64 = 12;
 const UNIX_DAY_OF_START: i64 = days_from_civil(1984, 1, 1);
 const UNIX_EPOCH_WEEKDAY: i64 = 3;
 
@@ -93,6 +94,24 @@ impl GameDate {
         Self {
             day: self.day + days,
         }
+    }
+
+    /// Дата через `months` месяцев: то же число, а если в том месяце его нет — последний день
+    /// месяца (31 августа и полгода — конец февраля).
+    pub fn after_months(self, months: u32) -> Self {
+        let (year, month, day) = self.year_month_day();
+        let month_index =
+            i64::from(year) * MONTHS_IN_YEAR + i64::from(month - 1) + i64::from(months);
+        let target_year = i32::try_from(month_index.div_euclid(MONTHS_IN_YEAR))
+            .expect("срок в месяцах укладывается в календарь игры");
+        let target_month = u32::try_from(month_index.rem_euclid(MONTHS_IN_YEAR))
+            .expect("остаток от деления на 12 неотрицателен")
+            + 1;
+        let last_day = Self::from_ymd(target_year, target_month, 1)
+            .expect("первое число есть в каждом месяце")
+            .days_in_month();
+        Self::from_ymd(target_year, target_month, day.min(last_day))
+            .expect("число не больше дней в месяце")
     }
 
     pub fn year(self) -> i32 {

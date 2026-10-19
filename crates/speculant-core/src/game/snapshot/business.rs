@@ -3,7 +3,7 @@
 
 use super::super::Game;
 use super::super::consequences::signed;
-use super::russian_count::count;
+use super::super::russian_count::count;
 use crate::business::{Business, Employee, MonthReport};
 use crate::content::{Content, HabitId};
 use crate::economy::{Currency, Money, MoneyRules};
@@ -40,9 +40,12 @@ pub(super) fn businesses(game: &Game, today: GameDate) -> Vec<BusinessView> {
         .collect()
 }
 
-/// Кандидаты в управляющие по порядку идентификаторов.
+/// Кандидаты в управляющие по порядку идентификаторов; из зоны никого не наймёшь.
 pub(super) fn candidates(game: &Game, today: GameDate) -> Vec<CandidateView> {
     let content = &game.content;
+    if game.zone.is_some() {
+        return Vec::new();
+    }
     game.candidates(today)
         .into_iter()
         .map(|npc| {
@@ -62,10 +65,10 @@ pub(super) fn candidates(game: &Game, today: GameDate) -> Vec<CandidateView> {
         .collect()
 }
 
-/// Дела, которые сейчас можно открыть в городе игрока; в дороге — никаких.
+/// Дела, которые сейчас можно открыть в городе игрока; в дороге и в зоне — никаких.
 pub(super) fn kinds(game: &Game, today: GameDate) -> Vec<BusinessKindView> {
     let content = &game.content;
-    if game.journey.is_some() {
+    if game.journey.is_some() || game.zone.is_some() {
         return Vec::new();
     }
     let cash = game.player.money().cash();

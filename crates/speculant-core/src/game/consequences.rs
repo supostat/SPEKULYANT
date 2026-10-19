@@ -2,6 +2,7 @@
 //! — и строка того, что изменилось, для окна исхода.
 
 use super::Game;
+use super::russian_count::term;
 use crate::business::BusinessId;
 use crate::content::{BusinessChange, Consequences, ContactChange, Content, NpcId};
 use crate::economy::{Currency, Real};
@@ -10,6 +11,7 @@ use crate::time::GameDate;
 
 const MONEY: &str = "Деньги";
 const HEALTH: &str = "Здоровье";
+const SENTENCE: &str = "Срок";
 const NOTHING_CHANGED: &str = "Ничего не изменилось.";
 const CONTACT_OWES: &str = "за ним услуг";
 const PLAYER_OWES: &str = "за тобой услуг";
@@ -24,9 +26,10 @@ const MINUS: char = '−';
 impl Game {
     /// Применяет последствия и возвращает строку перемен: «Торговцы +1. Деньги −600 р.». Флаги и
     /// сдвиги цен игроку не показываются — о них говорит текст исхода; здоровье — словом
-    /// состояния. Финал последствия или кончившееся здоровье завершают жизнь после всех перемен. `rival` — участвующий в
-    /// событии соперник, к которому относится последствие `rival`; `business` — дело
-    /// происшествия, к которому относится последствие `business`.
+    /// состояния. Финал последствия или кончившееся здоровье завершают жизнь после всех перемен,
+    /// а срок без финала отправляет в зону. `rival` — участвующий в событии соперник, к которому
+    /// относится последствие `rival`; `business` — дело происшествия, к которому относится
+    /// последствие `business`.
     pub(super) fn apply_consequences(
         &mut self,
         consequences: &Consequences,
@@ -125,6 +128,9 @@ impl Game {
         for flag in &consequences.clear_flags {
             self.events.clear_flag(flag);
         }
+        if let Some(change) = &consequences.zone {
+            self.change_zone(change, today, &mut effects);
+        }
         for shock in &consequences.price_shocks {
             self.markets.apply_shock(
                 shock.good.clone(),
@@ -139,8 +145,13 @@ impl Game {
             None if self.character.health() <= 0 => Some(&content.life.health_ending),
             None => None,
         };
-        if let Some(ending) = ending {
-            self.end_life(ending, today);
+        if let Some(months) = consequences.sentence_months {
+            effects.push(format!("{SENTENCE}: {}", term(months)));
+        }
+        match (ending, consequences.sentence_months) {
+            (Some(ending), _) => self.end_life(ending, today),
+            (None, Some(months)) => self.imprison(months, today),
+            (None, None) => {}
         }
         if effects.is_empty() {
             NOTHING_CHANGED.to_owned()

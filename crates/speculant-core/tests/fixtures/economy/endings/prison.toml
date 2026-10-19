@@ -1,0 +1,8 @@
+kind = "prison"
+title = "Срок"
+capital_label = "Капитал на момент приговора"
+headline = "ПРИГОВОР: {NAME}"
+text = "{date} суд дал срок, который не пересидеть."
+
+[sources]
+stagnation = "«ВЕЧЕРНЯЯ МОСКВА»"

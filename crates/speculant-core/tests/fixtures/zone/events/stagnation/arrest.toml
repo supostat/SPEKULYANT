@@ -1,0 +1,13 @@
+title = "Взяли с поличным"
+weight = 1
+text = "Милиция накрыла точку."
+
+[[choices]]
+text = "Признаться"
+outcome = "Суд был скорым: год общего режима."
+consequences = { sentence_months = 12 }
+
+[[choices]]
+text = "Молчать"
+outcome = "Молчание суд не оценил."
+consequences = { sentence_months = 150 }

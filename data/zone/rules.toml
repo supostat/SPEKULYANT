@@ -1,0 +1,73 @@
+# Зона (§12, решение 15.8): неделя зоны идёт за время одного дня на воле. Сигареты и чай,
+# промзона, передачи с воли, услуги, свой авторитет, доверенные лица на воле и выход. Деньги —
+# рубли 1984 года, шансы — в неделю; калибровка — в фазе симулятора.
+
+week_days = 7
+longest_sentence_months = 120   # больше десяти лет не пересидеть: жизнь кончается приговором
+life_ending = "prison"
+event_chance = 0.25             # событие зоны — в среднем раз в месяц
+health_loss_chance = 0.15       # зона подтачивает здоровье
+health_loss = 2
+
+# Авторитет снизу вверх.
+authority_levels = ["первоход", "мужик", "уважаемый", "блатной", "авторитет"]
+start_authority = 1
+idle_authority_chance = 0.04    # кто не работает, поднимается примерно раз в полгода
+parole_max_authority = 3        # блатному и выше УДО не дают
+parole_retry_weeks = 26         # отказали — новая просьба через полгода
+
+# Выход: флаг открывает «Бывшего сидельца», авторитет оборачивается репутацией у бандитов.
+release_flag = "released_from_zone"
+ties_faction = "bandits"
+ties = [0, 0, 1, 2, 3]
+
+[parcel]
+price = 30.0
+contents = { cigarettes = 20, tea = 5 }
+
+# Доверенные лица: шансы в месяц отсидки по делениям черт 1–5.
+[trustees]
+vanish_chances = [0.25, 0.12, 0.05, 0.02, 0.0]   # по лояльности
+steal_chances = [0.6, 0.35, 0.15, 0.05, 0.0]     # по честности
+steal_share = 0.5                                # ворующий уносит половину выручки
+
+# Зоны эпох: советская платит промзоной и выпускать за деньги не умеет, в девяностые промзона
+# стоит, передачи чаще, а на волю продают.
+[camps.stagnation]
+title = "ИТК общего режима, Мордовия"
+work_pay = 4          # пачек сигарет за неделю на промзоне
+parcel_weeks = 13     # передача — раз в квартал
+parole_after = 0.5
+parole_chance = 0.6
+
+[camps.perestroika]
+title = "ИТК усиленного режима, Пермский край"
+work_pay = 3
+parcel_weeks = 8
+parole_after = 0.5
+parole_chance = 0.5
+bribe = 8000.0
+
+[camps.wild_market]
+title = "Колония общего режима, Тверская область"
+work_pay = 1
+parcel_weeks = 4
+parole_after = 0.5
+parole_chance = 0.4
+bribe = 3000.0
+
+[camps.stabilization]
+title = "ИК-6, Мордовия"
+work_pay = 2
+parcel_weeks = 6
+parole_after = 0.5
+parole_chance = 0.35
+bribe = 6000.0
+
+[camps.sandbox]
+title = "ИК-7, Карелия"
+work_pay = 2
+parcel_weeks = 6
+parole_after = 0.5
+parole_chance = 0.35
+bribe = 8000.0

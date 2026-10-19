@@ -1,0 +1,11 @@
+title = "Амнистия к 70-летию Октября"
+weight = 1
+text = "Зачитали указ об амнистии."
+
+[conditions]
+window = { from = "1987-06-18", until = "1988-01-01" }
+
+[[choices]]
+text = "Собрать вещи"
+outcome = "Ворота открылись."
+consequences = { zone = { amnesty = true } }

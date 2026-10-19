@@ -28,6 +28,16 @@ pub struct Conditions {
     /// Участвует соперник, подходящий под условие; кто именно — решает сид при начале события.
     pub rival: Option<RivalCondition>,
     pub timeline: Option<TimelineNodeId>,
+    /// Уровень авторитета в зоне — только у событий зоны.
+    pub authority: Option<AuthorityCondition>,
+}
+
+/// Границы авторитета в зоне, уровни от 1.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AuthorityCondition {
+    pub at_least: Option<u8>,
+    pub at_most: Option<u8>,
 }
 
 /// Какой соперник участвует (§8): стратегия, отношение к игроку и давность обиды — так «кинутый

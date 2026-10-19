@@ -3,9 +3,10 @@ use serde::Deserialize;
 use super::{CityId, EndingId, FactionId, FlagId, GoodId, NpcId};
 use crate::business::PolicyKind;
 use crate::economy::Real;
+use crate::zone::Stash;
 
 /// Последствия выбора (§10.1): деньги, товар, репутация, связи, флаги, сдвиг цен, перемены в деле,
-/// здоровье и конец жизни.
+/// здоровье, срок и перемены в зоне, конец жизни.
 #[derive(Clone, Debug, Default, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Consequences {
@@ -29,6 +30,11 @@ pub struct Consequences {
     /// Здоровье: пьянство, драка, санаторий; на нуле — финал здоровья.
     #[serde(default)]
     pub health: i32,
+    /// Суд дал срок в месяцах — игрок идёт в зону (§12), а если уже сидит, срок прибавляется;
+    /// срок длиннее порога правил зоны кончает жизнь приговором. Только у событий на воле.
+    pub sentence_months: Option<u32>,
+    /// Перемена в зоне — только у событий зоны.
+    pub zone: Option<ZoneChange>,
     /// Жизнь кончается этим финалом, когда игрок прочтёт исход.
     pub end_life: Option<EndingId>,
 }
@@ -122,5 +128,40 @@ impl BusinessChange {
     /// Последствие что-то меняет.
     pub fn changes_anything(&self) -> bool {
         !self.policies.is_empty() || self.manager_leaves || self.closed_days.is_some() || self.lost
+    }
+}
+
+/// Перемена в зоне (§12): сигареты и чай (минус — отдать, и их должно хватать), авторитет, месяцы
+/// к сроку или из срока и выход по амнистии.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct ZoneChange {
+    pub cigarettes: i32,
+    pub tea: i32,
+    pub authority: i32,
+    pub term_months: i32,
+    pub amnesty: bool,
+}
+
+impl ZoneChange {
+    /// Последствие что-то меняет.
+    pub fn changes_anything(&self) -> bool {
+        self != &Self::default()
+    }
+
+    /// Сигареты и чай, которые выбор забирает.
+    pub fn price(&self) -> Stash {
+        Stash {
+            cigarettes: self.cigarettes.min(0).unsigned_abs(),
+            tea: self.tea.min(0).unsigned_abs(),
+        }
+    }
+
+    /// Сигареты и чай, которые выбор приносит.
+    pub fn gain(&self) -> Stash {
+        Stash {
+            cigarettes: self.cigarettes.max(0).unsigned_abs(),
+            tea: self.tea.max(0).unsigned_abs(),
+        }
     }
 }

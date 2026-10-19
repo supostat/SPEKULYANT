@@ -87,3 +87,7 @@ content_id!(
     /// Финал жизни — имя файла в `data/endings/`.
     EndingId
 );
+content_id!(
+    /// Услуга зоны — имя файла в `data/zone/services/`.
+    ZoneServiceId
+);
