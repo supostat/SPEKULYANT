@@ -3,6 +3,7 @@
 
 use super::super::Game;
 use super::super::consequences::signed;
+use super::russian_count::count;
 use crate::business::{Business, Employee, MonthReport};
 use crate::content::{Content, HabitId};
 use crate::economy::{Currency, Money, MoneyRules};
@@ -13,9 +14,7 @@ use crate::view::{
 };
 
 const POINTS_SEPARATOR: &str = "·";
-const POINT_ONE: &str = "точка";
-const POINT_FEW: &str = "точки";
-const POINT_MANY: &str = "точек";
+const POINTS: [&str; 3] = ["точка", "точки", "точек"];
 const SINCE: &str = "с";
 const SINCE_YEAR: &str = "года";
 const CLOSED_UNTIL: &str = "закрыто до";
@@ -103,7 +102,7 @@ fn business_view(game: &Game, business: &Business, today: GameDate) -> BusinessV
         title: format!(
             "{} {POINTS_SEPARATOR} {}",
             kind.title,
-            points_label(business.points())
+            count(business.points(), POINTS)
         ),
         city: content.cities[&business.id().city].name.clone(),
         form: business.form(content, today).title.clone(),
@@ -215,15 +214,4 @@ fn habit_texts(content: &Content, habits: &[HabitId]) -> Vec<String> {
         .iter()
         .map(|habit| content.habits[habit].text.clone())
         .collect()
-}
-
-/// «1 точка», «3 точки», «5 точек».
-fn points_label(points: u32) -> String {
-    let word = match (points % 10, points % 100) {
-        (_, 11..=14) => POINT_MANY,
-        (1, _) => POINT_ONE,
-        (2..=4, _) => POINT_FEW,
-        _ => POINT_MANY,
-    };
-    format!("{points} {word}")
 }

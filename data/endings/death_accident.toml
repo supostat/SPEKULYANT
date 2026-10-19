@@ -1,0 +1,12 @@
+kind = "death"
+title = "Несчастный случай"
+capital_label = "Капитал на момент смерти"
+headline = "{NAME}  {born}–{ended}"
+text = "Трагически погиб {date}. Следствие считает это несчастным случаем."
+
+[sources]
+stagnation = "«ВЕЧЕРНЯЯ МОСКВА»"
+perestroika = "«МОСКОВСКИЕ НОВОСТИ»"
+wild_market = "«МОСКОВСКИЙ КОМСОМОЛЕЦ»"
+stabilization = "«КОММЕРСАНТЪ»"
+sandbox = "«КОММЕРСАНТЪ»"

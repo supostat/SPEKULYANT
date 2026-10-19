@@ -5,6 +5,9 @@
     "date": "14 марта 1986, пт",
     "money": ["Наличные: 1 240 р.", "Чеки: 85"]
   },
+  "character": { "name": "Лыков Пётр Сергеевич", "age": "24 года", "health": "здоров", "housing": "Койка в общежитии" },
+  "homes": [],
+  "exits": [],
   "time": { "speed": 1, "paused": false, "fast_forward": null },
   "market": {
     "place": "Толкучка у Рижского вокзала",

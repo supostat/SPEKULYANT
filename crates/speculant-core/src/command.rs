@@ -66,6 +66,14 @@ pub enum Command {
     Call {
         contact: String,
     },
+    /// Купить жильё за наличные; прежнее уходит в зачёт.
+    BuyHousing {
+        housing: String,
+    },
+    /// Уйти по своей воле — эмиграция или покой: жизнь кончается итогами.
+    Retire {
+        ending: String,
+    },
     /// Положить в место хранения `amount` целых единиц его валюты на ценнике дня: рубли — из
     /// наличных, чеки и доллары — купленные на наличные по курсу.
     Deposit {
@@ -114,6 +122,8 @@ impl Command {
             Self::Hire { .. } => "hire",
             Self::Fire { .. } => "fire",
             Self::Call { .. } => "call",
+            Self::BuyHousing { .. } => "buy_housing",
+            Self::Retire { .. } => "retire",
             Self::Deposit { .. } => "deposit",
             Self::Withdraw { .. } => "withdraw",
             Self::Save { .. } => "save",

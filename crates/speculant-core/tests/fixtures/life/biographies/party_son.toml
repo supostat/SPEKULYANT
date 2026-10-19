@@ -1,0 +1,10 @@
+title = "Сын партработника"
+description = "Папины связи, кооперативная квартира."
+start_city = "moscow"
+start_cash = 20000
+age = { from = 22, to = 25 }
+housing = "coop_flat"
+obituary = "Рос в доме на Кутузовском."
+starts_unlocked = false
+unlocked_by_flag = "nomenklatura"
+unlock_hint = "Открывается после выхода на номенклатуру в одной из жизней"

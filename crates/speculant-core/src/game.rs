@@ -3,10 +3,11 @@
 mod business_flow;
 mod consequences;
 mod event_flow;
+mod life_flow;
 mod snapshot;
 mod travel_flow;
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
 
 use crate::business::{Business, BusinessId};
@@ -15,6 +16,7 @@ use crate::command_error::CommandError;
 use crate::content::{BiographyId, CityId, Content, GoodId, MoneyPlaceId, NpcId};
 use crate::economy::{Currency, Deal, Markets, Money, Trader};
 use crate::events::{EventEngine, JournalEntry, Situation};
+use crate::life::{Character, Chronicle, LifeSummary};
 use crate::npc::Rivals;
 use crate::reputation::{Contact, FactionReputation};
 use crate::rng::WorldRng;
@@ -28,10 +30,17 @@ const BOUGHT: &str = "Купил";
 const SOLD: &str = "Продал";
 const DEPOSITED: &str = "положил";
 const WITHDREW: &str = "снял";
+const LIFE_STREAM: &str = "life";
 
 #[derive(Debug)]
 pub struct Game {
     content: Arc<Content>,
+    character: Character,
+    chronicle: Chronicle,
+    /// Итоги, когда жизнь кончилась; до тех пор — `None`.
+    summary: Option<LifeSummary>,
+    /// Биографии, открытые прошлыми жизнями этого сеанса.
+    unlocked: BTreeSet<BiographyId>,
     clock: Clock,
     rng: WorldRng,
     city: CityId,
@@ -48,25 +57,51 @@ pub struct Game {
 }
 
 impl Game {
-    /// Открывает жизнь в первый день 1984 года: город, наличные и знакомые — из биографии, случай
-    /// мира и состав соперников — из сида, репутация у всех фракций нулевая.
+    /// Открывает первую жизнь сеанса в первый день 1984 года: доступны только биографии, открытые
+    /// с начала.
     pub fn new_life(settings: &LifeSettings, content: Arc<Content>) -> Result<Self, CommandError> {
+        Self::start_life(settings, content, BTreeSet::new())
+    }
+
+    /// Жизнь по биографии, открытой с начала или прошлыми жизнями: город, наличные, знакомые и
+    /// жильё — из биографии, имя, возраст, случай мира и состав соперников — из сида, репутация у
+    /// всех фракций нулевая.
+    fn start_life(
+        settings: &LifeSettings,
+        content: Arc<Content>,
+        unlocked: BTreeSet<BiographyId>,
+    ) -> Result<Self, CommandError> {
         if settings.biography.trim().is_empty() {
             return Err(CommandError::EmptyBiography);
         }
-        let biography = content
-            .biographies
-            .get(&BiographyId::new(settings.biography.as_str()))
-            .ok_or_else(|| CommandError::UnknownBiography {
+        let id = BiographyId::new(settings.biography.as_str());
+        let biography =
+            content
+                .biographies
+                .get(&id)
+                .ok_or_else(|| CommandError::UnknownBiography {
+                    biography: settings.biography.clone(),
+                })?;
+        if !biography.starts_unlocked && !unlocked.contains(&id) {
+            return Err(CommandError::BiographyLocked {
                 biography: settings.biography.clone(),
-            })?;
+                title: biography.title.clone(),
+                hint: biography.unlock_hint.clone().unwrap_or_default(),
+            });
+        }
         let today = GameDate::START;
         let cash = content
             .money
             .from_real(biography.start_cash, Currency::Ruble, today);
         let mut rng = WorldRng::new(settings.seed);
         let rivals = Rivals::new(&content, &mut rng, today);
+        let character =
+            life_flow::born_character(&content, &id, biography, rng.stream(LIFE_STREAM));
         Ok(Self {
+            character,
+            chronicle: Chronicle::default(),
+            summary: None,
+            unlocked,
             clock: Clock::new(content.time.clock.clone(), today),
             rng,
             city: biography.start_city.clone(),
@@ -126,6 +161,16 @@ impl Game {
         &self.rivals
     }
 
+    /// Персонаж этой жизни.
+    pub fn character(&self) -> &Character {
+        &self.character
+    }
+
+    /// Итоги, если жизнь кончилась.
+    pub fn summary(&self) -> Option<&LifeSummary> {
+        self.summary.as_ref()
+    }
+
     /// Дела игрока.
     pub fn businesses(&self) -> &BTreeMap<BusinessId, Business> {
         &self.businesses
@@ -157,7 +202,7 @@ impl Game {
     /// случиться событие — дома или в дороге. Событие и прибытие останавливают перемотку, и остаток реального времени сгорает;
     /// событие держит время, пока игрок не прочтёт исход.
     pub fn advance(&mut self, milliseconds: u32) -> bool {
-        if self.events.pending().is_some() {
+        if self.events.pending().is_some() || self.summary.is_some() {
             return false;
         }
         self.clock.add_time(milliseconds);
@@ -175,15 +220,19 @@ impl Game {
 
     pub fn apply(&mut self, command: Command) -> Result<(), CommandError> {
         let today = self.clock.today();
-        if self.events.pending().is_some() && waits_for_event(&command) {
+        if self.events.pending().is_some() && changes_the_world(&command) {
             return Err(CommandError::EventPending);
+        }
+        if self.summary.is_some() && changes_the_world(&command) {
+            return Err(CommandError::LifeOver);
         }
         if self.journey.is_some() && needs_a_city(&command) {
             return Err(CommandError::Traveling);
         }
         match command {
             Command::NewLife(settings) => {
-                *self = Self::new_life(&settings, Arc::clone(&self.content))?;
+                *self =
+                    Self::start_life(&settings, Arc::clone(&self.content), self.unlocked.clone())?;
             }
             Command::Advance { milliseconds } => {
                 self.advance(milliseconds);
@@ -215,10 +264,13 @@ impl Game {
                     quantity,
                     today,
                 )?;
+                let cost = self.content.money.real_value(deal.total, today);
+                self.chronicle.bought(&good, cost);
                 self.log_deal(BOUGHT, &good, deal);
             }
             Command::Sell { good, quantity } => {
                 let good = GoodId::new(good);
+                let held = self.player.pocket().quantity(&good);
                 let deal = self.player.sell(
                     &mut self.markets,
                     &self.content,
@@ -227,6 +279,9 @@ impl Game {
                     quantity,
                     today,
                 )?;
+                let proceeds = self.content.money.real_value(deal.total, today);
+                self.chronicle
+                    .sold(&good, deal.quantity, held, proceeds, today);
                 self.log_deal(SOLD, &good, deal);
             }
             Command::Deposit { place, amount } => {
@@ -252,6 +307,8 @@ impl Game {
                 candidate,
             } => self.hire(&business, &candidate)?,
             Command::Fire { business, employee } => self.fire(&business, &employee)?,
+            Command::BuyHousing { housing } => self.buy_housing(&housing)?,
+            Command::Retire { ending } => self.retire(&ending)?,
             other => {
                 return Err(CommandError::NotSimulatedYet {
                     command: other.name().to_owned(),
@@ -273,7 +330,7 @@ impl Game {
         self.reputation.next_day(drift_days);
         self.rivals
             .next_day(&self.content, &mut self.markets, &mut self.rng, date);
-        if self.live_businesses(date) {
+        if self.live_character(date) || self.live_businesses(date) {
             return true;
         }
         let Some(journey) = self.journey.clone() else {
@@ -327,8 +384,9 @@ impl Game {
     }
 }
 
-/// Пока событие ждёт ответа, мир стоит: торговать, класть деньги и ехать нельзя.
-fn waits_for_event(command: &Command) -> bool {
+/// Команды, которые меняют мир: пока событие ждёт ответа, их не выполнить, а когда жизнь
+/// кончилась, остаются только экраны, исход последнего события и новая жизнь.
+fn changes_the_world(command: &Command) -> bool {
     matches!(
         command,
         Command::Buy { .. }
@@ -342,11 +400,13 @@ fn waits_for_event(command: &Command) -> bool {
             | Command::Hire { .. }
             | Command::Fire { .. }
             | Command::Call { .. }
+            | Command::BuyHousing { .. }
+            | Command::Retire { .. }
     )
 }
 
-/// В дороге нет ни толкучки, ни сберкассы, точку не открыть, и второй поездки не начать.
-/// Управлять делами можно и с дороги — по пейджеру.
+/// В дороге нет ни толкучки, ни сберкассы, точку и жильё не купить, на покой не уйти, и второй
+/// поездки не начать. Управлять делами можно и с дороги — по пейджеру.
 fn needs_a_city(command: &Command) -> bool {
     matches!(
         command,
@@ -356,5 +416,7 @@ fn needs_a_city(command: &Command) -> bool {
             | Command::Withdraw { .. }
             | Command::Travel { .. }
             | Command::OpenBusiness { .. }
+            | Command::BuyHousing { .. }
+            | Command::Retire { .. }
     )
 }

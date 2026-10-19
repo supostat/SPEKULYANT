@@ -3,6 +3,7 @@
 
 mod biography;
 mod business;
+mod character;
 mod contact;
 mod event;
 mod faction;
@@ -24,6 +25,7 @@ pub use business::{
     BusinessKindView, BusinessView, CandidateView, ForecastView, ManagerView, PolicyView,
     ReportView,
 };
+pub use character::{CharacterView, ExitView, HomeView};
 pub use contact::ContactView;
 pub use event::{ChoiceView, EventView, OutcomeView};
 pub use faction::FactionView;
@@ -46,6 +48,9 @@ use serde::{Deserialize, Serialize};
 pub struct StateView {
     pub screen: Screen,
     pub header: HeaderView,
+    pub character: CharacterView,
+    pub homes: Vec<HomeView>,
+    pub exits: Vec<ExitView>,
     pub time: TimeView,
     pub market: MarketView,
     pub travel: TravelView,

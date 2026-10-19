@@ -1,0 +1,5 @@
+title = "ТОО"
+from = "1992-01-01"
+until = "1999-07-01"
+racket_share = 0.7
+tax = 0.1

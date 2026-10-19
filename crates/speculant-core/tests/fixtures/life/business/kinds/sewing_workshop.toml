@@ -1,0 +1,10 @@
+title = "Цех варёнок"
+forms = ["workshop"]
+point_cost = 1500
+max_points = 1
+rent = 40
+wages = 200
+goods = { jeans = 10 }
+margin = 0.5
+theft = 1
+policies = ["markup", "roof", "purchase", "inspection", "wage"]

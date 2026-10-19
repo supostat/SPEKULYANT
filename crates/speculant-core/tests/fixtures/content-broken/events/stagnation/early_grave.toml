@@ -1,0 +1,7 @@
+title = "Рано"
+weight = 1
+text = "Всё."
+
+[[choices]]
+text = "Конец"
+consequences = { end_life = "nowhere" }

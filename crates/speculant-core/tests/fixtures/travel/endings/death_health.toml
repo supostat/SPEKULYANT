@@ -1,0 +1,9 @@
+kind = "death"
+title = "Не выдержало сердце"
+capital_label = "Капитал на момент смерти"
+headline = "{NAME}  {born}–{ended}"
+text = "Скончался {date}."
+
+[sources]
+stagnation = "«ВЕЧЕРНЯЯ МОСКВА»"
+perestroika = "«ВЕЧЕРНЯЯ МОСКВА»"

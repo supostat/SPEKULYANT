@@ -1,0 +1,9 @@
+kind = "death"
+title = "Подвиг"
+voluntary = true
+capital_label = "Капитал"
+headline = "{NAME} {rank}"
+text = "Погиб {date}."
+
+[sources]
+perestroika = "«ПРАВДА»"

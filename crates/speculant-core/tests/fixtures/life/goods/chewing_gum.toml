@@ -1,0 +1,6 @@
+name = "Жвачка, блок"
+short_name = "Жвачка"
+category = "sweets"
+unit = "бл"
+stock = 30
+curve = [{ year = 1984, price = 25 }]

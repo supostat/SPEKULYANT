@@ -1,7 +1,7 @@
 //! Контент как данные (§10, §14.1): товары, города, маршруты, эпохи, правила толкучки, индекс цен
-//! и курсы, места хранения денег, фракции и правила репутации, биографии, шаблоны NPC, дела —
-//! формы, типы, политики, привычки и правила, — события и правила их розыгрыша. Формат — TOML,
-//! файл на сущность в `data/`, имя файла — идентификатор (решение 15.7).
+//! и курсы, места хранения денег, фракции и правила репутации, биографии, жильё, финалы и правила
+//! жизни, шаблоны NPC, дела — формы, типы, политики, привычки и правила, — события и правила их
+//! розыгрыша. Формат — TOML, файл на сущность в `data/`, имя файла — идентификатор (решение 15.7).
 //! Загрузка проверяет схему и ссылки и возвращает все ошибки сразу, каждая — «файл:строка».
 
 mod biography;
@@ -13,11 +13,13 @@ mod consequences;
 mod content_error;
 mod content_file;
 mod employee_traits;
+mod ending;
 mod epoch_profile;
 mod event;
 mod faction;
 mod good;
 mod habit;
+mod housing;
 mod ids;
 mod loader;
 mod money_place;
@@ -30,7 +32,7 @@ mod validation;
 use std::collections::BTreeMap;
 use std::path::Path;
 
-pub use biography::Biography;
+pub use biography::{AgeRange, Biography};
 pub use business_form::BusinessForm;
 pub use business_kind::BusinessKind;
 pub use city::City;
@@ -44,14 +46,16 @@ pub use consequences::{
 pub use content_error::ContentError;
 pub use content_file::ContentFile;
 pub use employee_traits::EmployeeTraits;
+pub use ending::Ending;
 pub use epoch_profile::{EpochProfile, Threat};
 pub use event::{Choice, Event, FollowUp};
 pub use faction::Faction;
 pub use good::Good;
 pub use habit::Habit;
+pub use housing::Housing;
 pub use ids::{
-    BiographyId, BusinessFormId, BusinessKindId, CityId, EpochId, EventId, FactionId, FlagId,
-    GoodId, HabitId, MoneyPlaceId, NpcId, TimelineNodeId,
+    BiographyId, BusinessFormId, BusinessKindId, CityId, EndingId, EpochId, EventId, FactionId,
+    FlagId, GoodId, HabitId, HousingId, MoneyPlaceId, NpcId, TimelineNodeId,
 };
 pub use money_place::{InterestPoint, MoneyPlace};
 pub use npc_template::NpcTemplate;
@@ -62,6 +66,7 @@ pub use route::Route;
 use crate::business::{BusinessRules, PolicyKind};
 use crate::economy::{MarketRules, MoneyRules};
 use crate::events::EventRules;
+use crate::life::LifeRules;
 use crate::npc::RivalRules;
 use crate::reputation::ReputationRules;
 use crate::time::{GameDate, TimeRules};
@@ -75,6 +80,7 @@ pub struct Content {
     pub event_rules: EventRules,
     pub rival_rules: RivalRules,
     pub business: BusinessRules,
+    pub life: LifeRules,
     pub epochs: BTreeMap<EpochId, EpochProfile>,
     pub goods: BTreeMap<GoodId, Good>,
     pub cities: BTreeMap<CityId, City>,
@@ -82,6 +88,8 @@ pub struct Content {
     pub money_places: BTreeMap<MoneyPlaceId, MoneyPlace>,
     pub factions: BTreeMap<FactionId, Faction>,
     pub biographies: BTreeMap<BiographyId, Biography>,
+    pub housing: BTreeMap<HousingId, Housing>,
+    pub endings: BTreeMap<EndingId, Ending>,
     pub npcs: BTreeMap<NpcId, NpcTemplate>,
     pub business_forms: BTreeMap<BusinessFormId, BusinessForm>,
     pub business_kinds: BTreeMap<BusinessKindId, BusinessKind>,

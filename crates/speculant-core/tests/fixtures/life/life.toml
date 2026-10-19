@@ -1,0 +1,22 @@
+# Жизнь фикстуры: здоровье с четырьмя состояниями, старение с 35 лет, итоги в долларах с 1992-го.
+health_max = 100
+start_health = 90
+health_states = [
+  { from = 1, name = "при смерти" },
+  { from = 20, name = "плох" },
+  { from = 45, name = "пошаливает сердце" },
+  { from = 75, name = "здоров" },
+]
+aging_from = 35
+aging_per_year = 3
+health_ending = "death_health"
+stash_loss_share = 1.0
+resale_share = 0.8
+capital_in_dollars_from = "1992-01-01"
+newspaper_pages = 16
+business_sentence = "В {year} году завёл своё дело — «{business}»."
+
+[names]
+surnames = ["Лыков", "Кузнецов", "Смирнов", "Волков", "Зайцев", "Морозов", "Козлов", "Лебедев"]
+first_names = ["Пётр", "Андрей", "Сергей", "Михаил", "Алексей", "Дмитрий", "Николай", "Олег"]
+patronymics = ["Сергеевич", "Иванович", "Петрович", "Николаевич", "Юрьевич", "Борисович"]

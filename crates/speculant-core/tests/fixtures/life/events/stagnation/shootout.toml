@@ -1,0 +1,8 @@
+title = "Стрелка"
+weight = 1
+text = "На стрелке за гаражами разговор не заладился."
+
+[[choices]]
+text = "Достать нож"
+outcome = "Зря."
+consequences = { end_life = "death_bandits" }

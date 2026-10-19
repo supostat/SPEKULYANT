@@ -2,4 +2,7 @@ title = "Студент"
 description = "Общежитие, иностранцы-сокурсники, мало денег."
 start_city = "moscow"
 start_cash = 150
+age = { from = 20, to = 22 }
+housing = "dorm_bed"
+obituary = "Начинал студентом."
 starts_unlocked = true

@@ -1,6 +1,7 @@
 //! Проверки контента после разбора: ссылки, флаги, окна дат, кривые, выборы и подстановки.
 
 mod business;
+mod life;
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -40,6 +41,8 @@ struct Known {
     reputation_limit: Option<i32>,
     business_forms: BTreeSet<String>,
     habits: BTreeSet<String>,
+    housing: BTreeSet<String>,
+    endings: BTreeSet<String>,
     /// Подписи вариантов каждой политики.
     policies: BTreeMap<String, BTreeSet<String>>,
     /// Шкала черт сотрудников, если правила дел разобрались.
@@ -116,6 +119,8 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
             .map(|(_, rules)| i32::from(rules.limit)),
         business_forms: ids(&parsed.business_forms),
         habits: ids(&parsed.habits),
+        housing: ids(&parsed.housing),
+        endings: ids(&parsed.endings),
         policies: parsed
             .policies
             .iter()
@@ -135,6 +140,7 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
             .map(|(_, rules)| rules.trait_scale),
     };
     business::validate(parsed, &known, errors);
+    life::validate(parsed, &known, errors);
     for entry in &parsed.epochs {
         let mut report = Report {
             file: entry.file,
@@ -574,6 +580,7 @@ fn check_biography(biography: &Biography, known: &Known, report: &mut Report<'_,
             "стартовые наличные не могут быть меньше нуля".to_owned(),
         );
     }
+    life::check_biography(biography, known, report);
 }
 
 fn check_market(rules: &MarketRules, report: &mut Report<'_, '_>) {
@@ -935,6 +942,15 @@ fn check_choice(
     }
     if let Some(change) = &consequences.business {
         check_business_change(change, index, known, report);
+    }
+    if let Some(ending) = &consequences.end_life {
+        check_reference(
+            &known.endings,
+            ending.as_str(),
+            "финала",
+            "endings/",
+            report,
+        );
     }
     for shock in &consequences.price_shocks {
         check_reference(

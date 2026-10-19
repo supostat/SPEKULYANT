@@ -1,0 +1,4 @@
+# Случайных событий нет: тесты начинают события сами.
+daily_chance = 0
+road_daily_chance = 0
+cooldown_days = 30

@@ -44,6 +44,12 @@ impl Trader {
         self.money.pay(amount);
     }
 
+    /// Деньги пропали из места хранения — кража, пожар, лопнувший банк; больше, чем лежит, не
+    /// пропадает — это проверяет вызывающий.
+    pub fn lose_from(&mut self, place: &MoneyPlaceId, amount: Money) {
+        self.money.take(place, amount);
+    }
+
     /// Товар от события.
     pub fn add_goods(&mut self, good: &GoodId, quantity: u32) {
         self.pocket.add(good, quantity);

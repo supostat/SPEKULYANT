@@ -73,6 +73,7 @@ impl Game {
                 format!("{}: {NEW_POINT} за {price}", business.name(&content))
             }
             None => {
+                self.chronicle.opened_business(&id.kind, today);
                 let business = Business::open(id.clone(), &content);
                 let message = format!("{OPENED}: {} за {price}", business.name(&content));
                 self.businesses.insert(id, business);

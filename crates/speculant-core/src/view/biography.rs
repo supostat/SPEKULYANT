@@ -7,4 +7,6 @@ pub struct BiographyView {
     pub title: String,
     pub start: String,
     pub unlocked: bool,
+    /// Чем открыть закрытую биографию.
+    pub unlock_hint: Option<String>,
 }

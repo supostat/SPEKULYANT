@@ -1,0 +1,4 @@
+denomination = { date = "1998-01-01", factor = 1000 }
+inflation = [{ year = 1984, rubles = 1 }]
+checks_rate = [{ year = 1984, rubles = 2 }]
+dollar_rate = [{ year = 1984, rubles = 3 }]

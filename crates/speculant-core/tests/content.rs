@@ -40,6 +40,9 @@ fn the_minimal_set_loads_every_kind_of_content() {
     assert_eq!(content.biographies.len(), 1);
     assert_eq!(content.npcs.len(), 2);
     assert_eq!(content.business.trait_scale, 5);
+    assert_eq!(content.life.health_max, 100);
+    assert_eq!(content.housing.len(), 1);
+    assert_eq!(content.endings.len(), 1);
     assert_eq!(content.business_forms.len(), 1);
     assert_eq!(content.business_kinds.len(), 1);
     assert_eq!(content.policies.len(), 1);
@@ -97,6 +100,9 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         .map(ContentError::to_string)
         .collect();
     let expected = [
+        "biographies/heir.toml:5: возраст на старте: from больше to",
+        "biographies/heir.toml:6: жилья castle нет в housing/",
+        "biographies/heir.toml:8: закрытой биографии нужны флаг открытия unlocked_by_flag и подсказка",
         "biographies/student.toml:3: стартового города kiev нет в cities/",
         "business/forms/cooperative.toml:3: racket_share = 1.5: доля от 0 до 1",
         "business/habits/drunk.toml:2: skill_loss_chance = 2: доля от 0 до 1",
@@ -128,6 +134,11 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "events/stagnation/broken.toml:8: флаг never_set_flag не ставит ни одно последствие",
         "events/stagnation/broken.toml:10: выбор 1 без последствий, исхода и продолжения",
         "events/stagnation/broken.toml:17: события-продолжения missing_event нет в events/",
+        "endings/heroic_exit.toml:3: по своей воле жизнь кончается только уходом",
+        "endings/heroic_exit.toml:5: headline: подстановки {rank} нет",
+        "endings/heroic_exit.toml:8: нет заметки для эпохи stagnation",
+        "endings/heroic_exit.toml:9: эпохи perestroika нет в календаре",
+        "events/stagnation/early_grave.toml:7: финала nowhere нет в endings/",
         "events/stagnation/greedy.toml:3: отдых события в ноль дней — это каждый день",
         "events/stagnation/lost_luggage.toml:3: дорожное событие lost_luggage не стоит ни на одном маршруте",
         "events/stagnation/rival_misuse.toml:5: выбор 1: последствие rival без соперника в условиях события",
@@ -138,7 +149,11 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "goods/Black-Caviar.toml: имя файла «Black-Caviar» — не идентификатор",
         "goods/jeans.toml:6: годы опорных точек кривой должны строго возрастать",
         "goods/sugar.toml:1: invalid basic string",
+        "housing/shack.toml:2: жильё без цены не продаётся",
+        "housing/shack.toml:3: stash_risk = 2: доля от 0 до 1",
+        "life.toml:5: здоровье на старте 150 вне шкалы 1–100",
         "money/pyramids.toml:4: место закрывается не позже, чем открывается",
+        "money/sock.toml:3: дома деньги лежат в одном месте, а оно уже есть: jar",
         "music/song.toml: путь не входит в раскладку data/",
         "npc/lonely_rival.toml:4: у соперника со стратегией нет капитала capital",
         "routes.toml:3: города riga нет в cities/",

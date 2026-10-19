@@ -79,3 +79,11 @@ content_id!(
     /// Привычка сотрудника — имя файла в `data/business/habits/`.
     HabitId
 );
+content_id!(
+    /// Жильё — имя файла в `data/housing/`.
+    HousingId
+);
+content_id!(
+    /// Финал жизни — имя файла в `data/endings/`.
+    EndingId
+);

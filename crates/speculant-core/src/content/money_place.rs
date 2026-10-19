@@ -18,6 +18,9 @@ pub struct MoneyPlace {
     pub illegal_until: Option<GameDate>,
     /// Чем рискует вклад — строка для экрана денег.
     pub risk: String,
+    /// Деньги лежат дома — «под матрасом»: их уносят кража и пожар, и риск зависит от жилья.
+    #[serde(default)]
+    pub home: bool,
     /// Годовой процент в валюте места с опорного года; до первой точки процентов нет.
     #[serde(default)]
     pub interest: Vec<InterestPoint>,

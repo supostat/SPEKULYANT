@@ -3,4 +3,7 @@ description = "Общежитие, иностранцы-сокурсники, м
 start_city = "moscow"
 start_cash = 1000
 contacts = ["kofi"]
+age = { from = 20, to = 22 }
+housing = "dorm_bed"
+obituary = "Начинал студентом."
 starts_unlocked = true

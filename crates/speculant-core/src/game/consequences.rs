@@ -9,6 +9,7 @@ use crate::reputation::Contact;
 use crate::time::GameDate;
 
 const MONEY: &str = "Деньги";
+const HEALTH: &str = "Здоровье";
 const NOTHING_CHANGED: &str = "Ничего не изменилось.";
 const CONTACT_OWES: &str = "за ним услуг";
 const PLAYER_OWES: &str = "за тобой услуг";
@@ -22,7 +23,8 @@ const MINUS: char = '−';
 
 impl Game {
     /// Применяет последствия и возвращает строку перемен: «Торговцы +1. Деньги −600 р.». Флаги и
-    /// сдвиги цен игроку не показываются — о них говорит текст исхода. `rival` — участвующий в
+    /// сдвиги цен игроку не показываются — о них говорит текст исхода; здоровье — словом
+    /// состояния. Финал последствия или кончившееся здоровье завершают жизнь после всех перемен. `rival` — участвующий в
     /// событии соперник, к которому относится последствие `rival`; `business` — дело
     /// происшествия, к которому относится последствие `business`.
     pub(super) fn apply_consequences(
@@ -59,6 +61,8 @@ impl Game {
         for change in &consequences.goods {
             let quantity = change.change.unsigned_abs();
             if change.change < 0 {
+                let held = self.player.pocket().quantity(&change.good);
+                self.chronicle.gave_away(&change.good, quantity, held);
                 self.player.remove_goods(&change.good, quantity);
             } else {
                 self.player.add_goods(&change.good, quantity);
@@ -106,6 +110,15 @@ impl Game {
         if let (Some(change), Some(id)) = (&consequences.business, business) {
             self.change_business(&content, change, id, today, &mut effects);
         }
+        if consequences.health != 0 {
+            let rules = &content.life;
+            self.character
+                .change_health(consequences.health, rules.health_max);
+            effects.push(format!(
+                "{HEALTH}: {}",
+                rules.health_state(self.character.health())
+            ));
+        }
         for flag in &consequences.set_flags {
             self.events.set_flag(flag.clone());
         }
@@ -120,6 +133,14 @@ impl Game {
                 shock.days,
                 today,
             );
+        }
+        let ending = match &consequences.end_life {
+            Some(ending) => Some(ending),
+            None if self.character.health() <= 0 => Some(&content.life.health_ending),
+            None => None,
+        };
+        if let Some(ending) = ending {
+            self.end_life(ending, today);
         }
         if effects.is_empty() {
             NOTHING_CHANGED.to_owned()

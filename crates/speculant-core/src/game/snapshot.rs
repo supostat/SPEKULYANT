@@ -2,6 +2,8 @@
 //! которых ещё нет в мире (зона, пейджер, книжка), отдают пустые окна.
 
 mod business;
+mod life;
+mod russian_count;
 
 use std::cmp::Ordering;
 
@@ -40,9 +42,14 @@ pub(super) fn snapshot(game: &Game) -> StateView {
     StateView {
         screen: game.screen,
         header: header(game, today),
+        character: life::character(game, today),
+        homes: life::homes(game, today),
+        exits: life::exits(game, today),
         time: TimeView {
             speed: game.clock.speed(),
-            paused: game.clock.is_paused() || game.events.pending().is_some(),
+            paused: game.clock.is_paused()
+                || game.events.pending().is_some()
+                || game.summary.is_some(),
             fast_forward: game.clock.fast_forward(),
         },
         market: market(game, today),
@@ -65,8 +72,11 @@ pub(super) fn snapshot(game: &Game) -> StateView {
         money: money(game, today),
         notebook: Vec::new(),
         zone: None,
-        summary: None,
-        biographies: Vec::new(),
+        summary: game
+            .summary
+            .as_ref()
+            .map(|summary| life::summary(game, summary)),
+        biographies: life::biographies(game),
     }
 }
 

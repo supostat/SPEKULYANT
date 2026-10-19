@@ -11,6 +11,29 @@ pub enum CommandError {
     UnknownBiography {
         biography: String,
     },
+    BiographyLocked {
+        biography: String,
+        title: String,
+        hint: String,
+    },
+    LifeOver,
+    UnknownHousing {
+        housing: String,
+    },
+    AlreadyLivingThere {
+        title: String,
+    },
+    HousingNotOnSale {
+        housing: String,
+        title: String,
+    },
+    UnknownEnding {
+        ending: String,
+    },
+    EndingUnavailable {
+        ending: String,
+        title: String,
+    },
     InvalidSpeed {
         speed: u8,
         max: u8,
@@ -140,6 +163,21 @@ impl fmt::Display for CommandError {
             Self::EmptyBiography => write!(formatter, "жизнь не начинается без биографии"),
             Self::UnknownBiography { biography } => {
                 write!(formatter, "биографии {biography} нет")
+            }
+            Self::BiographyLocked { title, hint, .. } => {
+                write!(formatter, "{title}: пока закрыта — {hint}")
+            }
+            Self::LifeOver => write!(formatter, "эта жизнь кончилась: начни новую"),
+            Self::UnknownHousing { housing } => write!(formatter, "жилья {housing} нет"),
+            Self::AlreadyLivingThere { title } => {
+                write!(formatter, "{title}: ты и так здесь живёшь")
+            }
+            Self::HousingNotOnSale { title, .. } => {
+                write!(formatter, "{title}: такое жильё сейчас не купить")
+            }
+            Self::UnknownEnding { ending } => write!(formatter, "финала {ending} нет"),
+            Self::EndingUnavailable { title, .. } => {
+                write!(formatter, "{title}: так уйти сейчас нельзя")
             }
             Self::InvalidSpeed { speed, max } => {
                 write!(formatter, "скорости {speed} нет, есть 1–{max}")

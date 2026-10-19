@@ -1,10 +1,11 @@
 use serde::Deserialize;
 
-use super::{CityId, FactionId, FlagId, GoodId, NpcId};
+use super::{CityId, EndingId, FactionId, FlagId, GoodId, NpcId};
 use crate::business::PolicyKind;
 use crate::economy::Real;
 
-/// Последствия выбора (§10.1): деньги, товар, репутация, связи, флаги, сдвиг цен, перемены в деле.
+/// Последствия выбора (§10.1): деньги, товар, репутация, связи, флаги, сдвиг цен, перемены в деле,
+/// здоровье и конец жизни.
 #[derive(Clone, Debug, Default, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Consequences {
@@ -25,6 +26,11 @@ pub struct Consequences {
     pub price_shocks: Vec<PriceShock>,
     /// Перемена в деле, с которым случилось происшествие события.
     pub business: Option<BusinessChange>,
+    /// Здоровье: пьянство, драка, санаторий; на нуле — финал здоровья.
+    #[serde(default)]
+    pub health: i32,
+    /// Жизнь кончается этим финалом, когда игрок прочтёт исход.
+    pub end_life: Option<EndingId>,
 }
 
 impl Consequences {

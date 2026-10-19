@@ -1,0 +1,16 @@
+title = "При проверке"
+default = "звонить мне"
+
+[[options]]
+label = "платить"
+inspection = "pay"
+raid = -1
+
+[[options]]
+label = "звонить мне"
+inspection = "call"
+
+[[options]]
+label = "закрыться"
+inspection = "close"
+raid = 1

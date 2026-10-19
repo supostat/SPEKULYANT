@@ -1,0 +1,8 @@
+title = "Наследник"
+description = "Ждёт наследства."
+start_city = "moscow"
+start_cash = 100
+age = { from = 30, to = 25 }
+housing = "castle"
+obituary = "Ждал наследства."
+starts_unlocked = false

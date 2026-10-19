@@ -10,6 +10,7 @@ use crate::command_error::CommandError;
 use crate::content::EventId;
 use crate::events::{EventEngine, PendingEvent, Resolution, Substitutions};
 use crate::time::GameDate;
+use crate::view::Screen;
 
 const EVENTS_STREAM: &str = "events";
 
@@ -174,13 +175,17 @@ impl Game {
     }
 
     /// Исход прочитан — событие закрывается, время идёт; случилось оно в последний день пути —
-    /// игрок наконец приезжает.
+    /// игрок наконец приезжает. Если исход кончил жизнь, открываются итоги.
     pub(super) fn close_event(&mut self) -> Result<(), CommandError> {
         let pending = self.events.pending().ok_or(CommandError::NoPendingEvent)?;
         if pending.resolution.is_none() {
             return Err(CommandError::ChoiceRequired);
         }
         self.events.close();
+        if self.summary.is_some() {
+            self.screen = Screen::Summary;
+            return Ok(());
+        }
         self.arrive_if_due(self.today());
         Ok(())
     }

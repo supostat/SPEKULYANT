@@ -139,12 +139,13 @@ impl GameDate {
 
     /// Дата так, как её показывает шапка экрана: «14 марта 1986, пт».
     pub fn russian(self) -> String {
+        format!("{}, {}", self.long(), self.weekday_short())
+    }
+
+    /// Дата словами без дня недели — для газетной шапки и некролога: «3 ноября 1997».
+    pub fn long(self) -> String {
         let (year, month, day) = self.year_month_day();
-        format!(
-            "{day} {} {year}, {}",
-            MONTHS_GENITIVE[month as usize - 1],
-            self.weekday_short()
-        )
+        format!("{day} {} {year}", MONTHS_GENITIVE[month as usize - 1])
     }
 
     /// Короткая дата для записей в истории знакомства: «14.03.1986».
