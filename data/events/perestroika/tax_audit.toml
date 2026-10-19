@@ -1,0 +1,32 @@
+title = "Налоговая проверка"
+weight = 1
+once = true
+text = "Инспектор пришёл с проверкой: «Нули у вас красивые. А машина у подъезда — чья?»"
+
+[conditions]
+flags_set = ["tax_doubt"]
+
+[[choices]]
+text = "Доплатить со штрафом"
+outcome = "Квитанция длинная, как очередь за колбасой."
+
+[choices.consequences]
+money = -400
+clear_flags = ["tax_doubt"]
+
+[[choices]]
+text = "Договориться"
+outcome = "Инспектор забывает про машину."
+
+[choices.consequences]
+money = -250
+reputation = [{ faction = "officials", change = -1 }]
+clear_flags = ["tax_doubt"]
+
+[[choices]]
+text = "Упереться"
+outcome = "Дело уходит в суд. Два года за сокрытие доходов."
+
+[choices.consequences]
+sentence_months = 24
+clear_flags = ["tax_doubt"]

@@ -1,0 +1,29 @@
+title = "Налоговая инспекция"
+weight = 5
+cooldown_days = 365
+text = """
+Новая государственная налоговая инспекция рассылает бланки деклараций. Бланк сложный, \
+инспектор — злой."""
+
+[conditions]
+window = { from = "1990-11-21" }
+
+[[choices]]
+text = "Заплатить честно"
+outcome = "Инспектор удивлён. Записывает тебя в «добросовестные»."
+
+[choices.consequences]
+money = -150
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Показать нули"
+outcome = "Инспектор ставит галочку. Галочка — не в твою пользу."
+
+[choices.consequences]
+set_flags = ["tax_doubt"]
+
+[[choices.follow_ups]]
+event = "tax_audit"
+after_days = 60
+chance = 0.3

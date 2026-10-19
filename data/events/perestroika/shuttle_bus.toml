@@ -1,0 +1,18 @@
+title = "Автобус челноков"
+weight = 3
+cooldown_days = 30
+road = true
+text = """
+В автобусе на Варшаву баулы до потолка. Соседка просит помочь с её сумками на границе."""
+
+[[choices]]
+text = "Помочь соседке"
+outcome = "На границе она отдаёт тебе пару колготок «за спину»."
+
+[choices.consequences]
+goods = [{ good = "tights", change = 1 }]
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Спать"
+outcome = "Автобус качает, баулы скрипят."

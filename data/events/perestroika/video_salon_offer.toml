@@ -1,0 +1,30 @@
+title = "Видеосалон"
+weight = 5
+once = true
+text = """
+В подвале ДК можно поставить телевизор, двадцать стульев и показывать «Рэмбо». Рубль за \
+сеанс, очередь с утра."""
+
+[conditions]
+flags_set = ["cooperatives_legal"]
+
+[[choices]]
+text = "Купить всё и открыть"
+outcome = "Телевизор «Шарп», стулья из столовой, афиша от руки."
+
+[choices.consequences]
+money = -1400
+set_flags = ["video_salon"]
+
+[[choices]]
+text = "Поставить свой видик"
+outcome = "Видик переезжает в подвал. Афиша — от руки."
+
+[choices.consequences]
+money = -200
+goods = [{ good = "video_recorder", change = -1 }]
+set_flags = ["video_salon"]
+
+[[choices]]
+text = "Не связываться"
+outcome = "Через месяц салон открывает сосед. Очередь — у него."

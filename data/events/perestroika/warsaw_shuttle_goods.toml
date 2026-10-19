@@ -1,0 +1,22 @@
+title = "Челночница из Варшавы"
+weight = 6
+cooldown_days = 90
+text = """
+{npc} вернулась из Варшавы с клетчатыми баулами: колготки, косметика, джинсы. Отдаёт \
+оптом."""
+
+[conditions]
+npc = "shuttle_lyuba"
+window = { from = "1990-07-01" }
+
+[[choices]]
+text = "Взять оптом"
+outcome = "Баулы весят как ты сам. Товар — как золото."
+
+[choices.consequences]
+money = -250
+goods = [{ good = "tights", change = 20 }, { good = "jeans", change = 1 }]
+
+[[choices]]
+text = "Не брать"
+outcome = "Люба пожимает плечами и уходит на рынок."

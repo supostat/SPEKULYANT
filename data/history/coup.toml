@@ -6,12 +6,14 @@ scale = { from = 0.8, to = 1.3 }
 [[outcomes]]
 weight = 4
 news = "ГКЧП: танки в Москве, через три дня путч провалился."
+event = "coup_tanks"
 price_shocks = [{ good = "cigarettes", factor = 1.4, days = 30 }]
 set_flags = ["coup_failed"]
 
 [[outcomes]]
 weight = 1
 news = "ГКЧП: танки в Москве неделю, магазины пусты."
+event = "coup_tanks"
 price_shocks = [
   { good = "cigarettes", factor = 1.8, days = 60 },
   { good = "vodka", factor = 1.4, days = 60 },

@@ -1,0 +1,29 @@
+title = "Рая в кооперативе"
+weight = 6
+once = true
+text = """
+{npc} ушла из гастронома и открывает кооперативный магазин «Деликатесы». Зовёт своих в \
+долю."""
+
+[conditions]
+npc = "shop_manager_raya"
+flags_set = ["blat_raya"]
+timeline = "cooperative_law"
+
+[[choices]]
+text = "Вложиться к Рае"
+outcome = "Рая обнимает: «Я знала, что ты свой»."
+
+[choices.consequences]
+money = -300
+contacts = [{ npc = "shop_manager_raya", relation = 1 }]
+set_flags = ["raya_share"]
+
+[[choices.follow_ups]]
+event = "raya_coop_profit"
+after_days = 90
+chance = 0.8
+
+[[choices]]
+text = "Пожелать удачи"
+outcome = "Рая кивает. Дружба дружбой."

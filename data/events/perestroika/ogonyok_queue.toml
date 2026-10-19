@@ -1,0 +1,16 @@
+title = "Очередь за «Огоньком»"
+weight = 6
+cooldown_days = 60
+text = "Гласность: за свежим «Огоньком» стоят с утра. Читают прямо у киоска."
+
+[[choices]]
+text = "Перепродать пачку журналов"
+outcome = "Журналы рвут из рук у метро."
+
+[choices.consequences]
+money = 6
+reputation = [{ faction = "people", change = -1 }]
+
+[[choices]]
+text = "Читать самому"
+outcome = "Ты узнаёшь о стране больше, чем за тридцать лет."

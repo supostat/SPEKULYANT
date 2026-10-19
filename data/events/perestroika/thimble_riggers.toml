@@ -1,0 +1,27 @@
+title = "Напёрсточники"
+weight = 6
+cooldown_days = 60
+text = """
+У вокзала крутят напёрстки: «Кручу-верчу, обмануть хочу». Только что при тебе мужик \
+выиграл сотню."""
+
+[conditions]
+window = { from = "1989-01-01" }
+
+[[choices]]
+text = "Сыграть"
+outcome = "Шарик всегда не там. Мужик, который выигрывал, курит с ведущим за углом."
+
+[choices.consequences]
+money = -50
+
+[[choices]]
+text = "Предупредить лоха"
+outcome = "Лох уходит с деньгами. Ведущий запоминает твоё лицо."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }, { faction = "bandits", change = -1 }]
+
+[[choices]]
+text = "Пройти мимо"
+outcome = "Кручу-верчу продолжается без тебя."

@@ -1,0 +1,27 @@
+title = "Центр НТТМ"
+weight = 4
+once = true
+text = """
+{npc} открыл при райкоме Центр научно-технического творчества молодёжи. Творчество \
+простое: безнал превращается в наличные."""
+
+[conditions]
+npc = "raikom_zorin"
+flags_set = ["cooperatives_legal"]
+
+[[choices]]
+text = "Войти в схему"
+outcome = "Пятьсот рублей уходят «на творчество»."
+
+[choices.consequences]
+money = -500
+set_flags = ["nttm_share"]
+
+[[choices.follow_ups]]
+event = "nttm_payout"
+after_days = 45
+chance = 0.85
+
+[[choices]]
+text = "Отказаться"
+outcome = "Зорин не настаивает: желающих хватает."

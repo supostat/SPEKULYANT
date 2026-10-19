@@ -1,0 +1,20 @@
+title = "Бычки на развес"
+weight = 4
+cooldown_days = 120
+text = """
+У метро продают трёхлитровые банки окурков: «Табак отличный, только чуть использованный»."""
+
+[conditions]
+flags_set = ["tobacco_crisis"]
+
+[[choices]]
+text = "Купить банку для соседа"
+outcome = "Сосед счастлив. Ты — нет."
+
+[choices.consequences]
+money = -3
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Посмеяться"
+outcome = "Смех смехом, а банки раскупают."

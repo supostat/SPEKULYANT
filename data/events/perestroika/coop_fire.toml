@@ -1,0 +1,19 @@
+title = "Пожар в кооперативе"
+weight = 1
+incident = "fire"
+text = "Ночью «{business}» загорелся. Говорят — проводка, но все знают, кто не платил."
+
+[[choices]]
+text = "Восстановить"
+outcome = "Ремонт за свой счёт. Новые замки, новая сигнализация."
+
+[choices.consequences]
+money = -400
+business = { closed_days = 21 }
+
+[[choices]]
+text = "Бросить"
+outcome = "Пепелище остаётся пепелищем."
+
+[choices.consequences]
+business = { lost = true }

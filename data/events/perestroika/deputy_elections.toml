@@ -1,0 +1,28 @@
+title = "Выборы народных депутатов"
+weight = 8
+once = true
+text = """
+Первые выборы, где можно выбирать. У метро агитируют за демократов, в домоуправлении — за \
+секретаря парткома."""
+
+[conditions]
+timeline = "elections_1989"
+window = { from = "1989-03-01", until = "1989-06-01" }
+
+[[choices]]
+text = "Агитировать за демократов"
+outcome = "Ты раздаёшь листовки и ночуешь у Лужников на митинге."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 2 }, { faction = "officials", change = -1 }]
+
+[[choices]]
+text = "Голосовать за парткомовского"
+outcome = "В парткоме тебя запоминают как надёжного."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = 2 }, { faction = "people", change = -1 }]
+
+[[choices]]
+text = "Не ходить"
+outcome = "Выборы проходят без тебя."

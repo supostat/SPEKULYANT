@@ -1,0 +1,20 @@
+title = "Увёл кассу"
+weight = 1
+incident = "betrayal"
+text = "{manager} увёл из «{business}» клиентов, поставщиков и кассу."
+
+[[choices]]
+text = "Найти через бандитов"
+outcome = "Касса вернулась. Наполовину."
+
+[choices.consequences]
+money = -150
+reputation = [{ faction = "bandits", change = 1 }]
+business = { manager_leaves = true }
+
+[[choices]]
+text = "Уволить и забыть"
+outcome = "Урок кооперации."
+
+[choices.consequences]
+business = { manager_leaves = true }

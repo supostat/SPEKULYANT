@@ -1,0 +1,24 @@
+title = "Разрешение на лоток"
+weight = 6
+cooldown_days = 120
+text = """
+Торговать с лотка теперь можно, но с разрешения райисполкома. Разрешение дают тем, кто \
+понимает."""
+
+[conditions]
+flags_set = ["cooperatives_legal"]
+
+[[choices]]
+text = "Понимать"
+outcome = "Разрешение с печатью висит над лотком."
+
+[choices.consequences]
+money = -50
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Стоять без разрешения"
+outcome = "Участковый пока не замечает."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -1 }]

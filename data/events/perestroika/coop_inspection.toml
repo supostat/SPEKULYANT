@@ -1,0 +1,18 @@
+title = "Проверка из исполкома"
+weight = 1
+incident = "inspection"
+text = "В «{business}» пришли санэпидстанция и пожарные: нарушения найдутся всегда."
+
+[[choices]]
+text = "Откупиться"
+outcome = "Нарушения не найдены."
+
+[choices.consequences]
+money = -200
+
+[[choices]]
+text = "Закрыться на неделю"
+outcome = "Красим стены и вешаем огнетушитель."
+
+[choices.consequences]
+business = { closed_days = 7 }

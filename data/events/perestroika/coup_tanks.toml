@@ -1,0 +1,28 @@
+title = "Танки в Москве"
+weight = 10
+once = true
+text = """
+По телевизору «Лебединое озеро», по Тверской идут танки. У Белого дома строят баррикады."""
+
+[conditions]
+timeline = "coup"
+
+[[choices]]
+text = "Идти к Белому дому"
+outcome = "Три ночи у костра на баррикадах. Ты видел историю."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 2 }, { faction = "officials", change = -1 }]
+set_flags = ["white_house_defender"]
+
+[[choices]]
+text = "Скупить консервы"
+outcome = "Кладовка полна. На всякий случай."
+
+[choices.consequences]
+money = -50
+goods = [{ good = "cervelat", change = 3 }]
+
+[[choices]]
+text = "Сидеть дома"
+outcome = "Лебеди танцуют три дня."

@@ -1,0 +1,16 @@
+title = "Творчество окупилось"
+weight = 1
+once = true
+text = "{npc} привозит наличные: безнал превратился в живые деньги с наваром."
+
+[conditions]
+npc = "raikom_zorin"
+flags_set = ["nttm_share"]
+
+[[choices]]
+text = "Забрать"
+outcome = "Девятьсот рублей. Творчество молодёжи — сила."
+
+[choices.consequences]
+money = 900
+clear_flags = ["nttm_share"]

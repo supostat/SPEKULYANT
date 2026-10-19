@@ -1,0 +1,21 @@
+title = "Выбить долг"
+weight = 4
+cooldown_days = 180
+text = """
+{npc} просит помочь: кооператор задолжал и не отдаёт. Нужен человек, которого кооператор \
+знает в лицо."""
+
+[conditions]
+npc = "racket_sery"
+
+[[choices]]
+text = "Пойти с ними"
+outcome = "Кооператор отдаёт всё сразу. Тебе — доля."
+
+[choices.consequences]
+money = 200
+reputation = [{ faction = "bandits", change = 1 }, { faction = "people", change = -1 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Серый не обижается. Пока."

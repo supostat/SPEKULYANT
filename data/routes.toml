@@ -12,6 +12,7 @@ road_events = [
   { event = "transport_militia", weight = 2 },
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
+  { event = "train_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -24,6 +25,7 @@ road_events = [
   { event = "transport_militia", weight = 2 },
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
+  { event = "train_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -36,6 +38,7 @@ road_events = [
   { event = "transport_militia", weight = 2 },
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
+  { event = "train_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -48,6 +51,7 @@ road_events = [
   { event = "transport_militia", weight = 2 },
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
+  { event = "train_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -60,6 +64,7 @@ road_events = [
   { event = "transport_militia", weight = 2 },
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
+  { event = "train_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -72,6 +77,7 @@ road_events = [
   { event = "transport_militia", weight = 2 },
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
+  { event = "train_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -84,6 +90,7 @@ road_events = [
   { event = "transport_militia", weight = 2 },
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
+  { event = "train_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -96,6 +103,7 @@ road_events = [
   { event = "transport_militia", weight = 2 },
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
+  { event = "train_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -108,6 +116,7 @@ road_events = [
   { event = "transport_militia", weight = 2 },
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
+  { event = "train_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -120,6 +129,7 @@ road_events = [
   { event = "transport_militia", weight = 2 },
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
+  { event = "train_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -147,12 +157,20 @@ from = "moscow"
 to = "warsaw"
 days = 2
 fare = 50
+road_events = [
+  { event = "polish_border", weight = 3 },
+  { event = "shuttle_bus", weight = 3 },
+]
 
 [[routes]]
 from = "warsaw"
 to = "moscow"
 days = 2
 fare = 50
+road_events = [
+  { event = "polish_border", weight = 3 },
+  { event = "shuttle_bus", weight = 3 },
+]
 
 [[routes]]
 from = "moscow"
@@ -188,6 +206,7 @@ road_events = [
   { event = "transport_militia", weight = 2 },
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
+  { event = "train_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -200,6 +219,7 @@ road_events = [
   { event = "transport_militia", weight = 2 },
   { event = "card_sharps", weight = 1 },
   { event = "fellow_traveller", weight = 3 },
+  { event = "train_racket", weight = 2 },
 ]
 
 [[routes]]
@@ -227,12 +247,20 @@ from = "warsaw"
 to = "berlin"
 days = 1
 fare = 25
+road_events = [
+  { event = "polish_border", weight = 3 },
+  { event = "shuttle_bus", weight = 3 },
+]
 
 [[routes]]
 from = "berlin"
 to = "warsaw"
 days = 1
 fare = 25
+road_events = [
+  { event = "polish_border", weight = 3 },
+  { event = "shuttle_bus", weight = 3 },
+]
 
 [[routes]]
 from = "tbilisi"

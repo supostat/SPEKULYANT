@@ -1,0 +1,18 @@
+title = "Деликатесы Раи"
+weight = 1
+once = true
+text = """
+{npc} приносит конверт: колбаса из кооператива идёт втрое дороже, чем в гастрономе, и её \
+всё равно раскупают."""
+
+[conditions]
+npc = "shop_manager_raya"
+flags_set = ["raya_share"]
+
+[[choices]]
+text = "Забрать долю"
+outcome = "Пятьсот рублей. Колбаса пахнет так же, деньги — лучше."
+
+[choices.consequences]
+money = 500
+clear_flags = ["raya_share"]

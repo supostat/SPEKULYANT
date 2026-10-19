@@ -1,0 +1,16 @@
+title = "Табачный кризис"
+window = { from = "1990-07-01", until = "1990-09-01" }
+scale = { from = 0.8, to = 1.3 }
+
+[[outcomes]]
+weight = 3
+news = "Табачный бунт: курильщики перекрывают улицы, сигарет нет нигде."
+price_shocks = [{ good = "cigarettes", factor = 2.5, days = 120 }, { good = "java_cigarettes", factor = 3.0, days = 120 }]
+event = "tobacco_riot"
+set_flags = ["tobacco_crisis"]
+
+[[outcomes]]
+weight = 1
+news = "Табачные фабрики встали на ремонт: сигареты продают по пять пачек в руки."
+price_shocks = [{ good = "cigarettes", factor = 1.6, days = 90 }]
+set_flags = ["tobacco_crisis"]

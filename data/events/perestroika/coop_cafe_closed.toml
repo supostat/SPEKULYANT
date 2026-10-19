@@ -1,0 +1,15 @@
+title = "Кафе закрыли"
+weight = 1
+once = true
+text = """
+Санэпидстанция, пожарные и райком пришли в кафе в один день. Повар уехал к тёще в Саратов."""
+
+[conditions]
+flags_set = ["cafe_share"]
+
+[[choices]]
+text = "Списать пятьсот рублей"
+outcome = "Урок кооперации: делиться надо не только прибылью."
+
+[choices.consequences]
+clear_flags = ["cafe_share"]

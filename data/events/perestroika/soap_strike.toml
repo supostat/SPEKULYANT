@@ -1,0 +1,27 @@
+title = "Мыла нет"
+weight = 5
+cooldown_days = 120
+text = "Шахтёры бастуют: им нечем мыться после смены. Мыла нет по всей стране."
+
+[conditions]
+timeline = "miners_strike_1989"
+
+[[choices]]
+text = "Продать импортный шампунь"
+outcome = "Шампунь уходит за минуту."
+
+[choices.consequences]
+money = 25
+goods = [{ good = "shampoo", change = -1 }]
+
+[[choices]]
+text = "Отправить шахтёрам посылку"
+outcome = "Шахтёры пишут благодарность в «Труд»."
+
+[choices.consequences]
+goods = [{ good = "shampoo", change = -1 }]
+reputation = [{ faction = "people", change = 2 }]
+
+[[choices]]
+text = "Ничего не делать"
+outcome = "Забастовка идёт без тебя."

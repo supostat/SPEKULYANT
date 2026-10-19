@@ -1,0 +1,8 @@
+title = "Шахтёрская забастовка"
+window = { from = "1989-07-10", until = "1989-07-25" }
+
+[[outcomes]]
+weight = 1
+news = "Бастуют шахтёры Кузбасса и Донбасса: требуют мыла, мяса и честных выборов."
+price_shocks = [{ good = "shampoo", factor = 1.4, days = 120 }]
+event = "soap_strike"

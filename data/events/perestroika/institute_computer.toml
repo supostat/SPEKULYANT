@@ -1,0 +1,20 @@
+title = "Компьютер для НИИ"
+weight = 4
+cooldown_days = 180
+text = """
+Завлаб ищет персональный компьютер для лаборатории и готов платить из фонда развития."""
+
+[conditions]
+goods = [{ good = "computer", at_least = 1 }]
+
+[[choices]]
+text = "Продать институту"
+outcome = "Деньги приходят на счёт кооператива. Обналичка — отдельная история."
+
+[choices.consequences]
+money = 3500
+goods = [{ good = "computer", change = -1 }]
+
+[[choices]]
+text = "Оставить себе"
+outcome = "Ты учишься играть в «Тетрис»."

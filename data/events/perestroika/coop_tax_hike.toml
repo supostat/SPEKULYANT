@@ -1,0 +1,24 @@
+title = "Налог на кооперативы"
+weight = 4
+once = true
+text = """
+Верховный Совет обсуждает налог на кооперативы до девяноста процентов. Бухгалтер советует \
+перерегистрироваться."""
+
+[conditions]
+flags_set = ["coop_registered"]
+
+[[choices]]
+text = "Перерегистрироваться в малое предприятие"
+outcome = "Новая вывеска, старые люди."
+
+[choices.consequences]
+money = -100
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Платить и ругаться"
+outcome = "Бухгалтер вздыхает и переписывает отчёт."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]

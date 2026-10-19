@@ -1,0 +1,19 @@
+title = "Талоны на сахар и мыло"
+weight = 7
+cooldown_days = 60
+text = "Сахар, мыло и стиральный порошок — по талонам. Пенсионеры продают свои у магазина."
+
+[conditions]
+flags_set = ["coupons"]
+
+[[choices]]
+text = "Скупить талоны"
+outcome = "Мешок сахара и коробка мыла. Самогонщики будут ласковы."
+
+[choices.consequences]
+money = -60
+goods = [{ good = "sugar", change = 1 }, { good = "shampoo", change = 2 }]
+
+[[choices]]
+text = "Обойтись"
+outcome = "Чай без сахара, руки — хозяйственным."

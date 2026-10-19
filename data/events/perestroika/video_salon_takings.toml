@@ -1,0 +1,23 @@
+title = "Полный зал"
+weight = 7
+cooldown_days = 30
+text = """
+Сеанс «Терминатора» с гнусавым переводом: двадцать стульев и ещё пятнадцать человек стоя."""
+
+[conditions]
+flags_set = ["video_salon"]
+
+[[choices]]
+text = "Забрать выручку"
+outcome = "Мятые рубли в коробке из-под обуви."
+
+[choices.consequences]
+money = 120
+
+[[choices]]
+text = "Пустить школьников бесплатно"
+outcome = "Школьники обещают привести родителей."
+
+[choices.consequences]
+money = 40
+reputation = [{ faction = "people", change = 1 }]

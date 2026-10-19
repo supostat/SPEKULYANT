@@ -1,0 +1,25 @@
+title = "Сухой закон сворачивают"
+weight = 6
+once = true
+text = "Водку снова продают с одиннадцати. Те, кто копил ящики, считают убытки."
+
+[conditions]
+timeline = "dry_law"
+window = { from = "1988-01-01", until = "1989-01-01" }
+
+[[choices]]
+text = "Сбыть запасы, пока не упало"
+outcome = "Последний ящик уходит по старой цене."
+
+[choices.consequences]
+money = 150
+goods = [{ good = "vodka", change = -1 }]
+price_shocks = [{ good = "vodka", factor = 0.7, days = 180 }]
+
+[[choices]]
+text = "Отметить"
+outcome = "Ты пьёшь за отмену. Цены падают вместе с тобой."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }]
+price_shocks = [{ good = "vodka", factor = 0.7, days = 180 }]

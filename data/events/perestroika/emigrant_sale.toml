@@ -1,0 +1,24 @@
+title = "Отъезжающий"
+weight = 5
+cooldown_days = 180
+text = """
+Знакомый уезжает в Израиль и распродаёт всё: холодильник, хрусталь, мебель — за бесценок, \
+вывезти нельзя."""
+
+[conditions]
+window = { from = "1989-01-01" }
+
+[[choices]]
+text = "Купить холодильник и хрусталь"
+outcome = "Знакомый плачет и обнимает. Холодильник гудит у тебя на кухне."
+
+[choices.consequences]
+money = -400
+goods = [{ good = "fridge", change = 1 }, { good = "crystal_vase", change = 2 }]
+
+[[choices]]
+text = "Помочь собрать чемоданы"
+outcome = "В аэропорту он машет тебе. Навсегда."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }]

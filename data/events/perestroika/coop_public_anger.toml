@@ -1,0 +1,28 @@
+title = "«Спекулянты!»"
+weight = 5
+cooldown_days = 90
+text = """
+У кооперативного ларька толпа: пенсионерка кричит про цены, мужики поддакивают. \
+Кооператоров народ не любит."""
+
+[conditions]
+flags_set = ["coop_registered"]
+
+[[choices]]
+text = "Снизить цены на день"
+outcome = "Толпа разбирает всё по-быстрому и уходит довольная."
+
+[choices.consequences]
+money = -50
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Вызвать милицию"
+outcome = "Милиция разгоняет толпу. Толпа запоминает."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 1 }, { faction = "people", change = -1 }]
+
+[[choices]]
+text = "Переждать"
+outcome = "К вечеру крики стихают."

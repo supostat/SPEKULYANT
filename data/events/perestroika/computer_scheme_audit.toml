@@ -1,0 +1,31 @@
+title = "Ревизия по схеме"
+weight = 1
+once = true
+text = "КРУ проверяет завод: откуда кооператив, почему компьютер стоит как самолёт."
+
+[conditions]
+flags_set = ["computer_scheme"]
+
+[[choices]]
+text = "Договориться с ревизором"
+outcome = "Ревизор находит ошибку в датах и уходит."
+
+[choices.consequences]
+money = -1500
+clear_flags = ["computer_scheme"]
+
+[[choices]]
+text = "Идти до конца"
+outcome = "Суд: три года за хищение в особо крупном."
+
+[choices.consequences]
+sentence_months = 36
+clear_flags = ["computer_scheme"]
+
+[[choices]]
+text = "Списать деньги и молчать"
+outcome = "Завод платит штраф, ты — вложенными тремя тысячами."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]
+clear_flags = ["computer_scheme"]

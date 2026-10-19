@@ -1,0 +1,27 @@
+title = "Афганцы"
+weight = 4
+cooldown_days = 180
+text = """
+Ребята, вернувшиеся из Афганистана, ищут работу: охрана, сопровождение, «если кто обидит»."""
+
+[conditions]
+timeline = "afghan_withdrawal_1989"
+
+[[choices]]
+text = "Нанять охрану"
+outcome = "Двое в тельняшках сопровождают тебя на рынок. Спортсмены здороваются."
+
+[choices.consequences]
+money = -100
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Помочь устроиться на завод"
+outcome = "Ребята благодарны. Такое не забывают."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Отказать"
+outcome = "Ребята уходят к тем, кто платит."

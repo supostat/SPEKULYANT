@@ -1,0 +1,34 @@
+title = "Регистрация кооператива"
+weight = 6
+once = true
+text = """
+Закон о кооперации принят, но в исполкоме говорят: «Приходите через полгода». Инструктор \
+многозначительно смотрит на твой портфель."""
+
+[conditions]
+flags_set = ["cooperatives_legal"]
+
+[[choices]]
+text = "Сунуть инструктору"
+outcome = "Устав кооператива «Прогресс» зарегистрирован за неделю."
+
+[choices.consequences]
+money = -300
+reputation = [{ faction = "officials", change = 1 }]
+set_flags = ["coop_registered"]
+
+[[choices]]
+text = "Ждать по закону"
+outcome = "Папка уходит в стопку таких же папок."
+
+[choices.consequences]
+set_flags = ["coop_waiting"]
+
+[[choices.follow_ups]]
+event = "coop_registered_late"
+after_days = 60
+chance = 0.7
+
+[[choices]]
+text = "Передумать"
+outcome = "Кооператор — это звучит гордо, но не для тебя."

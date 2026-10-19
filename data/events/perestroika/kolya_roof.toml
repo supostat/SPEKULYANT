@@ -1,0 +1,24 @@
+title = "Своя крыша"
+weight = 5
+once = true
+text = "{npc}, мастер спорта, предлагает «присмотреть» за тобой: от своих и от чужих."
+
+[conditions]
+npc = "kolya_borets"
+window = { from = "1988-06-01" }
+
+[[choices]]
+text = "Взять Колю в крышу"
+outcome = "Коля немногословен. Спортсмены обходят тебя стороной."
+
+[choices.consequences]
+money = -80
+reputation = [{ faction = "bandits", change = 2 }]
+contacts = [{ npc = "kolya_borets", relation = 2 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Коля пожимает плечами: «Как знаешь»."
+
+[choices.consequences]
+contacts = [{ npc = "kolya_borets", relation = -1 }]

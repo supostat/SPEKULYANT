@@ -1,0 +1,19 @@
+title = "Павловские цены"
+weight = 10
+once = true
+text = "Завтра цены вырастут втрое. Сегодня из магазинов выметают всё, что осталось."
+
+[conditions]
+timeline = "price_reform_1991"
+
+[[choices]]
+text = "Скупить сахар и мыло"
+outcome = "Кладовка забита. Завтра это будет стоить втрое."
+
+[choices.consequences]
+money = -100
+goods = [{ good = "sugar", change = 2 }, { good = "shampoo", change = 3 }]
+
+[[choices]]
+text = "Ворчать вместе со всеми"
+outcome = "Очередь ворчит дружно."

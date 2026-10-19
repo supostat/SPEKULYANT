@@ -1,0 +1,40 @@
+title = "Спортсмены"
+weight = 5
+cooldown_days = 120
+text = """
+Трое в спортивных костюмах вежливо объясняют: двадцать процентов — и никто не подожжёт."""
+
+[conditions]
+money = { at_least = 1000 }
+window = { from = "1988-06-01" }
+
+[[choices]]
+text = "Платить"
+outcome = "Спортсмены уходят. Через месяц придут снова."
+
+[choices.consequences]
+money = -100
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Послать"
+outcome = "Спортсмены улыбаются: «Подумай»."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = -2 }]
+set_flags = ["racket_refused"]
+
+[[choices.follow_ups]]
+event = "racket_burn"
+after_days = 20
+chance = 0.5
+
+[[choices]]
+text = "Позвать знакомого мента"
+outcome = "Мент приходит, и спортсмены вдруг вспоминают о тренировке."
+
+[choices.conditions]
+reputation = [{ faction = "militia", at_least = 1 }]
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -1 }, { faction = "bandits", change = -1 }]

@@ -1,0 +1,18 @@
+title = "Разборка у рынка"
+weight = 2
+cooldown_days = 365
+text = "У рынка тормозят две «девятки», начинают стрелять. Торговцы падают на асфальт."
+
+[conditions]
+window = { from = "1990-01-01" }
+
+[[choices]]
+text = "Лечь на асфальт"
+outcome = "Через минуту всё кончено. Машины уехали."
+
+[[choices]]
+text = "Вынести раненого торговца"
+outcome = "Торговец выжил. Рынок запомнил, кто его вынес."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 2 }, { faction = "bandits", change = 1 }]

@@ -1,0 +1,26 @@
+title = "Майор против мафии"
+weight = 4
+once = true
+text = """
+{npc} теперь в отделе по борьбе с организованной преступностью. Просит рассказать, кто \
+крышует рынок."""
+
+[conditions]
+npc = "major_glebov"
+window = { from = "1989-01-01" }
+reputation = [{ faction = "militia", at_least = 1 }]
+
+[[choices]]
+text = "Рассказать про Серого"
+outcome = "Глебов пишет быстро. Серый узнает не сразу."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 2 }, { faction = "bandits", change = -3 }]
+contacts = [{ npc = "major_glebov", relation = 1 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Глебов закрывает блокнот: «Ты выбрал не ту сторону»."
+
+[choices.consequences]
+contacts = [{ npc = "major_glebov", relation = -1 }]

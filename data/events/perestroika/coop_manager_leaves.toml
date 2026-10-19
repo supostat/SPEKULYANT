@@ -1,0 +1,18 @@
+title = "Свой кооператив"
+weight = 1
+incident = "departure"
+text = "{manager} уходит из «{business}»: открывает свой кооператив по соседству."
+
+[[choices]]
+text = "Удержать долей"
+outcome = "Управляющий остаётся. Пока."
+
+[choices.consequences]
+money = -200
+
+[[choices]]
+text = "Отпустить"
+outcome = "Дело стоит, пока не найдёшь другого."
+
+[choices.consequences]
+business = { manager_leaves = true }

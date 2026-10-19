@@ -1,0 +1,31 @@
+title = "Кооперативное кафе"
+weight = 5
+once = true
+text = """
+Знакомый повар открывает кооперативное кафе на месте пельменной и ищет пайщика: пятьсот \
+рублей — и треть прибыли."""
+
+[conditions]
+flags_set = ["cooperatives_legal"]
+
+[[choices]]
+text = "Вложить пятьсот"
+outcome = "Повар жмёт руку и обещает шашлык по субботам."
+
+[choices.consequences]
+money = -500
+set_flags = ["cafe_share"]
+
+[[choices.follow_ups]]
+event = "coop_cafe_dividend"
+after_days = 60
+chance = 0.6
+
+[[choices.follow_ups]]
+event = "coop_cafe_closed"
+after_days = 60
+chance = 0.4
+
+[[choices]]
+text = "Отказаться"
+outcome = "Повар найдёт другого. Шашлык тоже."

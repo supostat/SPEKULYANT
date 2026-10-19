@@ -1,0 +1,19 @@
+title = "Неспокойно в Тбилиси"
+weight = 6
+once = true
+text = "На проспекте Руставели митинг, в город вошли войска. Торговать сейчас — не время."
+
+[conditions]
+cities = ["tbilisi"]
+window = { from = "1989-04-05", until = "1989-06-01" }
+
+[[choices]]
+text = "Уехать"
+outcome = "Поезд на Москву полон таких же, как ты."
+
+[[choices]]
+text = "Остаться с друзьями"
+outcome = "Ты остаёшься. Друзья это помнят."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 2 }]

@@ -1,0 +1,19 @@
+title = "Наезд"
+weight = 1
+incident = "racket"
+text = "В «{business}» пришли спортсмены: «Кто у вас крыша? Никто? Теперь мы»."
+
+[[choices]]
+text = "Заплатить"
+outcome = "Спортсмены уходят с конвертом."
+
+[choices.consequences]
+money = -200
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Закрыться на неделю"
+outcome = "Двери на замке, спортсмены уходят ни с чем."
+
+[choices.consequences]
+business = { closed_days = 7 }

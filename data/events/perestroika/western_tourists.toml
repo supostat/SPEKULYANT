@@ -1,0 +1,28 @@
+title = "Американцы на Арбате"
+weight = 6
+cooldown_days = 90
+text = "Американские туристы скупают ушанки, значки и часы «Командирские» за доллары."
+
+[conditions]
+cities = ["moscow", "leningrad"]
+window = { from = "1988-06-01" }
+
+[[choices]]
+text = "Продать ондатровую шапку"
+outcome = "Американец платит, не торгуясь, и фотографируется в шапке."
+
+[choices.consequences]
+money = 250
+goods = [{ good = "fur_hat", change = -1 }]
+
+[[choices]]
+text = "Продать значки"
+outcome = "Ленин в профиль идёт по доллару."
+
+[choices.consequences]
+money = 30
+reputation = [{ faction = "militia", change = -1 }]
+
+[[choices]]
+text = "Пройти мимо"
+outcome = "Американцы находят других."

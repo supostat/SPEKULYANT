@@ -1,0 +1,19 @@
+title = "Рэкет в поезде"
+weight = 3
+cooldown_days = 30
+road = true
+text = "По вагонам ходят качки и собирают «за проезд». Проводница прячется в купе."
+
+[conditions]
+window = { from = "1989-01-01" }
+
+[[choices]]
+text = "Отдать четвертак"
+outcome = "Качки идут дальше."
+
+[choices.consequences]
+money = -25
+
+[[choices]]
+text = "Сделать вид, что спишь"
+outcome = "Качки толкают в плечо, потом машут рукой."

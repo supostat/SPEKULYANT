@@ -1,0 +1,17 @@
+title = "Варёнки на кухне"
+weight = 6
+cooldown_days = 90
+text = """
+Хлорка, кипяток и джинсы фабрики «Тверь» — через час они выглядят как из Парижа. Почти."""
+
+[[choices]]
+text = "Сварить партию"
+outcome = "Кухня пахнет бассейном, зато четыре пары готовы."
+
+[choices.consequences]
+money = -80
+goods = [{ good = "boiled_jeans", change = 4 }]
+
+[[choices]]
+text = "Не дышать хлоркой"
+outcome = "Соседи благодарны."

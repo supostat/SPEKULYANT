@@ -1,0 +1,22 @@
+title = "Стрелка"
+weight = 2
+once = true
+text = "Две бригады делят рынок и зовут тебя свидетелем: «Ты человек нейтральный»."
+
+[conditions]
+reputation = [{ faction = "bandits", at_least = 1 }]
+window = { from = "1989-06-01" }
+
+[[choices]]
+text = "Пойти"
+outcome = "Стрелка прошла мирно. Тебя теперь знают обе стороны."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = 2 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Нейтральных людей становится меньше."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = -1 }]

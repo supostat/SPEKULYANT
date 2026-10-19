@@ -1,0 +1,15 @@
+title = "Доля от кафе"
+weight = 1
+once = true
+text = "Кафе «Встреча» не успевает накрывать столы: кооператоры, иностранцы, спортсмены."
+
+[conditions]
+flags_set = ["cafe_share"]
+
+[[choices]]
+text = "Забрать долю"
+outcome = "Восемьсот рублей за два месяца. Повар клянётся, что дальше будет больше."
+
+[choices.consequences]
+money = 800
+clear_flags = ["cafe_share"]

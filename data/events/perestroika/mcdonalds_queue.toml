@@ -1,0 +1,29 @@
+title = "Очередь в «Макдональдс»"
+weight = 8
+once = true
+text = """
+На Пушкинской открылся «Макдональдс». Очередь стоит с ночи, бигмак — три рубля, как обед в \
+столовой на неделю."""
+
+[conditions]
+timeline = "mcdonalds_1990"
+cities = ["moscow"]
+
+[[choices]]
+text = "Продать место в очереди"
+outcome = "Студент из хвоста платит десятку."
+
+[choices.consequences]
+money = 10
+
+[[choices]]
+text = "Отстоять за бигмаком"
+outcome = "Вкус Запада. Коробку ты хранишь ещё год."
+
+[choices.consequences]
+money = -5
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Пройти мимо"
+outcome = "Очередь даже не оборачивается."

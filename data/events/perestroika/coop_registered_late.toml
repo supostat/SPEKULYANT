@@ -1,0 +1,18 @@
+title = "Устав зарегистрирован"
+weight = 1
+once = true
+text = """
+Через два месяца исполком вспоминает о твоей папке: устав зарегистрирован, печать \
+заказана."""
+
+[conditions]
+flags_set = ["coop_waiting"]
+
+[[choices]]
+text = "Отметить с инструктором"
+outcome = "Инструктор пьёт и говорит, что ты первый, кто дождался честно."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = 1 }]
+set_flags = ["coop_registered"]
+clear_flags = ["coop_waiting"]

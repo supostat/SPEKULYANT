@@ -1,0 +1,32 @@
+title = "Подожгли дверь"
+weight = 1
+once = true
+text = "Ночью подожгли дверь твоей квартиры. На стене мелом: «Подумал?»"
+
+[conditions]
+flags_set = ["racket_refused"]
+
+[[choices]]
+text = "Заплатить вдвойне"
+outcome = "Спортсмены довольны: ты понял."
+
+[choices.consequences]
+money = -250
+reputation = [{ faction = "bandits", change = 1 }]
+clear_flags = ["racket_refused"]
+
+[[choices]]
+text = "Нанять афганцев"
+outcome = "Двое ребят в тельняшках дежурят у подъезда. Спортсмены больше не приходят."
+
+[choices.consequences]
+money = -300
+reputation = [{ faction = "bandits", change = -1 }]
+clear_flags = ["racket_refused"]
+
+[[choices]]
+text = "Уехать на месяц к тётке"
+outcome = "Когда возвращаешься, дверь новая — соседи скинулись. Спортсмены нашли других."
+
+[choices.consequences]
+clear_flags = ["racket_refused"]

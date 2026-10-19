@@ -1,0 +1,21 @@
+title = "Мода прошла"
+weight = 6
+once = true
+text = "Варёнки больше никто не носит: теперь в моде «бананы» и турецкая кожа."
+
+[conditions]
+window = { from = "1990-06-01" }
+
+[[choices]]
+text = "Сбыть остатки за бесценок"
+outcome = "Остатки уходят в Ташкент вагоном."
+
+[choices.consequences]
+price_shocks = [{ good = "boiled_jeans", factor = 0.5, days = 365 }]
+
+[[choices]]
+text = "Ждать, что мода вернётся"
+outcome = "Мода вернётся. Лет через двадцать."
+
+[choices.consequences]
+price_shocks = [{ good = "boiled_jeans", factor = 0.5, days = 365 }]

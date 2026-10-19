@@ -1,0 +1,28 @@
+title = "Изъятие кассеты"
+weight = 3
+cooldown_days = 180
+text = "Посреди сеанса включают свет: милиция изымает «Эммануэль» как порнографию."
+
+[conditions]
+flags_set = ["video_salon"]
+
+[[choices]]
+text = "Откупиться"
+outcome = "Кассету возвращают. Без коробки."
+
+[choices.consequences]
+money = -150
+
+[[choices]]
+text = "Отдать кассету"
+outcome = "Кассета уходит на экспертизу. Эксперты смотрят её неделю."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 1 }]
+
+[[choices]]
+text = "Закрыть салон"
+outcome = "Стулья возвращаются в столовую."
+
+[choices.consequences]
+clear_flags = ["video_salon"]

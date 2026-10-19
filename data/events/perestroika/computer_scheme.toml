@@ -1,0 +1,33 @@
+title = "Компьютеры за безнал"
+weight = 4
+once = true
+text = """
+Схема простая: купить «Ямахи» за наличные, продать заводу за безналичные, обналичить через \
+кооператив. Нужны три тысячи и нервы."""
+
+[conditions]
+flags_set = ["coop_registered"]
+money = { at_least = 3000 }
+window = { from = "1988-06-01", until = "1991-12-01" }
+
+[[choices]]
+text = "Войти в схему"
+outcome = "Компьютеры уехали на завод. Деньги пока едут обратно."
+
+[choices.consequences]
+money = -3000
+set_flags = ["computer_scheme"]
+
+[[choices.follow_ups]]
+event = "computer_scheme_paid"
+after_days = 45
+chance = 0.7
+
+[[choices.follow_ups]]
+event = "computer_scheme_audit"
+after_days = 45
+chance = 0.3
+
+[[choices]]
+text = "Не связываться"
+outcome = "Схема уходит к другим. Кто-то из них станет миллионером."

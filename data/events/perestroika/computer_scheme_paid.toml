@@ -1,0 +1,15 @@
+title = "Безнал обналичен"
+weight = 1
+once = true
+text = "Деньги вернулись через кооператив: вдвое больше вложенного, в спортивной сумке."
+
+[conditions]
+flags_set = ["computer_scheme"]
+
+[[choices]]
+text = "Забрать"
+outcome = "Шесть тысяч наличными. Ты понимаешь, что страна изменилась."
+
+[choices.consequences]
+money = 6000
+clear_flags = ["computer_scheme"]

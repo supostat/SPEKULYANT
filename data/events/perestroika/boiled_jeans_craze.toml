@@ -1,0 +1,23 @@
+title = "Вся Москва в варёнках"
+weight = 5
+cooldown_days = 180
+text = "Варёнки носят все — от школьников до завучей. На толкучке их рвут из рук."
+
+[conditions]
+window = { from = "1988-01-01", until = "1990-06-01" }
+
+[[choices]]
+text = "Скупить у цеха партию"
+outcome = "Шесть пар в сумке, цены растут на глазах."
+
+[choices.consequences]
+money = -120
+goods = [{ good = "boiled_jeans", change = 6 }]
+price_shocks = [{ good = "boiled_jeans", factor = 1.4, days = 60 }]
+
+[[choices]]
+text = "Пропустить"
+outcome = "Мода без тебя. Цены — тоже."
+
+[choices.consequences]
+price_shocks = [{ good = "boiled_jeans", factor = 1.4, days = 60 }]

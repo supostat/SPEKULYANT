@@ -1,0 +1,24 @@
+title = "Своя таможня"
+weight = 5
+cooldown_days = 180
+text = """
+Латвия объявила независимость, на выезде из Риги — своя таможня. Товар в Россию не \
+выпускают."""
+
+[conditions]
+cities = ["riga"]
+window = { from = "1990-05-04" }
+
+[[choices]]
+text = "Договориться с таможенником"
+outcome = "Литовская граница, латвийская таможня, советские рубли — работает всё."
+
+[choices.consequences]
+money = -50
+
+[[choices]]
+text = "Везти как есть"
+outcome = "Таможенник машет рукой: пока ещё можно."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = -1 }]

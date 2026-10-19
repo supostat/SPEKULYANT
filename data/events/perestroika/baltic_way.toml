@@ -1,0 +1,19 @@
+title = "Балтийский путь"
+weight = 8
+once = true
+text = "Живая цепь от Таллина до Вильнюса: два миллиона человек держатся за руки."
+
+[conditions]
+cities = ["riga"]
+window = { from = "1989-08-20", until = "1989-09-01" }
+
+[[choices]]
+text = "Встать в цепь"
+outcome = "Тебя держат за руки латыш и эстонка. Ты понимаешь, что Союз кончается."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }, { faction = "officials", change = -1 }]
+
+[[choices]]
+text = "Смотреть со стороны"
+outcome = "Цепь стоит без тебя."

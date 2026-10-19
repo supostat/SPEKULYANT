@@ -1,0 +1,20 @@
+title = "Сахар для самогонщика"
+weight = 5
+cooldown_days = 90
+text = "Сосед-самогонщик ищет сахар и платит вдвое."
+
+[conditions]
+goods = [{ good = "sugar", at_least = 1 }]
+
+[[choices]]
+text = "Продать мешок"
+outcome = "Сосед благодарит бутылью «первача», которую ты выливаешь в раковину."
+
+[choices.consequences]
+money = 90
+goods = [{ good = "sugar", change = -1 }]
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Не продавать"
+outcome = "Сахар полежит."

@@ -1,0 +1,19 @@
+title = "Защитник Белого дома"
+weight = 5
+once = true
+text = """
+Новая власть помнит своих: защитникам Белого дома дают медали, кабинеты и знакомства."""
+
+[conditions]
+flags_set = ["white_house_defender"]
+
+[[choices]]
+text = "Пойти на приём"
+outcome = "Тебе жмут руку люди, которые завтра будут министрами."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = 2 }]
+
+[[choices]]
+text = "Остаться в стороне"
+outcome = "Медаль приходит по почте."

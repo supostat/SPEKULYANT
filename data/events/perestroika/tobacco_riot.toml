@@ -1,0 +1,28 @@
+title = "Табачный бунт"
+weight = 8
+once = true
+text = "Курильщики перекрыли проспект: сигарет нет неделю. Милиция растеряна."
+
+[conditions]
+timeline = "tobacco_riot_1990"
+
+[[choices]]
+text = "Продать блок сигарет толпе"
+outcome = "Сигареты уходят по пятёрке за пачку. Толпа смотрит недобро."
+
+[choices.consequences]
+money = 120
+goods = [{ good = "cigarettes", change = -5 }]
+reputation = [{ faction = "people", change = -1 }]
+
+[[choices]]
+text = "Раздать пачку"
+outcome = "Тебя качают на руках."
+
+[choices.consequences]
+goods = [{ good = "cigarettes", change = -1 }]
+reputation = [{ faction = "people", change = 2 }]
+
+[[choices]]
+text = "Обойти стороной"
+outcome = "Бунт гаснет к вечеру: привезли «Беломор»."

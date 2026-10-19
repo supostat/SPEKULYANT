@@ -5,5 +5,5 @@ max_points = 3
 rent = 300
 wages = 400
 goods = { jeans = 80, sneakers = 60, watch = 40, videocassette = 200 }
-margin = 0.3
+margin = 0.065
 policies = ["markup", "roof", "purchase", "night_trade", "inspection", "wage"]

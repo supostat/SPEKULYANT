@@ -1,0 +1,16 @@
+title = "Талоны"
+window = { from = "1989-03-01", until = "1989-09-01" }
+scale = { from = 0.8, to = 1.4 }
+
+[[outcomes]]
+weight = 3
+news = "Сахар, мыло и стиральный порошок — по талонам."
+price_shocks = [{ good = "sugar", factor = 1.5, days = 365 }, { good = "shampoo", factor = 1.5, days = 365 }]
+event = "coupon_sugar"
+set_flags = ["coupons"]
+
+[[outcomes]]
+weight = 1
+news = "Талоны ввели только на сахар: мыло пока есть."
+price_shocks = [{ good = "sugar", factor = 1.3, days = 180 }]
+set_flags = ["coupons"]

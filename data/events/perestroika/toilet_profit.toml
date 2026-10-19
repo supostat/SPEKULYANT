@@ -1,0 +1,15 @@
+title = "Доход «Чистоты»"
+weight = 1
+once = true
+text = "Кооператив «Чистота» оказался золотой жилой: у вокзала очередь, как в мавзолей."
+
+[conditions]
+flags_set = ["toilet_share"]
+
+[[choices]]
+text = "Забрать долю"
+outcome = "Сто двадцать рублей мелочью. Не пахнут."
+
+[choices.consequences]
+money = 120
+clear_flags = ["toilet_share"]

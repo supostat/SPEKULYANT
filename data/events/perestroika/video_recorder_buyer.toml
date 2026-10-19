@@ -1,0 +1,22 @@
+title = "Покупатель на видик"
+weight = 5
+cooldown_days = 120
+price_of = "video_recorder"
+text = """
+Кооператор из видеосалона ищет видик срочно: на толкучке он идёт по {price}, а кооператор \
+готов дать больше."""
+
+[conditions]
+goods = [{ good = "video_recorder", at_least = 1 }]
+
+[[choices]]
+text = "Продать"
+outcome = "Кооператор платит пачкой новых сотенных."
+
+[choices.consequences]
+money = 1300
+goods = [{ good = "video_recorder", change = -1 }]
+
+[[choices]]
+text = "Не продавать"
+outcome = "Видик стоит дома. Смотришь сам."

@@ -1,0 +1,19 @@
+title = "Вагон сахара"
+weight = 6
+cooldown_days = 60
+text = "На бирже ищут, кто сведёт вагон сахара из Краснодара с мебельной фабрикой в Твери."
+
+[conditions]
+flags_set = ["broker"]
+
+[[choices]]
+text = "Свести сделку"
+outcome = "Комиссия — три процента от вагона. Вагон большой."
+
+[choices.consequences]
+money = 600
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Пропустить"
+outcome = "Сделку сводит сосед по залу."
