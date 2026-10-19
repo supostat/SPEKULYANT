@@ -217,6 +217,10 @@ fn market(game: &Game, today: GameDate) -> MarketView {
                 buy: content.money.format_number(quote.buy, today),
                 sell: content.money.format_number(quote.sell, today),
                 stock: quote.stock.to_string(),
+                held: match game.world.player.pocket().quantity(id) {
+                    0 => String::new(),
+                    quantity => quantity.to_string(),
+                },
             })
         })
         .collect();

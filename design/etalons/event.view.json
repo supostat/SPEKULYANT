@@ -30,56 +30,64 @@
         "name": "Джинсы (фирма)",
         "buy": "160",
         "sell": "140",
-        "stock": "6"
+        "stock": "6",
+        "held": ""
       },
       {
         "good": "videocassette",
         "name": "Видеокассета E-180",
         "buy": "70",
         "sell": "58",
-        "stock": "12"
+        "stock": "12",
+        "held": ""
       },
       {
         "good": "records",
         "name": "Пластинки (фирма)",
         "buy": "45",
         "sell": "38",
-        "stock": "9"
+        "stock": "9",
+        "held": ""
       },
       {
         "good": "chewing_gum",
         "name": "Жвачка, блок",
         "buy": "25",
         "sell": "19",
-        "stock": "30"
+        "stock": "30",
+        "held": ""
       },
       {
         "good": "cigarettes",
         "name": "Сигареты (импорт)",
         "buy": "4.50",
         "sell": "3.60",
-        "stock": "40"
+        "stock": "40",
+        "held": ""
       },
       {
         "good": "sneakers",
         "name": "Кроссовки (импорт)",
         "buy": "120",
         "sell": "100",
-        "stock": "3"
+        "stock": "3",
+        "held": ""
       },
       {
         "good": "watch",
         "name": "Часы «Электроника»",
         "buy": "35",
         "sell": "27",
-        "stock": "8"
+        "stock": "8",
+        "held": ""
       },
       {
         "good": "vodka",
         "name": "Водка, ящик",
         "buy": "140",
         "sell": "118",
-        "stock": "2"
+        "stock": "2",
+        "held": ""
       }
     ]
   },

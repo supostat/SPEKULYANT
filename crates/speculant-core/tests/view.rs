@@ -237,3 +237,25 @@ fn the_lobby_plays_the_boot_melody_with_its_pauses() {
         "мелодия кончается паузой — без частоты"
     );
 }
+
+#[test]
+fn a_market_row_shows_how_much_of_the_good_the_player_holds() {
+    let mut game = new_life();
+    let held = |game: &Game, good: &str| {
+        game.view()
+            .market
+            .goods
+            .into_iter()
+            .find(|row| row.good == good)
+            .expect("товар на толкучке")
+            .held
+    };
+    assert_eq!(held(&game, "chewing_gum"), "", "в кармане пусто");
+    game.apply(Command::Buy {
+        good: "chewing_gum".to_owned(),
+        quantity: 2,
+    })
+    .expect("жвачка по карману");
+    assert_eq!(held(&game, "chewing_gum"), "2");
+    assert_eq!(held(&game, "jeans"), "", "чего нет, то пусто");
+}

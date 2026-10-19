@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-/// Толкучка текущего города: место и строки товаров с ценами в номинале и запасом.
+/// Толкучка текущего города: место и строки товаров с ценами в номинале, запасом толкучки и тем,
+/// сколько товара при игроке.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MarketView {
     pub place: String,
@@ -14,4 +15,6 @@ pub struct MarketRowView {
     pub buy: String,
     pub sell: String,
     pub stock: String,
+    /// Сколько этого товара в кармане игрока; пусто — нисколько.
+    pub held: String,
 }

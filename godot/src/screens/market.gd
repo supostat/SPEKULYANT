@@ -1,38 +1,40 @@
 class_name MarketScreen
 extends RefCounted
-## Рынок, главный экран (docs/SPEKULYANT.md §13.3 п. 1, макет «Рынок» дизайн-книги): шапка, толкучка,
-## карман с угрозой эпохи, слухи, сообщения, ход времени и строка F-клавиш. Стрелки выбирают товар,
+## Рынок, главный экран (docs/SPEKULYANT.md §13.3 п. 1, макет «Рынок» дизайн-книги): шапка, толкучка
+## — цены, запас толкучки и сколько товара у игрока, — карман с угрозой эпохи, слухи, сообщения, ход
+## времени и строка F-клавиш. Стрелки выбирают товар,
 ## F2 и F3 открывают окно количества для покупки и продажи, пробел — пауза, +/− — скорость, F4 —
 ## поездка; F1 — помощь, F5 — связи, F6 — дела, F7 — пейджер, F10 и Esc — меню выхода.
 
 const TEXT := 7
 const BACKGROUND := 1
 const FRAME := 15
-const GOODS_BOX := Rect2i(1, 2, 50, 15)
-const GOODS_COLUMNS := "Товар                   Купить  Продать  Есть"
+const GOODS_BOX := Rect2i(1, 2, 55, 15)
+const GOODS_HEADINGS := ["Товар", "Купить", "Продать", "Запас", "У тебя"]
 const GOODS_COLUMNS_FOREGROUND := 14
 const GOODS_COLUMN := 3
 const GOODS_FIRST_ROW := 5
-const GOODS_LINE_WIDTH := 46
-const NAME_WIDTH := 22
+const NAME_WIDTH := 21
 const BUY_WIDTH := 8
 const SELL_WIDTH := 9
 const STOCK_WIDTH := 6
+const HELD_WIDTH := 7
+const GOODS_LINE_WIDTH := NAME_WIDTH + BUY_WIDTH + SELL_WIDTH + STOCK_WIDTH + HELD_WIDTH
 const SELECTED_FOREGROUND := 0
 const SELECTED_BACKGROUND := 3
 const GOODS_HINT := "↑↓ выбрать   F2 купить   F3 продать"
 const GOODS_HINT_ROW := 14
 const GOODS_HINT_FOREGROUND := 8
 const GOODS_VISIBLE := GOODS_HINT_ROW - GOODS_FIRST_ROW
-const POCKET_BOX := Rect2i(52, 2, 27, 8)
+const POCKET_BOX := Rect2i(57, 2, 22, 8)
 const POCKET_TITLE := "Карман"
-const POCKET_COLUMN := 54
-const POCKET_LINE_WIDTH := 20
+const POCKET_COLUMN := 59
+const POCKET_LINE_WIDTH := 18
 const DANGER_ROW := 8
 const DANGER_FOREGROUND := 12
-const RUMORS_BOX := Rect2i(52, 10, 27, 7)
+const RUMORS_BOX := Rect2i(57, 10, 22, 7)
 const RUMORS_TITLE := "Слухи"
-const RUMOR_COLUMN := 54
+const RUMOR_COLUMN := 59
 const RUMOR_WRAP_WIDTH := 17
 const RUMOR_FOREGROUND := 11
 const MESSAGES_BOX := Rect2i(1, 17, 78, 5)
@@ -171,16 +173,11 @@ func _handle_dialog(action: Dictionary) -> Dictionary:
 
 func _draw_goods(market: Dictionary, screen: TextScreen) -> void:
 	_box(screen, GOODS_BOX, market["place"], true)
-	screen.put(GOODS_COLUMN, GOODS_BOX.position.y + 1, GOODS_COLUMNS, GOODS_COLUMNS_FOREGROUND, BACKGROUND)
+	screen.put(GOODS_COLUMN, GOODS_BOX.position.y + 1, _goods_line(GOODS_HEADINGS), GOODS_COLUMNS_FOREGROUND, BACKGROUND)
 	var goods: Array = market["goods"]
 	for index: int in _goods.shown(goods.size()):
 		var row: Dictionary = goods[index]
-		var line: String = (
-			TextScreen.pad_right(row["name"], NAME_WIDTH)
-			+ TextScreen.pad_left(row["buy"], BUY_WIDTH)
-			+ TextScreen.pad_left(row["sell"], SELL_WIDTH)
-			+ TextScreen.pad_left(row["stock"], STOCK_WIDTH)
-		)
+		var line := _goods_line([row["name"], row["buy"], row["sell"], row["stock"], row["held"]])
 		var is_selected := index == _goods.selected
 		screen.put(
 			GOODS_COLUMN,
@@ -192,14 +189,26 @@ func _draw_goods(market: Dictionary, screen: TextScreen) -> void:
 	screen.put(GOODS_COLUMN, GOODS_HINT_ROW, GOODS_HINT, GOODS_HINT_FOREGROUND, BACKGROUND)
 
 
+## Строка толкучки по колонкам: название, покупка, продажа, запас толкучки, сколько у игрока.
+func _goods_line(cells: Array) -> String:
+	return (
+		TextScreen.pad_right(cells[0], NAME_WIDTH)
+		+ TextScreen.pad_left(cells[1], BUY_WIDTH)
+		+ TextScreen.pad_left(cells[2], SELL_WIDTH)
+		+ TextScreen.pad_left(cells[3], STOCK_WIDTH)
+		+ TextScreen.pad_left(cells[4], HELD_WIDTH)
+	)
+
+
+## Строка кармана — подпись и количество; длинная подпись укорачивается, количество — нет.
 func _draw_pocket(pocket: Dictionary, screen: TextScreen) -> void:
 	_box(screen, POCKET_BOX, POCKET_TITLE, true)
 	var items: Array = pocket["items"]
 	for index in items.size():
 		var item: Dictionary = items[index]
-		var label: String = item["label"]
-		var amount := TextScreen.pad_left(item["amount"], POCKET_LINE_WIDTH - label.length())
-		screen.put(POCKET_COLUMN, POCKET_BOX.position.y + 1 + index, label + amount, TEXT, BACKGROUND)
+		var amount: String = item["amount"]
+		var line := TextScreen.pad_right(item["label"], POCKET_LINE_WIDTH - amount.length() - 1) + " " + amount
+		screen.put(POCKET_COLUMN, POCKET_BOX.position.y + 1 + index, line, TEXT, BACKGROUND)
 	if pocket["danger"] != null:
 		var danger: Dictionary = pocket["danger"]
 		var bar := TextScreen.bar(int(danger["level"]), int(danger["scale"]))

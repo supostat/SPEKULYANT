@@ -19,7 +19,6 @@ const EFFECTS_FOREGROUND := 14
 const HINT_FOREGROUND := 7
 const STOPPED_HINT := "Время остановлено. Выбери %s."
 const CONTINUE_HINT := "Любая клавиша — продолжить"
-const GOODS_NAME_WIDTH := 44
 
 ## Строки выборов на экране — по ним мышь находит выбор.
 var _choice_rows := {}
@@ -86,7 +85,7 @@ func _draw_backdrop(view: Dictionary, screen: TextScreen) -> void:
 	var goods: Array = view["market"]["goods"]
 	for index in mini(goods.size(), MarketScreen.GOODS_VISIBLE):
 		var name: String = goods[index]["name"]
-		screen.put(MarketScreen.GOODS_COLUMN, MarketScreen.GOODS_FIRST_ROW + index, TextScreen.pad_right(name, GOODS_NAME_WIDTH), DIM, BACKGROUND)
+		screen.put(MarketScreen.GOODS_COLUMN, MarketScreen.GOODS_FIRST_ROW + index, TextScreen.pad_right(name, MarketScreen.GOODS_LINE_WIDTH), DIM, BACKGROUND)
 	var pocket_box := MarketScreen.POCKET_BOX
 	screen.box(pocket_box.position.x, pocket_box.position.y, pocket_box.size.x, pocket_box.size.y, DIM, BACKGROUND, MarketScreen.POCKET_TITLE)
 	var messages_box := MarketScreen.MESSAGES_BOX
