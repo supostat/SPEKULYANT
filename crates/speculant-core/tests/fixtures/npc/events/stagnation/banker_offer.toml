@@ -1,0 +1,10 @@
+title = "Предложение Льва Аркадьевича"
+weight = 1
+text = "{npc} предлагает деньги в рост."
+
+[conditions]
+npc = "banker_lev"
+
+[[choices]]
+text = "Отказаться"
+outcome = "Отказался."

@@ -1,0 +1,6 @@
+name = "Серый"
+role = "бригадир"
+faction = "bandits"
+strategy = "racketeer"
+capital = 300
+description = "Улыбается редко."

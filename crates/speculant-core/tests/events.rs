@@ -198,6 +198,7 @@ fn snitching_raises_the_militia_angers_traders_and_sets_the_flag() {
             contact: "vodka_man".to_owned(),
             name: "Мужик в спецовке".to_owned(),
             role: "случайный продавец".to_owned(),
+            rival: false,
             relation: "обижен".to_owned(),
             debt: None,
             availability: "на связи".to_owned(),

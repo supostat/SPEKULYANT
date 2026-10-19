@@ -8,6 +8,7 @@ use speculant_core::{Command, Content, Game, LifeSettings};
 
 const DATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../data");
 const EVENTS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/events");
+const RIVALS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/npc");
 /// До конца августа 1985 года — через окно ящика «Столичной».
 const EVENTFUL_DAYS: i32 = 600;
 const FRAME_MILLISECONDS: u32 = 16;
@@ -183,4 +184,46 @@ fn the_same_seed_gives_the_same_events_and_choices() {
     );
     let (_, other_journal) = play_eventful_life(8);
     assert_ne!(first_journal, other_journal, "другой сид — другие события");
+}
+
+/// Жизнь среди соперников: 300 дней торговли, поездок челноков, доходов и судеб. Итог — снимок
+/// мира с запасами рынков и экраном соперников и капиталы соперников.
+fn live_among_rivals(seed: u64) -> (String, Vec<String>) {
+    let content = Content::load(Path::new(RIVALS)).expect("фикстура соперников валидна");
+    let settings = LifeSettings {
+        biography: "student".to_owned(),
+        ironman: true,
+        seed,
+    };
+    let mut game = Game::new_life(&settings, Arc::new(content)).expect("жизнь начинается");
+    for _ in 0..(1800 * 300 / FRAME_MILLISECONDS) {
+        game.advance(FRAME_MILLISECONDS);
+    }
+    let capitals = game
+        .rivals()
+        .iter()
+        .map(|rival| {
+            format!(
+                "{} {} {}",
+                rival.npc(),
+                rival.city(),
+                rival.trader().money().cash().minor_units()
+            )
+        })
+        .collect();
+    (
+        serde_json::to_string(&game.view()).expect("снимок сериализуется"),
+        capitals,
+    )
+}
+
+#[test]
+fn the_same_seed_gives_the_same_rivals_and_their_deals() {
+    let first = live_among_rivals(7);
+    assert_eq!(first, live_among_rivals(7));
+    assert_ne!(
+        first.1,
+        live_among_rivals(8).1,
+        "другой сид — другие соперники"
+    );
 }

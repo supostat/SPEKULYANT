@@ -8,6 +8,7 @@ pub mod content;
 pub mod economy;
 pub mod events;
 pub mod game;
+pub mod npc;
 pub mod reputation;
 pub mod rng;
 pub mod time;

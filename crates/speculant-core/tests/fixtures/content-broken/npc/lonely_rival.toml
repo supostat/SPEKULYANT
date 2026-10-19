@@ -1,0 +1,5 @@
+name = "Безденежный"
+role = "торговец"
+faction = "traders"
+strategy = "trader"
+description = "Хочет торговать, но не на что."

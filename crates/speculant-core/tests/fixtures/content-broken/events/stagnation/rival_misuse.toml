@@ -1,0 +1,9 @@
+title = "Неизвестный соперник"
+weight = 1
+text = "Кто-то мешает торговать."
+
+[[choices]]
+text = "Помириться"
+
+[choices.consequences]
+rival = { relation = 1 }

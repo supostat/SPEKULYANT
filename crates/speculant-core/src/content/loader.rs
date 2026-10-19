@@ -11,6 +11,7 @@ use super::{
 };
 use crate::economy::{MarketRules, MoneyRules};
 use crate::events::EventRules;
+use crate::npc::RivalRules;
 use crate::reputation::ReputationRules;
 use crate::time::TimeRules;
 
@@ -20,6 +21,7 @@ const MONEY_FILE: &str = "economy/money.toml";
 const ROUTES_FILE: &str = "routes.toml";
 const REPUTATION_FILE: &str = "reputation.toml";
 const EVENT_RULES_FILE: &str = "event_rules.toml";
+const RIVALS_FILE: &str = "rivals.toml";
 const TOML_EXTENSION: &str = ".toml";
 
 /// Сущность, прочитанная из файла: идентификатор из имени файла и сам файл для мест ошибок.
@@ -37,6 +39,7 @@ pub(super) struct Parsed<'a> {
     pub money: Option<(&'a ContentFile, MoneyRules)>,
     pub reputation: Option<(&'a ContentFile, ReputationRules)>,
     pub event_rules: Option<(&'a ContentFile, EventRules)>,
+    pub rival_rules: Option<(&'a ContentFile, RivalRules)>,
     pub epochs: Vec<Entry<'a, EpochProfile>>,
     pub goods: Vec<Entry<'a, Good>>,
     pub cities: Vec<Entry<'a, City>>,
@@ -94,6 +97,13 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
             "нет правил розыгрыша событий",
         ));
     }
+    if parsed.rival_rules.is_none() {
+        errors.push(ContentError::new(
+            RIVALS_FILE,
+            None,
+            "нет правил соперников",
+        ));
+    }
     let mut events = BTreeMap::new();
     for entry in &parsed.events {
         if events
@@ -111,15 +121,21 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         errors.sort();
         return Err(errors);
     }
-    let (Some((_, market)), Some((_, money)), Some((_, reputation)), Some((_, event_rules))) = (
+    let (
+        Some((_, market)),
+        Some((_, money)),
+        Some((_, reputation)),
+        Some((_, event_rules)),
+        Some((_, rival_rules)),
+    ) = (
         parsed.market,
         parsed.money,
         parsed.reputation,
         parsed.event_rules,
-    ) else {
-        unreachable!(
-            "без правил толкучки, денег, репутации или событий загрузка вернула ошибку выше"
-        );
+        parsed.rival_rules,
+    )
+    else {
+        unreachable!("без любого из файлов правил загрузка вернула ошибку выше");
     };
     Ok(Content {
         time,
@@ -127,6 +143,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         money,
         reputation,
         event_rules,
+        rival_rules,
         epochs: keyed(&parsed.epochs, EpochId::new),
         goods: keyed(&parsed.goods, GoodId::new),
         cities: keyed(&parsed.cities, CityId::new),
@@ -177,6 +194,11 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
                 parsed.event_rules = Some((file, rules));
             }
         }
+        ["rivals.toml"] => {
+            if let Some(rules) = parse::<RivalRules>(file, errors) {
+                parsed.rival_rules = Some((file, rules));
+            }
+        }
         ["routes.toml"] => {
             if let Some(routes) = parse::<RoutesFile>(file, errors) {
                 parsed.routes = Some((file, routes.routes));
@@ -194,7 +216,7 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         _ => errors.push(ContentError::new(
             &file.path,
             None,
-            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, epochs/, biographies/, npc/, events/<эпоха>/, zone/events/)"),
+            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, epochs/, biographies/, npc/, events/<эпоха>/, zone/events/)"),
         )),
     }
 }

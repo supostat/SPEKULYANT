@@ -9,6 +9,7 @@ use super::{
 };
 use crate::economy::{MarketRules, MoneyRules, RubleCurve};
 use crate::events::EventRules;
+use crate::npc::RivalRules;
 use crate::reputation::ReputationRules;
 use crate::time::{GameDate, TimeRules};
 
@@ -126,6 +127,15 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
             ));
         }
     }
+    if let Some((file, rules)) = &parsed.rival_rules {
+        check_rival_rules(
+            rules,
+            &mut Report {
+                file,
+                errors: &mut *errors,
+            },
+        );
+    }
     if let Some((file, rules)) = &parsed.event_rules {
         check_event_rules(
             *rules,
@@ -154,10 +164,12 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
             },
         );
     }
+    let rival_rules = parsed.rival_rules.as_ref().map(|(_, rules)| rules);
     for entry in &parsed.npcs {
         check_npc(
             &entry.value,
             &known,
+            rival_rules,
             &mut Report {
                 file: entry.file,
                 errors: &mut *errors,
@@ -397,7 +409,12 @@ fn check_faction(faction: &Faction, known: &Known, report: &mut Report<'_, '_>) 
     }
 }
 
-fn check_npc(npc: &NpcTemplate, known: &Known, report: &mut Report<'_, '_>) {
+fn check_npc(
+    npc: &NpcTemplate,
+    known: &Known,
+    rival_rules: Option<&RivalRules>,
+    report: &mut Report<'_, '_>,
+) {
     check_reference(
         &known.factions,
         npc.faction.as_str(),
@@ -405,6 +422,100 @@ fn check_npc(npc: &NpcTemplate, known: &Known, report: &mut Report<'_, '_>) {
         "factions/",
         report,
     );
+    match (npc.strategy, npc.capital) {
+        (Some(strategy), Some(capital)) => {
+            if !capital.is_positive() {
+                report.at(
+                    report.file.line_of("capital"),
+                    "капитал соперника должен быть больше нуля".to_owned(),
+                );
+            }
+            if rival_rules.is_some_and(|rules| !rules.strategies.contains_key(&strategy)) {
+                report.at(
+                    report.file.line_of("strategy"),
+                    format!(
+                        "у стратегии {} нет параметров в rivals.toml",
+                        strategy.title()
+                    ),
+                );
+            }
+        }
+        (Some(_), None) => report.at(
+            report.file.line_of("strategy"),
+            "у соперника со стратегией нет капитала capital".to_owned(),
+        ),
+        (None, Some(_)) => report.at(
+            report.file.line_of("capital"),
+            "капитал бывает только у соперника со стратегией".to_owned(),
+        ),
+        (None, None) => {}
+    }
+}
+
+fn check_rival_rules(rules: &RivalRules, report: &mut Report<'_, '_>) {
+    if rules.min_rivals > rules.max_rivals {
+        report.at(
+            report.file.line_of("min_rivals"),
+            "соперников не меньше, чем больше: min_rivals выше max_rivals".to_owned(),
+        );
+    }
+    if rules.prison_days == 0 {
+        report.at(
+            report.file.line_of("prison_days"),
+            "срок в зоне не может быть нулевым".to_owned(),
+        );
+    }
+    if rules.ruin_below.is_negative() {
+        report.at(
+            report.file.line_of("ruin_below"),
+            "порог разорения не может быть меньше нуля".to_owned(),
+        );
+    }
+    for (strategy, parameters) in &rules.strategies {
+        let line = report
+            .file
+            .line_of(&format!("strategies.{}", strategy_key(*strategy)));
+        let chances = [
+            ("trade_chance", parameters.trade_chance),
+            ("prison_chance", parameters.prison_chance),
+            ("death_chance", parameters.death_chance),
+            ("deputy_chance", parameters.deputy_chance),
+        ];
+        for (key, chance) in chances {
+            if !(0.0..=1.0).contains(&chance) {
+                report.at(
+                    line,
+                    format!(
+                        "{}: {key} = {chance} — вероятность от 0 до 1",
+                        strategy.title()
+                    ),
+                );
+            }
+        }
+        if strategy.trades() && parameters.lot == 0 {
+            report.at(
+                line,
+                format!("{} торгует лотами больше нуля: lot", strategy.title()),
+            );
+        }
+        if parameters.daily_income.is_negative() || parameters.annual_percent < 0.0 {
+            report.at(
+                line,
+                format!(
+                    "{}: доход и процент не бывают меньше нуля",
+                    strategy.title()
+                ),
+            );
+        }
+    }
+}
+
+/// Ключ стратегии в данных — так, как его пишет автор.
+fn strategy_key(strategy: crate::npc::Strategy) -> String {
+    serde_json::to_value(strategy)
+        .ok()
+        .and_then(|value| value.as_str().map(str::to_owned))
+        .expect("стратегия пишется строкой")
 }
 
 fn check_biography(biography: &Biography, known: &Known, report: &mut Report<'_, '_>) {
@@ -670,13 +781,32 @@ fn check_event(event: &Event, known: &Known, report: &mut Report<'_, '_>) {
     }
     check_conditions(&event.conditions, known, report);
     let sources = Sources {
-        npc: event.conditions.npc.is_some(),
+        npc: event.conditions.npc.is_some() || event.conditions.rival.is_some(),
         price: event.price_of.is_some(),
         sum: event.sum.is_some(),
     };
     check_placeholders(&event.text, sources, report);
+    let has_rival = event.conditions.rival.is_some();
     for (index, choice) in event.choices.iter().enumerate() {
         check_choice(choice, index, sources, known, report);
+        if choice.conditions.rival.is_some() {
+            report.at(
+                report.file.nth_line_of("[[choices]]", index),
+                format!(
+                    "выбор {}: соперник выбирается для всего события, условие rival — в [conditions]",
+                    index + 1
+                ),
+            );
+        }
+        if choice.consequences.rival.is_some() && !has_rival {
+            report.at(
+                report.file.nth_line_of("[[choices]]", index),
+                format!(
+                    "выбор {}: последствие rival без соперника в условиях события",
+                    index + 1
+                ),
+            );
+        }
     }
 }
 

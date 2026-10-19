@@ -1,0 +1,6 @@
+name = "Толик Плацкарт"
+role = "челнок"
+faction = "traders"
+strategy = "shuttle"
+capital = 800
+description = "Живёт в поезде."

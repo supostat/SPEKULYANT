@@ -1,0 +1,16 @@
+//! Соперники (§8): 10–15 постоянных персонажей на мир из пула шаблонов по сиду. Они торгуют по
+//! тем же правилам, что игрок, только грубее, живут своей судьбой и помнят игроку обиды и услуги.
+
+mod fate;
+mod rival;
+mod rival_rules;
+mod rivals;
+mod strategy;
+mod strategy_rules;
+
+pub use fate::Fate;
+pub use rival::Rival;
+pub use rival_rules::RivalRules;
+pub use rivals::Rivals;
+pub use strategy::Strategy;
+pub use strategy_rules::StrategyRules;

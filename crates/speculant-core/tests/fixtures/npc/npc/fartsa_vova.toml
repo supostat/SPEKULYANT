@@ -1,0 +1,6 @@
+name = "Вова-фарца"
+role = "фарцовщик с Рижского"
+faction = "traders"
+strategy = "trader"
+capital = 500
+description = "Скупает всё, что блестит."

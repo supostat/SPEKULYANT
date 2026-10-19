@@ -1,0 +1,6 @@
+name = "Лев Аркадьевич"
+role = "председатель кооператива"
+faction = "officials"
+strategy = "banker"
+capital = 5000
+description = "Даёт в долг под проценты."

@@ -101,6 +101,7 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "events/stagnation/broken.toml:17: события-продолжения missing_event нет в events/",
         "events/stagnation/greedy.toml:3: отдых события в ноль дней — это каждый день",
         "events/stagnation/lost_luggage.toml:3: дорожное событие lost_luggage не стоит ни на одном маршруте",
+        "events/stagnation/rival_misuse.toml:5: выбор 1: последствие rival без соперника в условиях события",
         "events/stagnation/greedy.toml:4: подстановка {price} в событии без price_of",
         "events/stagnation/greedy.toml:4: подстановка {sum} в событии без sum",
         "events/stagnation/greedy.toml:10: последствие для vodka_man ничего не меняет",
@@ -110,6 +111,7 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "goods/sugar.toml:1: invalid basic string",
         "money/pyramids.toml:4: место закрывается не позже, чем открывается",
         "music/song.toml: путь не входит в раскладку data/",
+        "npc/lonely_rival.toml:4: у соперника со стратегией нет капитала capital",
         "routes.toml:3: города riga нет в cities/",
         "routes.toml:6: событие vodka_crate стоит на маршруте, но не помечено road = true",
     ];

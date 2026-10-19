@@ -1,0 +1,22 @@
+# Соперники без случайных судеб: тесты включают судьбы там, где они проверяются.
+min_rivals = 3
+max_rivals = 5
+ruin_below = 5
+prison_days = 100
+
+[strategies.trader]
+trade_chance = 1
+lot = 3
+
+[strategies.shuttle]
+trade_chance = 1
+lot = 4
+
+[strategies.racketeer]
+daily_income = 2
+
+[strategies.official]
+daily_income = 1
+
+[strategies.banker]
+annual_percent = 30

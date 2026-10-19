@@ -1,0 +1,6 @@
+name = "Костя Шрам"
+role = "рэкетир"
+faction = "bandits"
+strategy = "racketeer"
+capital = 300
+description = "Помнит всех должников."

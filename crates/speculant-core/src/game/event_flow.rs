@@ -2,6 +2,8 @@
 
 use std::sync::Arc;
 
+use rand_chacha::rand_core::Rng;
+
 use super::Game;
 use crate::command_error::CommandError;
 use crate::content::EventId;
@@ -28,7 +30,7 @@ impl Game {
                 event: event.to_string(),
             });
         }
-        self.events.start(event.clone(), today);
+        self.begin_event(event.clone(), today);
         Ok(())
     }
 
@@ -45,7 +47,7 @@ impl Game {
             if started {
                 self.events.schedule(event, date.next());
             } else {
-                self.events.start(event, date);
+                self.begin_event(event, date);
                 started = true;
             }
         }
@@ -59,11 +61,28 @@ impl Game {
         let ready = self.events.ready_events(&self.situation(date));
         match EventEngine::pick(self.rng.stream(EVENTS_STREAM), &ready) {
             Some(event) => {
-                self.events.start(event, date);
+                self.begin_event(event, date);
                 true
             }
             None => false,
         }
+    }
+
+    /// Начинает готовое событие; если в нём участвует соперник, сид выбирает одного из
+    /// подходящих.
+    pub(super) fn begin_event(&mut self, event: EventId, today: GameDate) {
+        let rival = self.content.events[&event]
+            .conditions
+            .rival
+            .and_then(|condition| {
+                let matching = self.rivals.matching(&condition, today);
+                let count = u64::try_from(matching.len()).expect("соперников меньше 2^64");
+                (count > 0).then(|| {
+                    let index = self.rng.stream(EVENTS_STREAM).next_u64() % count;
+                    matching[usize::try_from(index).expect("номер меньше числа соперников")].clone()
+                })
+            });
+        self.events.start(event, today, rival);
     }
 
     /// Выбор `number` (от 1) в ожидающем событии: последствия применяются сразу, продолжения
@@ -87,7 +106,9 @@ impl Game {
         if !self.situation(today).allows_choice(choice) {
             return Err(CommandError::ChoiceUnavailable { choice: number });
         }
-        let effects = self.apply_consequences(&choice.consequences, &event.title, today);
+        let rival = pending.rival.clone();
+        let effects =
+            self.apply_consequences(&choice.consequences, &event.title, rival.as_ref(), today);
         for follow_up in &choice.follow_ups {
             if EventEngine::roll(self.rng.stream(EVENTS_STREAM), follow_up.chance) {
                 self.events.schedule(

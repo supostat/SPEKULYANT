@@ -6,6 +6,7 @@ use std::cmp::Ordering;
 use super::Game;
 use crate::economy::{Currency, MoneyRules};
 use crate::events::Substitutions;
+use crate::npc::Rival;
 use crate::reputation::{Availability, Contact};
 use crate::time::GameDate;
 use crate::travel::Access;
@@ -56,6 +57,7 @@ pub(super) fn snapshot(game: &Game) -> StateView {
             .contacts
             .values()
             .map(|contact| contact_view(game, contact, today))
+            .chain(game.rivals.iter().map(|rival| rival_view(game, rival)))
             .collect(),
         factions: factions(game, today),
         money: money(game, today),
@@ -71,7 +73,8 @@ fn pending_event(game: &Game, today: GameDate) -> Option<EventView> {
     let pending = game.events.pending()?;
     let event = &game.content.events[&pending.event];
     let situation = game.situation(today);
-    let substitutions = Substitutions::for_event(event, &situation, &game.markets);
+    let substitutions =
+        Substitutions::for_event(event, pending.rival.as_ref(), &situation, &game.markets);
     Some(EventView {
         title: event.title.clone(),
         text: substitutions.apply(&event.text),
@@ -263,17 +266,6 @@ fn pocket(game: &Game, today: GameDate) -> PocketView {
 
 /// Связь: кто это, как к игроку относится, кто кому должен и можно ли до него достучаться.
 fn contact_view(game: &Game, contact: &Contact, today: GameDate) -> ContactView {
-    let template = &game.content.npcs[contact.npc()];
-    let relation = match contact.relation().cmp(&0) {
-        Ordering::Greater => WELL_DISPOSED,
-        Ordering::Equal => ACQUAINTED,
-        Ordering::Less => OFFENDED,
-    };
-    let debt = match contact.debt().cmp(&0) {
-        Ordering::Less => Some(format!("{PLAYER_OWES}: {}", contact.debt().unsigned_abs())),
-        Ordering::Equal => None,
-        Ordering::Greater => Some(format!("{CONTACT_OWES}: {}", contact.debt())),
-    };
     let availability = match contact.availability() {
         Availability::AwayUntil(until) if today < until => {
             format!("{AWAY_UNTIL} {}", until.numeric())
@@ -281,14 +273,35 @@ fn contact_view(game: &Game, contact: &Contact, today: GameDate) -> ContactView 
         Availability::AwayUntil(_) | Availability::Available => REACHABLE.to_owned(),
         Availability::Lost => LOST.to_owned(),
     };
+    person_view(game, contact, false, availability)
+}
+
+/// Соперник: то же, что связь, только вместо доступности — судьба.
+fn rival_view(game: &Game, rival: &Rival) -> ContactView {
+    person_view(game, rival.memory(), true, rival.fate().status())
+}
+
+fn person_view(game: &Game, memory: &Contact, rival: bool, availability: String) -> ContactView {
+    let template = &game.content.npcs[memory.npc()];
+    let relation = match memory.relation().cmp(&0) {
+        Ordering::Greater => WELL_DISPOSED,
+        Ordering::Equal => ACQUAINTED,
+        Ordering::Less => OFFENDED,
+    };
+    let debt = match memory.debt().cmp(&0) {
+        Ordering::Less => Some(format!("{PLAYER_OWES}: {}", memory.debt().unsigned_abs())),
+        Ordering::Equal => None,
+        Ordering::Greater => Some(format!("{CONTACT_OWES}: {}", memory.debt())),
+    };
     ContactView {
-        contact: contact.npc().to_string(),
+        contact: memory.npc().to_string(),
         name: template.name.clone(),
         role: template.role.clone(),
+        rival,
         relation: relation.to_owned(),
         debt,
         availability,
-        history: contact.history().to_vec(),
+        history: memory.history().to_vec(),
     }
 }
 

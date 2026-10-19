@@ -2,6 +2,7 @@ use serde::Deserialize;
 
 use super::{CityId, EpochId, FactionId, FlagId, GoodId, NpcId, TimelineNodeId};
 use crate::economy::Real;
+use crate::npc::Strategy;
 use crate::time::GameDate;
 
 /// Условия события или выбора (§10.1) — структурные таблицы, а не строки-выражения.
@@ -24,7 +25,20 @@ pub struct Conditions {
     #[serde(default)]
     pub flags_unset: Vec<FlagId>,
     pub npc: Option<NpcId>,
+    /// Участвует соперник, подходящий под условие; кто именно — решает сид при начале события.
+    pub rival: Option<RivalCondition>,
     pub timeline: Option<TimelineNodeId>,
+}
+
+/// Какой соперник участвует (§8): стратегия, отношение к игроку и давность обиды — так «кинутый
+/// партнёр возвращается через полгода».
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RivalCondition {
+    pub strategy: Option<Strategy>,
+    pub relation_at_least: Option<i32>,
+    pub relation_at_most: Option<i32>,
+    pub offended_days: Option<u32>,
 }
 
 /// Окно дат; без `until` окно открыто до конца жизни.

@@ -27,8 +27,12 @@ use std::path::Path;
 
 pub use biography::Biography;
 pub use city::City;
-pub use conditions::{Conditions, DateWindow, GoodCondition, MoneyCondition, ReputationCondition};
-pub use consequences::{Consequences, ContactChange, GoodChange, PriceShock, ReputationChange};
+pub use conditions::{
+    Conditions, DateWindow, GoodCondition, MoneyCondition, ReputationCondition, RivalCondition,
+};
+pub use consequences::{
+    Consequences, ContactChange, GoodChange, PriceShock, ReputationChange, RivalChange,
+};
 pub use content_error::ContentError;
 pub use content_file::ContentFile;
 pub use epoch_profile::{EpochProfile, Threat};
@@ -46,6 +50,7 @@ pub use route::Route;
 
 use crate::economy::{MarketRules, MoneyRules};
 use crate::events::EventRules;
+use crate::npc::RivalRules;
 use crate::reputation::ReputationRules;
 use crate::time::{GameDate, TimeRules};
 
@@ -56,6 +61,7 @@ pub struct Content {
     pub money: MoneyRules,
     pub reputation: ReputationRules,
     pub event_rules: EventRules,
+    pub rival_rules: RivalRules,
     pub epochs: BTreeMap<EpochId, EpochProfile>,
     pub goods: BTreeMap<GoodId, Good>,
     pub cities: BTreeMap<CityId, City>,

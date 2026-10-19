@@ -1,0 +1,6 @@
+name = "Люба Сумки"
+role = "челночница"
+faction = "traders"
+strategy = "shuttle"
+capital = 800
+description = "Знает всех проводников."

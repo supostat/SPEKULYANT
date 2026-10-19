@@ -4,7 +4,7 @@ use rand_chacha::ChaCha8Rng;
 use rand_chacha::rand_core::Rng;
 
 use super::{JournalEntry, PendingEvent, Resolution, ScheduledEvent, Situation};
-use crate::content::{EventId, FlagId, RoadEvent};
+use crate::content::{EventId, FlagId, NpcId, RoadEvent};
 use crate::time::GameDate;
 
 /// Сколько старших бит случайного числа даёт равномерную долю от нуля до единицы.
@@ -118,8 +118,8 @@ impl EventEngine {
         self.scheduled.push(ScheduledEvent { event, due });
     }
 
-    /// Событие случилось и остановило время.
-    pub fn start(&mut self, event: EventId, today: GameDate) {
+    /// Событие случилось и остановило время; `rival` — участвующий соперник, если он есть.
+    pub fn start(&mut self, event: EventId, today: GameDate, rival: Option<NpcId>) {
         assert!(
             self.pending.is_none(),
             "новое событие приходит только после того, как прочитан исход прошлого"
@@ -132,6 +132,7 @@ impl EventEngine {
         });
         self.pending = Some(PendingEvent {
             event,
+            rival,
             resolution: None,
         });
     }

@@ -13,6 +13,7 @@ use crate::command_error::CommandError;
 use crate::content::{BiographyId, CityId, Content, GoodId, MoneyPlaceId, NpcId};
 use crate::economy::{Currency, Deal, Markets, Money, Trader};
 use crate::events::{EventEngine, JournalEntry, Situation};
+use crate::npc::Rivals;
 use crate::reputation::{Contact, FactionReputation};
 use crate::rng::WorldRng;
 use crate::time::{Clock, FastForward, GameDate, MAX_SPEED};
@@ -36,6 +37,7 @@ pub struct Game {
     player: Trader,
     reputation: FactionReputation,
     contacts: BTreeMap<NpcId, Contact>,
+    rivals: Rivals,
     events: EventEngine,
     journey: Option<Journey>,
     messages: Vec<String>,
@@ -44,7 +46,7 @@ pub struct Game {
 
 impl Game {
     /// Открывает жизнь в первый день 1984 года: город, наличные и знакомые — из биографии, случай
-    /// мира — из сида, репутация у всех фракций нулевая.
+    /// мира и состав соперников — из сида, репутация у всех фракций нулевая.
     pub fn new_life(settings: &LifeSettings, content: Arc<Content>) -> Result<Self, CommandError> {
         if settings.biography.trim().is_empty() {
             return Err(CommandError::EmptyBiography);
@@ -59,9 +61,11 @@ impl Game {
         let cash = content
             .money
             .from_real(biography.start_cash, Currency::Ruble, today);
+        let mut rng = WorldRng::new(settings.seed);
+        let rivals = Rivals::new(&content, &mut rng, today);
         Ok(Self {
             clock: Clock::new(content.time.clock.clone(), today),
-            rng: WorldRng::new(settings.seed),
+            rng,
             city: biography.start_city.clone(),
             markets: Markets::new(&content),
             player: Trader::new(cash, &content),
@@ -71,6 +75,7 @@ impl Game {
                 .iter()
                 .map(|npc| (npc.clone(), Contact::new(npc.clone())))
                 .collect(),
+            rivals,
             events: EventEngine::default(),
             journey: None,
             messages: Vec::new(),
@@ -110,6 +115,11 @@ impl Game {
 
     pub fn contacts(&self) -> &BTreeMap<NpcId, Contact> {
         &self.contacts
+    }
+
+    /// Соперники мира.
+    pub fn rivals(&self) -> &Rivals {
+        &self.rivals
     }
 
     /// Флаги прошлых решений, ожидающее событие, отложенные продолжения.
@@ -231,7 +241,8 @@ impl Game {
         Ok(())
     }
 
-    /// День мира; `true`, если он кончился событием или прибытием. В пути вместо событий дня
+    /// День мира; `true`, если он кончился событием или прибытием. Соперники живут свой день до
+    /// событий. В пути вместо событий дня
     /// разыгрываются дорожные события маршрута, а в последний день пути игрок приезжает — если в
     /// этот день случилось событие, то после того, как прочтёт его исход.
     fn live_day(&mut self, date: GameDate) -> bool {
@@ -239,6 +250,8 @@ impl Game {
         self.player.next_day(&self.content, date);
         let drift_days = self.content.epoch_profile_on(date).reputation_drift_days;
         self.reputation.next_day(drift_days);
+        self.rivals
+            .next_day(&self.content, &mut self.markets, &mut self.rng, date);
         let Some(journey) = self.journey.clone() else {
             return self.start_day_event(date);
         };
@@ -258,6 +271,7 @@ impl Game {
             player: &self.player,
             reputation: &self.reputation,
             contacts: &self.contacts,
+            rivals: &self.rivals,
             flags: self.events.flags(),
         }
     }

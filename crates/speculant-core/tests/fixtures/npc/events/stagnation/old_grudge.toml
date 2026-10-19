@@ -1,0 +1,14 @@
+title = "Старая обида"
+weight = 1
+text = "{npc} вернулся и помнит, как ты его послал."
+
+[conditions]
+rival = { offended_days = 180 }
+
+[[choices]]
+text = "Откупиться"
+outcome = "Откупился."
+
+[choices.consequences]
+money = -50
+rival = { relation = 3 }

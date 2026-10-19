@@ -1,0 +1,6 @@
+name = "Гена Бобёр"
+role = "фарцовщик у ГУМа"
+faction = "traders"
+strategy = "trader"
+capital = 500
+description = "Тихий, но цепкий."

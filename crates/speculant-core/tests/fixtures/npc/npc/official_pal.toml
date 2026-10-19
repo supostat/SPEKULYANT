@@ -1,0 +1,6 @@
+name = "Палыч"
+role = "инструктор райкома"
+faction = "officials"
+strategy = "official"
+capital = 1000
+description = "Всё решает через знакомых."

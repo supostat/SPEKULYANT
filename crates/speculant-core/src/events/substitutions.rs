@@ -1,13 +1,14 @@
 use super::Situation;
-use crate::content::Event;
+use crate::content::{Event, NpcId};
 use crate::economy::{Currency, Markets};
 
 const NPC: &str = "{npc}";
 const PRICE: &str = "{price}";
 const SUM: &str = "{sum}";
 
-/// Подстановки в тексте события (§10.1): имя участника, цена товара на толкучке города и сумма —
-/// всё в номинале текущей валюты. Что событие подставляет, проверяет загрузка контента.
+/// Подстановки в тексте события (§10.1): имя участника — человека из условия `npc` или соперника,
+/// которого выбрал сид, — цена товара на толкучке города и сумма в номинале текущей валюты. Что
+/// событие подставляет, проверяет загрузка контента.
 pub struct Substitutions {
     npc: Option<String>,
     price: Option<String>,
@@ -15,14 +16,17 @@ pub struct Substitutions {
 }
 
 impl Substitutions {
-    pub fn for_event(event: &Event, situation: &Situation<'_>, markets: &Markets) -> Self {
+    pub fn for_event(
+        event: &Event,
+        rival: Option<&NpcId>,
+        situation: &Situation<'_>,
+        markets: &Markets,
+    ) -> Self {
         let content = situation.content;
         let rules = &content.money;
         Self {
-            npc: event
-                .conditions
-                .npc
-                .as_ref()
+            npc: rival
+                .or(event.conditions.npc.as_ref())
                 .map(|npc| content.npcs[npc].name.clone()),
             price: event.price_of.as_ref().and_then(|good| {
                 markets

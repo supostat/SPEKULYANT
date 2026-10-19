@@ -14,6 +14,8 @@ pub struct Consequences {
     pub reputation: Vec<ReputationChange>,
     #[serde(default)]
     pub contacts: Vec<ContactChange>,
+    /// Перемена в отношениях с соперником, который участвует в событии.
+    pub rival: Option<RivalChange>,
     #[serde(default)]
     pub set_flags: Vec<FlagId>,
     #[serde(default)]
@@ -56,6 +58,16 @@ pub struct ContactChange {
     pub away_days: Option<u32>,
     #[serde(default)]
     pub lost: bool,
+}
+
+/// Перемена в отношениях с участвующим соперником: отношение и услуги, как у связи.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RivalChange {
+    #[serde(default)]
+    pub relation: i32,
+    #[serde(default)]
+    pub favours: i32,
 }
 
 impl ContactChange {

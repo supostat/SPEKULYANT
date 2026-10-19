@@ -2,11 +2,12 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::content::{Choice, CityId, Conditions, Consequences, Content, Event, FlagId, NpcId};
 use crate::economy::{Currency, Money, Real, Trader};
+use crate::npc::Rivals;
 use crate::reputation::{Contact, FactionReputation};
 use crate::time::GameDate;
 
 /// Положение дел, над которым считаются условия событий (§10.1): день, город (в пути — город
-/// отправления), дорога, деньги и карман, репутация, связи и флаги прошлых решений.
+/// отправления), дорога, деньги и карман, репутация, связи, соперники и флаги прошлых решений.
 pub struct Situation<'a> {
     pub content: &'a Content,
     pub today: GameDate,
@@ -15,6 +16,7 @@ pub struct Situation<'a> {
     pub player: &'a Trader,
     pub reputation: &'a FactionReputation,
     pub contacts: &'a BTreeMap<NpcId, Contact>,
+    pub rivals: &'a Rivals,
     pub flags: &'a BTreeSet<FlagId>,
 }
 
@@ -76,6 +78,9 @@ impl Situation<'_> {
             .npc
             .as_ref()
             .is_none_or(|npc| self.is_reachable(npc));
+        let rival_present = conditions
+            .rival
+            .is_none_or(|rival| !self.rivals.matching(&rival, self.today).is_empty());
         in_epoch
             && in_window
             && in_city
@@ -84,6 +89,7 @@ impl Situation<'_> {
             && has_goods
             && flags_fit
             && npc_reachable
+            && rival_present
             && conditions.timeline.is_none()
     }
 
@@ -106,8 +112,15 @@ impl Situation<'_> {
             .from_real(amount, Currency::Ruble, self.today)
     }
 
-    /// С человеком можно встретиться: он не потерян и не в отъезде; незнакомый — тоже можно.
+    /// С человеком можно встретиться: соперник — если он в этом мире и в деле; связь — если не
+    /// потерян и не в отъезде; незнакомый — тоже можно.
     fn is_reachable(&self, npc: &NpcId) -> bool {
+        if self.content.npcs[npc].strategy.is_some() {
+            return self
+                .rivals
+                .get(npc)
+                .is_some_and(|rival| rival.fate().is_active());
+        }
         self.contacts
             .get(npc)
             .is_none_or(|contact| contact.is_available_on(self.today))

@@ -1,0 +1,6 @@
+min_rivals = 0
+max_rivals = 0
+ruin_below = 0
+prison_days = 365
+
+[strategies]

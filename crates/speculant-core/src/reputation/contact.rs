@@ -3,12 +3,13 @@ use crate::content::{ContactChange, NpcId};
 use crate::time::GameDate;
 
 /// Связь (§9): конкретный человек из шаблонов NPC. Отношение — расположение к игроку от поступков,
-/// долг — счёт услуг: больше нуля — он должен игроку, меньше — игрок ему. История — что было
-/// между ними, по датам.
+/// долг — счёт услуг: больше нуля — он должен игроку, меньше — игрок ему. Обида помнится с того
+/// дня, как отношение ушло в минус (§8). История — что было между ними, по датам.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Contact {
     npc: NpcId,
     relation: i32,
+    offended_since: Option<GameDate>,
     debt: i32,
     history: Vec<String>,
     availability: Availability,
@@ -20,6 +21,7 @@ impl Contact {
         Self {
             npc,
             relation: 0,
+            offended_since: None,
             debt: 0,
             history: Vec::new(),
             availability: Availability::Available,
@@ -36,6 +38,14 @@ impl Contact {
 
     pub fn debt(&self) -> i32 {
         self.debt
+    }
+
+    /// Сколько дней длится обида; `None`, если её нет.
+    pub fn offended_days(&self, today: GameDate) -> Option<u32> {
+        self.offended_since.map(|since| {
+            u32::try_from(today.day_index() - since.day_index())
+                .expect("обида началась не позже сегодняшнего дня")
+        })
     }
 
     pub fn history(&self) -> &[String] {
@@ -114,7 +124,7 @@ impl Contact {
         today: GameDate,
         what: &str,
     ) {
-        self.relation = rules.clamp(self.relation.saturating_add(change));
+        self.set_relation(rules.clamp(self.relation.saturating_add(change)), today);
         self.record(today, what);
     }
 
@@ -138,7 +148,10 @@ impl Contact {
         today: GameDate,
         what: &str,
     ) {
-        self.relation = rules.clamp(self.relation.saturating_add(change.relation));
+        self.set_relation(
+            rules.clamp(self.relation.saturating_add(change.relation)),
+            today,
+        );
         self.debt = self.debt.saturating_add(change.favours);
         if let Some(days) = change.away_days {
             self.availability = Availability::AwayUntil(today.after_days(days));
@@ -147,6 +160,16 @@ impl Contact {
             self.availability = Availability::Lost;
         }
         self.record(today, what);
+    }
+
+    /// Новое отношение: обида начинается в день, когда оно ушло в минус, и кончается с примирением.
+    fn set_relation(&mut self, relation: i32, today: GameDate) {
+        self.relation = relation;
+        if relation >= 0 {
+            self.offended_since = None;
+        } else if self.offended_since.is_none() {
+            self.offended_since = Some(today);
+        }
     }
 
     /// Сколько услуг игрок ему должен.

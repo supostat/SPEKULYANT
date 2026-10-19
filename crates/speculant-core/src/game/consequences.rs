@@ -2,7 +2,7 @@
 //! того, что изменилось, для окна исхода.
 
 use super::Game;
-use crate::content::Consequences;
+use crate::content::{Consequences, ContactChange, NpcId};
 use crate::economy::{Currency, Real};
 use crate::reputation::Contact;
 use crate::time::GameDate;
@@ -18,11 +18,13 @@ const MINUS: char = '−';
 
 impl Game {
     /// Применяет последствия и возвращает строку перемен: «Торговцы +1. Деньги −600 р.». Флаги и
-    /// сдвиги цен игроку не показываются — о них говорит текст исхода.
+    /// сдвиги цен игроку не показываются — о них говорит текст исхода. `rival` — участвующий в
+    /// событии соперник, к которому относится последствие `rival`.
     pub(super) fn apply_consequences(
         &mut self,
         consequences: &Consequences,
         what: &str,
+        rival: Option<&NpcId>,
         today: GameDate,
     ) -> String {
         let content = std::sync::Arc::clone(&self.content);
@@ -64,17 +66,7 @@ impl Game {
                 .or_insert_with(|| Contact::new(change.npc.clone()))
                 .apply(change, content.reputation, today, what);
             let name = &content.npcs[&change.npc].name;
-            if change.relation != 0 {
-                effects.push(format!("{name} {}", signed(change.relation)));
-            }
-            match change.favours.signum() {
-                1 => effects.push(format!("{name}: {CONTACT_OWES} {}", signed(change.favours))),
-                -1 => effects.push(format!(
-                    "{name}: {PLAYER_OWES} {PLUS}{}",
-                    change.favours.unsigned_abs()
-                )),
-                _ => {}
-            }
+            relation_effects(&mut effects, name, change.relation, change.favours);
             if let Some(days) = change.away_days {
                 effects.push(format!(
                     "{name}: {AWAY_UNTIL} {}",
@@ -84,6 +76,26 @@ impl Game {
             if change.lost {
                 effects.push(format!("{name}: {LOST}"));
             }
+        }
+        if let (Some(change), Some(npc)) = (consequences.rival, rival) {
+            let as_contact = ContactChange {
+                npc: npc.clone(),
+                relation: change.relation,
+                favours: change.favours,
+                away_days: None,
+                lost: false,
+            };
+            self.rivals
+                .get_mut(npc)
+                .expect("участвующий соперник есть в мире")
+                .memory_mut()
+                .apply(&as_contact, content.reputation, today, what);
+            relation_effects(
+                &mut effects,
+                &content.npcs[npc].name,
+                change.relation,
+                change.favours,
+            );
         }
         for flag in &consequences.set_flags {
             self.events.set_flag(flag.clone());
@@ -122,6 +134,21 @@ fn sentences(effects: &[String]) -> String {
         }
     }
     text
+}
+
+/// Перемены в отношениях с человеком: «Кофи −2», «Кофи: за ним услуг +1».
+fn relation_effects(effects: &mut Vec<String>, name: &str, relation: i32, favours: i32) {
+    if relation != 0 {
+        effects.push(format!("{name} {}", signed(relation)));
+    }
+    match favours.signum() {
+        1 => effects.push(format!("{name}: {CONTACT_OWES} {}", signed(favours))),
+        -1 => effects.push(format!(
+            "{name}: {PLAYER_OWES} {PLUS}{}",
+            favours.unsigned_abs()
+        )),
+        _ => {}
+    }
 }
 
 /// Число со знаком так, как его пишет окно исхода: «+1», «−3».

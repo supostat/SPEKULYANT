@@ -1,0 +1,21 @@
+title = "Наезд"
+weight = 1
+text = "{npc} подходит к твоему месту на толкучке: «Здесь платят»."
+
+[conditions]
+rival = { strategy = "racketeer" }
+
+[[choices]]
+text = "Заплатить"
+outcome = "Заплатил."
+
+[choices.consequences]
+money = -20
+rival = { relation = 1 }
+
+[[choices]]
+text = "Послать"
+outcome = "{npc} обещает вернуться."
+
+[choices.consequences]
+rival = { relation = -2 }
