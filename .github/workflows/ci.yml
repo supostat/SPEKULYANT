@@ -46,6 +46,7 @@ jobs:
       - run: cargo xtask screen-check end
       - run: cargo xtask screen-smoke all
       - run: cargo xtask ui-flow-smoke
+      - run: cargo xtask e2e
       - run: cargo xtask sound-smoke
       - run: cargo xtask bridge-smoke --full
       - name: PNG заставки под Xvfb

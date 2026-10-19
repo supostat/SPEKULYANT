@@ -9,6 +9,7 @@ mod content_count;
 mod coverage_check;
 mod deps_check;
 mod docs_check;
+mod e2e;
 mod etalons;
 mod export;
 mod export_check;
@@ -54,6 +55,8 @@ const USAGE: &str = "\
   ui-flow-smoke             безголовый клавиатурный сценарий: заставка → меню → новая жизнь →
                             рынок, событие, поездка → дела, связи, пейджер → сохранение →
                             главное меню → загрузка → выход
+  e2e                       безголово полная ironman-жизнь на настоящих модулях: торговля,
+                            события, поездка, выход и «Продолжить», покой, итоги, рекорды
   sound-smoke               безголово: пищалка PC-speaker выдаёт ноту заданной частоты, мелодия
                             заставки приходит из данных через мост
   export <платформа>        экспорт игры на родной системе платформы (windows-x86_64,
@@ -104,6 +107,7 @@ fn main() -> Result<()> {
         "screen-check" => screen_check::run(single_argument(flags, "screen-check <экран>")?),
         "screen-smoke" => screen_smoke::run(single_argument(flags, "screen-smoke <экран>")?),
         "ui-flow-smoke" => ui_flow_smoke::run(),
+        "e2e" => e2e::run(),
         "sound-smoke" => sound_smoke::run(),
         "screenshot" => {
             let (screen, crt) = match flags {

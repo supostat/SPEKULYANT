@@ -1,7 +1,7 @@
 class_name RecordsScreen
 extends RefCounted
 ## Рекорды (docs/SPEKULYANT.md §11.4, решение 15.10): «Рейтинг Форбс» ironman-жизней и таблица
-## свободного режима — имя, биография, капитал в рублях 1984 года, годы жизни и финал.
+## свободного режима — имя и капитал в рублях 1984 года, под ними биография, годы жизни и финал.
 
 const TEXT := 7
 const BACKGROUND := 1
@@ -18,13 +18,12 @@ const TABLES := [
 ]
 const TABLE_FOREGROUND := 14
 const COLUMNS_LINE_FOREGROUND := 8
-const NAME_WIDTH := 20
-const BIOGRAPHY_WIDTH := 16
-const CAPITAL_WIDTH := 12
-const YEARS_WIDTH := 10
-const ENDING_WIDTH := 12
-const COLUMN_GAP := "  "
-const COLUMN_TITLES := ["Имя", "Биография", "Капитал", "Годы", "Финал"]
+const CAPITAL_WIDTH := 16
+const COLUMN_TITLES := ["Имя", "Капитал"]
+## Запись — две строки: имя целиком и капитал, под ними биография, годы и финал.
+const DETAILS_INDENT := "  "
+const DETAILS_SEPARATOR := " · "
+const DETAILS_FOREGROUND := 8
 const EMPTY := "Пока пусто."
 const EMPTY_FOREGROUND := 8
 const HINT := "↑↓ PgUp PgDn — листать   Esc — назад"
@@ -86,18 +85,13 @@ func _lines(records: Dictionary) -> Array:
 		if rows.is_empty():
 			lines.append([EMPTY, EMPTY_FOREGROUND])
 			continue
-		lines.append([_row(COLUMN_TITLES), COLUMNS_LINE_FOREGROUND])
+		lines.append([_row(COLUMN_TITLES[0], COLUMN_TITLES[1]), COLUMNS_LINE_FOREGROUND])
 		for record: Dictionary in rows:
-			lines.append([_row([record["name"], record["biography"], record["capital"], record["years"], record["ending"]]), TEXT])
+			lines.append([_row(record["name"], record["capital"]), TEXT])
+			var details := DETAILS_SEPARATOR.join(PackedStringArray([record["biography"], record["years"], record["ending"]]))
+			lines.append([DETAILS_INDENT + details, DETAILS_FOREGROUND])
 	return lines
 
 
-func _row(cells: Array) -> String:
-	return (
-		TextScreen.pad_right(cells[0], NAME_WIDTH)
-		+ TextScreen.pad_right(cells[1], BIOGRAPHY_WIDTH)
-		+ TextScreen.pad_left(cells[2], CAPITAL_WIDTH)
-		+ COLUMN_GAP
-		+ TextScreen.pad_right(cells[3], YEARS_WIDTH)
-		+ TextScreen.pad_right(cells[4], ENDING_WIDTH)
-	)
+func _row(name: String, capital: String) -> String:
+	return TextScreen.pad_right(name, WIDTH - CAPITAL_WIDTH) + TextScreen.pad_left(capital, CAPITAL_WIDTH)
