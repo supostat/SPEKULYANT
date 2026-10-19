@@ -1,0 +1,13 @@
+title = "Технологическая волна"
+weight = 1
+rest_days = 1825
+scale = { from = 0.8, to = 1.5 }
+
+[[outcomes]]
+weight = 1
+news = "Новая техника: старая электроника дешевеет на глазах."
+price_shocks = [
+  { good = "watch", factor = 0.6, days = 730 },
+  { good = "videocassette", factor = 0.5, days = 730 },
+]
+set_flags = ["tech_wave"]

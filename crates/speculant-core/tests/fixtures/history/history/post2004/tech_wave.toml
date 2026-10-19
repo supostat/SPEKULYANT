@@ -1,0 +1,8 @@
+title = "Технологическая волна"
+weight = 1
+rest_days = 1460
+
+[[outcomes]]
+weight = 1
+news = "Новая техника."
+price_shocks = [{ good = "chewing_gum", factor = 0.5, days = 365 }]

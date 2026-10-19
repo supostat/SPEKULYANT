@@ -1,0 +1,8 @@
+# Деноминация — рамка номинала (economy/money.toml), её день не плавает.
+title = "Деноминация"
+window = { from = "1998-01-01", until = "1998-01-02" }
+
+[[outcomes]]
+weight = 1
+news = "Деноминация: у рубля три нуля долой."
+set_flags = ["denominated"]

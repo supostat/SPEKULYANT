@@ -45,6 +45,9 @@ fn the_minimal_set_loads_every_kind_of_content() {
     assert_eq!(content.endings.len(), 2);
     assert_eq!(content.zone.week_days, 7);
     assert_eq!(content.zone_services.len(), 1);
+    assert_eq!(content.history.len(), 1);
+    assert_eq!(content.history_templates.len(), 1);
+    assert_eq!(content.history_generator.gap_days.from, 150);
     assert_eq!(content.business_forms.len(), 1);
     assert_eq!(content.business_kinds.len(), 1);
     assert_eq!(content.policies.len(), 1);

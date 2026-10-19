@@ -1,0 +1,17 @@
+# Запрет или разрешение товара: сигареты.
+title = "Запрет товара"
+weight = 2
+rest_days = 730
+scale = { from = 0.8, to = 1.4 }
+
+[[outcomes]]
+weight = 2
+news = "Новый закон: сигареты — только в магазинах с лицензией."
+price_shocks = [{ good = "cigarettes", factor = 1.5, days = 365 }]
+set_flags = ["cigarettes_restricted"]
+
+[[outcomes]]
+weight = 1
+news = "Ограничения на сигареты сняли: ларьки снова торгуют."
+price_shocks = [{ good = "cigarettes", factor = 0.8, days = 365 }]
+set_flags = ["cigarettes_allowed"]

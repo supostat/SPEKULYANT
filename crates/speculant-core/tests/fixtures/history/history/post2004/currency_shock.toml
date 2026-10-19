@@ -1,0 +1,9 @@
+title = "Валютный шок"
+weight = 3
+rest_days = 365
+scale = { from = 0.5, to = 2.0 }
+
+[[outcomes]]
+weight = 1
+news = "Рубль рухнул."
+price_shocks = [{ good = "jeans", factor = 1.5, days = 60 }]

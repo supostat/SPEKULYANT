@@ -1,0 +1,9 @@
+# Соперников нет: тесты конкуренции заводят их сами.
+min_rivals = 0
+max_rivals = 0
+ruin_below = 5
+prison_days = 100
+
+[strategies.trader]
+trade_chance = 0
+lot = 1

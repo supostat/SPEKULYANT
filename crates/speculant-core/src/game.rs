@@ -3,6 +3,7 @@
 mod business_flow;
 mod consequences;
 mod event_flow;
+mod history_flow;
 mod life_flow;
 mod russian_count;
 mod snapshot;
@@ -18,6 +19,7 @@ use crate::command_error::CommandError;
 use crate::content::{BiographyId, CityId, Content, GoodId, MoneyPlaceId, NpcId};
 use crate::economy::{Currency, Deal, Markets, Money, Trader};
 use crate::events::{EventEngine, JournalEntry, Situation};
+use crate::history::Timeline;
 use crate::life::{Character, Chronicle, LifeSummary};
 use crate::npc::Rivals;
 use crate::reputation::{Contact, FactionReputation};
@@ -34,6 +36,7 @@ const SOLD: &str = "Продал";
 const DEPOSITED: &str = "положил";
 const WITHDREW: &str = "снял";
 const LIFE_STREAM: &str = "life";
+const HISTORY_STREAM: &str = "history";
 
 #[derive(Debug)]
 pub struct Game {
@@ -46,6 +49,8 @@ pub struct Game {
     unlocked: BTreeSet<BiographyId>,
     clock: Clock,
     rng: WorldRng,
+    /// История мира, зафиксированная по сиду при его создании.
+    timeline: Timeline,
     city: CityId,
     markets: Markets,
     player: Trader,
@@ -69,8 +74,8 @@ impl Game {
     }
 
     /// Жизнь по биографии, открытой с начала или прошлыми жизнями: город, наличные, знакомые и
-    /// жильё — из биографии, имя, возраст, случай мира и состав соперников — из сида, репутация у
-    /// всех фракций нулевая.
+    /// жильё — из биографии, имя, возраст, случай мира, история и состав соперников — из сида,
+    /// репутация у всех фракций нулевая.
     fn start_life(
         settings: &LifeSettings,
         content: Arc<Content>,
@@ -100,6 +105,7 @@ impl Game {
             .from_real(biography.start_cash, Currency::Ruble, today);
         let mut rng = WorldRng::new(settings.seed);
         let rivals = Rivals::new(&content, &mut rng, today);
+        let timeline = Timeline::generate(&content, rng.stream(HISTORY_STREAM));
         let character =
             life_flow::born_character(&content, &id, biography, rng.stream(LIFE_STREAM));
         Ok(Self {
@@ -109,6 +115,7 @@ impl Game {
             unlocked,
             clock: Clock::new(content.time.clock.clone(), today),
             rng,
+            timeline,
             city: biography.start_city.clone(),
             markets: Markets::new(&content),
             player: Trader::new(cash, &content),
@@ -197,6 +204,11 @@ impl Game {
         self.journey.as_ref()
     }
 
+    /// История мира по сиду.
+    pub fn timeline(&self) -> &Timeline {
+        &self.timeline
+    }
+
     /// Отсидка, если игрок в зоне.
     pub fn zone(&self) -> Option<&Zone> {
         self.zone.as_ref()
@@ -209,7 +221,8 @@ impl Game {
 
     /// Двигает мир на `milliseconds` реального времени; `true`, если наступил хотя бы один день.
     /// Каждый день рынки приходят в себя и колеблются по сиду, вклады получают проценты,
-    /// репутация дрейфует к нулю в темпе эпохи, соперники и дела живут свой день, а затем может
+    /// репутация дрейфует к нулю в темпе эпохи, соперники живут свой день, случаются узлы истории
+    /// этого дня, персонаж и дела живут свой день, а затем может
     /// случиться событие — дома, в дороге или в зоне, где неделя идёт за время одного дня.
     /// Событие, прибытие и выход на волю останавливают перемотку, и остаток реального времени
     /// сгорает; событие держит время, пока игрок не прочтёт исход.
@@ -350,6 +363,7 @@ impl Game {
         self.reputation.next_day(drift_days);
         self.rivals
             .next_day(&self.content, &mut self.markets, &mut self.rng, date);
+        self.live_history(date);
         if self.live_character(date) || self.live_businesses(date) {
             return true;
         }
@@ -377,6 +391,7 @@ impl Game {
             contacts: &self.contacts,
             rivals: &self.rivals,
             flags: self.events.flags(),
+            timeline: &self.timeline,
             zone: self.zone.as_ref(),
         }
     }

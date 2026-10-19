@@ -113,21 +113,22 @@ impl EventEngine {
         (rng.next_u64() >> (u64::BITS - FRACTION_BITS)) as f64 / (1_u64 << FRACTION_BITS) as f64
     }
 
-    /// Одно событие из готовых, с вероятностью по весу; `None`, если готовых нет.
-    pub fn pick(rng: &mut ChaCha8Rng, weighted: &[(EventId, u32)]) -> Option<EventId> {
+    /// Одно из взвешенных — событие из готовых, исход узла истории, шаблон генератора — с
+    /// вероятностью по весу; `None`, если выбирать не из чего.
+    pub fn pick<T: Clone>(rng: &mut ChaCha8Rng, weighted: &[(T, u32)]) -> Option<T> {
         let total: u64 = weighted.iter().map(|(_, weight)| u64::from(*weight)).sum();
         if total == 0 {
             return None;
         }
         let mut ticket = rng.next_u64() % total;
-        for (event, weight) in weighted {
+        for (item, weight) in weighted {
             let weight = u64::from(*weight);
             if ticket < weight {
-                return Some(event.clone());
+                return Some(item.clone());
             }
             ticket -= weight;
         }
-        unreachable!("билет меньше суммы весов попадает в одно из событий")
+        unreachable!("билет меньше суммы весов попадает в один из весов")
     }
 
     /// Продолжения, срок которых пришёл, в порядке назначения; они уходят из расписания.

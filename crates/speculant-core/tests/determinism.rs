@@ -4,6 +4,7 @@
 use std::path::Path;
 use std::sync::Arc;
 
+use speculant_core::time::GameDate;
 use speculant_core::{Command, Content, Game, LifeSettings};
 
 const DATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../data");
@@ -284,5 +285,33 @@ fn the_same_seed_gives_the_same_business_history() {
         first,
         run_a_business(8),
         "другой сид — другая выручка и другие беды"
+    );
+}
+
+/// История `data/` по сиду: таймлайн и мир до 1 июля 1985 года — через окно сухого закона.
+fn live_through_the_dry_law(seed: u64) -> (Game, String) {
+    let mut game = new_game(seed);
+    while game.today() < GameDate::from_ymd(1985, 7, 1).expect("дата существует") {
+        assert!(game.advance(1800), "в data/ нет событий — время идёт");
+    }
+    let view = serde_json::to_string(&game.view()).expect("снимок сериализуется");
+    (game, view)
+}
+
+#[test]
+fn the_same_seed_gives_the_same_history_and_its_news() {
+    let (first, first_view) = live_through_the_dry_law(7);
+    let (second, second_view) = live_through_the_dry_law(7);
+    assert_eq!(first.timeline(), second.timeline());
+    assert_eq!(first_view, second_view);
+    assert!(
+        first_view.contains("Указ о борьбе с пьянством"),
+        "узел сухого закона случился в своё окно"
+    );
+    let (other, _) = live_through_the_dry_law(8);
+    assert_ne!(
+        first.timeline(),
+        other.timeline(),
+        "другой сид — другие даты, масштабы и исходы"
     );
 }

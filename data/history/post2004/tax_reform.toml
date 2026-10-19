@@ -1,0 +1,13 @@
+title = "Налоговая реформа"
+weight = 2
+rest_days = 1095
+
+[[outcomes]]
+weight = 1
+news = "Налоговая реформа: налоги подняли, проверок стало больше."
+set_flags = ["taxes_raised"]
+
+[[outcomes]]
+weight = 1
+news = "Налоговая реформа: налоги снизили, бизнес выдохнул."
+set_flags = ["taxes_cut"]

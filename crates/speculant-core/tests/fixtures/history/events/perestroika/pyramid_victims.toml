@@ -1,0 +1,11 @@
+title = "Обманутые вкладчики"
+weight = 1
+text = "У офиса пирамиды толпа."
+
+[conditions]
+timeline = "mmm"
+flags_set = ["mmm_collapsed"]
+
+[[choices]]
+text = "Пройти мимо"
+outcome = "Не твоё дело."

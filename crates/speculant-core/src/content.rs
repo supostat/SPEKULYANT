@@ -1,7 +1,7 @@
 //! Контент как данные (§10, §14.1): товары, города, маршруты, эпохи, правила толкучки, индекс цен
 //! и курсы, места хранения денег, фракции и правила репутации, биографии, жильё, финалы и правила
 //! жизни, шаблоны NPC, дела — формы, типы, политики, привычки и правила, — события и правила их
-//! розыгрыша, правила зоны и её услуги. Формат — TOML, файл на сущность в `data/`, имя файла — идентификатор (решение 15.7).
+//! розыгрыша, правила зоны и её услуги, исторические узлы и шаблоны генератора песочницы. Формат — TOML, файл на сущность в `data/`, имя файла — идентификатор (решение 15.7).
 //! Загрузка проверяет схему и ссылки и возвращает все ошибки сразу, каждая — «файл:строка».
 
 mod biography;
@@ -19,6 +19,9 @@ mod event;
 mod faction;
 mod good;
 mod habit;
+mod history_node;
+mod history_outcome;
+mod history_template;
 mod housing;
 mod ids;
 mod loader;
@@ -27,6 +30,7 @@ mod npc_template;
 mod policy;
 mod road_event;
 mod route;
+mod scale_range;
 mod validation;
 mod zone_service;
 
@@ -54,6 +58,9 @@ pub use event::{Choice, Event, FollowUp};
 pub use faction::Faction;
 pub use good::Good;
 pub use habit::Habit;
+pub use history_node::{HistoryNode, HistoryWindow};
+pub use history_outcome::HistoryOutcome;
+pub use history_template::HistoryTemplate;
 pub use housing::Housing;
 pub use ids::{
     BiographyId, BusinessFormId, BusinessKindId, CityId, EndingId, EpochId, EventId, FactionId,
@@ -64,11 +71,13 @@ pub use npc_template::NpcTemplate;
 pub use policy::{Policy, PolicyOption};
 pub use road_event::RoadEvent;
 pub use route::Route;
+pub use scale_range::ScaleRange;
 pub use zone_service::ZoneService;
 
 use crate::business::{BusinessRules, PolicyKind};
 use crate::economy::{MarketRules, MoneyRules};
 use crate::events::EventRules;
+use crate::history::HistoryGenerator;
 use crate::life::LifeRules;
 use crate::npc::RivalRules;
 use crate::reputation::ReputationRules;
@@ -86,6 +95,7 @@ pub struct Content {
     pub business: BusinessRules,
     pub life: LifeRules,
     pub zone: ZoneRules,
+    pub history_generator: HistoryGenerator,
     pub epochs: BTreeMap<EpochId, EpochProfile>,
     pub goods: BTreeMap<GoodId, Good>,
     pub cities: BTreeMap<CityId, City>,
@@ -102,6 +112,8 @@ pub struct Content {
     pub habits: BTreeMap<HabitId, Habit>,
     pub events: BTreeMap<EventId, Event>,
     pub zone_services: BTreeMap<ZoneServiceId, ZoneService>,
+    pub history: BTreeMap<TimelineNodeId, HistoryNode>,
+    pub history_templates: BTreeMap<TimelineNodeId, HistoryTemplate>,
 }
 
 impl Content {

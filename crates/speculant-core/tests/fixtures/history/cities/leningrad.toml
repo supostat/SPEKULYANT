@@ -1,0 +1,4 @@
+name = "Ленинград"
+region = "north_west"
+market = "Галёрка у Гостиного двора"
+multipliers = { clothes = 1.3 }

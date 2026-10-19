@@ -1,0 +1,13 @@
+# Павловский обмен: 50- и 100-рублёвки меняют три дня; наличные бегут в товар.
+title = "Павловский обмен"
+window = { from = "1991-01-15", until = "1991-02-05" }
+scale = { from = 0.8, to = 1.3 }
+
+[[outcomes]]
+weight = 1
+news = "Павловский обмен: 50- и 100-рублёвые купюры меняют только три дня."
+price_shocks = [
+  { good = "jeans", factor = 1.2, days = 30 },
+  { good = "watch", factor = 1.2, days = 30 },
+]
+set_flags = ["pavlov_exchange"]

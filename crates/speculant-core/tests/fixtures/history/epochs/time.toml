@@ -1,0 +1,18 @@
+[clock]
+day_milliseconds = [1800, 1000, 500]
+fast_forward_day_milliseconds = 20
+
+[[epochs]]
+id = "stagnation"
+title = "Застой"
+starts = "1984-01-01"
+
+[[epochs]]
+id = "perestroika"
+title = "Перестройка"
+starts = "1988-01-01"
+
+[[epochs]]
+id = "sandbox"
+title = "Песочница"
+starts = "2005-01-01"

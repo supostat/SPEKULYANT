@@ -1,6 +1,7 @@
 //! Проверки контента после разбора: ссылки, флаги, окна дат, кривые, выборы и подстановки.
 
 mod business;
+mod history;
 mod life;
 mod zone;
 
@@ -9,7 +10,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use super::loader::{Entry, Parsed};
 use super::{
     Biography, BusinessChange, Choice, City, Conditions, Consequences, ContentError, ContentFile,
-    EpochProfile, Event, Faction, Good, MoneyPlace, NpcTemplate,
+    EpochProfile, Event, Faction, Good, MoneyPlace, NpcTemplate, PriceShock,
 };
 use crate::economy::{MarketRules, MoneyRules, RubleCurve};
 use crate::events::EventRules;
@@ -50,6 +51,8 @@ struct Known {
     trait_scale: Option<u8>,
     /// Уровней авторитета в зоне, если правила зоны разобрались.
     authority_levels: Option<usize>,
+    /// Исторические узлы и шаблоны генератора — то, на что ссылается условие `timeline`.
+    timeline_nodes: BTreeSet<String>,
 }
 
 /// Чем событие наполняет подстановки: участником, товаром для цены, суммой, делом происшествия и
@@ -121,6 +124,20 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
                     .iter()
                     .map(|(_, rules)| rules.release_flag.as_str().to_owned()),
             )
+            .chain(
+                parsed
+                    .history
+                    .iter()
+                    .flat_map(|entry| entry.value.outcomes.iter())
+                    .chain(
+                        parsed
+                            .history_templates
+                            .iter()
+                            .flat_map(|entry| entry.value.outcomes.iter()),
+                    )
+                    .flat_map(|outcome| outcome.set_flags.iter())
+                    .map(|flag| flag.as_str().to_owned()),
+            )
             .collect(),
         reputation_limit: parsed
             .reputation
@@ -151,10 +168,15 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
             .zone
             .as_ref()
             .map(|(_, rules)| rules.authority_levels.len()),
+        timeline_nodes: ids(&parsed.history)
+            .into_iter()
+            .chain(ids(&parsed.history_templates))
+            .collect(),
     };
     business::validate(parsed, &known, errors);
     life::validate(parsed, &known, errors);
     zone::validate(parsed, &known, errors);
+    history::validate(parsed, &known, time, errors);
     for entry in &parsed.epochs {
         let mut report = Report {
             file: entry.file,
@@ -987,22 +1009,7 @@ fn check_choice(
         );
     }
     for shock in &consequences.price_shocks {
-        check_reference(
-            &known.goods,
-            shock.good.as_str(),
-            "товара",
-            "goods/",
-            report,
-        );
-        if let Some(city) = &shock.city {
-            check_reference(&known.cities, city.as_str(), "города", "cities/", report);
-        }
-        if !(shock.factor.is_finite() && shock.factor > 0.0) {
-            report.at(
-                report.file.line_of("factor"),
-                format!("множитель шока цены {} должен быть больше нуля", shock.good),
-            );
-        }
+        check_price_shock(shock, known, report);
     }
     for follow_up in &choice.follow_ups {
         check_reference(
@@ -1027,6 +1034,32 @@ fn check_choice(
                 ),
             );
         }
+    }
+}
+
+/// Шок цены: товар и город из данных, множитель больше нуля, срок — от дня.
+fn check_price_shock(shock: &PriceShock, known: &Known, report: &mut Report<'_, '_>) {
+    check_reference(
+        &known.goods,
+        shock.good.as_str(),
+        "товара",
+        "goods/",
+        report,
+    );
+    if let Some(city) = &shock.city {
+        check_reference(&known.cities, city.as_str(), "города", "cities/", report);
+    }
+    if !(shock.factor.is_finite() && shock.factor > 0.0) {
+        report.at(
+            report.file.line_of("factor"),
+            format!("множитель шока цены {} должен быть больше нуля", shock.good),
+        );
+    }
+    if shock.days == Some(0) {
+        report.at(
+            report.file.line_of("days"),
+            format!("шок цены {} на ноль дней ничего не сдвинет", shock.good),
+        );
     }
 }
 
@@ -1226,6 +1259,15 @@ fn check_conditions(conditions: &Conditions, known: &Known, report: &mut Report<
                 }
             }
         }
+    }
+    if let Some(node) = &conditions.timeline {
+        check_reference(
+            &known.timeline_nodes,
+            node.as_str(),
+            "узла таймлайна",
+            "history/ и history/post2004/",
+            report,
+        );
     }
     if let Some(money) = &conditions.money
         && !money.at_least.is_positive()

@@ -1,0 +1,11 @@
+# Широкое окно и разброс масштаба: на нём видно, как история плавает по сиду.
+title = "Сухой закон"
+window = { from = "1985-04-01", until = "1985-08-01" }
+scale = { from = 0.5, to = 1.5 }
+
+[[outcomes]]
+weight = 1
+news = "Указ о борьбе с пьянством: водку продают с двух часов дня."
+price_shocks = [{ good = "vodka", factor = 2.0, days = 90 }]
+event = "dry_law_queue"
+set_flags = ["dry_law"]

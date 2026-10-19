@@ -1,0 +1,7 @@
+title = "Распад СССР"
+window = { from = "1991-12-05", until = "1992-01-01" }
+
+[[outcomes]]
+weight = 1
+news = "Беловежские соглашения: СССР больше нет."
+set_flags = ["ussr_gone"]

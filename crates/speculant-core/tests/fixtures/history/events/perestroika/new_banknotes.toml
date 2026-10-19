@@ -1,0 +1,10 @@
+title = "Новые деньги"
+weight = 1
+text = "В кассе дают новые купюры."
+
+[conditions]
+timeline = "denomination"
+
+[[choices]]
+text = "Пересчитать"
+outcome = "Нулей стало меньше."

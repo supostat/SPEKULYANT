@@ -1,0 +1,14 @@
+title = "Ночная торговля"
+default = "нет"
+
+[[options]]
+label = "нет"
+
+[[options]]
+label = "пиво"
+revenue = 9
+
+[[options]]
+label = "водка «Рояль»"
+revenue = 18
+raid = 1

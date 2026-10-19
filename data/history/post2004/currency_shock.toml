@@ -1,0 +1,13 @@
+title = "Валютный шок"
+weight = 3
+rest_days = 1095
+scale = { from = 0.6, to = 1.6 }
+
+[[outcomes]]
+weight = 1
+news = "Рубль рухнул за неделю: импорт подорожал."
+price_shocks = [
+  { good = "sneakers", factor = 1.3, days = 120 },
+  { good = "cigarettes", factor = 1.3, days = 120 },
+]
+set_flags = ["currency_shock"]

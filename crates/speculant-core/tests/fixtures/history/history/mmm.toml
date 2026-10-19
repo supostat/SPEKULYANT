@@ -1,0 +1,13 @@
+# Альтернативные исходы: пирамида рухнет или продержится.
+title = "МММ"
+window = { from = "1990-06-01", until = "1990-09-01" }
+
+[[outcomes]]
+weight = 3
+news = "«МММ» прекратила выплаты."
+set_flags = ["mmm_collapsed"]
+
+[[outcomes]]
+weight = 1
+news = "«МММ» держится."
+set_flags = ["mmm_lasted"]

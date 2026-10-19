@@ -1,0 +1,13 @@
+title = "Дефолт"
+window = { from = "1998-08-10", until = "1998-09-01" }
+scale = { from = 0.8, to = 1.4 }
+
+[[outcomes]]
+weight = 1
+news = "Дефолт: рубль упал втрое, банки закрыли двери."
+price_shocks = [
+  { good = "sneakers", factor = 1.6, days = 120 },
+  { good = "cigarettes", factor = 1.6, days = 120 },
+  { good = "videocassette", factor = 1.6, days = 120 },
+]
+set_flags = ["default_1998"]

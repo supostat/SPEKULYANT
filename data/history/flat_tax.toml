@@ -1,0 +1,7 @@
+title = "Плоский налог"
+window = { from = "2000-12-01", until = "2001-02-01" }
+
+[[outcomes]]
+weight = 1
+news = "Плоский налог: тринадцать процентов для всех."
+set_flags = ["flat_tax"]

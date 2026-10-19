@@ -1,0 +1,8 @@
+title = "Банковский кризис"
+weight = 2
+rest_days = 1460
+
+[[outcomes]]
+weight = 1
+news = "Банки закрывают двери: вкладчики стоят в очередях."
+set_flags = ["bank_crisis"]

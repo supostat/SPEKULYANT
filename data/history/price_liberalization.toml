@@ -1,0 +1,7 @@
+title = "Либерализация цен"
+window = { from = "1992-01-02", until = "1992-01-16" }
+
+[[outcomes]]
+weight = 1
+news = "Цены отпущены: полки полны, кошельки пусты."
+set_flags = ["prices_free"]

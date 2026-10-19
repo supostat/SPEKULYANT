@@ -3,14 +3,15 @@ use std::collections::{BTreeMap, BTreeSet};
 use crate::business::Incident;
 use crate::content::{Choice, CityId, Conditions, Consequences, Content, Event, FlagId, NpcId};
 use crate::economy::{Currency, Money, Real, Trader};
+use crate::history::Timeline;
 use crate::npc::Rivals;
 use crate::reputation::{Contact, FactionReputation};
 use crate::time::GameDate;
 use crate::zone::Zone;
 
 /// Положение дел, над которым считаются условия событий (§10.1): день, город (в пути — город
-/// отправления), дорога, деньги и карман, репутация, связи, соперники, флаги прошлых решений и
-/// зона, если игрок сидит.
+/// отправления), дорога, деньги и карман, репутация, связи, соперники, флаги прошлых решений,
+/// таймлайн мира и зона, если игрок сидит.
 pub struct Situation<'a> {
     pub content: &'a Content,
     pub today: GameDate,
@@ -21,6 +22,7 @@ pub struct Situation<'a> {
     pub contacts: &'a BTreeMap<NpcId, Contact>,
     pub rivals: &'a Rivals,
     pub flags: &'a BTreeSet<FlagId>,
+    pub timeline: &'a Timeline,
     pub zone: Option<&'a Zone>,
 }
 
@@ -62,8 +64,8 @@ impl Situation<'_> {
     }
 
     /// Условия выполнены; пустые условия выполняются всегда. Окно дат включает `from` и не
-    /// включает `until`. Условие авторитета выполняется только в зоне. Узлы таймлайна появятся с
-    /// генератором истории, до тех пор условие `timeline` не выполняется.
+    /// включает `until`. Условие авторитета выполняется только в зоне, условие `timeline` — когда
+    /// узел таймлайна уже случился.
     pub fn allows(&self, conditions: &Conditions) -> bool {
         let epoch = &self.content.time.epochs.epoch_on(self.today).id;
         let cash = self.player.money().cash();
@@ -120,7 +122,10 @@ impl Situation<'_> {
             && npc_reachable
             && rival_present
             && authority_fits
-            && conditions.timeline.is_none()
+            && conditions
+                .timeline
+                .as_ref()
+                .is_none_or(|node| self.timeline.has_happened(node, self.today))
     }
 
     /// Деньги, которые выбор забирает, есть наличными, товар — в кармане, а сигареты и чай — в

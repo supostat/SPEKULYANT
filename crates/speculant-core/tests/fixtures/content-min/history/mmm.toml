@@ -1,0 +1,12 @@
+title = "МММ"
+window = { from = "1984-07-01", until = "1984-09-01" }
+scale = { from = 0.8, to = 1.2 }
+
+[[outcomes]]
+weight = 3
+news = "«МММ» прекратила выплаты."
+set_flags = ["mmm_collapsed"]
+
+[[outcomes]]
+weight = 1
+news = "«МММ» держится."

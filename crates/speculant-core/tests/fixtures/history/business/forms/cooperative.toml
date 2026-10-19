@@ -1,0 +1,4 @@
+title = "Кооператив"
+from = "1988-05-26"
+racket_share = 0.6
+tax = 0.05

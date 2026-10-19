@@ -64,7 +64,7 @@ content_id!(
     FactionId
 );
 content_id!(
-    /// Узел исторического таймлайна (§3.6); узлы описывает генератор истории.
+    /// Узел таймлайна (§3.6) — имя файла в `data/history/` или шаблона в `data/history/post2004/`.
     TimelineNodeId
 );
 content_id!(

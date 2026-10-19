@@ -7,12 +7,14 @@ use super::validation;
 use super::{
     Biography, BiographyId, BusinessForm, BusinessFormId, BusinessKind, BusinessKindId, City,
     CityId, Content, ContentError, ContentFile, Ending, EndingId, EpochId, EpochProfile, Event,
-    EventId, Faction, FactionId, Good, GoodId, Habit, HabitId, Housing, HousingId, MoneyPlace,
-    MoneyPlaceId, NpcId, NpcTemplate, Policy, Route, ZoneService, ZoneServiceId,
+    EventId, Faction, FactionId, Good, GoodId, Habit, HabitId, HistoryNode, HistoryTemplate,
+    Housing, HousingId, MoneyPlace, MoneyPlaceId, NpcId, NpcTemplate, Policy, Route,
+    TimelineNodeId, ZoneService, ZoneServiceId,
 };
 use crate::business::{BusinessRules, PolicyKind};
 use crate::economy::{MarketRules, MoneyRules};
 use crate::events::EventRules;
+use crate::history::HistoryGenerator;
 use crate::life::LifeRules;
 use crate::npc::RivalRules;
 use crate::reputation::ReputationRules;
@@ -29,6 +31,7 @@ const RIVALS_FILE: &str = "rivals.toml";
 const BUSINESS_RULES_FILE: &str = "business/rules.toml";
 const LIFE_FILE: &str = "life.toml";
 const ZONE_RULES_FILE: &str = "zone/rules.toml";
+const HISTORY_GENERATOR_FILE: &str = "history/generator.toml";
 const TOML_EXTENSION: &str = ".toml";
 
 /// Сущность, прочитанная из файла: идентификатор из имени файла и сам файл для мест ошибок.
@@ -50,6 +53,7 @@ pub(super) struct Parsed<'a> {
     pub business_rules: Option<(&'a ContentFile, BusinessRules)>,
     pub life: Option<(&'a ContentFile, LifeRules)>,
     pub zone: Option<(&'a ContentFile, ZoneRules)>,
+    pub history_generator: Option<(&'a ContentFile, HistoryGenerator)>,
     pub epochs: Vec<Entry<'a, EpochProfile>>,
     pub goods: Vec<Entry<'a, Good>>,
     pub cities: Vec<Entry<'a, City>>,
@@ -66,6 +70,8 @@ pub(super) struct Parsed<'a> {
     pub habits: Vec<Entry<'a, Habit>>,
     pub events: Vec<Entry<'a, Event>>,
     pub zone_services: Vec<Entry<'a, ZoneService>>,
+    pub history: Vec<Entry<'a, HistoryNode>>,
+    pub history_templates: Vec<Entry<'a, HistoryTemplate>>,
 }
 
 #[derive(Deserialize)]
@@ -134,6 +140,13 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
     if parsed.zone.is_none() {
         errors.push(ContentError::new(ZONE_RULES_FILE, None, "нет правил зоны"));
     }
+    if parsed.history_generator.is_none() {
+        errors.push(ContentError::new(
+            HISTORY_GENERATOR_FILE,
+            None,
+            "нет правил генератора песочницы",
+        ));
+    }
     let mut events = BTreeMap::new();
     for entry in &parsed.events {
         if events
@@ -160,6 +173,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         Some((_, business)),
         Some((_, life)),
         Some((_, zone)),
+        Some((_, history_generator)),
     ) = (
         parsed.market,
         parsed.money,
@@ -169,6 +183,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         parsed.business_rules,
         parsed.life,
         parsed.zone,
+        parsed.history_generator,
     )
     else {
         unreachable!("без любого из файлов правил загрузка вернула ошибку выше");
@@ -183,6 +198,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         business,
         life,
         zone,
+        history_generator,
         epochs: keyed(&parsed.epochs, EpochId::new),
         goods: keyed(&parsed.goods, GoodId::new),
         cities: keyed(&parsed.cities, CityId::new),
@@ -207,6 +223,8 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         habits: keyed(&parsed.habits, HabitId::new),
         events,
         zone_services: keyed(&parsed.zone_services, ZoneServiceId::new),
+        history: keyed(&parsed.history, TimelineNodeId::new),
+        history_templates: keyed(&parsed.history_templates, TimelineNodeId::new),
     })
 }
 
@@ -282,6 +300,15 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         ["biographies", name] => push_entry(file, name, &mut parsed.biographies, errors),
         ["npc", name] => push_entry(file, name, &mut parsed.npcs, errors),
         ["events", epoch, name] => push_event(file, name, Some(EpochId::new(*epoch)), parsed, errors),
+        ["history", "generator.toml"] => {
+            if let Some(rules) = parse::<HistoryGenerator>(file, errors) {
+                parsed.history_generator = Some((file, rules));
+            }
+        }
+        ["history", "post2004", name] => {
+            push_entry(file, name, &mut parsed.history_templates, errors)
+        }
+        ["history", name] => push_entry(file, name, &mut parsed.history, errors),
         ["zone", "rules.toml"] => {
             if let Some(rules) = parse::<ZoneRules>(file, errors) {
                 parsed.zone = Some((file, rules));
@@ -292,7 +319,7 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         _ => errors.push(ContentError::new(
             &file.path,
             None,
-            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, {LIFE_FILE}, housing/, endings/, epochs/, biographies/, npc/, events/<эпоха>/, {ZONE_RULES_FILE}, zone/services/, zone/events/)"),
+            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, {LIFE_FILE}, housing/, endings/, epochs/, biographies/, npc/, events/<эпоха>/, {ZONE_RULES_FILE}, zone/services/, zone/events/, {HISTORY_GENERATOR_FILE}, history/, history/post2004/)"),
         )),
     }
 }

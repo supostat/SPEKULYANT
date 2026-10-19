@@ -1,0 +1,7 @@
+title = "Закон о кооперации"
+window = { from = "1988-05-01", until = "1988-07-01" }
+
+[[outcomes]]
+weight = 1
+news = "Принят закон о кооперации: торговать можно, если ты кооператив."
+set_flags = ["cooperatives_legal"]
