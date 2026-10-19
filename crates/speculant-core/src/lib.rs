@@ -1,5 +1,5 @@
 //! Ядро симуляции «Спекулянта»: время, экономика, репутация, события, поездки, соперники, дела,
-//! жизнь персонажа, зона, история по сиду.
+//! жизнь персонажа, зона, история по сиду, метапрогрессия и сохранения.
 //! Крейт не зависит от Godot: его гоняют симулятор, валидатор и мост gdext.
 //! Наружу ядро отдаёт `StateView` — снимок мира, готовый к показу, — и принимает `Command`.
 
@@ -12,9 +12,11 @@ pub mod events;
 pub mod game;
 pub mod history;
 pub mod life;
+pub mod meta;
 pub mod npc;
 pub mod reputation;
 pub mod rng;
+pub mod save;
 pub mod time;
 pub mod travel;
 pub mod view;

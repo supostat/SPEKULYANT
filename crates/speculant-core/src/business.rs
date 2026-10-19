@@ -33,6 +33,7 @@ pub use policies::Policies;
 pub use policy_kind::PolicyKind;
 
 use rand_chacha::ChaCha8Rng;
+use serde::{Deserialize, Serialize};
 
 use crate::content::{BusinessForm, BusinessKind, Content};
 use crate::economy::{Currency, Markets, Money, Real};
@@ -46,7 +47,7 @@ const WHOLE_INCOME: f64 = 1.0;
 
 /// Дело игрока (§7): тип в городе, точки, варианты политик, управляющий, закрытие до даты, учёт
 /// месяца и последний отчёт. Без управляющего дело стоит и только платит аренду.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Business {
     id: BusinessId,
     points: u32,

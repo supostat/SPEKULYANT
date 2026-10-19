@@ -1,8 +1,9 @@
 //! Снимок мира для интерфейса: состояние жизни строками, готовыми к показу (§13.3). Подсистемы,
-//! которых ещё нет в мире (пейджер, книжка), отдают пустые окна.
+//! которых ещё нет в мире (пейджер), отдают пустые окна.
 
 mod business;
 mod life;
+mod meta;
 mod zone;
 
 use std::cmp::Ordering;
@@ -39,41 +40,53 @@ const AWAY_UNTIL: &str = "не на связи до";
 const LOST: &str = "потерян";
 
 pub(super) fn snapshot(game: &Game) -> StateView {
-    let today = game.clock.today();
+    let today = game.world.clock.today();
     StateView {
-        screen: game.screen,
+        screen: game.world.screen,
         header: header(game, today),
         character: life::character(game, today),
         homes: life::homes(game, today),
         exits: life::exits(game, today),
         time: TimeView {
-            speed: game.clock.speed(),
-            paused: game.clock.is_paused()
-                || game.events.pending().is_some()
-                || game.summary.is_some(),
-            fast_forward: game.clock.fast_forward(),
+            speed: game.world.clock.speed(),
+            paused: game.world.clock.is_paused()
+                || game.world.events.pending().is_some()
+                || game.world.summary.is_some(),
+            fast_forward: game.world.clock.fast_forward(),
         },
         market: market(game, today),
         travel: travel(game, today),
         pocket: pocket(game, today),
-        rumors: Vec::new(),
-        messages: game.messages.clone(),
+        rumors: meta::rumors(game, today),
+        messages: game.world.messages.clone(),
         pending_event: pending_event(game, today),
         pager: None,
         businesses: business::businesses(game, today),
         candidates: business::candidates(game, today),
         business_kinds: business::kinds(game, today),
         contacts: game
+            .world
             .contacts
             .values()
             .map(|contact| contact_view(game, contact, today))
-            .chain(game.rivals.iter().map(|rival| rival_view(game, rival)))
+            .chain(
+                game.world
+                    .rivals
+                    .iter()
+                    .map(|rival| rival_view(game, rival)),
+            )
             .collect(),
         factions: factions(game, today),
         money: money(game, today),
-        notebook: Vec::new(),
-        zone: game.zone.as_ref().map(|zone| zone::zone(game, zone, today)),
+        notebook: meta::notebook(game),
+        records: meta::records(game),
+        zone: game
+            .world
+            .zone
+            .as_ref()
+            .map(|zone| zone::zone(game, zone, today)),
         summary: game
+            .world
             .summary
             .as_ref()
             .map(|summary| life::summary(game, summary)),
@@ -83,7 +96,7 @@ pub(super) fn snapshot(game: &Game) -> StateView {
 
 /// Событие, остановившее время: текст и выборы с подстановками, а после выбора — исход.
 fn pending_event(game: &Game, today: GameDate) -> Option<EventView> {
-    let pending = game.events.pending()?;
+    let pending = game.world.events.pending()?;
     let event = &game.content.events[&pending.event];
     let situation = game.situation(today);
     let substitutions = &pending.substitutions;
@@ -111,7 +124,7 @@ fn pending_event(game: &Game, today: GameDate) -> Option<EventView> {
 /// Шапка: город, дата, наличные; чеки, доллары и курс — когда они есть у игрока.
 fn header(game: &Game, today: GameDate) -> HeaderView {
     let rules = &game.content.money;
-    let wallet = game.player.money();
+    let wallet = game.world.player.money();
     let mut money = vec![format!(
         "{CASH_LABEL}: {}",
         rules.format_money(wallet.cash(), today)
@@ -131,10 +144,10 @@ fn header(game: &Game, today: GameDate) -> HeaderView {
             rate(rules, Currency::Dollar, today)
         ));
     }
-    let city = match (&game.journey, &game.zone) {
+    let city = match (&game.world.journey, &game.world.zone) {
         (_, Some(_)) => IN_ZONE.to_owned(),
         (Some(_), None) => ON_THE_ROAD.to_owned(),
-        (None, None) => game.content.cities[&game.city].name.clone(),
+        (None, None) => game.content.cities[&game.world.city].name.clone(),
     };
     HeaderView {
         city,
@@ -147,13 +160,13 @@ fn header(game: &Game, today: GameDate) -> HeaderView {
 /// дороге и в зоне толкучки нет.
 fn market(game: &Game, today: GameDate) -> MarketView {
     let content = &game.content;
-    if game.zone.is_some() {
+    if game.world.zone.is_some() {
         return MarketView {
             place: content.camp_on(today).title.clone(),
             goods: Vec::new(),
         };
     }
-    if let Some(journey) = &game.journey {
+    if let Some(journey) = &game.world.journey {
         return MarketView {
             place: format!(
                 "{ON_THE_ROAD}: {} — {}",
@@ -166,7 +179,10 @@ fn market(game: &Game, today: GameDate) -> MarketView {
         .goods
         .iter()
         .filter_map(|(id, good)| {
-            let quote = game.markets.quote(content, &game.city, id, today)?;
+            let quote = game
+                .world
+                .markets
+                .quote(content, &game.world.city, id, today)?;
             Some(MarketRowView {
                 good: id.to_string(),
                 name: good.name.clone(),
@@ -177,7 +193,7 @@ fn market(game: &Game, today: GameDate) -> MarketView {
         })
         .collect();
     MarketView {
-        place: content.cities[&game.city].market.clone(),
+        place: content.cities[&game.world.city].market.clone(),
         goods,
     }
 }
@@ -186,13 +202,13 @@ fn market(game: &Game, today: GameDate) -> MarketView {
 /// и ценой в номинале дня. Закрытые города не показываются, из зоны не ездят.
 fn travel(game: &Game, today: GameDate) -> TravelView {
     let content = &game.content;
-    if game.zone.is_some() {
+    if game.world.zone.is_some() {
         return TravelView {
             journey: None,
             destinations: Vec::new(),
         };
     }
-    if let Some(journey) = &game.journey {
+    if let Some(journey) = &game.world.journey {
         let days_left = journey.arrives.day_index() - today.day_index();
         return TravelView {
             journey: Some(JourneyView {
@@ -205,15 +221,16 @@ fn travel(game: &Game, today: GameDate) -> TravelView {
             destinations: Vec::new(),
         };
     }
-    let cash = game.player.money().cash();
+    let cash = game.world.player.money().cash();
     let someone_helps = game
+        .world
         .contacts
         .values()
         .any(|contact| contact.refusal(content.reputation, today).is_none());
     let destinations = content
         .routes
         .iter()
-        .filter(|route| route.from == game.city)
+        .filter(|route| route.from == game.world.city)
         .filter_map(|route| {
             let access = Access::of(route, content, today);
             if access == Access::Closed {
@@ -241,6 +258,7 @@ fn travel(game: &Game, today: GameDate) -> TravelView {
 fn pocket(game: &Game, today: GameDate) -> PocketView {
     let content = &game.content;
     let mut items: Vec<PocketItemView> = game
+        .world
         .player
         .pocket()
         .goods()
@@ -252,7 +270,7 @@ fn pocket(game: &Game, today: GameDate) -> PocketView {
             }
         })
         .collect();
-    let wallet = game.player.money();
+    let wallet = game.world.player.money();
     let checks = wallet.holdings(Currency::Checks);
     if !checks.is_zero() {
         items.push(PocketItemView {
@@ -268,6 +286,7 @@ fn pocket(game: &Game, today: GameDate) -> PocketView {
         });
     }
     let reachable = game
+        .world
         .contacts
         .values()
         .filter(|contact| !contact.is_lost())
@@ -282,6 +301,7 @@ fn pocket(game: &Game, today: GameDate) -> PocketView {
         danger: Some(LevelView {
             label: threat.label.clone(),
             level: game
+                .world
                 .reputation
                 .hostility(&threat.faction, content.reputation),
             scale: content.reputation.limit,
@@ -340,7 +360,7 @@ fn factions(game: &Game, today: GameDate) -> Vec<FactionView> {
         .map(|(id, faction)| FactionView {
             faction: id.to_string(),
             title: faction.title.clone(),
-            level: game.reputation.level(id),
+            level: game.world.reputation.level(id),
             limit: content.reputation.limit,
         })
         .collect()
@@ -349,7 +369,7 @@ fn factions(game: &Game, today: GameDate) -> Vec<FactionView> {
 /// Деньги: места, куда сейчас можно положить или где что-то лежит, и курсы их валют.
 fn money(game: &Game, today: GameDate) -> MoneyView {
     let content = &game.content;
-    let wallet = game.player.money();
+    let wallet = game.world.player.money();
     let shown: Vec<_> = content
         .money_places
         .iter()

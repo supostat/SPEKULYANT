@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 use super::ReputationRules;
@@ -5,7 +6,7 @@ use crate::content::{Faction, FactionId};
 
 /// Репутация по фракциям (§9): целый уровень у каждой, от поступков вверх или вниз, а без них —
 /// дрейф на уровень к нулю раз в столько дней, сколько задаёт эпоха.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FactionReputation {
     levels: BTreeMap<FactionId, i32>,
     days_since_drift: u32,

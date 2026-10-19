@@ -73,14 +73,17 @@ impl Game {
     pub(super) fn live_character(&mut self, date: GameDate) -> bool {
         let content = Arc::clone(&self.content);
         let rules = &content.life;
-        if self.character.has_birthday(date) && self.character.age_on(date) >= rules.aging_from {
-            self.character
+        if self.world.character.has_birthday(date)
+            && self.world.character.age_on(date) >= rules.aging_from
+        {
+            self.world
+                .character
                 .change_health(-rules.aging_per_year, rules.health_max);
         }
         if date.day_of_month() == 1 {
             self.lose_stash(&content, date);
         }
-        if self.character.health() <= 0 {
+        if self.world.character.health() <= 0 {
             self.end_life(&rules.health_ending, date);
             return true;
         }
@@ -89,12 +92,12 @@ impl Game {
 
     /// Кража или пожар с шансом жилья в месяц уносят долю денег, лежащих дома.
     fn lose_stash(&mut self, content: &Content, date: GameDate) {
-        let housing = &content.housing[self.character.housing()];
-        let struck = EventEngine::roll(self.rng.stream(LIFE_STREAM), housing.stash_risk);
+        let housing = &content.housing[self.world.character.housing()];
+        let struck = EventEngine::roll(self.world.rng.stream(LIFE_STREAM), housing.stash_risk);
         let Some((place, _)) = content.money_places.iter().find(|(_, place)| place.home) else {
             return;
         };
-        let balance = self.player.money().balance(place);
+        let balance = self.world.player.money().balance(place);
         if !struck || balance.is_zero() {
             return;
         }
@@ -102,7 +105,7 @@ impl Game {
             balance.currency(),
             (balance.minor_units() as f64 * content.life.stash_loss_share).round() as i64,
         );
-        self.player.lose_from(place, lost);
+        self.world.player.lose_from(place, lost);
         let shown = content.money.format_money(lost, date);
         self.log(format!("{}: {STASH_LOST} {shown}", housing.title));
     }
@@ -119,7 +122,7 @@ impl Game {
             .ok_or_else(|| CommandError::UnknownHousing {
                 housing: housing.to_owned(),
             })?;
-        if self.character.housing() == &id {
+        if self.world.character.housing() == &id {
             return Err(CommandError::AlreadyLivingThere {
                 title: data.title.clone(),
             });
@@ -138,14 +141,14 @@ impl Game {
         let resale = self.resale_of_home(today);
         let message = if price.covers(resale) {
             let due = price.minus(resale);
-            let cash = self.player.money().cash();
+            let cash = self.world.player.money().cash();
             if !cash.covers(due) {
                 return Err(CommandError::NotEnoughCash {
                     needed: content.money.format_money(due, today),
                     cash: content.money.format_money(cash, today),
                 });
             }
-            self.player.pay_cash(due);
+            self.world.player.pay_cash(due);
             format!(
                 "{MOVED}: {}, {PAID_EXTRA} {}",
                 data.title,
@@ -153,14 +156,14 @@ impl Game {
             )
         } else {
             let refund = resale.minus(price);
-            self.player.receive_cash(refund);
+            self.world.player.receive_cash(refund);
             format!(
                 "{MOVED}: {}, {GOT_BACK} {}",
                 data.title,
                 content.money.format_money(refund, today)
             )
         };
-        self.character.move_to(id);
+        self.world.character.move_to(id);
         self.log(message);
         Ok(())
     }
@@ -168,15 +171,14 @@ impl Game {
     /// Во что идёт в зачёт нынешнее жильё: доля его цены; жильё без цены — ни во что.
     pub(super) fn resale_of_home(&self, today: GameDate) -> Money {
         let content = &self.content;
-        content.housing[self.character.housing()].price.map_or(
-            Money::zero(Currency::Ruble),
-            |price| {
+        content.housing[self.world.character.housing()]
+            .price
+            .map_or(Money::zero(Currency::Ruble), |price| {
                 let share = (price.kopecks() as f64 * content.life.resale_share).round() as i64;
                 content
                     .money
                     .from_real(Real::from_kopecks(share), Currency::Ruble, today)
-            },
-        )
+            })
     }
 
     /// Добровольный уход: эмиграция или покой, когда он открыт.
@@ -200,16 +202,17 @@ impl Game {
         Ok(())
     }
 
-    /// Финал: итоги снимаются в этот день, биографии, чей флаг жизнь поставила, открываются для
-    /// следующих жизней, время останавливается. Если финал пришёл последствием события, экран
-    /// итогов откроется, когда игрок прочтёт исход.
+    /// Финал: итоги снимаются в этот день, открытия, знания и место в рекордах уходят в
+    /// метапрогрессию — и на диск, если он есть, — время останавливается. Если финал пришёл
+    /// последствием события, экран итогов откроется, когда игрок прочтёт исход.
     pub(super) fn end_life(&mut self, ending: &EndingId, date: GameDate) {
         let summary = self.summarize(ending, date);
-        self.unlocked.extend(summary.discoveries.iter().cloned());
-        self.summary = Some(summary);
-        self.clock.stop_fast_forward();
-        if self.events.pending().is_none() {
-            self.screen = Screen::Summary;
+        self.remember_life(&summary);
+        self.world.summary = Some(summary);
+        self.store_after_life();
+        self.world.clock.stop_fast_forward();
+        if self.world.events.pending().is_none() {
+            self.world.screen = Screen::Summary;
         }
     }
 
@@ -217,25 +220,28 @@ impl Game {
     /// открытия и жильё по цене.
     pub(super) fn capital(&self, date: GameDate) -> Real {
         let content = &self.content;
-        let money = self.player.money().real_total(&content.money, date);
+        let money = self.world.player.money().real_total(&content.money, date);
         let goods: f64 = self
+            .world
             .player
             .pocket()
             .goods()
             .filter_map(|(good, quantity)| {
-                self.markets
-                    .normal_kopecks(content, &self.city, good, date)
+                self.world
+                    .markets
+                    .normal_kopecks(content, &self.world.city, good, date)
                     .map(|price| price * f64::from(quantity))
             })
             .sum();
         let businesses: i64 = self
+            .world
             .businesses
             .values()
             .map(|business| {
                 business.kind(content).point_cost.kopecks() * i64::from(business.points())
             })
             .sum();
-        let housing = content.housing[self.character.housing()]
+        let housing = content.housing[self.world.character.housing()]
             .price
             .map_or(0, Real::kopecks);
         Real::from_kopecks(money.kopecks() + goods.round() as i64 + businesses + housing)
@@ -254,8 +260,8 @@ impl Game {
             .map(|(_, source)| source)
             .expect("у финала заметка для каждой эпохи — это проверяет загрузка");
         let pages = u64::from(content.life.newspaper_pages);
-        let page = 1 + self.rng.stream(LIFE_STREAM).next_u64() % pages;
-        let character = &self.character;
+        let page = 1 + self.world.rng.stream(LIFE_STREAM).next_u64() % pages;
+        let character = &self.world.character;
         let biography = &content.biographies[character.biography()];
         let fill = |text: &str| {
             text.replace(NAME_UPPER, &character.name().to_uppercase())
@@ -266,7 +272,7 @@ impl Game {
                 .replace(AGE, &character.age_on(date).to_string())
         };
         let mut text = vec![biography.obituary.trim().to_owned()];
-        if let Some((opened, kind)) = self.chronicle.first_business() {
+        if let Some((opened, kind)) = self.world.chronicle.first_business() {
             text.push(
                 content
                     .life
@@ -276,13 +282,13 @@ impl Game {
             );
         }
         text.push(fill(data.text.trim()));
-        let flags = self.events.flags();
+        let flags = self.world.events.flags();
         let discoveries = content
             .biographies
             .iter()
             .filter(|(id, biography)| {
                 !biography.starts_unlocked
-                    && !self.unlocked.contains(*id)
+                    && !self.meta.unlocked().contains(*id)
                     && biography
                         .unlocked_by_flag
                         .as_ref()
@@ -300,9 +306,10 @@ impl Game {
             headline: fill(&data.headline),
             text: text.join(" "),
             capital: self.capital(date),
-            best_deal: self.chronicle.best_deal().cloned(),
-            worst_deal: self.chronicle.worst_deal().cloned(),
+            best_deal: self.world.chronicle.best_deal().cloned(),
+            worst_deal: self.world.chronicle.worst_deal().cloned(),
             businesses: self
+                .world
                 .businesses
                 .values()
                 .map(|business| business.name(&content))

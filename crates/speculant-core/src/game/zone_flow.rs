@@ -36,7 +36,7 @@ impl Game {
     pub(super) fn imprison(&mut self, months: u32, today: GameDate) {
         let content = Arc::clone(&self.content);
         let rules = &content.zone;
-        if let Some(zone) = &mut self.zone {
+        if let Some(zone) = &mut self.world.zone {
             zone.change_term(i32::try_from(months).expect("срок в месяцах мал"));
             let until = zone.sentence().until();
             self.log(format!(
@@ -51,17 +51,17 @@ impl Game {
             self.end_life(&rules.life_ending, today);
             return;
         }
-        self.journey = None;
-        self.zone = Some(Zone::new(Sentence::new(today, months), rules));
-        self.clock.stop_fast_forward();
-        self.clock.set_zone_pace(rules.week_days);
+        self.world.journey = None;
+        self.world.zone = Some(Zone::new(Sentence::new(today, months), rules));
+        self.world.clock.stop_fast_forward();
+        self.world.clock.set_zone_pace(rules.week_days);
         self.log(format!(
             "{SENTENCED}: {}, {}",
             term(months),
             content.camp_on(today).title
         ));
-        if self.events.pending().is_none() {
-            self.screen = Screen::Zone;
+        if self.world.events.pending().is_none() {
+            self.world.screen = Screen::Zone;
         }
     }
 
@@ -70,6 +70,7 @@ impl Game {
         let content = Arc::clone(&self.content);
         let rules = &content.zone;
         let months = self
+            .world
             .zone
             .as_ref()
             .expect("срок растёт только в зоне")
@@ -85,6 +86,7 @@ impl Game {
     /// безделье растит авторитет, зона подтачивает здоровье и может случиться событие зоны.
     pub(super) fn live_zone_day(&mut self, date: GameDate) -> bool {
         let sentence = *self
+            .world
             .zone
             .as_ref()
             .expect("день зоны — только в зоне")
@@ -105,17 +107,26 @@ impl Game {
     fn live_zone_week(&mut self, date: GameDate) -> bool {
         let content = Arc::clone(&self.content);
         let rules = &content.zone;
-        let zone = self.zone.as_mut().expect("неделя зоны — только в зоне");
+        let zone = self
+            .world
+            .zone
+            .as_mut()
+            .expect("неделя зоны — только в зоне");
         let before = zone.authority();
-        zone.live_week(rules, content.camp_on(date), self.rng.stream(ZONE_STREAM));
+        zone.live_week(
+            rules,
+            content.camp_on(date),
+            self.world.rng.stream(ZONE_STREAM),
+        );
         let authority = zone.authority();
         if authority != before {
             self.log(format!("{AUTHORITY}: {}", rules.authority_title(authority)));
         }
-        if EventEngine::roll(self.rng.stream(ZONE_STREAM), rules.health_loss_chance) {
-            self.character
+        if EventEngine::roll(self.world.rng.stream(ZONE_STREAM), rules.health_loss_chance) {
+            self.world
+                .character
                 .change_health(-rules.health_loss, content.life.health_max);
-            if self.character.health() <= 0 {
+            if self.world.character.health() <= 0 {
                 self.end_life(&content.life.health_ending, date);
                 return true;
             }
@@ -129,15 +140,16 @@ impl Game {
     pub(super) fn release(&mut self, release: Release) {
         let content = Arc::clone(&self.content);
         let rules = &content.zone;
-        let zone = self.zone.take().expect("выходят только из зоны");
-        self.clock.stop_fast_forward();
-        self.clock.set_freedom_pace();
-        self.clock.drop_carried_time();
-        self.events.set_flag(rules.release_flag.clone());
+        let zone = self.world.zone.take().expect("выходят только из зоны");
+        self.world.clock.stop_fast_forward();
+        self.world.clock.set_freedom_pace();
+        self.world.clock.drop_carried_time();
+        self.world.events.set_flag(rules.release_flag.clone());
         self.log(format!("{RELEASED} {}", release.title()));
         let ties = rules.ties[usize::from(zone.authority()) - 1];
         if ties != 0 {
-            self.reputation
+            self.world
+                .reputation
                 .change(&rules.ties_faction, ties, content.reputation);
             self.log(format!(
                 "{TIES}: {} {}",
@@ -145,8 +157,8 @@ impl Game {
                 signed(ties)
             ));
         }
-        if self.events.pending().is_none() {
-            self.screen = Screen::Market;
+        if self.world.events.pending().is_none() {
+            self.world.screen = Screen::Market;
         }
     }
 
@@ -160,6 +172,7 @@ impl Game {
         let content = Arc::clone(&self.content);
         let rules = &content.zone;
         let zone = self
+            .world
             .zone
             .as_mut()
             .expect("событие зоны с переменой в зоне приходит только в зоне");
@@ -186,7 +199,7 @@ impl Game {
             ));
             self.end_life_if_term_too_long(today);
         }
-        if change.amnesty && self.summary.is_none() {
+        if change.amnesty && self.world.summary.is_none() {
             self.release(Release::Amnesty);
             effects.push(format!("{RELEASED} {}", Release::Amnesty.title()));
         }
@@ -195,7 +208,8 @@ impl Game {
     /// На промзону или нет: работа платит сигаретами и пишет трудовую характеристику для УДО, а
     /// безделье растит авторитет.
     pub(super) fn set_work(&mut self, work: bool) -> Result<(), CommandError> {
-        self.zone
+        self.world
+            .zone
             .as_mut()
             .ok_or(CommandError::NotInZone)?
             .set_working(work);
@@ -205,7 +219,7 @@ impl Game {
     /// Услуга за сигареты и чай: здоровье — в пределах шкалы, авторитет — в пределах уровней.
     pub(super) fn use_service(&mut self, service: &str) -> Result<(), CommandError> {
         let content = Arc::clone(&self.content);
-        let zone = self.zone.as_mut().ok_or(CommandError::NotInZone)?;
+        let zone = self.world.zone.as_mut().ok_or(CommandError::NotInZone)?;
         let data = content
             .zone_services
             .get(&ZoneServiceId::new(service))
@@ -221,7 +235,8 @@ impl Game {
         }
         zone.pay(data.price);
         zone.change_authority(data.authority, &content.zone);
-        self.character
+        self.world
+            .character
             .change_health(data.health, content.life.health_max);
         self.log(format!("{} {FOR} {}", data.title, packs(data.price)));
         Ok(())
@@ -233,7 +248,7 @@ impl Game {
         let content = Arc::clone(&self.content);
         let rules = &content.zone;
         let today = self.today();
-        let zone = self.zone.as_ref().ok_or(CommandError::NotInZone)?;
+        let zone = self.world.zone.as_ref().ok_or(CommandError::NotInZone)?;
         if today < zone.next_parcel() {
             return Err(CommandError::ParcelTooSoon {
                 from: zone.next_parcel().numeric(),
@@ -244,7 +259,8 @@ impl Game {
             .from_real(rules.parcel.price, Currency::Ruble, today);
         self.pay_from_cash(price, today)?;
         let next = rules.weeks_after(today, content.camp_on(today).parcel_weeks);
-        self.zone
+        self.world
+            .zone
             .as_mut()
             .expect("в зоне — проверено выше")
             .receive_parcel(rules.parcel.contents, next);
@@ -263,7 +279,7 @@ impl Game {
         let rules = &content.zone;
         let today = self.today();
         let camp = content.camp_on(today);
-        let zone = self.zone.as_ref().ok_or(CommandError::NotInZone)?;
+        let zone = self.world.zone.as_ref().ok_or(CommandError::NotInZone)?;
         let from = zone.parole_from(camp);
         if today < from {
             return Err(CommandError::ParoleTooEarly {
@@ -271,12 +287,13 @@ impl Game {
             });
         }
         let chance = zone.parole_chance(rules, camp);
-        if EventEngine::roll(self.rng.stream(ZONE_STREAM), chance) {
+        if EventEngine::roll(self.world.rng.stream(ZONE_STREAM), chance) {
             self.release(Release::Parole);
             return Ok(());
         }
         let next = rules.weeks_after(today, rules.parole_retry_weeks);
-        self.zone
+        self.world
+            .zone
             .as_mut()
             .expect("в зоне — проверено выше")
             .refuse_parole(next);
@@ -288,7 +305,7 @@ impl Game {
     pub(super) fn bribe_for_release(&mut self) -> Result<(), CommandError> {
         let content = Arc::clone(&self.content);
         let today = self.today();
-        if self.zone.is_none() {
+        if self.world.zone.is_none() {
             return Err(CommandError::NotInZone);
         }
         let camp = content.camp_on(today);
@@ -307,14 +324,14 @@ impl Game {
 
     /// Платит наличными на воле: передачу и взятку оплачивают из них.
     fn pay_from_cash(&mut self, price: Money, today: GameDate) -> Result<(), CommandError> {
-        let cash = self.player.money().cash();
+        let cash = self.world.player.money().cash();
         if !cash.covers(price) {
             return Err(CommandError::NotEnoughCash {
                 needed: self.content.money.format_money(price, today),
                 cash: self.content.money.format_money(cash, today),
             });
         }
-        self.player.pay_cash(price);
+        self.world.player.pay_cash(price);
         Ok(())
     }
 }

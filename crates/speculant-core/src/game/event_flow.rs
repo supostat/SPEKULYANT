@@ -23,11 +23,11 @@ impl Game {
                 event: event.to_string(),
             });
         }
-        if self.events.pending().is_some() {
+        if self.world.events.pending().is_some() {
             return Err(CommandError::EventPending);
         }
         let today = self.today();
-        if !self.events.is_ready(event, &self.situation(today)) {
+        if !self.world.events.is_ready(event, &self.situation(today)) {
             return Err(CommandError::EventNotReady {
                 event: event.to_string(),
             });
@@ -47,12 +47,12 @@ impl Game {
     /// остальные готовые ждут завтрашнего дня, а неготовые пропадают — момент упущен.
     pub(super) fn start_due_follow_up(&mut self, date: GameDate) -> bool {
         let mut started = false;
-        for event in self.events.take_due(date) {
-            if !self.events.is_ready(&event, &self.situation(date)) {
+        for event in self.world.events.take_due(date) {
+            if !self.world.events.is_ready(&event, &self.situation(date)) {
                 continue;
             }
             if started {
-                self.events.schedule(event, date.next());
+                self.world.events.schedule(event, date.next());
             } else {
                 self.begin_event(event, date, None);
                 started = true;
@@ -64,11 +64,11 @@ impl Game {
     /// Розыгрыш: с шансом `chance` случается одно из готовых событий по весам; `true`, если
     /// случилось.
     pub(super) fn draw_event(&mut self, date: GameDate, chance: f64) -> bool {
-        if !EventEngine::roll(self.rng.stream(EVENTS_STREAM), chance) {
+        if !EventEngine::roll(self.world.rng.stream(EVENTS_STREAM), chance) {
             return false;
         }
-        let ready = self.events.ready_events(&self.situation(date));
-        match EventEngine::pick(self.rng.stream(EVENTS_STREAM), &ready) {
+        let ready = self.world.events.ready_events(&self.situation(date));
+        match EventEngine::pick(self.world.rng.stream(EVENTS_STREAM), &ready) {
             Some(event) => {
                 self.begin_event(event, date, None);
                 true
@@ -87,9 +87,10 @@ impl Game {
         date: GameDate,
     ) -> bool {
         let ready = self
+            .world
             .events
             .ready_incident_events(&self.situation(date), incident);
-        match EventEngine::pick(self.rng.stream(EVENTS_STREAM), &ready) {
+        match EventEngine::pick(self.world.rng.stream(EVENTS_STREAM), &ready) {
             Some(event) => {
                 self.begin_event(event, date, Some(business.clone()));
                 true
@@ -110,21 +111,21 @@ impl Game {
             .conditions
             .rival
             .and_then(|condition| {
-                let matching = self.rivals.matching(&condition, today);
+                let matching = self.world.rivals.matching(&condition, today);
                 let count = u64::try_from(matching.len()).expect("соперников меньше 2^64");
                 (count > 0).then(|| {
-                    let index = self.rng.stream(EVENTS_STREAM).next_u64() % count;
+                    let index = self.world.rng.stream(EVENTS_STREAM).next_u64() % count;
                     matching[usize::try_from(index).expect("номер меньше числа соперников")].clone()
                 })
             });
         let substitutions = Substitutions::for_event(
             &self.content.events[&event],
             rival.as_ref(),
-            business.as_ref().map(|id| &self.businesses[id]),
+            business.as_ref().map(|id| &self.world.businesses[id]),
             &self.situation(today),
-            &self.markets,
+            &self.world.markets,
         );
-        self.events.start(
+        self.world.events.start(
             PendingEvent {
                 event,
                 rival,
@@ -139,7 +140,11 @@ impl Game {
     /// Выбор `number` (от 1) в ожидающем событии: последствия применяются сразу, продолжения
     /// назначаются с их вероятностью, событие показывает исход.
     pub(super) fn choose(&mut self, number: usize) -> Result<(), CommandError> {
-        let pending = self.events.pending().ok_or(CommandError::NoPendingEvent)?;
+        let pending = self
+            .world
+            .events
+            .pending()
+            .ok_or(CommandError::NoPendingEvent)?;
         if pending.resolution.is_some() {
             return Err(CommandError::ChoiceAlreadyMade);
         }
@@ -167,14 +172,14 @@ impl Game {
             today,
         );
         for follow_up in &choice.follow_ups {
-            if EventEngine::roll(self.rng.stream(EVENTS_STREAM), follow_up.chance) {
-                self.events.schedule(
+            if EventEngine::roll(self.world.rng.stream(EVENTS_STREAM), follow_up.chance) {
+                self.world.events.schedule(
                     follow_up.event.clone(),
                     today.after_days(follow_up.after_days),
                 );
             }
         }
-        self.events.resolve(Resolution {
+        self.world.events.resolve(Resolution {
             choice: index,
             effects,
         });
@@ -185,21 +190,25 @@ impl Game {
     /// игрок наконец приезжает. Если исход кончил жизнь, открываются итоги; в зоне — экран зоны,
     /// а если исход выпустил на волю — рынок.
     pub(super) fn close_event(&mut self) -> Result<(), CommandError> {
-        let pending = self.events.pending().ok_or(CommandError::NoPendingEvent)?;
+        let pending = self
+            .world
+            .events
+            .pending()
+            .ok_or(CommandError::NoPendingEvent)?;
         if pending.resolution.is_none() {
             return Err(CommandError::ChoiceRequired);
         }
-        self.events.close();
-        if self.summary.is_some() {
-            self.screen = Screen::Summary;
+        self.world.events.close();
+        if self.world.summary.is_some() {
+            self.world.screen = Screen::Summary;
             return Ok(());
         }
-        if self.zone.is_some() {
-            self.screen = Screen::Zone;
+        if self.world.zone.is_some() {
+            self.world.screen = Screen::Zone;
             return Ok(());
         }
-        if self.screen == Screen::Zone {
-            self.screen = Screen::Market;
+        if self.world.screen == Screen::Zone {
+            self.world.screen = Screen::Market;
         }
         self.arrive_if_due(self.today());
         Ok(())

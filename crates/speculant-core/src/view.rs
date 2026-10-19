@@ -14,6 +14,7 @@ mod money;
 mod notebook;
 mod pager;
 mod pocket;
+mod records;
 mod screen;
 mod summary;
 mod time;
@@ -36,6 +37,7 @@ pub use money::{MoneyPlaceView, MoneyView};
 pub use notebook::NotebookEntryView;
 pub use pager::{PagerMessageView, PagerView};
 pub use pocket::{PocketItemView, PocketView};
+pub use records::{RecordView, RecordsView};
 pub use screen::Screen;
 pub use summary::{LifeSummaryView, SummaryLineView};
 pub use time::TimeView;
@@ -66,6 +68,7 @@ pub struct StateView {
     pub factions: Vec<FactionView>,
     pub money: MoneyView,
     pub notebook: Vec<NotebookEntryView>,
+    pub records: RecordsView,
     pub zone: Option<ZoneView>,
     pub summary: Option<LifeSummaryView>,
     pub biographies: Vec<BiographyView>,

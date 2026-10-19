@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use super::{Availability, ContactRefusal, ReputationRules};
 use crate::content::{ContactChange, NpcId};
 use crate::time::GameDate;
@@ -5,7 +7,7 @@ use crate::time::GameDate;
 /// Связь (§9): конкретный человек из шаблонов NPC. Отношение — расположение к игроку от поступков,
 /// долг — счёт услуг: больше нуля — он должен игроку, меньше — игрок ему. Обида помнится с того
 /// дня, как отношение ушло в минус (§8). История — что было между ними, по датам.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Contact {
     npc: NpcId,
     relation: i32,

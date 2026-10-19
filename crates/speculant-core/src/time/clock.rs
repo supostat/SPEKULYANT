@@ -9,7 +9,7 @@ const SHORTEST_DAY_MILLISECONDS: u64 = 1;
 const FREEDOM_PACE: u32 = 1;
 
 /// Длительность игрового дня в миллисекундах реального времени на каждой скорости и при перемотке.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ClockSettings {
     day_milliseconds: [u32; MAX_SPEED as usize],
     fast_forward_day_milliseconds: u32,
@@ -67,7 +67,7 @@ pub struct InvalidSpeed {
 
 /// Часы мира: превращают реальное время в игровые дни по скорости, стоят на паузе, перематывают.
 /// Темп — сколько дней проходит за длительность одного дня: в зоне это неделя (§12).
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Clock {
     settings: ClockSettings,
     today: GameDate,

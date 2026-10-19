@@ -18,6 +18,7 @@ stash_loss_share = 1.0     # кража или пожар уносят всё, �
 resale_share = 0.8         # прежнее жильё идёт в зачёт по 80% цены
 capital_in_dollars_from = "1992-01-01"
 newspaper_pages = 16
+records_size = 10          # строк в каждой таблице рекордов
 business_sentence = "В {year} году завёл своё дело — «{business}»."
 
 [names]

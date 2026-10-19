@@ -1,0 +1,6 @@
+name = "Вова Длинный"
+role = "делец"
+faction = "traders"
+strategy = "trader"
+capital = 50000
+description = "Не отстаёт от Миши."

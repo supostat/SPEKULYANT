@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use crate::content::{EmployeeTraits, HabitId, NpcId};
 
 /// Нанятый человек (§7.2): черты из шаблона на день найма — дальше они живут своей жизнью,
 /// хватку можно пропить.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Employee {
     npc: NpcId,
     skill: u8,

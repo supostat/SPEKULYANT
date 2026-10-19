@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use super::Situation;
 use crate::business::Business;
 use crate::content::{Event, NpcId};
@@ -12,7 +14,7 @@ const MANAGER: &str = "{manager}";
 /// Подстановки в тексте события (§10.1): имя участника — человека из условия `npc` или соперника,
 /// которого выбрал сид, — цена товара на толкучке города, сумма в номинале текущей валюты, дело
 /// происшествия и его управляющий. Что событие подставляет, проверяет загрузка контента.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Substitutions {
     npc: Option<String>,
     price: Option<String>,

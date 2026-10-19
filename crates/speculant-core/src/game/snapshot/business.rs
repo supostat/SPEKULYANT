@@ -34,7 +34,8 @@ const PLUS: char = '+';
 const MINUS: char = '−';
 
 pub(super) fn businesses(game: &Game, today: GameDate) -> Vec<BusinessView> {
-    game.businesses
+    game.world
+        .businesses
         .values()
         .map(|business| business_view(game, business, today))
         .collect()
@@ -43,7 +44,7 @@ pub(super) fn businesses(game: &Game, today: GameDate) -> Vec<BusinessView> {
 /// Кандидаты в управляющие по порядку идентификаторов; из зоны никого не наймёшь.
 pub(super) fn candidates(game: &Game, today: GameDate) -> Vec<CandidateView> {
     let content = &game.content;
-    if game.zone.is_some() {
+    if game.world.zone.is_some() {
         return Vec::new();
     }
     game.candidates(today)
@@ -68,10 +69,10 @@ pub(super) fn candidates(game: &Game, today: GameDate) -> Vec<CandidateView> {
 /// Дела, которые сейчас можно открыть в городе игрока; в дороге и в зоне — никаких.
 pub(super) fn kinds(game: &Game, today: GameDate) -> Vec<BusinessKindView> {
     let content = &game.content;
-    if game.journey.is_some() || game.zone.is_some() {
+    if game.world.journey.is_some() || game.world.zone.is_some() {
         return Vec::new();
     }
-    let cash = game.player.money().cash();
+    let cash = game.world.player.money().cash();
     content
         .business_kinds
         .iter()
@@ -81,9 +82,10 @@ pub(super) fn kinds(game: &Game, today: GameDate) -> Vec<BusinessKindView> {
                 .money
                 .from_real(kind.point_cost, Currency::Ruble, today);
             let points = game
+                .world
                 .businesses
                 .values()
-                .find(|business| &business.id().kind == id && business.id().city == game.city)
+                .find(|business| &business.id().kind == id && business.id().city == game.world.city)
                 .map_or(0, Business::points);
             Some(BusinessKindView {
                 kind: id.to_string(),

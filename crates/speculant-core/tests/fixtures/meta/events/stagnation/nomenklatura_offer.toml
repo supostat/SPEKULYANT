@@ -1,0 +1,8 @@
+title = "Приглашение в райком"
+weight = 1
+text = "Тебя зовут на должность в райком."
+
+[[choices]]
+text = "Согласиться"
+outcome = "Теперь ты номенклатура."
+consequences = { set_flags = ["nomenklatura"] }

@@ -109,6 +109,25 @@ pub enum CommandError {
     NotTraveling,
     InZone,
     NotInZone,
+    NoStorage,
+    InvalidSlot {
+        slot: String,
+    },
+    IronmanSavesItself,
+    IronmanNoRollback,
+    NoSuchSave {
+        slot: String,
+    },
+    SaveUnreadable {
+        slot: String,
+        reason: String,
+    },
+    SaveFailed {
+        reason: String,
+    },
+    MetaUnreadable {
+        reason: String,
+    },
     UnknownService {
         service: String,
     },
@@ -248,6 +267,23 @@ impl fmt::Display for CommandError {
             Self::NotTraveling => write!(formatter, "ты никуда не едешь"),
             Self::InZone => write!(formatter, "ты в зоне"),
             Self::NotInZone => write!(formatter, "ты на воле"),
+            Self::NoStorage => write!(formatter, "сохранять некуда: у игры нет каталога игрока"),
+            Self::InvalidSlot { slot } => write!(
+                formatter,
+                "«{slot}» — не имя слота: латиница в нижнем регистре, цифры и _, до 32 знаков, и не ironman"
+            ),
+            Self::IronmanSavesItself => {
+                write!(formatter, "в ironman жизнь сохраняется сама")
+            }
+            Self::IronmanNoRollback => write!(formatter, "в ironman отката нет"),
+            Self::NoSuchSave { slot } => write!(formatter, "в слоте {slot} ничего нет"),
+            Self::SaveUnreadable { slot, reason } => {
+                write!(formatter, "слот {slot} не прочесть: {reason}")
+            }
+            Self::SaveFailed { reason } => write!(formatter, "сохранить не вышло: {reason}"),
+            Self::MetaUnreadable { reason } => {
+                write!(formatter, "знания прошлых жизней не прочесть: {reason}")
+            }
             Self::UnknownService { service } => write!(formatter, "услуги {service} в зоне нет"),
             Self::StashTooSmall {
                 title,

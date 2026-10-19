@@ -1,0 +1,9 @@
+title = "Студент"
+description = "Общежитие, мало денег."
+start_city = "moscow"
+start_cash = 5000
+contacts = ["kofi"]
+age = { from = 20, to = 23 }
+housing = "dorm_bed"
+obituary = "Начинал фарцовщиком в общежитии."
+starts_unlocked = true

@@ -1,9 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 use crate::content::{BiographyId, HousingId};
 use crate::time::GameDate;
 
 /// Персонаж жизни (§11, решение 15.4): имя, биография, день рождения, скрытая шкала здоровья и
 /// жильё. Числовых навыков у него нет — сила в ресурсах, связях и репутации.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Character {
     name: String,
     biography: BiographyId,

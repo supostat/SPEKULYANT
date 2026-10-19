@@ -15,6 +15,7 @@ pub use trustee_conduct::TrusteeConduct;
 pub use zone_rules::{Camp, Parcel, TrusteeRules, ZoneRules};
 
 use rand_chacha::ChaCha8Rng;
+use serde::{Deserialize, Serialize};
 
 use crate::events::EventEngine;
 use crate::time::GameDate;
@@ -25,7 +26,7 @@ const LOWEST_AUTHORITY: i32 = 1;
 
 /// Отсидка: срок, авторитет, сигареты и чай, работа на промзоне с трудовой характеристикой и
 /// когда можно следующую передачу и следующую просьбу об УДО.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Zone {
     sentence: Sentence,
     authority: u8,

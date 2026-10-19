@@ -185,6 +185,12 @@ fn check_rules(rules: &LifeRules, endings: &[(&str, &Ending)], report: &mut Repo
             );
         }
     }
+    if rules.records_size == 0 {
+        report.at(
+            report.file.line_of("records_size"),
+            "в таблице рекордов хотя бы одна строка".to_owned(),
+        );
+    }
     if rules.newspaper_pages == 0 {
         report.at(
             report.file.line_of("newspaper_pages"),

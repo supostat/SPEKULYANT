@@ -1,0 +1,7 @@
+title = "Подарок"
+weight = 1
+text = "Сокурсник оставил тебе два блока жвачки."
+
+[[choices]]
+text = "Взять"
+consequences = { goods = [{ good = "chewing_gum", change = 2 }] }

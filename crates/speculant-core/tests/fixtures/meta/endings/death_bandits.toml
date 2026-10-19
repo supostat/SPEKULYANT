@@ -1,0 +1,9 @@
+kind = "death"
+title = "Убит бандитами"
+capital_label = "Капитал на момент смерти"
+headline = "{NAME}  {born}–{ended}"
+text = "Погиб {date}, не поладив с бандитами."
+
+[sources]
+stagnation = "«ВЕЧЕРНЯЯ МОСКВА»"
+wild_market = "«МОСКОВСКИЙ КОМСОМОЛЕЦ»"

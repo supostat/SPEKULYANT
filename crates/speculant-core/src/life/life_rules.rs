@@ -4,7 +4,8 @@ use crate::content::EndingId;
 use crate::time::GameDate;
 
 /// Правила жизни из `data/life.toml` (решение 15.4): шкала здоровья и старение, потери денег под
-/// матрасом, зачёт жилья, газетная страница итогов, фраза некролога о деле и имена персонажей.
+/// матрасом, зачёт жилья, газетная страница итогов, фраза некролога о деле, длина таблиц рекордов
+/// и имена персонажей.
 #[derive(Clone, Debug, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct LifeRules {
@@ -25,6 +26,8 @@ pub struct LifeRules {
     pub capital_in_dollars_from: GameDate,
     /// Страниц в газете: номер страницы заметки выбирает сид.
     pub newspaper_pages: u32,
+    /// Сколько жизней помнит каждая таблица рекордов.
+    pub records_size: usize,
     /// Фраза некролога о первом деле с подстановками `{year}` и `{business}`.
     pub business_sentence: String,
     pub names: NamePools,

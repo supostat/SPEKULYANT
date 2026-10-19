@@ -43,6 +43,7 @@
   "factions": [],
   "money": { "places": [], "rates": [] },
   "notebook": [],
+  "records": { "ironman": [], "free": [] },
   "zone": null,
   "summary": null,
   "biographies": []

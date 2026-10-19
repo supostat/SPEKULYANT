@@ -1,0 +1,11 @@
+kind = "departure"
+title = "Эмигрировать"
+voluntary = true
+available_from = "1990-01-01"
+capital_label = "Вывезено за границу"
+headline = "УЕХАЛ: {NAME}"
+text = "{date} улетел в один конец."
+
+[sources]
+stagnation = "«ВЕЧЕРНЯЯ МОСКВА»"
+wild_market = "«МОСКОВСКИЙ КОМСОМОЛЕЦ»"

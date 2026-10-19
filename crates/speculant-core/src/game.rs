@@ -5,12 +5,15 @@ mod consequences;
 mod event_flow;
 mod history_flow;
 mod life_flow;
+mod meta_flow;
 mod russian_count;
+mod save_flow;
 mod snapshot;
 mod travel_flow;
+mod world;
 mod zone_flow;
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use crate::business::{Business, BusinessId};
@@ -21,13 +24,16 @@ use crate::economy::{Currency, Deal, Markets, Money, Trader};
 use crate::events::{EventEngine, JournalEntry, Situation};
 use crate::history::Timeline;
 use crate::life::{Character, Chronicle, LifeSummary};
+use crate::meta::Meta;
 use crate::npc::Rivals;
 use crate::reputation::{Contact, FactionReputation};
 use crate::rng::WorldRng;
+use crate::save::Storage;
 use crate::time::{Clock, FastForward, GameDate, MAX_SPEED};
 use crate::travel::Journey;
 use crate::view::{Screen, StateView};
 use crate::zone::Zone;
+use world::World;
 
 /// Сколько последних сообщений помнит лента.
 const MESSAGE_LOG_LENGTH: usize = 20;
@@ -38,48 +44,31 @@ const WITHDREW: &str = "снял";
 const LIFE_STREAM: &str = "life";
 const HISTORY_STREAM: &str = "history";
 
+/// Игра: данные, метапрогрессия прошлых жизней, каталог игрока, если он есть, и мир этой жизни.
 #[derive(Debug)]
 pub struct Game {
     content: Arc<Content>,
-    character: Character,
-    chronicle: Chronicle,
-    /// Итоги, когда жизнь кончилась; до тех пор — `None`.
-    summary: Option<LifeSummary>,
-    /// Биографии, открытые прошлыми жизнями этого сеанса.
-    unlocked: BTreeSet<BiographyId>,
-    clock: Clock,
-    rng: WorldRng,
-    /// История мира, зафиксированная по сиду при его создании.
-    timeline: Timeline,
-    city: CityId,
-    markets: Markets,
-    player: Trader,
-    reputation: FactionReputation,
-    contacts: BTreeMap<NpcId, Contact>,
-    rivals: Rivals,
-    businesses: BTreeMap<BusinessId, Business>,
-    events: EventEngine,
-    journey: Option<Journey>,
-    /// Отсидка, пока игрок в зоне.
-    zone: Option<Zone>,
-    messages: Vec<String>,
-    screen: Screen,
+    meta: Meta,
+    /// Без каталога игра живёт в памяти: так её гоняют симулятор и тесты.
+    storage: Option<Storage>,
+    world: World,
 }
 
 impl Game {
-    /// Открывает первую жизнь сеанса в первый день 1984 года: доступны только биографии, открытые
-    /// с начала.
+    /// Первая жизнь сеанса в памяти, без каталога игрока: доступны только биографии, открытые с
+    /// начала.
     pub fn new_life(settings: &LifeSettings, content: Arc<Content>) -> Result<Self, CommandError> {
-        Self::start_life(settings, content, BTreeSet::new())
+        Self::start_life(settings, content, Meta::default(), None)
     }
 
     /// Жизнь по биографии, открытой с начала или прошлыми жизнями: город, наличные, знакомые и
     /// жильё — из биографии, имя, возраст, случай мира, история и состав соперников — из сида,
-    /// репутация у всех фракций нулевая.
+    /// репутация у всех фракций нулевая. Ironman-жизнь сразу ложится в свой слот.
     fn start_life(
         settings: &LifeSettings,
         content: Arc<Content>,
-        unlocked: BTreeSet<BiographyId>,
+        meta: Meta,
+        storage: Option<Storage>,
     ) -> Result<Self, CommandError> {
         if settings.biography.trim().is_empty() {
             return Err(CommandError::EmptyBiography);
@@ -92,7 +81,7 @@ impl Game {
                 .ok_or_else(|| CommandError::UnknownBiography {
                     biography: settings.biography.clone(),
                 })?;
-        if !biography.starts_unlocked && !unlocked.contains(&id) {
+        if !biography.starts_unlocked && !meta.unlocked().contains(&id) {
             return Err(CommandError::BiographyLocked {
                 biography: settings.biography.clone(),
                 title: biography.title.clone(),
@@ -108,11 +97,11 @@ impl Game {
         let timeline = Timeline::generate(&content, rng.stream(HISTORY_STREAM));
         let character =
             life_flow::born_character(&content, &id, biography, rng.stream(LIFE_STREAM));
-        Ok(Self {
+        let world = World {
+            ironman: settings.ironman,
             character,
             chronicle: Chronicle::default(),
             summary: None,
-            unlocked,
             clock: Clock::new(content.time.clock.clone(), today),
             rng,
             timeline,
@@ -132,8 +121,15 @@ impl Game {
             zone: None,
             messages: Vec::new(),
             screen: Screen::Market,
+        };
+        let mut game = Self {
             content,
-        })
+            meta,
+            storage,
+            world,
+        };
+        game.autosave();
+        Ok(game)
     }
 
     /// Снимок мира для интерфейса.
@@ -142,7 +138,7 @@ impl Game {
     }
 
     pub fn today(&self) -> GameDate {
-        self.clock.today()
+        self.world.clock.today()
     }
 
     pub fn content(&self) -> &Content {
@@ -150,73 +146,83 @@ impl Game {
     }
 
     pub fn city(&self) -> &CityId {
-        &self.city
+        &self.world.city
     }
 
     pub fn markets(&self) -> &Markets {
-        &self.markets
+        &self.world.markets
     }
 
     pub fn player(&self) -> &Trader {
-        &self.player
+        &self.world.player
     }
 
     pub fn reputation(&self) -> &FactionReputation {
-        &self.reputation
+        &self.world.reputation
     }
 
     pub fn contacts(&self) -> &BTreeMap<NpcId, Contact> {
-        &self.contacts
+        &self.world.contacts
     }
 
     /// Соперники мира.
     pub fn rivals(&self) -> &Rivals {
-        &self.rivals
+        &self.world.rivals
     }
 
     /// Персонаж этой жизни.
     pub fn character(&self) -> &Character {
-        &self.character
+        &self.world.character
+    }
+
+    /// Знания и открытия прошлых жизней.
+    pub fn meta(&self) -> &Meta {
+        &self.meta
+    }
+
+    /// Ironman-жизнь сохраняется сама и не откатывается.
+    pub fn is_ironman(&self) -> bool {
+        self.world.ironman
     }
 
     /// Итоги, если жизнь кончилась.
     pub fn summary(&self) -> Option<&LifeSummary> {
-        self.summary.as_ref()
+        self.world.summary.as_ref()
     }
 
     /// Дела игрока.
     pub fn businesses(&self) -> &BTreeMap<BusinessId, Business> {
-        &self.businesses
+        &self.world.businesses
     }
 
     /// Флаги прошлых решений, ожидающее событие, отложенные продолжения.
     pub fn events(&self) -> &EventEngine {
-        &self.events
+        &self.world.events
     }
 
     /// Журнал событий жизни.
     pub fn journal(&self) -> &[JournalEntry] {
-        self.events.journal()
+        self.world.events.journal()
     }
 
     /// Поездка в пути, если игрок едет.
     pub fn journey(&self) -> Option<&Journey> {
-        self.journey.as_ref()
+        self.world.journey.as_ref()
     }
 
     /// История мира по сиду.
     pub fn timeline(&self) -> &Timeline {
-        &self.timeline
+        &self.world.timeline
     }
 
     /// Отсидка, если игрок в зоне.
     pub fn zone(&self) -> Option<&Zone> {
-        self.zone.as_ref()
+        self.world.zone.as_ref()
     }
 
     /// Перемотка, если она идёт.
     pub fn fast_forward(&self) -> Option<FastForward> {
-        self.clock.fast_forward()
+        self.world.clock.fast_forward()
     }
 
     /// Двигает мир на `milliseconds` реального времени; `true`, если наступил хотя бы один день.
@@ -227,99 +233,121 @@ impl Game {
     /// Событие, прибытие и выход на волю останавливают перемотку, и остаток реального времени
     /// сгорает; событие держит время, пока игрок не прочтёт исход.
     pub fn advance(&mut self, milliseconds: u32) -> bool {
-        if self.events.pending().is_some() || self.summary.is_some() {
+        if self.world.events.pending().is_some() || self.world.summary.is_some() {
             return false;
         }
-        self.clock.add_time(milliseconds);
+        self.world.clock.add_time(milliseconds);
         let mut day_passed = false;
-        while let Some(day) = self.clock.next_day() {
+        while let Some(day) = self.world.clock.next_day() {
             day_passed = true;
             if self.live_day(day.date) {
-                self.clock.drop_carried_time();
-                self.clock.stop_fast_forward();
+                self.world.clock.drop_carried_time();
+                self.world.clock.stop_fast_forward();
                 break;
             }
+        }
+        if day_passed {
+            self.autosave();
         }
         day_passed
     }
 
     pub fn apply(&mut self, command: Command) -> Result<(), CommandError> {
-        let today = self.clock.today();
-        if self.events.pending().is_some() && changes_the_world(&command) {
+        let today = self.world.clock.today();
+        if self.world.events.pending().is_some() && changes_the_world(&command) {
             return Err(CommandError::EventPending);
         }
-        if self.summary.is_some() && changes_the_world(&command) {
+        if self.world.summary.is_some() && changes_the_world(&command) {
             return Err(CommandError::LifeOver);
         }
-        if self.journey.is_some() && needs_a_city(&command) {
+        if self.world.journey.is_some() && needs_a_city(&command) {
             return Err(CommandError::Traveling);
         }
-        if self.zone.is_some() && needs_freedom(&command) {
+        if self.world.zone.is_some() && needs_freedom(&command) {
             return Err(CommandError::InZone);
         }
+        let deed = is_a_deed(&command);
         match command {
             Command::NewLife(settings) => {
-                *self =
-                    Self::start_life(&settings, Arc::clone(&self.content), self.unlocked.clone())?;
+                *self = Self::start_life(
+                    &settings,
+                    Arc::clone(&self.content),
+                    self.meta.clone(),
+                    self.storage.clone(),
+                )?;
             }
             Command::Advance { milliseconds } => {
                 self.advance(milliseconds);
             }
             Command::SetSpeed { speed } => {
-                self.clock
-                    .set_speed(speed)
-                    .map_err(|invalid| CommandError::InvalidSpeed {
+                self.world.clock.set_speed(speed).map_err(|invalid| {
+                    CommandError::InvalidSpeed {
                         speed: invalid.speed,
                         max: MAX_SPEED,
-                    })?;
+                    }
+                })?;
             }
-            Command::Pause { paused } => self.clock.set_paused(paused),
+            Command::Pause { paused } => self.world.clock.set_paused(paused),
             Command::FastForward { until } => {
-                if until == FastForward::UntilArrival && self.journey.is_none() {
+                if until == FastForward::UntilArrival && self.world.journey.is_none() {
                     return Err(CommandError::NotTraveling);
                 }
-                self.clock.start_fast_forward(until);
+                self.world.clock.start_fast_forward(until);
             }
             Command::Travel { destination } => self.travel(&destination)?,
-            Command::OpenScreen { screen } => self.screen = screen,
+            Command::OpenScreen { screen } => self.world.screen = screen,
             Command::Buy { good, quantity } => {
                 let good = GoodId::new(good);
-                let deal = self.player.buy(
-                    &mut self.markets,
+                let deal = self.world.player.buy(
+                    &mut self.world.markets,
                     &self.content,
-                    &self.city,
+                    &self.world.city,
                     &good,
                     quantity,
                     today,
                 )?;
                 let cost = self.content.money.real_value(deal.total, today);
-                self.chronicle.bought(&good, cost);
+                self.world
+                    .chronicle
+                    .bought(&good, deal.quantity, cost, today, &self.world.city);
                 self.log_deal(BOUGHT, &good, deal);
             }
             Command::Sell { good, quantity } => {
                 let good = GoodId::new(good);
-                let held = self.player.pocket().quantity(&good);
-                let deal = self.player.sell(
-                    &mut self.markets,
+                let held = self.world.player.pocket().quantity(&good);
+                let deal = self.world.player.sell(
+                    &mut self.world.markets,
                     &self.content,
-                    &self.city,
+                    &self.world.city,
                     &good,
                     quantity,
                     today,
                 )?;
                 let proceeds = self.content.money.real_value(deal.total, today);
-                self.chronicle
-                    .sold(&good, deal.quantity, held, proceeds, today);
+                self.world.chronicle.sold(
+                    &good,
+                    deal.quantity,
+                    held,
+                    proceeds,
+                    today,
+                    &self.world.city,
+                );
                 self.log_deal(SOLD, &good, deal);
             }
             Command::Deposit { place, amount } => {
                 let place = MoneyPlaceId::new(place);
-                let deposited = self.player.deposit(&self.content, &place, amount, today)?;
+                let deposited = self
+                    .world
+                    .player
+                    .deposit(&self.content, &place, amount, today)?;
                 self.log_money_move(&place, DEPOSITED, deposited);
             }
             Command::Withdraw { place, amount } => {
                 let place = MoneyPlaceId::new(place);
-                let withdrawn = self.player.withdraw(&self.content, &place, amount, today)?;
+                let withdrawn = self
+                    .world
+                    .player
+                    .withdraw(&self.content, &place, amount, today)?;
                 self.log_money_move(&place, WITHDREW, withdrawn);
             }
             Command::Choose { choice } => self.choose(choice)?,
@@ -342,11 +370,16 @@ impl Game {
             Command::OrderParcel => self.order_parcel()?,
             Command::ApplyForParole => self.apply_for_parole()?,
             Command::BribeForRelease => self.bribe_for_release()?,
+            Command::Save { slot } => self.save(&slot)?,
+            Command::Load { slot } => self.load(&slot)?,
             other => {
                 return Err(CommandError::NotSimulatedYet {
                     command: other.name().to_owned(),
                 });
             }
+        }
+        if deed {
+            self.autosave();
         }
         Ok(())
     }
@@ -357,20 +390,26 @@ impl Game {
     /// пути вместо событий дня разыгрываются дорожные события маршрута, а в последний день пути
     /// игрок приезжает — если в этот день случилось событие, то после того, как прочтёт его исход.
     fn live_day(&mut self, date: GameDate) -> bool {
-        self.markets.next_day(&self.content, &mut self.rng, date);
-        self.player.next_day(&self.content, date);
+        self.world
+            .markets
+            .next_day(&self.content, &mut self.world.rng, date);
+        self.world.player.next_day(&self.content, date);
         let drift_days = self.content.epoch_profile_on(date).reputation_drift_days;
-        self.reputation.next_day(drift_days);
-        self.rivals
-            .next_day(&self.content, &mut self.markets, &mut self.rng, date);
+        self.world.reputation.next_day(drift_days);
+        self.world.rivals.next_day(
+            &self.content,
+            &mut self.world.markets,
+            &mut self.world.rng,
+            date,
+        );
         self.live_history(date);
         if self.live_character(date) || self.live_businesses(date) {
             return true;
         }
-        if self.zone.is_some() {
+        if self.world.zone.is_some() {
             return self.live_zone_day(date);
         }
-        let Some(journey) = self.journey.clone() else {
+        let Some(journey) = self.world.journey.clone() else {
             return self.start_day_event(date);
         };
         if self.start_road_event(date, &journey) {
@@ -384,15 +423,15 @@ impl Game {
         Situation {
             content: &self.content,
             today,
-            city: &self.city,
-            on_road: self.journey.is_some(),
-            player: &self.player,
-            reputation: &self.reputation,
-            contacts: &self.contacts,
-            rivals: &self.rivals,
-            flags: self.events.flags(),
-            timeline: &self.timeline,
-            zone: self.zone.as_ref(),
+            city: &self.world.city,
+            on_road: self.world.journey.is_some(),
+            player: &self.world.player,
+            reputation: &self.world.reputation,
+            contacts: &self.world.contacts,
+            rivals: &self.world.rivals,
+            flags: self.world.events.flags(),
+            timeline: &self.world.timeline,
+            zone: self.world.zone.as_ref(),
         }
     }
 
@@ -416,9 +455,9 @@ impl Game {
     }
 
     fn log(&mut self, message: String) {
-        self.messages.push(message);
-        if self.messages.len() > MESSAGE_LOG_LENGTH {
-            self.messages.remove(0);
+        self.world.messages.push(message);
+        if self.world.messages.len() > MESSAGE_LOG_LENGTH {
+            self.world.messages.remove(0);
         }
     }
 }
@@ -482,5 +521,21 @@ fn needs_freedom(command: &Command) -> bool {
             | Command::Call { .. }
             | Command::BuyHousing { .. }
             | Command::Retire { .. }
+    )
+}
+
+/// Поступки, после которых ironman-жизнь сохраняется сама: всё, кроме экранов, скорости, паузы,
+/// сохранений и новой жизни, которая сохраняется при рождении, — а время сохраняется по дням.
+fn is_a_deed(command: &Command) -> bool {
+    !matches!(
+        command,
+        Command::NewLife(_)
+            | Command::Advance { .. }
+            | Command::SetSpeed { .. }
+            | Command::Pause { .. }
+            | Command::OpenScreen { .. }
+            | Command::Save { .. }
+            | Command::Load { .. }
+            | Command::Quit
     )
 }

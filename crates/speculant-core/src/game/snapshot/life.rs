@@ -20,7 +20,7 @@ const OPENED_BIOGRAPHY: &str = "Открыто: биография";
 
 pub(super) fn character(game: &Game, today: GameDate) -> CharacterView {
     let content = &game.content;
-    let character = &game.character;
+    let character = &game.world.character;
     CharacterView {
         name: character.name().to_owned(),
         age: count(character.age_on(today), YEARS),
@@ -32,9 +32,9 @@ pub(super) fn character(game: &Game, today: GameDate) -> CharacterView {
 /// Нынешнее жильё и то, что продаётся сегодня, — от дешёвого к дорогому.
 pub(super) fn homes(game: &Game, today: GameDate) -> Vec<HomeView> {
     let content = &game.content;
-    let current = game.character.housing();
+    let current = game.world.character.housing();
     let resale = game.resale_of_home(today);
-    let cash = game.player.money().cash();
+    let cash = game.world.player.money().cash();
     let mut homes: Vec<_> = content
         .housing
         .iter()
@@ -57,8 +57,8 @@ pub(super) fn homes(game: &Game, today: GameDate) -> Vec<HomeView> {
                 available: !is_current
                     && housing.is_on_sale(today)
                     && affordable
-                    && game.journey.is_none()
-                    && game.zone.is_none(),
+                    && game.world.journey.is_none()
+                    && game.world.zone.is_none(),
             }
         })
         .collect()
@@ -73,7 +73,9 @@ pub(super) fn exits(game: &Game, today: GameDate) -> Vec<ExitView> {
         .map(|(id, ending)| ExitView {
             ending: id.to_string(),
             title: ending.title.clone(),
-            available: ending.is_open_on(today) && game.journey.is_none() && game.zone.is_none(),
+            available: ending.is_open_on(today)
+                && game.world.journey.is_none()
+                && game.world.zone.is_none(),
         })
         .collect()
 }
@@ -84,7 +86,7 @@ pub(super) fn biographies(game: &Game) -> Vec<BiographyView> {
         .biographies
         .iter()
         .map(|(id, biography)| {
-            let unlocked = biography.starts_unlocked || game.unlocked.contains(id);
+            let unlocked = biography.starts_unlocked || game.meta.unlocked().contains(id);
             BiographyView {
                 biography: id.to_string(),
                 title: biography.title.clone(),

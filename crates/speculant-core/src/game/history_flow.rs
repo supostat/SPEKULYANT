@@ -12,12 +12,12 @@ impl Game {
     /// начнётся, если готово, — дома, а в зоне только событие зоны, как амнистия.
     pub(super) fn live_history(&mut self, date: GameDate) {
         let content = Arc::clone(&self.content);
-        let nodes: Vec<_> = self.timeline.on(date).cloned().collect();
+        let nodes: Vec<_> = self.world.timeline.on(date).cloned().collect();
         for node in nodes {
             let outcome = node.outcome(&content);
             self.log(outcome.news.clone());
             for shock in &outcome.price_shocks {
-                self.markets.apply_shock(
+                self.world.markets.apply_shock(
                     shock.good.clone(),
                     shock.city.clone(),
                     shock.factor.powf(node.scale),
@@ -26,10 +26,10 @@ impl Game {
                 );
             }
             for flag in &outcome.set_flags {
-                self.events.set_flag(flag.clone());
+                self.world.events.set_flag(flag.clone());
             }
             if let Some(event) = &outcome.event {
-                self.events.schedule(event.clone(), date);
+                self.world.events.schedule(event.clone(), date);
             }
         }
     }

@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 use rand_chacha::rand_core::Rng;
@@ -13,7 +14,7 @@ const NPC_STREAM: &str = "npc";
 
 /// Соперники мира (§8): состав выбирается по сиду из шаблонов со стратегией, дальше каждый живёт
 /// свой день.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Rivals {
     rivals: BTreeMap<NpcId, Rival>,
 }

@@ -32,9 +32,9 @@ impl Game {
         let route = content
             .routes
             .iter()
-            .find(|route| route.from == self.city && route.to == to)
+            .find(|route| route.from == self.world.city && route.to == to)
             .ok_or_else(|| CommandError::NoRoute {
-                from: self.city.to_string(),
+                from: self.world.city.to_string(),
                 to: destination.to_owned(),
             })?;
         let today = self.today();
@@ -46,7 +46,7 @@ impl Game {
             });
         }
         let fare = content.money.from_real(route.fare, Currency::Ruble, today);
-        let cash = self.player.money().cash();
+        let cash = self.world.player.money().cash();
         if !cash.covers(fare) {
             return Err(CommandError::NotEnoughCash {
                 needed: content.money.format_money(fare, today),
@@ -56,6 +56,7 @@ impl Game {
         if access == Access::ByConnections {
             let favour = format!("{HELPED_TO_LEAVE}: {}", city.name);
             let helped = self
+                .world
                 .contacts
                 .values_mut()
                 .any(|contact| contact.ask(content.reputation, today, &favour).is_ok());
@@ -66,14 +67,14 @@ impl Game {
                 });
             }
         }
-        self.player.pay_cash(fare);
-        self.journey = Some(Journey {
-            from: self.city.clone(),
+        self.world.player.pay_cash(fare);
+        self.world.journey = Some(Journey {
+            from: self.world.city.clone(),
             to,
             departed: today,
             arrives: today.after_days(route.days),
         });
-        let from = &content.cities[&self.city].name;
+        let from = &content.cities[&self.world.city].name;
         let fare = content.money.format_money(fare, today);
         self.log(format!(
             "{DEPARTED}: {from} — {}, {} {DAYS} за {fare}",
@@ -94,13 +95,14 @@ impl Game {
     /// Дорожное событие дня пути; `true`, если оно случилось.
     pub(super) fn start_road_event(&mut self, date: GameDate, journey: &Journey) -> bool {
         let road_chance = self.content.event_rules.road_daily_chance;
-        if !EventEngine::roll(self.rng.stream(EVENTS_STREAM), road_chance) {
+        if !EventEngine::roll(self.world.rng.stream(EVENTS_STREAM), road_chance) {
             return false;
         }
         let ready = self
+            .world
             .events
             .ready_road_events(&self.situation(date), &self.route_of(journey).road_events);
-        match EventEngine::pick(self.rng.stream(EVENTS_STREAM), &ready) {
+        match EventEngine::pick(self.world.rng.stream(EVENTS_STREAM), &ready) {
             Some(event) => {
                 self.begin_event(event, date, None);
                 true
@@ -111,11 +113,15 @@ impl Game {
 
     /// Если пришёл последний день пути, игрок в городе назначения; `true` — приехал.
     pub(super) fn arrive_if_due(&mut self, today: GameDate) -> bool {
-        let Some(journey) = self.journey.take_if(|journey| today >= journey.arrives) else {
+        let Some(journey) = self
+            .world
+            .journey
+            .take_if(|journey| today >= journey.arrives)
+        else {
             return false;
         };
-        self.city = journey.to;
-        let name = &self.content.cities[&self.city].name;
+        self.world.city = journey.to;
+        let name = &self.content.cities[&self.world.city].name;
         let message = format!("{ARRIVED}: {name}");
         self.log(message);
         true

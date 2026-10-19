@@ -1,5 +1,6 @@
 //! Детерминированный случай мира: один сид — одна история.
 
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 use rand_chacha::ChaCha8Rng;
@@ -11,7 +12,7 @@ const FNV_PRIME: u64 = 0x0000_0100_0000_01b3;
 /// Генератор мира на ChaCha8 с именованными подпотоками: у каждой подсистемы свой поток
 /// (`stream("prices")`, `stream("events")`), поэтому новые розыгрыши в одной подсистеме
 /// не сдвигают последовательности других.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WorldRng {
     seed: u64,
     streams: BTreeMap<String, ChaCha8Rng>,
@@ -39,9 +40,14 @@ impl WorldRng {
     }
 }
 
-/// FNV-1a 64 от имени: номер потока ChaCha, одинаковый на всех платформах и версиях Rust.
+/// Номер потока ChaCha по имени, одинаковый на всех платформах и версиях Rust.
 fn stream_number(name: &str) -> u64 {
-    name.bytes().fold(FNV_OFFSET_BASIS, |hash, byte| {
+    fnv1a(name.bytes())
+}
+
+/// FNV-1a 64: устойчивый хэш байтов — номера потоков и отпечаток данных игры.
+pub(crate) fn fnv1a(bytes: impl IntoIterator<Item = u8>) -> u64 {
+    bytes.into_iter().fold(FNV_OFFSET_BASIS, |hash, byte| {
         (hash ^ u64::from(byte)).wrapping_mul(FNV_PRIME)
     })
 }

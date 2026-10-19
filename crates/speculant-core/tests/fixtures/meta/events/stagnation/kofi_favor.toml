@@ -1,0 +1,8 @@
+title = "Кофи выручил"
+weight = 1
+text = "Кофи привёз с каникул пару джинсов и отдал по своей цене."
+
+[[choices]]
+text = "Поблагодарить"
+outcome = "Кофи доволен."
+consequences = { contacts = [{ npc = "kofi", relation = 1 }] }

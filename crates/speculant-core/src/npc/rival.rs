@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 use rand_chacha::ChaCha8Rng;
@@ -17,7 +18,7 @@ const PERCENT: f64 = 100.0;
 /// Соперник (§8): человек из шаблона со стратегией, деньгами и карманом, своим городом, для
 /// челнока — вторым городом, точками своих дел в своём городе, судьбой и памятью об игроке.
 /// Торгует через тот же `Trader` и те же рынки, что игрок, и ведёт дела по тем же расчётам.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Rival {
     npc: NpcId,
     strategy: Strategy,

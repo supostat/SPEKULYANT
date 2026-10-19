@@ -41,7 +41,8 @@ impl Game {
         let content = std::sync::Arc::clone(&self.content);
         let mut effects = Vec::new();
         for change in &consequences.reputation {
-            self.reputation
+            self.world
+                .reputation
                 .change(&change.faction, change.change, content.reputation);
             let title = &content.factions[&change.faction].title;
             effects.push(format!("{title} {}", signed(change.change)));
@@ -50,10 +51,10 @@ impl Game {
             let amount = Real::from_kopecks(money.kopecks().abs());
             let amount = content.money.from_real(amount, Currency::Ruble, today);
             let sign = if money.is_negative() {
-                self.player.pay_cash(amount);
+                self.world.player.pay_cash(amount);
                 MINUS
             } else {
-                self.player.receive_cash(amount);
+                self.world.player.receive_cash(amount);
                 PLUS
             };
             effects.push(format!(
@@ -64,17 +65,18 @@ impl Game {
         for change in &consequences.goods {
             let quantity = change.change.unsigned_abs();
             if change.change < 0 {
-                let held = self.player.pocket().quantity(&change.good);
-                self.chronicle.gave_away(&change.good, quantity, held);
-                self.player.remove_goods(&change.good, quantity);
+                let held = self.world.player.pocket().quantity(&change.good);
+                self.world.chronicle.gave_away(&change.good, quantity, held);
+                self.world.player.remove_goods(&change.good, quantity);
             } else {
-                self.player.add_goods(&change.good, quantity);
+                self.world.player.add_goods(&change.good, quantity);
             }
             let name = &content.goods[&change.good].name;
             effects.push(format!("{name} {}", signed(change.change)));
         }
         for change in &consequences.contacts {
-            self.contacts
+            self.world
+                .contacts
                 .entry(change.npc.clone())
                 .or_insert_with(|| Contact::new(change.npc.clone()))
                 .apply(change, content.reputation, today, what);
@@ -98,7 +100,8 @@ impl Game {
                 away_days: None,
                 lost: false,
             };
-            self.rivals
+            self.world
+                .rivals
                 .get_mut(npc)
                 .expect("участвующий соперник есть в мире")
                 .memory_mut()
@@ -115,24 +118,25 @@ impl Game {
         }
         if consequences.health != 0 {
             let rules = &content.life;
-            self.character
+            self.world
+                .character
                 .change_health(consequences.health, rules.health_max);
             effects.push(format!(
                 "{HEALTH}: {}",
-                rules.health_state(self.character.health())
+                rules.health_state(self.world.character.health())
             ));
         }
         for flag in &consequences.set_flags {
-            self.events.set_flag(flag.clone());
+            self.world.events.set_flag(flag.clone());
         }
         for flag in &consequences.clear_flags {
-            self.events.clear_flag(flag);
+            self.world.events.clear_flag(flag);
         }
         if let Some(change) = &consequences.zone {
             self.change_zone(change, today, &mut effects);
         }
         for shock in &consequences.price_shocks {
-            self.markets.apply_shock(
+            self.world.markets.apply_shock(
                 shock.good.clone(),
                 shock.city.clone(),
                 shock.factor,
@@ -142,7 +146,7 @@ impl Game {
         }
         let ending = match &consequences.end_life {
             Some(ending) => Some(ending),
-            None if self.character.health() <= 0 => Some(&content.life.health_ending),
+            None if self.world.character.health() <= 0 => Some(&content.life.health_ending),
             None => None,
         };
         if let Some(months) = consequences.sentence_months {
@@ -173,6 +177,7 @@ impl Game {
         effects: &mut Vec<String>,
     ) {
         let business = self
+            .world
             .businesses
             .get_mut(id)
             .expect("дело происшествия живо, пока событие ждёт ответа");
@@ -202,7 +207,7 @@ impl Game {
             effects.push(format!("{name}: {CLOSED_UNTIL} {}", until.numeric()));
         }
         if change.lost {
-            self.businesses.remove(id);
+            self.world.businesses.remove(id);
             effects.push(format!("{name}: {BUSINESS_LOST}"));
         }
     }

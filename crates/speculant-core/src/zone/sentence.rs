@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use crate::time::GameDate;
 
 /// Срок (§12): с какого дня и на сколько месяцев настоящего календаря. Суд может добавить месяцы,
 /// амнистия — скостить.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Sentence {
     from: GameDate,
     months: u32,

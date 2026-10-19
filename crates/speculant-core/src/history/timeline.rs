@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 use rand_chacha::ChaCha8Rng;
@@ -10,7 +11,7 @@ use crate::time::GameDate;
 
 /// Таймлайн мира (§3.6, решение 15.9), зафиксированный по сиду при создании мира: исторические
 /// узлы в своих окнах и узлы генератора песочницы — по дням.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Timeline {
     nodes: Vec<TimelineNode>,
 }

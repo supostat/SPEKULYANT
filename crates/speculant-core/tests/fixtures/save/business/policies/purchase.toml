@@ -1,0 +1,13 @@
+title = "Закупка"
+default = "сам, Черкизон"
+
+[[options]]
+label = "сам, Черкизон"
+
+[[options]]
+label = "оптовик"
+
+[[options]]
+label = "через Гену"
+revenue = -6
+theft = 1

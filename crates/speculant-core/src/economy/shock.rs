@@ -1,9 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 use crate::content::{CityId, GoodId};
 use crate::time::GameDate;
 
 /// Шок цены (§5.2 п. 4): указ, кризис или слух умножает цену товара в `factor` раз — в одном городе
 /// или везде (`city = None`), до даты `until` или навсегда (`until = None`).
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Shock {
     pub good: GoodId,
     pub city: Option<CityId>,

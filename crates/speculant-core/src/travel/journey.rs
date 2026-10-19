@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use crate::content::CityId;
 use crate::time::GameDate;
 
 /// Поездка в пути: откуда, куда, когда выехал и в какой день приезжает.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Journey {
     pub from: CityId,
     pub to: CityId,

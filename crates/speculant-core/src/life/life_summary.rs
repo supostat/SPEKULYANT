@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use super::DealRecord;
 use crate::content::{BiographyId, EndingId};
 use crate::economy::Real;
@@ -6,7 +8,7 @@ use crate::time::GameDate;
 /// Итоги жизни (§11.2), снятые в день финала: заметка в духе эпохи — откуда она, заголовок и
 /// текст, — капитал в рублях 1984 года, лучшая и худшая сделки, дела на тот день и биографии,
 /// которые жизнь открыла.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LifeSummary {
     pub ending: EndingId,
     pub ended: GameDate,

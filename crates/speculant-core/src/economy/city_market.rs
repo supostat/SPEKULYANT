@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 use rand_chacha::ChaCha8Rng;
@@ -15,7 +16,7 @@ const EMPTY_MARKET_MARKUP: f64 = 2.0;
 /// Толкучка одного города (§5.2 п. 3): сколько каждого товара сейчас у торговцев. Спрос выражен в
 /// цене: чем больше товара против обычного запаса, тем дешевле его и покупают, и продают. Крупная
 /// продажа заваливает рынок и обваливает цену; за дни запас возвращается к обычному.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CityMarket {
     stock: BTreeMap<GoodId, u32>,
 }

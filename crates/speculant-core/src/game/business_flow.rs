@@ -50,8 +50,8 @@ impl Game {
                 title: data.title.clone(),
             });
         }
-        let id = BusinessId::new(kind_id, self.city.clone());
-        let points = self.businesses.get(&id).map_or(0, Business::points);
+        let id = BusinessId::new(kind_id, self.world.city.clone());
+        let points = self.world.businesses.get(&id).map_or(0, Business::points);
         if points >= data.max_points {
             return Err(CommandError::MaxPoints {
                 kind: kind.to_owned(),
@@ -62,25 +62,25 @@ impl Game {
         let cost = content
             .money
             .from_real(data.point_cost, Currency::Ruble, today);
-        let cash = self.player.money().cash();
+        let cash = self.world.player.money().cash();
         if !cash.covers(cost) {
             return Err(CommandError::NotEnoughCash {
                 needed: content.money.format_money(cost, today),
                 cash: content.money.format_money(cash, today),
             });
         }
-        self.player.pay_cash(cost);
+        self.world.player.pay_cash(cost);
         let price = content.money.format_money(cost, today);
-        let message = match self.businesses.get_mut(&id) {
+        let message = match self.world.businesses.get_mut(&id) {
             Some(business) => {
                 business.add_point();
                 format!("{}: {NEW_POINT} за {price}", business.name(&content))
             }
             None => {
-                self.chronicle.opened_business(&id.kind, today);
+                self.world.chronicle.opened_business(&id.kind, today);
                 let business = Business::open(id.clone(), &content);
                 let message = format!("{OPENED}: {} за {price}", business.name(&content));
-                self.businesses.insert(id, business);
+                self.world.businesses.insert(id, business);
                 message
             }
         };
@@ -97,7 +97,7 @@ impl Game {
     ) -> Result<(), CommandError> {
         let content = Arc::clone(&self.content);
         let id = self.known_business(business)?;
-        let owned = &self.businesses[&id];
+        let owned = &self.world.businesses[&id];
         let kind = PolicyKind::from_id(policy)
             .filter(|kind| owned.kind(&content).has_policy(*kind))
             .ok_or_else(|| CommandError::UnknownPolicy {
@@ -112,7 +112,8 @@ impl Game {
                 count,
             });
         }
-        self.businesses
+        self.world
+            .businesses
             .get_mut(&id)
             .expect("дело нашлось выше")
             .set_policy(kind, option);
@@ -133,8 +134,8 @@ impl Game {
             .ok_or_else(|| CommandError::UnknownCandidate {
                 candidate: candidate.to_owned(),
             })?;
-        let name = self.businesses[&id].name(&content);
-        if let Some(manager) = self.businesses[&id].manager() {
+        let name = self.world.businesses[&id].name(&content);
+        if let Some(manager) = self.world.businesses[&id].manager() {
             return Err(CommandError::ManagerInPlace {
                 business: name,
                 name: content.npcs[manager.employee().npc()].name.clone(),
@@ -154,11 +155,13 @@ impl Game {
                 reason: refusal.to_string(),
             });
         }
-        self.businesses
+        self.world
+            .businesses
             .get_mut(&id)
             .expect("дело нашлось выше")
             .hire(Employee::from_template(npc.clone(), traits), today);
-        self.contacts
+        self.world
+            .contacts
             .entry(npc.clone())
             .or_insert_with(|| Contact::new(npc))
             .record(today, &format!("{HIRED}: {name}"));
@@ -171,7 +174,11 @@ impl Game {
         let content = Arc::clone(&self.content);
         let today = self.today();
         let id = self.known_business(business)?;
-        let owned = self.businesses.get_mut(&id).expect("дело нашлось выше");
+        let owned = self
+            .world
+            .businesses
+            .get_mut(&id)
+            .expect("дело нашлось выше");
         if owned
             .manager()
             .is_none_or(|manager| manager.employee().npc().as_str() != employee)
@@ -184,7 +191,8 @@ impl Game {
         let name = owned.name(&content);
         let manager = owned.dismiss().expect("управляющий есть — проверено выше");
         let npc = manager.employee().npc().clone();
-        self.contacts
+        self.world
+            .contacts
             .entry(npc.clone())
             .or_insert_with(|| Contact::new(npc.clone()))
             .change_relation(
@@ -218,23 +226,24 @@ impl Game {
     /// прочие в этот день проходят без последствий.
     pub(super) fn live_businesses(&mut self, date: GameDate) -> bool {
         let content = Arc::clone(&self.content);
-        let ids: Vec<BusinessId> = self.businesses.keys().cloned().collect();
+        let ids: Vec<BusinessId> = self.world.businesses.keys().cloned().collect();
         let mut messages = Vec::new();
         let mut out_of_policy = Vec::new();
         for id in ids {
-            let competitors = self.rivals.business_points(&id.kind, &id.city);
-            if date.day_of_month() == 1 && self.businesses[&id].ledger().days > 0 {
+            let competitors = self.world.rivals.business_points(&id.kind, &id.city);
+            if date.day_of_month() == 1 && self.world.businesses[&id].ledger().days > 0 {
                 let oversight = self.oversight(&id, date);
                 let report = self
+                    .world
                     .businesses
                     .get_mut(&id)
                     .expect("дело из списка ключей")
                     .settle(
                         &content,
-                        &self.markets,
+                        &self.world.markets,
                         competitors,
                         oversight,
-                        self.rng.stream(BUSINESS_STREAM),
+                        self.world.rng.stream(BUSINESS_STREAM),
                         date,
                     );
                 if oversight == Oversight::Trustee(TrusteeConduct::Vanishes) {
@@ -244,13 +253,16 @@ impl Game {
                     continue;
                 }
             }
-            let business = self.businesses.get_mut(&id).expect("дело не закрыто");
+            let business = self.world.businesses.get_mut(&id).expect("дело не закрыто");
             business.count_day(date);
             let name = business.name(&content);
-            let incidents =
-                business.incidents_of_the_day(&content, self.rng.stream(BUSINESS_STREAM), date);
+            let incidents = business.incidents_of_the_day(
+                &content,
+                self.world.rng.stream(BUSINESS_STREAM),
+                date,
+            );
             for incident in incidents {
-                match business.handle(incident, &content, &self.markets, competitors, date) {
+                match business.handle(incident, &content, &self.world.markets, competitors, date) {
                     Handling::ByRoof => messages.push(format!("{name}: {RAID_BY_ROOF}")),
                     Handling::Bribed(bribe) => {
                         let bribe = content.money.from_real(bribe, Currency::Ruble, date);
@@ -277,9 +289,9 @@ impl Game {
     /// Кто смотрел за делом месяц: на воле — хозяин; пока хозяин сидит, управляющий ведёт дело по
     /// своей лояльности и честности — честно, воруя или исчезнув с выручкой (§12).
     fn oversight(&mut self, id: &BusinessId, date: GameDate) -> Oversight {
-        let business = &self.businesses[id];
+        let business = &self.world.businesses[id];
         let (Some(_), Some(manager), Some(forecast)) = (
-            &self.zone,
+            &self.world.zone,
             business.manager(),
             business.forecast(&self.content, date),
         ) else {
@@ -290,7 +302,7 @@ impl Game {
             &self.content.zone.trustees,
             forecast.loyalty,
             honesty,
-            self.rng.stream(BUSINESS_STREAM),
+            self.world.rng.stream(BUSINESS_STREAM),
         ))
     }
 
@@ -298,14 +310,19 @@ impl Game {
     /// больше не найти.
     fn trustee_vanishes(&mut self, id: &BusinessId, date: GameDate, messages: &mut Vec<String>) {
         let content = Arc::clone(&self.content);
-        let business = self.businesses.get_mut(id).expect("дело из списка ключей");
+        let business = self
+            .world
+            .businesses
+            .get_mut(id)
+            .expect("дело из списка ключей");
         let name = business.name(&content);
         let manager = business
             .dismiss()
             .expect("исчезает только управляющий, который был");
         let npc = manager.employee().npc().clone();
         messages.push(format!("{name}: {} {VANISHED}", content.npcs[&npc].name));
-        self.contacts
+        self.world
+            .contacts
             .entry(npc.clone())
             .or_insert_with(|| Contact::new(npc))
             .lose(date, &format!("{name}: {VANISHED}"));
@@ -321,7 +338,7 @@ impl Game {
     ) -> bool {
         let content = Arc::clone(&self.content);
         let today = report.settled_on;
-        let business = &self.businesses[id];
+        let business = &self.world.businesses[id];
         let name = business.name(&content);
         let month = today.previous().month_and_year();
         if report.skill_lost
@@ -338,25 +355,25 @@ impl Game {
         let amount = Money::new(Currency::Ruble, profit.abs());
         let shown = content.money.format_money(amount, today);
         if profit >= 0 {
-            self.player.receive_cash(amount);
+            self.world.player.receive_cash(amount);
             messages.push(format!("{name}: {month} — {PROFIT} {shown}"));
             return true;
         }
-        let cash = self.player.money().cash();
+        let cash = self.world.player.money().cash();
         if cash.covers(amount) {
-            self.player.pay_cash(amount);
+            self.world.player.pay_cash(amount);
             messages.push(format!("{name}: {month} — {LOSS} {shown}"));
             return true;
         }
-        self.player.pay_cash(cash);
-        self.businesses.remove(id);
+        self.world.player.pay_cash(cash);
+        self.world.businesses.remove(id);
         messages.push(format!("{name}: {month} — {LOSS} {shown}, {BANKRUPT}"));
         false
     }
 
     fn known_business(&self, business: &str) -> Result<BusinessId, CommandError> {
         BusinessId::parse(business)
-            .filter(|id| self.businesses.contains_key(id))
+            .filter(|id| self.world.businesses.contains_key(id))
             .ok_or_else(|| CommandError::UnknownBusiness {
                 business: business.to_owned(),
             })
@@ -364,7 +381,7 @@ impl Game {
 
     /// Дело игрока, которым человек сейчас управляет.
     fn employer_of(&self, npc: &NpcId) -> Option<&Business> {
-        self.businesses.values().find(|business| {
+        self.world.businesses.values().find(|business| {
             business
                 .manager()
                 .is_some_and(|manager| manager.employee().npc() == npc)
@@ -374,7 +391,8 @@ impl Game {
     /// Почему человек не пойдёт в управляющие: потерян, в отъезде или обижен. Долг услуг найму
     /// не мешает — это работа, а не одолжение.
     fn candidate_refusal(&self, npc: &NpcId, today: GameDate) -> Option<ContactRefusal> {
-        self.contacts
+        self.world
+            .contacts
             .get(npc)
             .and_then(|contact| contact.refusal(self.content.reputation, today))
             .filter(|refusal| *refusal != ContactRefusal::OwedTooMuch)

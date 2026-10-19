@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 use super::{Currency, Money, MoneyRules, Real};
@@ -9,7 +10,7 @@ const PERCENT: f64 = 100.0;
 
 /// Деньги одного человека (§6): наличные рубли при себе и вклады по местам хранения — каждый в
 /// валюте своего места. Риски мест (кража, заморозка, отзыв лицензии, дефолт) приходят событиями.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MoneyStore {
     cash: Money,
     balances: BTreeMap<MoneyPlaceId, Money>,

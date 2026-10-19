@@ -114,6 +114,8 @@ pub struct Content {
     pub zone_services: BTreeMap<ZoneServiceId, ZoneService>,
     pub history: BTreeMap<TimelineNodeId, HistoryNode>,
     pub history_templates: BTreeMap<TimelineNodeId, HistoryTemplate>,
+    /// Отпечаток файлов данных: файл жизни, сделанный с другими данными, не загрузится.
+    pub fingerprint: u64,
 }
 
 impl Content {

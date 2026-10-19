@@ -1,0 +1,90 @@
+use serde::Serialize;
+use serde::de::DeserializeOwned;
+use serde_json::{Map, Value};
+
+use super::SaveError;
+
+const FORMAT_KEY: &str = "format";
+const VERSION_KEY: &str = "version";
+const CONTENT_KEY: &str = "content";
+const BODY_KEY: &str = "body";
+const FIRST_VERSION: u32 = 1;
+
+/// Вид файла и версия формата его тела. Когда тело меняется, версия растёт и добавляется шаг
+/// миграции: `migrations[i]` переводит тело версии `i + 1` в версию `i + 2`, поэтому файлы любой
+/// прошлой версии читаются по цепочке шагов.
+pub struct SaveFormat {
+    pub kind: &'static str,
+    pub version: u32,
+    pub migrations: &'static [fn(Value) -> Value],
+}
+
+/// Файл жизни: мир одной жизни.
+pub const LIFE: SaveFormat = SaveFormat {
+    kind: "speculant-life",
+    version: 1,
+    migrations: &[],
+};
+
+/// Файл метапрогрессии: открытия, книжка, история и рекорды.
+pub const META: SaveFormat = SaveFormat {
+    kind: "speculant-meta",
+    version: 1,
+    migrations: &[],
+};
+
+impl SaveFormat {
+    /// Текст файла: вид, версия, отпечаток данных игры, если файл к ним привязан, и тело.
+    pub fn encode<T: Serialize>(&self, content: Option<u64>, body: &T) -> String {
+        let mut file = Map::new();
+        file.insert(FORMAT_KEY.to_owned(), Value::from(self.kind));
+        file.insert(VERSION_KEY.to_owned(), Value::from(self.version));
+        if let Some(content) = content {
+            file.insert(CONTENT_KEY.to_owned(), Value::from(content));
+        }
+        file.insert(
+            BODY_KEY.to_owned(),
+            serde_json::to_value(body).expect("состояние ядра сериализуется в JSON"),
+        );
+        Value::Object(file).to_string()
+    }
+
+    /// Тело файла: вид должен совпасть, версия — не новее этой, отпечаток данных — тот же, если
+    /// он задан; тело прошлой версии проходит шаги миграции.
+    pub fn decode<T: DeserializeOwned>(
+        &self,
+        text: &str,
+        content: Option<u64>,
+    ) -> Result<T, SaveError> {
+        let mut file: Map<String, Value> =
+            serde_json::from_str(text).map_err(|error| SaveError::Corrupt(error.to_string()))?;
+        if file.get(FORMAT_KEY).and_then(Value::as_str) != Some(self.kind) {
+            return Err(SaveError::OtherFormat);
+        }
+        let version = file
+            .get(VERSION_KEY)
+            .and_then(Value::as_u64)
+            .and_then(|version| u32::try_from(version).ok())
+            .filter(|version| *version >= FIRST_VERSION)
+            .ok_or_else(|| SaveError::Corrupt("нет версии формата".to_owned()))?;
+        if version > self.version {
+            return Err(SaveError::Newer {
+                version,
+                supported: self.version,
+            });
+        }
+        if let Some(content) = content
+            && file.get(CONTENT_KEY).and_then(Value::as_u64) != Some(content)
+        {
+            return Err(SaveError::OtherContent);
+        }
+        let body = file
+            .remove(BODY_KEY)
+            .ok_or_else(|| SaveError::Corrupt("нет тела".to_owned()))?;
+        let steps = usize::try_from(version - FIRST_VERSION).expect("версий мало");
+        let body = self.migrations[steps..]
+            .iter()
+            .fold(body, |body, migrate| migrate(body));
+        serde_json::from_value(body).map_err(|error| SaveError::Corrupt(error.to_string()))
+    }
+}

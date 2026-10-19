@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 use super::{InspectionResponse, PolicyKind};
@@ -7,7 +8,7 @@ use crate::content::{BusinessKind, Content, PolicyOption};
 const MARKET_WAGE_PERCENT: u32 = 100;
 
 /// Выбранные варианты политик дела — по одной на каждую политику его типа.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Policies {
     selected: BTreeMap<PolicyKind, usize>,
 }

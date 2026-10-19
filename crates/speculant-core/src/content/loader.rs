@@ -18,6 +18,7 @@ use crate::history::HistoryGenerator;
 use crate::life::LifeRules;
 use crate::npc::RivalRules;
 use crate::reputation::ReputationRules;
+use crate::rng::fnv1a;
 use crate::time::TimeRules;
 use crate::zone::ZoneRules;
 
@@ -225,7 +226,21 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         zone_services: keyed(&parsed.zone_services, ZoneServiceId::new),
         history: keyed(&parsed.history, TimelineNodeId::new),
         history_templates: keyed(&parsed.history_templates, TimelineNodeId::new),
+        fingerprint: fingerprint(&files),
     })
+}
+
+/// Отпечаток набора файлов: пути и тексты по порядку путей, каждый с нулевым разделителем.
+fn fingerprint(files: &[ContentFile]) -> u64 {
+    let mut sorted: Vec<&ContentFile> = files.iter().collect();
+    sorted.sort_by(|left, right| left.path.cmp(&right.path));
+    fnv1a(sorted.iter().flat_map(|file| {
+        file.path
+            .bytes()
+            .chain([0])
+            .chain(file.text.bytes())
+            .chain([0])
+    }))
 }
 
 fn keyed<T: Clone, Id: Ord>(

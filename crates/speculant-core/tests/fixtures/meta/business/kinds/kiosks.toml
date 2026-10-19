@@ -1,0 +1,11 @@
+# Ларьки с макета «Управляющий»: дело 1995 года, уязвимое для наезда.
+title = "Ларьки у «Тушинской»"
+forms = ["cooperative", "partnership", "company"]
+point_cost = 3000
+max_points = 5
+rent = 50
+wages = 100
+goods = { chewing_gum = 100 }
+margin = 0.2
+raid = 1
+policies = ["markup", "roof", "purchase", "night_trade", "inspection", "wage"]

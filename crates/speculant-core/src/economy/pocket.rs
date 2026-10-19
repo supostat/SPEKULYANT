@@ -1,9 +1,10 @@
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 use crate::content::GoodId;
 
 /// Товар при себе: окно «Карман» (§13.3 п. 1).
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Pocket {
     goods: BTreeMap<GoodId, u32>,
 }

@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 use super::{CityMarket, Money, Shock};
@@ -19,7 +20,7 @@ pub struct Quote {
 
 /// Рынки всех городов и действующие шоки цен (§5.2). Цена в городе — кривая товара, множитель
 /// города по категории, шоки событий и местный запас; соперники торгуют по тем же правилам.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Markets {
     cities: BTreeMap<CityId, CityMarket>,
     shocks: Vec<Shock>,

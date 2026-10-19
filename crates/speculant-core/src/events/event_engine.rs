@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 use rand_chacha::ChaCha8Rng;
@@ -13,7 +14,7 @@ const FRACTION_BITS: u32 = 53;
 
 /// Память событий одной жизни: флаги прошлых решений, когда что случалось, отложенные
 /// продолжения, событие, остановившее время, и журнал.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EventEngine {
     flags: BTreeSet<FlagId>,
     last_happened: BTreeMap<EventId, GameDate>,

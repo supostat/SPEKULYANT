@@ -1,5 +1,7 @@
+use serde::{Deserialize, Serialize};
+
 /// Сделанный выбор: его номер с нуля и строка того, что изменилось («Торговцы +1. Деньги −600 р.»).
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Resolution {
     pub choice: usize,
     pub effects: String,

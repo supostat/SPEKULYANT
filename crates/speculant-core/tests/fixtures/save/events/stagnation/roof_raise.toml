@@ -1,0 +1,12 @@
+title = "Крыша подняла ставку"
+weight = 1
+incident = "roof_raise"
+text = "Крыша {business} хочет больше. Платить?"
+
+[[choices]]
+text = "Платить 15%"
+consequences = { business = { policies = [{ policy = "roof", option = "да, 15%" }] } }
+
+[[choices]]
+text = "Отказать"
+consequences = { business = { policies = [{ policy = "roof", option = "нет" }] }, reputation = [{ faction = "bandits", change = -1 }] }

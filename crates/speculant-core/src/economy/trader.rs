@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use super::{Currency, Markets, Money, MoneyStore, Pocket};
 use crate::command_error::CommandError;
 use crate::content::{CityId, Content, Good, GoodId, MoneyPlace, MoneyPlaceId};
@@ -11,7 +13,7 @@ pub struct Deal {
 }
 
 /// Торговец — игрок, а позже и соперники (§8): деньги, карман и сделки по общим правилам рынка.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Trader {
     money: MoneyStore,
     pocket: Pocket,

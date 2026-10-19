@@ -1,9 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 use crate::content::{Content, HistoryOutcome, TimelineNodeId};
 use crate::time::GameDate;
 
 /// Узел таймлайна мира: какой исторический узел или шаблон генератора, в какой день, с каким
 /// масштабом и каким исходом — номер среди исходов узла.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TimelineNode {
     pub node: TimelineNodeId,
     pub date: GameDate,

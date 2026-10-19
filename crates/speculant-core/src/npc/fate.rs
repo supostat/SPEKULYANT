@@ -1,7 +1,9 @@
+use serde::{Deserialize, Serialize};
+
 use crate::time::GameDate;
 
 /// Судьба соперника (§8): в деле, в зоне до даты, разорился, погиб или ушёл в депутаты.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Fate {
     Active,
     Prison { until: GameDate },

@@ -1,9 +1,11 @@
+use serde::{Deserialize, Serialize};
+
 use super::Employee;
 use crate::time::GameDate;
 
 /// Управляющий делом (§7.3): нанятый человек и день найма. Политики принадлежат делу и
 /// переходят к следующему управляющему.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Manager {
     employee: Employee,
     since: GameDate,

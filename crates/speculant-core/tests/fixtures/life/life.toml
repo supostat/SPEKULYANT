@@ -14,6 +14,7 @@ stash_loss_share = 1.0
 resale_share = 0.8
 capital_in_dollars_from = "1992-01-01"
 newspaper_pages = 16
+records_size = 10
 business_sentence = "В {year} году завёл своё дело — «{business}»."
 
 [names]

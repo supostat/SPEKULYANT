@@ -1,0 +1,7 @@
+title = "Запой"
+weight = 1
+text = "Неделя прошла как в тумане."
+
+[[choices]]
+text = "Опохмелиться"
+consequences = { health = -50 }

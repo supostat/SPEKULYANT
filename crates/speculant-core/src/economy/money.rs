@@ -1,8 +1,10 @@
+use serde::{Deserialize, Serialize};
+
 use super::Currency;
 
 /// Сумма в валюте: рубли — в копейках до деноминации 1998 года, чеки — в копейках чека, доллары —
 /// в центах. Складывать и сравнивать можно только суммы одной валюты; иное — ошибка в коде ядра.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Money {
     currency: Currency,
     minor_units: i64,

@@ -1,0 +1,10 @@
+kind = "departure"
+title = "Уйти на покой"
+voluntary = true
+capital_label = "Капитал на покое"
+headline = "НА ПОКОЕ: {NAME}"
+text = "{date} отошёл от дел."
+
+[sources]
+stagnation = "«ВЕЧЕРНЯЯ МОСКВА»"
+wild_market = "«МОСКОВСКИЙ КОМСОМОЛЕЦ»"

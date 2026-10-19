@@ -1,0 +1,10 @@
+# Десять пар джинсов по 180 р. в месяц, делу — половина: 900 р. с точки.
+title = "Палатка у метро"
+forms = ["artel"]
+point_cost = 1000
+max_points = 2
+rent = 40
+wages = 200
+goods = { jeans = 10 }
+margin = 0.5
+policies = ["markup", "roof", "purchase", "night_trade", "inspection", "wage"]

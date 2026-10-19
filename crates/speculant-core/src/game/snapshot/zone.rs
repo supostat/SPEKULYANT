@@ -18,7 +18,7 @@ pub(super) fn zone(game: &Game, zone: &Zone, today: GameDate) -> ZoneView {
     let rules = &content.zone;
     let camp = content.camp_on(today);
     let stash = zone.stash();
-    let cash = game.player.money().cash();
+    let cash = game.world.player.money().cash();
     let parcel_price = content
         .money
         .from_real(rules.parcel.price, Currency::Ruble, today);
@@ -74,6 +74,7 @@ pub(super) fn zone(game: &Game, zone: &Zone, today: GameDate) -> ZoneView {
             }
         }),
         trustees: game
+            .world
             .businesses
             .values()
             .map(|business| {
