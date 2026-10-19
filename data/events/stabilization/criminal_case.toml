@@ -1,0 +1,32 @@
+title = "Уголовное дело"
+weight = 1
+once = true
+text = """
+На тебя заведено дело о мошенничестве в особо крупном. Следователь намекает: есть \
+варианты."""
+
+[conditions]
+flags_set = ["siloviki_case"]
+
+[[choices]]
+text = "Найти варианты"
+outcome = "Дело прекращено за отсутствием состава."
+
+[choices.consequences]
+money = -1500
+clear_flags = ["siloviki_case"]
+
+[[choices]]
+text = "Судиться до конца"
+outcome = "Суд даёт четыре года условно... нет, реально."
+
+[choices.consequences]
+sentence_months = 48
+clear_flags = ["siloviki_case"]
+
+[[choices]]
+text = "Уехать в Лондон"
+outcome = "Самолёт, паспорт, новая жизнь эмигранта."
+
+[choices.consequences]
+end_life = "emigration"

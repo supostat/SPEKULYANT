@@ -1,0 +1,34 @@
+title = "Рейдеры"
+weight = 4
+cooldown_days = 365
+text = "В реестре вдруг появился новый владелец твоей фирмы. Охрана у входа — чужая."
+
+[conditions]
+money = { at_least = 2000 }
+
+[[choices]]
+text = "Нанять своих охранников и юристов"
+outcome = "Через неделю здание снова твоё."
+
+[choices.consequences]
+money = -600
+
+[[choices]]
+text = "Пойти к силовикам"
+outcome = "Силовики помогают. Теперь ты им должен."
+
+[choices.consequences]
+reputation = [{ faction = "siloviki", change = -1 }]
+set_flags = ["siloviki_debt"]
+
+[[choices]]
+text = "Судиться"
+outcome = "Суд идёт год. Фирма всё это время чужая."
+
+[choices.consequences]
+set_flags = ["raider_case"]
+
+[[choices.follow_ups]]
+event = "raider_court"
+after_days = 120
+chance = 0.6

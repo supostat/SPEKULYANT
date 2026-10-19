@@ -1,0 +1,30 @@
+title = "Рынок сносят"
+weight = 6
+once = true
+text = """
+Вещевой рынок, где ты торговал десять лет, сносят под гипермаркет. Контейнеры вывозят \
+бульдозерами."""
+
+[conditions]
+window = { from = "2002-01-01" }
+
+[[choices]]
+text = "Распродать остатки за бесценок"
+outcome = "Последний день рынка. Последние покупатели."
+
+[choices.consequences]
+money = 40
+
+[[choices]]
+text = "Перевезти товар на склад"
+outcome = "Аренда склада — новая статья расходов."
+
+[choices.consequences]
+money = -50
+
+[[choices]]
+text = "Смотреть, как сносят"
+outcome = "Бульдозер раздавил твой контейнер вместе с юностью."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = 1 }]

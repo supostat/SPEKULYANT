@@ -1,0 +1,15 @@
+title = "Прибыль интернет-магазина"
+weight = 1
+once = true
+text = "Интернет-магазин вышел в плюс: покупатели не хотят стоять в очередях."
+
+[conditions]
+flags_set = ["online_shop"]
+
+[[choices]]
+text = "Забрать прибыль"
+outcome = "Будущее приходит по проводам."
+
+[choices.consequences]
+money = 900
+clear_flags = ["online_shop"]

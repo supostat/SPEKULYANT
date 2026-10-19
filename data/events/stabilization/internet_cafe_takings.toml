@@ -1,0 +1,21 @@
+title = "Ночь «Контры»"
+weight = 6
+cooldown_days = 30
+text = "Ночной турнир по «Контре»: все компьютеры заняты до утра."
+
+[conditions]
+flags_set = ["internet_cafe"]
+
+[[choices]]
+text = "Забрать выручку"
+outcome = "Выручка мелкими купюрами и запах энергетиков."
+
+[choices.consequences]
+money = 110
+
+[[choices]]
+text = "Купить новые видеокарты"
+outcome = "Теперь «Контра» летает."
+
+[choices.consequences]
+money = -60

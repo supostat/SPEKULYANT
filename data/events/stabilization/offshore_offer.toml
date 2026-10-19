@@ -1,0 +1,19 @@
+title = "Офшор на Кипре"
+weight = 4
+cooldown_days = 365
+text = "Консультант предлагает кипрскую компанию: налоги меньше, вопросов тоже."
+
+[[choices]]
+text = "Открыть офшор"
+outcome = "Кипрская фирма с греческим названием твоя."
+
+[choices.consequences]
+money = 200
+reputation = [{ faction = "officials", change = -1 }]
+
+[[choices]]
+text = "Платить дома"
+outcome = "Тринадцать процентов — тоже не много."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = 1 }]

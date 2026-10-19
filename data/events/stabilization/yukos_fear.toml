@@ -1,0 +1,29 @@
+title = "Дело ЮКОСа"
+weight = 8
+once = true
+text = """
+Самого богатого человека страны арестовали в аэропорту Новосибирска. Бизнес понимает \
+намёк."""
+
+[conditions]
+timeline = "yukos_2003"
+
+[[choices]]
+text = "Сделать взнос в правильный фонд"
+outcome = "Лояльность подтверждена."
+
+[choices.consequences]
+money = -300
+reputation = [{ faction = "siloviki", change = 2 }]
+
+[[choices]]
+text = "Перевести часть денег за границу"
+outcome = "Деньги в Лондоне спокойнее."
+
+[choices.consequences]
+money = -100
+reputation = [{ faction = "siloviki", change = -1 }]
+
+[[choices]]
+text = "Жить как жил"
+outcome = "Ты не олигарх. Пока."

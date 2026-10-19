@@ -1,0 +1,16 @@
+title = "Ретро-бонус"
+weight = 5
+cooldown_days = 120
+text = "Поставщик предлагает «ретро-бонус» закупщику сети. Закупщик — твой знакомый."
+
+[[choices]]
+text = "Свести их за комиссию"
+outcome = "Комиссия приходит конвертом."
+
+[choices.consequences]
+money = 120
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Не участвовать"
+outcome = "Знакомый закупщик пожимает плечами."

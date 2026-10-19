@@ -1,0 +1,33 @@
+title = "Обыск"
+weight = 3
+cooldown_days = 365
+text = """
+Ранним утром в офис входят с ордером: изымают компьютеры, печати и почему-то кофеварку."""
+
+[conditions]
+reputation = [{ faction = "siloviki", at_most = -2 }]
+
+[[choices]]
+text = "Договориться о возврате техники"
+outcome = "Компьютеры вернулись. Кофеварка — нет."
+
+[choices.consequences]
+money = -300
+reputation = [{ faction = "siloviki", change = 1 }]
+
+[[choices]]
+text = "Нанять адвоката и жаловаться"
+outcome = "Жалоба идёт по инстанциям. Обыски тоже."
+
+[choices.consequences]
+money = -150
+set_flags = ["siloviki_case"]
+
+[[choices.follow_ups]]
+event = "criminal_case"
+after_days = 60
+chance = 0.35
+
+[[choices]]
+text = "Ждать, что вернут сами"
+outcome = "Через полгода возвращают половину. Без жёстких дисков."

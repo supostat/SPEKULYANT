@@ -1,0 +1,22 @@
+title = "Карточки оплаты"
+weight = 6
+cooldown_days = 30
+text = "Карточки оплаты разлетаются: вся страна говорит по мобильному."
+
+[conditions]
+flags_set = ["mobile_salon"]
+
+[[choices]]
+text = "Забрать выручку"
+outcome = "Карточки, чехлы, зарядки — касса полна."
+
+[choices.consequences]
+money = 160
+
+[[choices]]
+text = "Расширить ассортимент"
+outcome = "Ты завозишь «Нокии» под заказ."
+
+[choices.consequences]
+money = -100
+goods = [{ good = "mobile_phone", change = 2 }]

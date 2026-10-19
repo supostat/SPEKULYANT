@@ -1,0 +1,19 @@
+title = "Новый поезд"
+weight = 3
+cooldown_days = 30
+road = true
+text = "В купе — бизнесмены с ноутбуками. Говорят о сетях, кредитах и Лондоне."
+
+[conditions]
+window = { from = "1999-01-01" }
+
+[[choices]]
+text = "Обменяться визитками"
+outcome = "Попутчик — закупщик сети. Пригодится."
+
+[choices.consequences]
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Спать"
+outcome = "Ноутбуки стрекочут до утра."

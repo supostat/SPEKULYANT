@@ -1,0 +1,21 @@
+title = "Ночная смена"
+weight = 6
+cooldown_days = 30
+text = "Ночью в магазин у дома приходят за пивом, сигаретами и разговорами."
+
+[conditions]
+flags_set = ["corner_store"]
+
+[[choices]]
+text = "Забрать выручку"
+outcome = "Ночная касса пахнет пивом и мелочью."
+
+[choices.consequences]
+money = 150
+
+[[choices]]
+text = "Нанять ночного продавца"
+outcome = "Продавец ворует меньше, чем ты боялся."
+
+[choices.consequences]
+money = 90

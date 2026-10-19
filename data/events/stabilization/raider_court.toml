@@ -1,0 +1,23 @@
+title = "Решение по захвату"
+weight = 1
+once = true
+text = "Арбитраж выносит решение по захвату твоей фирмы."
+
+[conditions]
+flags_set = ["raider_case"]
+
+[[choices]]
+text = "Принять решение в свою пользу"
+outcome = "Судья оказался честным. Бывает."
+
+[choices.consequences]
+money = 300
+clear_flags = ["raider_case"]
+
+[[choices]]
+text = "Согласиться на мировую"
+outcome = "Половина фирмы — им, половина — тебе."
+
+[choices.consequences]
+money = -200
+clear_flags = ["raider_case"]

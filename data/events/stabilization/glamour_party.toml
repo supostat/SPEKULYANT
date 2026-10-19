@@ -1,0 +1,19 @@
+title = "Гламурная вечеринка"
+weight = 4
+cooldown_days = 180
+text = "Вечеринка на Рублёвке: светские львицы, министры, ди-джей из Лондона."
+
+[conditions]
+money = { at_least = 3000 }
+
+[[choices]]
+text = "Пойти и знакомиться"
+outcome = "Визитки министров в кармане."
+
+[choices.consequences]
+money = -150
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Остаться дома"
+outcome = "Рублёвка празднует без тебя."

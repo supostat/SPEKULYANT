@@ -1,0 +1,18 @@
+title = "«Я устал, я ухожу»"
+weight = 10
+once = true
+text = "Новогоднее обращение: президент уходит. Его преемник — бывший директор ФСБ."
+
+[conditions]
+timeline = "yeltsin_resigns_1999"
+
+[[choices]]
+text = "Поднять тост за новое время"
+outcome = "Шампанское, куранты, новое тысячелетие."
+
+[[choices]]
+text = "Перевести сбережения в доллары"
+outcome = "На всякий случай."
+
+[choices.consequences]
+reputation = [{ faction = "traders", change = 1 }]

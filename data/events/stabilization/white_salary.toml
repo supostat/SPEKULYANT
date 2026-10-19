@@ -1,0 +1,22 @@
+title = "Белая зарплата"
+weight = 6
+cooldown_days = 180
+text = "Работники просят белую зарплату: банки дают кредиты только со справкой 2-НДФЛ."
+
+[conditions]
+window = { from = "2001-01-01" }
+
+[[choices]]
+text = "Перевести на белую"
+outcome = "Работники берут кредиты на холодильники. Ты — налоги."
+
+[choices.consequences]
+money = -60
+reputation = [{ faction = "people", change = 2 }, { faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Оставить конверты"
+outcome = "Работники вздыхают и ищут других работодателей."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = -1 }]

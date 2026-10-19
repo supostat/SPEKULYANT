@@ -1,0 +1,22 @@
+title = "Тринадцать процентов"
+weight = 10
+once = true
+text = """
+Плоский налог: тринадцать процентов для всех. Бухгалтер считает: выгоднее платить, чем \
+прятать."""
+
+[conditions]
+timeline = "flat_tax"
+
+[[choices]]
+text = "Выйти из тени"
+outcome = "Белая зарплата, белая бухгалтерия, белый бизнес."
+
+[choices.consequences]
+money = -100
+reputation = [{ faction = "officials", change = 2 }, { faction = "siloviki", change = 1 }]
+set_flags = ["white_business"]
+
+[[choices]]
+text = "Остаться в тени"
+outcome = "Конверты привычнее. Пока."

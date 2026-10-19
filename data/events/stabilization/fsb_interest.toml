@@ -1,0 +1,20 @@
+title = "Вопросы о партнёрах"
+weight = 3
+cooldown_days = 365
+text = """
+Майор из «конторы» вызывает побеседовать о твоих зарубежных партнёрах: Стамбул, Пекин, \
+Варшава — всё интересно."""
+
+[[choices]]
+text = "Рассказать всё, что знаешь"
+outcome = "Майор благодарит. Партнёры — не узнают. Надеешься."
+
+[choices.consequences]
+reputation = [{ faction = "siloviki", change = 2 }, { faction = "traders", change = -1 }]
+
+[[choices]]
+text = "Отвечать односложно"
+outcome = "Майор пишет что-то в блокнот."
+
+[choices.consequences]
+reputation = [{ faction = "siloviki", change = -1 }]

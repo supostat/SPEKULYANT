@@ -1,0 +1,16 @@
+title = "Распродажа банкрота"
+weight = 4
+cooldown_days = 365
+text = "Конкурент обанкротился после дефолта. Конкурсный управляющий распродаёт имущество."
+
+[[choices]]
+text = "Купить склад за бесценок"
+outcome = "Склад теперь твой."
+
+[choices.consequences]
+money = -500
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Не участвовать"
+outcome = "Склад уходит другим."

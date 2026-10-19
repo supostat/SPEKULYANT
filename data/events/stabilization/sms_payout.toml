@@ -1,0 +1,15 @@
+title = "Доход с гороскопов"
+weight = 1
+once = true
+text = "Короткий номер приносит деньги: миллионы людей хотят знать будущее за доллар."
+
+[conditions]
+flags_set = ["sms_share"]
+
+[[choices]]
+text = "Забрать долю"
+outcome = "Будущее оказалось выгодным."
+
+[choices.consequences]
+money = 320
+clear_flags = ["sms_share"]

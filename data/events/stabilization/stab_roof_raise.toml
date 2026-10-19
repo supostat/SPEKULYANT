@@ -1,0 +1,18 @@
+title = "Тариф вырос"
+weight = 1
+incident = "roof_raise"
+text = "Крыша «{business}» поднимает тариф: «Времена стабильные, цены растут»."
+
+[[choices]]
+text = "Платить"
+outcome = "Крыша довольна."
+
+[choices.consequences]
+money = -200
+
+[[choices]]
+text = "Отказаться"
+outcome = "Крыша обижается."
+
+[choices.consequences]
+reputation = [{ faction = "siloviki", change = -2 }]

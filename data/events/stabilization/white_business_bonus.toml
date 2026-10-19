@@ -1,0 +1,18 @@
+title = "Белый бизнес"
+weight = 6
+cooldown_days = 180
+text = "Банк одобряет кредит под развитие: белая бухгалтерия наконец пригодилась."
+
+[conditions]
+flags_set = ["white_business"]
+
+[[choices]]
+text = "Взять кредит и расшириться"
+outcome = "Новый магазин, новые долги, новая жизнь."
+
+[choices.consequences]
+money = 400
+
+[[choices]]
+text = "Обойтись без кредита"
+outcome = "Свои деньги спокойнее."

@@ -1,0 +1,19 @@
+title = "Заказ оборонки"
+weight = 3
+once = true
+text = "Оборонный завод ищет поставщика комплектующих. Нужны допуск и знакомства."
+
+[conditions]
+reputation = [{ faction = "siloviki", at_least = 1 }]
+
+[[choices]]
+text = "Взять заказ"
+outcome = "Госзаказ — надёжнее любой сети."
+
+[choices.consequences]
+money = 1500
+reputation = [{ faction = "siloviki", change = 1 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Секретность — не для тебя."

@@ -1,0 +1,21 @@
+title = "Мобила-кирпич"
+weight = 5
+cooldown_days = 180
+text = """
+Твоя мобила-кирпич смотрится как экспонат музея. Партнёры приходят с «Нокиями» размером с \
+зажигалку."""
+
+[conditions]
+goods = [{ good = "mobile_phone", at_least = 1 }]
+
+[[choices]]
+text = "Купить новую «Нокию»"
+outcome = "Теперь ты снова современный человек."
+
+[choices.consequences]
+money = -150
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Оставить кирпич"
+outcome = "Кирпич не подводил ни разу. Как и молоток."

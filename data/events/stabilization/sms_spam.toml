@@ -1,0 +1,24 @@
+title = "Короткий номер"
+weight = 4
+cooldown_days = 180
+text = "Знакомые запускают «SMS-гороскоп» на короткий номер. Ищут, кто вложится в рекламу."
+
+[conditions]
+window = { from = "2002-01-01" }
+
+[[choices]]
+text = "Вложиться"
+outcome = "Гороскоп обещает тебе прибыль. Гороскоп не врёт."
+
+[choices.consequences]
+money = -150
+set_flags = ["sms_share"]
+
+[[choices.follow_ups]]
+event = "sms_payout"
+after_days = 60
+chance = 0.8
+
+[[choices]]
+text = "Не вкладываться"
+outcome = "Звёзды молчат."

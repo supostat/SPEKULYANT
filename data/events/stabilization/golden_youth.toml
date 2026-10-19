@@ -1,0 +1,22 @@
+title = "Мажоры"
+weight = 4
+cooldown_days = 180
+text = "Сын замминистра на «Гелендвагене» въехал в твою витрину и смеётся."
+
+[[choices]]
+text = "Требовать возмещения"
+outcome = "Папа звонит тебе сам. Разговор короткий."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]
+
+[[choices]]
+text = "Простить"
+outcome = "Витрину чинишь сам."
+
+[choices.consequences]
+money = -60
+
+[[choices]]
+text = "Промолчать"
+outcome = "Мажор уезжает. Витрина — нет."

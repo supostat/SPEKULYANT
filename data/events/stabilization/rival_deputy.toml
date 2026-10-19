@@ -1,0 +1,29 @@
+title = "Бывший соперник — депутат"
+weight = 5
+cooldown_days = 365
+text = """
+{npc}, с которым вы делили рынок в девяностые, теперь депутат областной думы. Звонит сам."""
+
+[conditions]
+rival = { relation_at_least = 0 }
+
+[[choices]]
+text = "Поддержать его фонд"
+outcome = "Депутат помнит своих."
+
+[choices.consequences]
+money = -150
+reputation = [{ faction = "officials", change = 2 }]
+rival = { relation = 1 }
+
+[[choices]]
+text = "Попросить о помощи с разрешениями"
+outcome = "Разрешения приходят быстро."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = 1 }]
+rival = { favours = -1 }
+
+[[choices]]
+text = "Поздравить и не связываться"
+outcome = "Депутат понимает. Наверное."

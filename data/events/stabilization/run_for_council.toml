@@ -1,0 +1,19 @@
+title = "Выборы в горсовет"
+weight = 4
+once = true
+text = "Партия власти предлагает тебе место в списке на выборах в городской совет."
+
+[conditions]
+reputation = [{ faction = "officials", at_least = 2 }]
+
+[[choices]]
+text = "Идти в депутаты"
+outcome = "Мандат, иммунитет, заседания по вторникам."
+
+[choices.consequences]
+money = -500
+reputation = [{ faction = "officials", change = 2 }, { faction = "people", change = -1 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Политика — не твоё."

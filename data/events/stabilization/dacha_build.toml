@@ -1,0 +1,19 @@
+title = "Дача"
+weight = 5
+once = true
+text = "Участок под Москвой подешевел: бывший совхоз продаёт землю под дачи."
+
+[conditions]
+money = { at_least = 2000 }
+
+[[choices]]
+text = "Купить участок"
+outcome = "Шесть соток и мечта о бане."
+
+[choices.consequences]
+money = -700
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Не покупать"
+outcome = "Земля подорожает без тебя."

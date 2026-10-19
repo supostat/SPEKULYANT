@@ -1,0 +1,19 @@
+title = "Управляющий и рейдеры"
+weight = 1
+incident = "betrayal"
+text = "{manager} передал рейдерам документы «{business}»."
+
+[[choices]]
+text = "Отбить дело через суд"
+outcome = "Дорого, но дело твоё."
+
+[choices.consequences]
+money = -500
+business = { manager_leaves = true }
+
+[[choices]]
+text = "Отдать дело"
+outcome = "Рейдеры довольны."
+
+[choices.consequences]
+business = { lost = true }

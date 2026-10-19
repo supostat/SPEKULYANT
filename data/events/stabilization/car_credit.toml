@@ -1,0 +1,20 @@
+title = "Иномарка в кредит"
+weight = 5
+once = true
+text = "Автосалон предлагает иномарку в кредит. Все соседи уже пересели."
+
+[conditions]
+window = { from = "2002-01-01" }
+money = { at_least = 1000 }
+
+[[choices]]
+text = "Купить «Жигули» за наличные"
+outcome = "Отечественное — надёжное. Почти."
+
+[choices.consequences]
+money = -800
+goods = [{ good = "zhiguli", change = 1 }]
+
+[[choices]]
+text = "Ездить на старой"
+outcome = "Старая машина пока ездит."

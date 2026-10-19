@@ -1,0 +1,20 @@
+title = "Интернет-кафе"
+weight = 5
+once = true
+text = """
+Интернет-кафе в подвале: десять компьютеров, «Контра» по ночам, электронная почта днём."""
+
+[conditions]
+money = { at_least = 1000 }
+
+[[choices]]
+text = "Открыть"
+outcome = "Подростки играют до утра, ты считаешь часы."
+
+[choices.consequences]
+money = -800
+set_flags = ["internet_cafe"]
+
+[[choices]]
+text = "Не связываться"
+outcome = "Подвал уходит под шиномонтаж."

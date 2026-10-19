@@ -1,0 +1,20 @@
+title = "Вертикаль"
+weight = 5
+cooldown_days = 180
+text = """
+Губернатор собирает бизнес на совещание: «Надо помочь области». Отказ не предусмотрен."""
+
+[[choices]]
+text = "Помочь области"
+outcome = "Детская площадка с твоей табличкой."
+
+[choices.consequences]
+money = -150
+reputation = [{ faction = "officials", change = 2 }]
+
+[[choices]]
+text = "Прислать заместителя"
+outcome = "Заместитель вернулся бледным."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]

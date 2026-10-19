@@ -1,0 +1,20 @@
+title = "Свой сайт"
+weight = 5
+cooldown_days = 365
+text = """
+Студент предлагает сделать сайт для твоего дела: «Все серьёзные фирмы уже в интернете»."""
+
+[conditions]
+window = { from = "2000-01-01" }
+
+[[choices]]
+text = "Заказать сайт"
+outcome = "Сайт мигает и играет музыку. Звонков стало больше."
+
+[choices.consequences]
+money = -80
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Обойтись"
+outcome = "Сайт сделали конкуренты."

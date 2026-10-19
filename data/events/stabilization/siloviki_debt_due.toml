@@ -1,0 +1,23 @@
+title = "Долг платежом красен"
+weight = 5
+cooldown_days = 180
+text = "Силовики напоминают: помогли — теперь помоги. Им нужна доля в твоём деле."
+
+[conditions]
+flags_set = ["siloviki_debt"]
+
+[[choices]]
+text = "Отдать долю"
+outcome = "Теперь у тебя партнёры в погонах."
+
+[choices.consequences]
+money = -400
+reputation = [{ faction = "siloviki", change = 2 }]
+clear_flags = ["siloviki_debt"]
+
+[[choices]]
+text = "Тянуть"
+outcome = "Партнёры ждут. Пока."
+
+[choices.consequences]
+reputation = [{ faction = "siloviki", change = -1 }]

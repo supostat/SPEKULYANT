@@ -1,0 +1,33 @@
+title = "Бывший хозяин"
+weight = 1
+once = true
+text = """
+Бывший хозяин захваченного завода нашёл, кто был в доле. С ним люди из прошлых девяностых."""
+
+[conditions]
+flags_set = ["raided_plant"]
+
+[[choices]]
+text = "Вернуть долю"
+outcome = "Деньги ушли. Голова осталась."
+
+[choices.consequences]
+money = -1000
+clear_flags = ["raided_plant"]
+
+[[choices]]
+text = "Спрятаться за силовиков"
+outcome = "Силовики разбираются. Не бесплатно."
+
+[choices.consequences]
+money = -400
+reputation = [{ faction = "siloviki", change = 1 }]
+clear_flags = ["raided_plant"]
+
+[[choices]]
+text = "Уехать на дачу и переждать"
+outcome = "Бывший хозяин ищет месяц и уходит ни с чем."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = -1 }]
+clear_flags = ["raided_plant"]

@@ -1,0 +1,20 @@
+title = "Пейджер устарел"
+weight = 5
+once = true
+text = "Пейджерные компании закрываются: у всех мобильные. Твой пейджер молчит навсегда."
+
+[conditions]
+goods = [{ good = "pager", at_least = 1 }]
+window = { from = "2001-01-01" }
+
+[[choices]]
+text = "Продать за копейки коллекционеру"
+outcome = "Коллекционер собирает девяностые."
+
+[choices.consequences]
+money = 5
+goods = [{ good = "pager", change = -1 }]
+
+[[choices]]
+text = "Оставить на память"
+outcome = "Пейджер лежит в ящике рядом с ваучером."

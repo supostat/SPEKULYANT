@@ -1,0 +1,18 @@
+title = "СЭС"
+weight = 6
+cooldown_days = 90
+text = "Санэпидстанция пришла с проверкой: тараканы, сроки годности, медкнижки."
+
+[[choices]]
+text = "Накрыть стол"
+outcome = "Тараканы признаны неопасными."
+
+[choices.consequences]
+money = -50
+
+[[choices]]
+text = "Показать медкнижки"
+outcome = "Медкнижки купленные, но с печатями."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = 1 }]

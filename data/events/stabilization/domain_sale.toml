@@ -1,0 +1,22 @@
+title = "Покупатель на домен"
+weight = 1
+once = true
+text = "Крупная фирма хочет купить твой короткий домен."
+
+[conditions]
+flags_set = ["domains"]
+
+[[choices]]
+text = "Продать"
+outcome = "Тридцать рублей превратились в тысячу."
+
+[choices.consequences]
+money = 1000
+clear_flags = ["domains"]
+
+[[choices]]
+text = "Держать дальше"
+outcome = "Пусть подорожает ещё."
+
+[choices.consequences]
+clear_flags = ["domains"]

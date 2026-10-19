@@ -1,0 +1,27 @@
+title = "Заказ на захват"
+weight = 3
+once = true
+text = """
+Знакомый юрист предлагает поучаствовать в «смене собственника» соседнего завода: документы \
+готовы, судья в доле."""
+
+[conditions]
+window = { from = "2000-01-01" }
+
+[[choices]]
+text = "Войти в долю"
+outcome = "Завод сменил хозяина. Бывший хозяин — тоже кое-что сменил."
+
+[choices.consequences]
+money = 1200
+reputation = [{ faction = "people", change = -2 }, { faction = "siloviki", change = 1 }]
+set_flags = ["raided_plant"]
+
+[[choices.follow_ups]]
+event = "raided_owner_revenge"
+after_days = 180
+chance = 0.3
+
+[[choices]]
+text = "Отказаться"
+outcome = "Юрист находит другого."

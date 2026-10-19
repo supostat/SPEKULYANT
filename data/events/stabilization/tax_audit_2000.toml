@@ -1,0 +1,33 @@
+title = "Выездная проверка"
+weight = 5
+cooldown_days = 180
+text = """
+Налоговая выездная проверка за три года. Инспекторы занимают твой кабинет на месяц."""
+
+[[choices]]
+text = "Доплатить по акту"
+outcome = "Акт подписан, совесть чиста."
+
+[choices.consequences]
+money = -250
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Оспорить в суде"
+outcome = "Суд затянется на год, но шансы есть."
+
+[choices.consequences]
+money = -80
+set_flags = ["tax_dispute"]
+
+[[choices.follow_ups]]
+event = "tax_dispute_result"
+after_days = 180
+chance = 0.7
+
+[[choices]]
+text = "Тянуть с ответом"
+outcome = "Инспекторы пишут акт без тебя."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]

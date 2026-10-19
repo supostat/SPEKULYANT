@@ -1,0 +1,31 @@
+title = "Авария на производстве"
+weight = 3
+cooldown_days = 365
+text = "На линии авария: рабочий в больнице, станок встал, приехала инспекция."
+
+[conditions]
+flags_set = ["factory"]
+
+[[choices]]
+text = "Оплатить лечение и ремонт"
+outcome = "Рабочий выздоровеет, станок — тоже."
+
+[choices.consequences]
+money = -400
+reputation = [{ faction = "people", change = 2 }]
+
+[[choices]]
+text = "Договориться с инспекцией"
+outcome = "Акт об аварии исчезает."
+
+[choices.consequences]
+money = -250
+reputation = [{ faction = "people", change = -2 }]
+
+[[choices]]
+text = "Закрыть цех"
+outcome = "Станки под брезентом, рабочие по домам."
+
+[choices.consequences]
+reputation = [{ faction = "people", change = -1 }]
+clear_flags = ["factory"]

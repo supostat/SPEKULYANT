@@ -1,0 +1,22 @@
+title = "Салон связи"
+weight = 5
+once = true
+text = """
+Сотовая связь дешевеет на глазах. Салон связи у метро продаётся вместе с договором с \
+«Билайном»."""
+
+[conditions]
+window = { from = "2000-06-01" }
+money = { at_least = 1500 }
+
+[[choices]]
+text = "Купить салон"
+outcome = "Телефоны, карточки оплаты, чехлы. Очередь у кассы."
+
+[choices.consequences]
+money = -1200
+set_flags = ["mobile_salon"]
+
+[[choices]]
+text = "Не покупать"
+outcome = "Через год салонов у метро — пять."

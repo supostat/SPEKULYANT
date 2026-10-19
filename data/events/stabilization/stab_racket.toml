@@ -1,0 +1,19 @@
+title = "Наезд в погонах"
+weight = 1
+incident = "racket"
+text = "В «{business}» пришли люди в погонах: «Крыша теперь — мы. Бандиты в прошлом»."
+
+[[choices]]
+text = "Платить новым"
+outcome = "Тариф тот же, форма другая."
+
+[choices.consequences]
+money = -250
+reputation = [{ faction = "siloviki", change = 1 }]
+
+[[choices]]
+text = "Закрыться на время"
+outcome = "Пусть остынут."
+
+[choices.consequences]
+business = { closed_days = 10 }

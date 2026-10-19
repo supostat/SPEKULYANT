@@ -1,0 +1,21 @@
+title = "Партия с завода"
+weight = 6
+cooldown_days = 45
+text = "Цех отгрузил партию. Склады сетей ждут."
+
+[conditions]
+flags_set = ["factory"]
+
+[[choices]]
+text = "Отгрузить в сети"
+outcome = "Отсрочка платежа, зато объём."
+
+[choices.consequences]
+money = 250
+
+[[choices]]
+text = "Продать с завода за наличные"
+outcome = "Меньше, зато сразу."
+
+[choices.consequences]
+money = 180

@@ -1,0 +1,19 @@
+title = "Открытие гипермаркета"
+weight = 6
+once = true
+text = "Открылся гипермаркет: тележки, касс тридцать штук, цены ниже, чем у тебя на рынке."
+
+[conditions]
+window = { from = "2002-03-01" }
+
+[[choices]]
+text = "Закупиться оптом по акции"
+outcome = "Шампунь и кофе дешевле, чем у оптовика."
+
+[choices.consequences]
+money = -40
+goods = [{ good = "shampoo", change = 10 }, { good = "coffee", change = 10 }]
+
+[[choices]]
+text = "Сходить посмотреть"
+outcome = "Тележка катится сама. Ты понимаешь, что эпоха кончилась."

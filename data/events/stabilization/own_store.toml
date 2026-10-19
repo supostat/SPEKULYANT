@@ -1,0 +1,20 @@
+title = "Свой магазин у дома"
+weight = 4
+once = true
+text = "Помещение на первом этаже жилого дома продают: магазин у дома, круглосуточный."
+
+[conditions]
+money = { at_least = 3000 }
+
+[[choices]]
+text = "Купить помещение"
+outcome = "Вывеска «Продукты 24» горит всю ночь."
+
+[choices.consequences]
+money = -2500
+reputation = [{ faction = "people", change = 1 }]
+set_flags = ["corner_store"]
+
+[[choices]]
+text = "Не связываться"
+outcome = "Помещение уходит под аптеку."

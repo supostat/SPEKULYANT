@@ -1,0 +1,15 @@
+title = "Суд с налоговой"
+weight = 1
+once = true
+text = "Арбитраж рассмотрел спор с налоговой."
+
+[conditions]
+flags_set = ["tax_dispute"]
+
+[[choices]]
+text = "Принять решение"
+outcome = "Половину доначислений сняли."
+
+[choices.consequences]
+money = 100
+clear_flags = ["tax_dispute"]

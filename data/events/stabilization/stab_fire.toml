@@ -1,0 +1,20 @@
+title = "Пожар"
+weight = 1
+incident = "fire"
+text = "В «{business}» пожар. Страховая компания впервые в истории готова платить."
+
+[[choices]]
+text = "Восстановить со страховкой"
+outcome = "Страховка покрыла половину."
+
+[choices.consequences]
+money = -200
+business = { closed_days = 21 }
+
+[[choices]]
+text = "Закрыть дело"
+outcome = "Страховку — в карман, дело — в прошлое."
+
+[choices.consequences]
+business = { lost = true }
+money = 200

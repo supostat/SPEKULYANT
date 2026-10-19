@@ -1,0 +1,8 @@
+title = "Дело ЮКОСа"
+window = { from = "2003-10-25", until = "2003-10-26" }
+
+[[outcomes]]
+weight = 1
+news = "Глава ЮКОСа арестован в аэропорту: бизнес и власть договариваются заново."
+event = "yukos_fear"
+set_flags = ["yukos_affair"]

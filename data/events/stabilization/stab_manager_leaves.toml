@@ -1,0 +1,18 @@
+title = "Управляющего переманили"
+weight = 1
+incident = "departure"
+text = "{manager} уходит из «{business}» в сеть: там соцпакет и белая зарплата."
+
+[[choices]]
+text = "Предложить соцпакет"
+outcome = "Управляющий остаётся."
+
+[choices.consequences]
+money = -200
+
+[[choices]]
+text = "Отпустить"
+outcome = "Ищешь нового."
+
+[choices.consequences]
+business = { manager_leaves = true }

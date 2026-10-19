@@ -1,0 +1,19 @@
+title = "Ипотека"
+weight = 4
+once = true
+text = "Банк предлагает ипотеку: квартира сейчас, долг — на пятнадцать лет."
+
+[conditions]
+window = { from = "2003-01-01" }
+
+[[choices]]
+text = "Взять квартиру в ипотеку"
+outcome = "Своя квартира. И свой долг."
+
+[choices.consequences]
+money = -300
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Не связываться с долгами"
+outcome = "Долги — это девяностые. Больше не надо."

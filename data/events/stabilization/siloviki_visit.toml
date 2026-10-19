@@ -1,0 +1,32 @@
+title = "Люди в штатском"
+weight = 6
+cooldown_days = 120
+text = """
+Двое в одинаковых костюмах интересуются твоим делом: «Мы не налоговая. Мы — серьёзнее. Нам \
+нужно, чтобы бизнес был социально ответственным»."""
+
+[conditions]
+money = { at_least = 1000 }
+
+[[choices]]
+text = "Проявить социальную ответственность"
+outcome = "Взнос в фонд ветеранов органов принят."
+
+[choices.consequences]
+money = -200
+reputation = [{ faction = "siloviki", change = 1 }]
+
+[[choices]]
+text = "Позвать юриста"
+outcome = "Юрист долго говорит о законе. Костюмы слушают и запоминают."
+
+[choices.consequences]
+money = -80
+reputation = [{ faction = "siloviki", change = -1 }]
+
+[[choices]]
+text = "Сделать вид, что не понял"
+outcome = "«Ничего, поймёшь», — говорит старший."
+
+[choices.consequences]
+reputation = [{ faction = "siloviki", change = -2 }]

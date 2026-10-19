@@ -1,0 +1,27 @@
+title = "Пожарная инспекция"
+weight = 7
+cooldown_days = 90
+text = """
+Пожарный инспектор находит в офисе тридцать нарушений: от огнетушителя до толщины двери."""
+
+[[choices]]
+text = "Решить на месте"
+outcome = "Нарушения исчезают вместе с конвертом."
+
+[choices.consequences]
+money = -60
+
+[[choices]]
+text = "Устранить нарушения"
+outcome = "Двери новые, огнетушители тоже. Неделя ремонта."
+
+[choices.consequences]
+money = -100
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Получить предписание и спорить"
+outcome = "Предписание висит на стене. Спор идёт."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]

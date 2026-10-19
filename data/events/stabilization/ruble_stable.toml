@@ -1,0 +1,18 @@
+title = "Рубль окреп"
+weight = 5
+cooldown_days = 365
+text = "Рубль стабилен второй год. Люди перестают считать в долларах и начинают в рублях."
+
+[conditions]
+window = { from = "2001-01-01" }
+
+[[choices]]
+text = "Положить деньги в банк"
+outcome = "Проценты маленькие, сон спокойный."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Держать в долларах по привычке"
+outcome = "Привычка девяностых крепче рубля."

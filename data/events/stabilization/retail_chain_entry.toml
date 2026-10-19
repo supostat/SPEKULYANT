@@ -1,0 +1,23 @@
+title = "Вход в сеть"
+weight = 5
+cooldown_days = 180
+text = """
+Сеть супермаркетов готова взять твой товар. Входной билет — плата за полку, отсрочка \
+платежа — девяносто дней."""
+
+[[choices]]
+text = "Заплатить за полку"
+outcome = "Товар стоит на полке рядом с импортом."
+
+[choices.consequences]
+money = -200
+set_flags = ["chain_supplier"]
+
+[[choices.follow_ups]]
+event = "chain_payment"
+after_days = 90
+chance = 0.85
+
+[[choices]]
+text = "Торговать по старинке"
+outcome = "Рынок пока жив."

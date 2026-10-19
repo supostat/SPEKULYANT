@@ -1,0 +1,25 @@
+title = "Крыша в погонах"
+weight = 5
+cooldown_days = 180
+text = """
+Бандитские крыши уходят: их место занимает подполковник из районного отдела. Тарифы те же, \
+а стреляют реже."""
+
+[[choices]]
+text = "Перейти под подполковника"
+outcome = "Теперь проверки обходят тебя стороной."
+
+[choices.consequences]
+money = -150
+reputation = [{ faction = "siloviki", change = 2 }, { faction = "bandits", change = -1 }]
+
+[[choices]]
+text = "Остаться при старой крыше"
+outcome = "Старая крыша стареет вместе с тобой."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = 1 }, { faction = "siloviki", change = -1 }]
+
+[[choices]]
+text = "Работать без крыши"
+outcome = "Времена другие — может, и правда обойдётся."

@@ -1,0 +1,17 @@
+title = "Пиратские диски"
+weight = 5
+cooldown_days = 120
+text = """
+Диски с фильмами по сто рублей: «Матрица» вышла в прокат вчера, а диск — позавчера."""
+
+[[choices]]
+text = "Взять партию дисков"
+outcome = "Партия уходит за неделю."
+
+[choices.consequences]
+money = -30
+goods = [{ good = "compact_disc", change = 10 }]
+
+[[choices]]
+text = "Не связываться с пиратами"
+outcome = "Правообладатели одобрили бы."

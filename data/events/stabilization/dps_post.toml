@@ -1,0 +1,19 @@
+title = "Пост ДПС"
+weight = 3
+cooldown_days = 30
+road = true
+text = "Пост ДПС на трассе: «Проверка документов. И багажника»."
+
+[conditions]
+window = { from = "1999-01-01" }
+
+[[choices]]
+text = "Договориться"
+outcome = "Документы в порядке. Особенно после пятисот рублей."
+
+[choices.consequences]
+money = -15
+
+[[choices]]
+text = "Открыть багажник"
+outcome = "Багажник чист. Инспектор разочарован."

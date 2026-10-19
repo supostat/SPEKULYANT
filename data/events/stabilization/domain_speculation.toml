@@ -1,0 +1,26 @@
+title = "Домен"
+weight = 4
+once = true
+text = """
+Знакомый программист советует купить короткие домены: «Через пять лет их будут покупать за \
+тысячи»."""
+
+[conditions]
+window = { from = "1999-06-01" }
+
+[[choices]]
+text = "Купить десяток доменов"
+outcome = "Десяток имён в интернете — твои."
+
+[choices.consequences]
+money = -30
+set_flags = ["domains"]
+
+[[choices.follow_ups]]
+event = "domain_sale"
+after_days = 720
+chance = 0.5
+
+[[choices]]
+text = "Не верить в интернет"
+outcome = "Интернет — это для студентов."

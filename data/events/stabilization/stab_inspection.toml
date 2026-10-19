@@ -1,0 +1,18 @@
+title = "Комплексная проверка"
+weight = 1
+incident = "inspection"
+text = "В «{business}» комплексная проверка: прокуратура, налоговая и пожарные."
+
+[[choices]]
+text = "Решить вопрос"
+outcome = "Проверка завершена без нарушений."
+
+[choices.consequences]
+money = -300
+
+[[choices]]
+text = "Закрыться на проверку"
+outcome = "Две недели простоя."
+
+[choices.consequences]
+business = { closed_days = 14 }

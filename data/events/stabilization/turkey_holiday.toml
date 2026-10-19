@@ -1,0 +1,19 @@
+title = "Отпуск в Турции"
+weight = 6
+cooldown_days = 365
+text = "Всё включено в Анталии: впервые за пятнадцать лет — отпуск."
+
+[conditions]
+window = { from = "2000-01-01" }
+
+[[choices]]
+text = "Поехать"
+outcome = "Неделя на пляже. Сердце отдыхает."
+
+[choices.consequences]
+money = -150
+health = 5
+
+[[choices]]
+text = "Работать дальше"
+outcome = "Отпуск — для слабых. Сердце не согласно."

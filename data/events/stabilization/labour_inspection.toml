@@ -1,0 +1,28 @@
+title = "Трудинспекция"
+weight = 5
+cooldown_days = 120
+text = """
+Уволенная продавщица пожаловалась в трудинспекцию: зарплата в конверте, отпуск без оплаты."""
+
+[[choices]]
+text = "Выплатить компенсацию"
+outcome = "Продавщица довольна. Инспекция тоже."
+
+[choices.consequences]
+money = -80
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Договориться с инспектором"
+outcome = "Жалоба потерялась."
+
+[choices.consequences]
+money = -50
+reputation = [{ faction = "people", change = -1 }]
+
+[[choices]]
+text = "Ничего не платить"
+outcome = "Инспектор выписывает штраф по почте."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]

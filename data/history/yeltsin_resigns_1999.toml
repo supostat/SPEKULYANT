@@ -1,0 +1,7 @@
+title = "Отставка Ельцина"
+window = { from = "1999-12-31", until = "2000-01-01" }
+
+[[outcomes]]
+weight = 1
+news = "Ельцин уходит в отставку: «Я устал, я ухожу»."
+event = "yeltsin_resigns_event"

@@ -1,0 +1,26 @@
+title = "Интернет-магазин"
+weight = 4
+cooldown_days = 365
+text = """
+Курьеры, телефон, сайт — интернет-магазин техники открыть проще, чем ларёк в девяностые."""
+
+[conditions]
+window = { from = "2001-06-01" }
+money = { at_least = 1500 }
+
+[[choices]]
+text = "Открыть"
+outcome = "Заказы идут, курьеры теряются, деньги приходят."
+
+[choices.consequences]
+money = -500
+set_flags = ["online_shop"]
+
+[[choices.follow_ups]]
+event = "online_shop_profit"
+after_days = 90
+chance = 0.7
+
+[[choices]]
+text = "Не связываться"
+outcome = "Интернет-магазины открывают другие."

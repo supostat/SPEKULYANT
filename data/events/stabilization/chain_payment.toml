@@ -1,0 +1,15 @@
+title = "Оплата от сети"
+weight = 1
+once = true
+text = "Сеть наконец оплатила поставки за квартал."
+
+[conditions]
+flags_set = ["chain_supplier"]
+
+[[choices]]
+text = "Забрать деньги"
+outcome = "Оборот вырос втрое, маржа — нет."
+
+[choices.consequences]
+money = 450
+clear_flags = ["chain_supplier"]

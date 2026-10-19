@@ -1,0 +1,22 @@
+title = "Депутат помнит"
+weight = 4
+cooldown_days = 365
+text = "{npc} стал депутатом и помнит вашу вражду. Проверки к тебе приходят чаще."
+
+[conditions]
+rival = { relation_at_most = -1 }
+
+[[choices]]
+text = "Помириться через общих знакомых"
+outcome = "Мир дорог, но проверки кончились."
+
+[choices.consequences]
+money = -300
+rival = { relation = 3 }
+
+[[choices]]
+text = "Терпеть проверки"
+outcome = "Проверки приходят по графику."
+
+[choices.consequences]
+reputation = [{ faction = "officials", change = -1 }]

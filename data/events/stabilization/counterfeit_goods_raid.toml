@@ -1,0 +1,26 @@
+title = "Контрафакт"
+weight = 5
+cooldown_days = 180
+text = """
+Правообладатели с милицией проверяют рынок на контрафакт: диски, кроссовки, джинсы."""
+
+[[choices]]
+text = "Спрятать товар"
+outcome = "Товар в подсобке, проверка ушла ни с чем."
+
+[choices.consequences]
+money = -20
+
+[[choices]]
+text = "Отдать подделки на уничтожение"
+outcome = "Бульдозер давит диски. Ты — чист."
+
+[choices.consequences]
+reputation = [{ faction = "siloviki", change = 1 }]
+
+[[choices]]
+text = "Спорить"
+outcome = "Протокол составлен."
+
+[choices.consequences]
+reputation = [{ faction = "siloviki", change = -1 }]

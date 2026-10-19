@@ -1,0 +1,24 @@
+title = "Старый друг"
+weight = 5
+cooldown_days = 365
+text = "Встретил старого друга по общаге: он инженер на заводе, где не платят по полгода."
+
+[[choices]]
+text = "Взять его к себе на работу"
+outcome = "Друг работает честно. Друзей мало."
+
+[choices.consequences]
+money = -60
+reputation = [{ faction = "people", change = 2 }]
+
+[[choices]]
+text = "Дать денег"
+outcome = "Друг берёт и отводит глаза."
+
+[choices.consequences]
+money = -40
+reputation = [{ faction = "people", change = 1 }]
+
+[[choices]]
+text = "Поговорить о прошлом"
+outcome = "Вы вспоминаете фарцовку и смеётесь."

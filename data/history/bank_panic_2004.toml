@@ -1,0 +1,13 @@
+title = "Банковская паника"
+window = { from = "2004-06-20", until = "2004-07-20" }
+scale = { from = 0.8, to = 1.3 }
+
+[[outcomes]]
+weight = 2
+news = "Банковская паника: очереди у банков, лицензии отзывают."
+event = "bank_panic_2004_event"
+
+[[outcomes]]
+weight = 1
+news = "Слухи о банковском кризисе не подтвердились: очереди разошлись."
+event = "bank_panic_2004_event"
