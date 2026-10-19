@@ -13,6 +13,7 @@ const COLUMN := 5
 const HEADINGS := ["Куда", "Дней", "Проезд", "Как"]
 const HEADINGS_FOREGROUND := 14
 const FIRST_ROW := 5
+const DESTINATIONS_VISIBLE := 12
 const NAME_WIDTH := 22
 const DAYS_WIDTH := 6
 const FARE_WIDTH := 13
@@ -41,11 +42,12 @@ const FKEYS := [
 	["7", ""],
 	["10", "Назад"],
 ]
+const HELP_KEY := 1
 const BACK_KEY := 10
 const SLOWEST := 1
 const FASTEST := 3
 
-var selected_row := 0
+var _destinations := ListCursor.new(DESTINATIONS_VISIBLE)
 var _was_traveling := false
 var _warning := ""
 
@@ -85,25 +87,28 @@ func handle(action: Dictionary, view: Dictionary) -> Dictionary:
 	var destinations: Array = view["travel"]["destinations"]
 	match action["action"]:
 		"up":
-			selected_row = clampi(selected_row - 1, 0, maxi(destinations.size() - 1, 0))
+			_destinations.move(-1, destinations.size())
 			return {"redraw": true}
 		"down":
-			selected_row = clampi(selected_row + 1, 0, maxi(destinations.size() - 1, 0))
+			_destinations.move(1, destinations.size())
 			return {"redraw": true}
 		"click":
-			var row: int = action["row"] - FIRST_ROW
-			if row >= 0 and row < destinations.size():
-				selected_row = row
+			var row := _destinations.row_at(action["row"], FIRST_ROW, destinations.size())
+			if row >= 0:
+				_destinations.select(row, destinations.size())
 				return {"redraw": true}
 		"confirm":
-			if destinations.is_empty() or not destinations[selected_row]["available"]:
+			if destinations.is_empty() or not destinations[_destinations.selected]["available"]:
 				return {}
-			return {"command": {"command": "travel", "destination": destinations[selected_row]["city"]}}
+			return {"command": {"command": "travel", "destination": destinations[_destinations.selected]["city"]}}
 		"back":
 			return {"pop": true}
 		"fkey":
-			if action["key"] == BACK_KEY:
-				return {"pop": true}
+			match action["key"]:
+				HELP_KEY:
+					return {"push": "help"}
+				BACK_KEY:
+					return {"pop": true}
 	return {}
 
 
@@ -129,8 +134,7 @@ func _draw_destinations(destinations: Array, screen: TextScreen) -> void:
 		+ HEADINGS[3]
 	)
 	screen.put(COLUMN, WINDOW.position.y + 1, headings, HEADINGS_FOREGROUND, BACKGROUND)
-	selected_row = clampi(selected_row, 0, maxi(destinations.size() - 1, 0))
-	for index in destinations.size():
+	for index: int in _destinations.shown(destinations.size()):
 		var destination: Dictionary = destinations[index]
 		var line: String = (
 			TextScreen.pad_right(destination["name"], NAME_WIDTH)
@@ -141,10 +145,10 @@ func _draw_destinations(destinations: Array, screen: TextScreen) -> void:
 		)
 		var foreground := TEXT if destination["available"] else UNAVAILABLE_FOREGROUND
 		var background := BACKGROUND
-		if index == selected_row:
+		if index == _destinations.selected:
 			foreground = SELECTED_FOREGROUND
 			background = SELECTED_BACKGROUND
-		screen.put(COLUMN, FIRST_ROW + index, TextScreen.pad_right(line, LINE_WIDTH), foreground, background)
+		screen.put(COLUMN, FIRST_ROW + index - _destinations.first, TextScreen.pad_right(line, LINE_WIDTH), foreground, background)
 
 
 func _draw_journey(journey: Dictionary, screen: TextScreen) -> void:

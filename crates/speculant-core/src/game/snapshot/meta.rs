@@ -6,7 +6,7 @@ use super::super::Game;
 use crate::content::{CityId, Content};
 use crate::economy::{Currency, Real};
 use crate::life::PriceNote;
-use crate::meta::Record;
+use crate::meta::{Meta, Record};
 use crate::time::GameDate;
 use crate::view::{NotebookEntryView, RecordView, RecordsView};
 
@@ -23,9 +23,8 @@ const RUMOR: &str = "Говорят, в";
 const RUMOR_YEARS_AHEAD: i32 = 1;
 
 /// Записи книжки: товары — почём брали и сбывали, люди — что о них знали, схемы — лучшие сделки.
-pub(super) fn notebook(game: &Game) -> Vec<NotebookEntryView> {
-    let content = &game.content;
-    let notebook = game.meta.notebook();
+pub(super) fn notebook(content: &Content, meta: &Meta) -> Vec<NotebookEntryView> {
+    let notebook = meta.notebook();
     let entry = |topic: &str, title: &str, text: String| NotebookEntryView {
         topic: topic.to_owned(),
         title: title.to_owned(),
@@ -66,8 +65,7 @@ pub(super) fn notebook(game: &Game) -> Vec<NotebookEntryView> {
 }
 
 /// Таблицы рекордов: капитал в рублях 1984 года.
-pub(super) fn records(game: &Game) -> RecordsView {
-    let content = &game.content;
+pub(super) fn records(content: &Content, meta: &Meta) -> RecordsView {
     let rows = |table: &[Record]| -> Vec<RecordView> {
         table
             .iter()
@@ -82,7 +80,7 @@ pub(super) fn records(game: &Game) -> RecordsView {
             })
             .collect()
     };
-    let records = game.meta.records();
+    let records = meta.records();
     RecordsView {
         ironman: rows(records.ironman()),
         free: rows(records.free()),

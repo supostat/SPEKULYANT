@@ -26,11 +26,16 @@ pub fn dump_with(screen: &str, view: Option<&Path>) -> Result<ScreenFile> {
     ScreenFile::parse(&fs::read_to_string(&output)?)
 }
 
-/// Рисует экран макета в окне и сохраняет PNG в `.tools/out/<screen>.png`.
+/// Рисует экран макета на его фикстуре в окне и сохраняет PNG в `.tools/out/<screen>.png`.
 pub fn screenshot(screen: &str) -> Result<PathBuf> {
     let fixture = etalon_fixture(screen)?;
+    screenshot_with(screen, fixture.as_deref())
+}
+
+/// Рисует экран в окне на снимке `StateView` из файла и сохраняет PNG в `.tools/out/<screen>.png`.
+pub fn screenshot_with(screen: &str, view: Option<&Path>) -> Result<PathBuf> {
     let output = output_path(screen, "png")?;
-    run_screen_tool(SCREENSHOT_TOOL, false, screen, &output, fixture.as_deref())?;
+    run_screen_tool(SCREENSHOT_TOOL, false, screen, &output, view)?;
     Ok(output)
 }
 

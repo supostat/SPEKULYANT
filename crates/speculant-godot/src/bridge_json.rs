@@ -3,10 +3,11 @@
 //!
 //! Ответ на команду — `{"ok":true}` или `{"error":"<вид>", ..., "message":"<текст для игрока>"}`.
 //!
-//! Старт жизни — `{"storage": "<каталог игрока>", "life": {"biography", "ironman", "seed"}}` или
-//! `{"storage": "<каталог игрока>", "resume": "<слот>"}`. В каталоге ядро само пишет жизни
-//! `saves/<слот>.spk` и метапрогрессию `meta.spk`; без `storage` жизнь идёт в памяти и не
-//! сохраняется.
+//! Старт сеанса — `{"storage": "<каталог игрока>", "life": {"biography", "ironman", "seed"}}`,
+//! `{"storage": "<каталог игрока>", "resume": "<слот>"}` или `{"storage": "<каталог игрока>"}` —
+//! лобби: каталог открыт, жизнь не начата, снимок — биографии, записная книжка и рекорды. В
+//! каталоге ядро само пишет жизни `saves/<слот>.spk` и метапрогрессию `meta.spk`; без `storage`
+//! жизнь идёт в памяти и не сохраняется, а лобби без каталога не бывает.
 
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -16,7 +17,7 @@ use std::sync::{Arc, OnceLock};
 use include_dir::{Dir, include_dir};
 use speculant_core::content::{ContentError, ContentFile};
 use speculant_core::save::Storage;
-use speculant_core::{Command, CommandError, Content, Game, LifeSettings};
+use speculant_core::{Command, CommandError, Content, Game, LifeSettings, Lobby};
 
 pub const OK: &str = r#"{"ok":true}"#;
 static DATA: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../../data");
@@ -70,33 +71,47 @@ fn slash_path(path: &Path) -> String {
         .join("/")
 }
 
-/// С чего начинается жизнь моста: каталог игрока, если он есть, и новая жизнь или слот.
+/// Сеанс моста: лобби, пока жизнь не начата, или идущая жизнь.
+#[derive(Debug)]
+pub enum Session {
+    Lobby(Lobby),
+    Life(Box<Game>),
+}
+
+/// С чего начинается сеанс: каталог игрока, если он есть, и новая жизнь, слот или ничего — лобби.
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 struct Start {
     storage: Option<PathBuf>,
-    #[serde(flatten)]
-    begin: Begin,
+    life: Option<LifeSettings>,
+    resume: Option<String>,
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "snake_case")]
-enum Begin {
-    Life(LifeSettings),
-    Resume(String),
-}
-
-pub fn new_life(start_json: &str) -> Result<Game, String> {
+pub fn start(start_json: &str) -> Result<Session, String> {
     let start: Start = serde_json::from_str(start_json)
         .map_err(|error| bridge_error("malformed_settings", error.to_string()))?;
     let content = content()?;
     let storage = start.storage.map(Storage::new);
-    let game = match (start.begin, storage) {
-        (Begin::Life(settings), None) => Game::new_life(&settings, content),
-        (Begin::Life(settings), Some(storage)) => Game::open(&settings, content, storage),
-        (Begin::Resume(slot), Some(storage)) => Game::resume(content, storage, &slot),
-        (Begin::Resume(_), None) => Err(CommandError::NoStorage),
+    let session = match (start.life, start.resume, storage) {
+        (Some(_), Some(_), _) => {
+            return Err(bridge_error(
+                "malformed_settings",
+                "жизнь начинается либо заново, либо из слота".to_owned(),
+            ));
+        }
+        (Some(settings), None, None) => {
+            Game::new_life(&settings, content).map(|game| Session::Life(Box::new(game)))
+        }
+        (Some(settings), None, Some(storage)) => {
+            Game::open(&settings, content, storage).map(|game| Session::Life(Box::new(game)))
+        }
+        (None, Some(slot), Some(storage)) => {
+            Game::resume(content, storage, &slot).map(|game| Session::Life(Box::new(game)))
+        }
+        (None, None, Some(storage)) => Lobby::open(content, &storage).map(Session::Lobby),
+        (None, _, None) => Err(CommandError::NoStorage),
     };
-    game.map_err(|error| command_error(&error))
+    session.map_err(|error| command_error(&error))
 }
 
 pub fn apply(game: &mut Game, command_json: &str) -> String {
@@ -124,6 +139,10 @@ pub fn view_json(game: &Game) -> String {
     serde_json::to_string(&game.view()).expect("StateView сериализуется в JSON")
 }
 
+pub fn lobby_view_json(lobby: &Lobby) -> String {
+    serde_json::to_string(&lobby.view()).expect("LobbyView сериализуется в JSON")
+}
+
 pub fn no_life() -> String {
     bridge_error(
         "no_life",
@@ -148,14 +167,14 @@ mod tests {
     use std::path::PathBuf;
 
     use serde_json::Value;
-    use speculant_core::{Command, StateView};
+    use speculant_core::{Command, Game, LobbyView, StateView};
 
-    use super::{OK, advance, apply, new_life, no_life, view_json};
+    use super::{OK, Session, advance, apply, lobby_view_json, no_life, start, view_json};
 
     const LIFE: &str = r#"{"life":{"biography":"student","ironman":true,"seed":7}}"#;
 
     /// JSON каждой команды интерфейса — так их шлёт GDScript.
-    const COMMANDS: [&str; 30] = [
+    const COMMANDS: [&str; 31] = [
         r#"{"command":"new_life","biography":"engineer","ironman":false,"seed":3}"#,
         r#"{"command":"advance","milliseconds":1800}"#,
         r#"{"command":"set_speed","speed":2}"#,
@@ -172,6 +191,7 @@ mod tests {
         r#"{"command":"hire","business":"sewing_workshop@moscow","candidate":"gena_kabanov"}"#,
         r#"{"command":"fire","business":"sewing_workshop@moscow","employee":"gena_kabanov"}"#,
         r#"{"command":"call","contact":"kofi"}"#,
+        r#"{"command":"erase_pager_message","message":0}"#,
         r#"{"command":"buy_housing","housing":"communal_room"}"#,
         r#"{"command":"retire","ending":"rest"}"#,
         r#"{"command":"set_work","work":true}"#,
@@ -187,6 +207,14 @@ mod tests {
         r#"{"command":"pause","paused":false}"#,
         r#"{"command":"fast_forward","until":"until_arrival"}"#,
     ];
+
+    /// Жизнь из JSON старта; лобби здесь — ошибка теста.
+    fn life(start_json: &str) -> Game {
+        match start(start_json).expect("жизнь начинается") {
+            Session::Life(game) => *game,
+            Session::Lobby(_) => panic!("{start_json}: ожидалась жизнь, а открылось лобби"),
+        }
+    }
 
     fn parsed(json: &str) -> Value {
         serde_json::from_str(json).expect("мост отвечает валидным JSON")
@@ -212,18 +240,19 @@ mod tests {
             Command::Hire { .. } => 13,
             Command::Fire { .. } => 14,
             Command::Call { .. } => 15,
-            Command::BuyHousing { .. } => 16,
-            Command::Retire { .. } => 17,
-            Command::SetWork { .. } => 18,
-            Command::UseService { .. } => 19,
-            Command::OrderParcel => 20,
-            Command::ApplyForParole => 21,
-            Command::BribeForRelease => 22,
-            Command::Deposit { .. } => 23,
-            Command::Withdraw { .. } => 24,
-            Command::Save { .. } => 25,
-            Command::Load { .. } => 26,
-            Command::Quit => 27,
+            Command::ErasePagerMessage { .. } => 16,
+            Command::BuyHousing { .. } => 17,
+            Command::Retire { .. } => 18,
+            Command::SetWork { .. } => 19,
+            Command::UseService { .. } => 20,
+            Command::OrderParcel => 21,
+            Command::ApplyForParole => 22,
+            Command::BribeForRelease => 23,
+            Command::Deposit { .. } => 24,
+            Command::Withdraw { .. } => 25,
+            Command::Save { .. } => 26,
+            Command::Load { .. } => 27,
+            Command::Quit => 28,
         }
     }
 
@@ -238,11 +267,14 @@ mod tests {
         directory
     }
 
-    fn start(storage: &std::path::Path, begin: &str) -> String {
-        format!(
-            r#"{{"storage":{},{begin}}}"#,
-            Value::from(storage.to_string_lossy())
-        )
+    /// JSON старта в каталоге игрока; `begin` — поля после `storage` или пусто для лобби.
+    fn begin(storage: &std::path::Path, begin: &str) -> String {
+        let storage = Value::from(storage.to_string_lossy());
+        if begin.is_empty() {
+            format!(r#"{{"storage":{storage}}}"#)
+        } else {
+            format!(r#"{{"storage":{storage},{begin}}}"#)
+        }
     }
 
     #[test]
@@ -259,7 +291,7 @@ mod tests {
         variants.dedup();
         assert_eq!(
             variants,
-            (0..=27).collect::<Vec<_>>(),
+            (0..=28).collect::<Vec<_>>(),
             "у каждой команды есть JSON"
         );
     }
@@ -267,7 +299,7 @@ mod tests {
     #[test]
     fn every_command_answers_ok_or_a_json_error_with_a_message() {
         for json in COMMANDS {
-            let mut game = new_life(LIFE).expect("жизнь начинается");
+            let mut game = life(LIFE);
             let answer = apply(&mut game, json);
             if answer == OK {
                 continue;
@@ -282,7 +314,7 @@ mod tests {
 
     #[test]
     fn a_new_life_from_settings_json_opens_the_market() {
-        let game = new_life(LIFE).expect("жизнь начинается");
+        let game = life(LIFE);
         let view: StateView =
             serde_json::from_str(&view_json(&game)).expect("снимок разбирается обратно");
         assert_eq!(view.header.city, "Москва");
@@ -296,16 +328,21 @@ mod tests {
 
     #[test]
     fn malformed_settings_name_the_problem() {
-        let error = parsed(&new_life("{не json").expect_err("битый JSON отвергнут"));
+        let error = parsed(&start("{не json").expect_err("битый JSON отвергнут"));
         assert_eq!(error["error"], "malformed_settings");
-        let unknown = parsed(&new_life(r#"{"replay":"first"}"#).expect_err("старта нет"));
+        let unknown = parsed(&start(r#"{"replay":"first"}"#).expect_err("старта нет"));
         assert_eq!(unknown["error"], "malformed_settings");
+        let both = parsed(
+            &start(r#"{"life":{"biography":"student","ironman":false,"seed":7},"resume":"first"}"#)
+                .expect_err("жизнь и слот разом"),
+        );
+        assert_eq!(both["error"], "malformed_settings");
     }
 
     #[test]
     fn core_refusals_carry_their_kind_and_a_message() {
         let error = parsed(
-            &new_life(r#"{"life":{"biography":"","ironman":false,"seed":1}}"#)
+            &start(r#"{"life":{"biography":"","ironman":false,"seed":1}}"#)
                 .expect_err("пустая биография отвергнута"),
         );
         assert_eq!(error["error"], "empty_biography");
@@ -314,7 +351,7 @@ mod tests {
 
     #[test]
     fn apply_runs_a_command_and_answers_ok() {
-        let mut game = new_life(LIFE).expect("жизнь начинается");
+        let mut game = life(LIFE);
         assert_eq!(apply(&mut game, r#"{"command":"set_speed","speed":2}"#), OK);
         assert_eq!(game.view().time.speed, 2);
         assert_eq!(
@@ -325,7 +362,7 @@ mod tests {
 
     #[test]
     fn buying_through_the_bridge_fills_the_pocket() {
-        let mut game = new_life(LIFE).expect("жизнь начинается");
+        let mut game = life(LIFE);
         assert_eq!(
             apply(
                 &mut game,
@@ -349,7 +386,7 @@ mod tests {
 
     #[test]
     fn advance_tells_whether_the_world_changed_and_refuses_a_negative_step() {
-        let mut game = new_life(LIFE).expect("жизнь начинается");
+        let mut game = life(LIFE);
         assert_eq!(advance(&mut game, 1800), Ok(true));
         assert_eq!(game.view().header.date, "2 января 1984, пн");
         assert_eq!(advance(&mut game, 0), Ok(false), "без дня мир тот же");
@@ -361,14 +398,17 @@ mod tests {
 
     #[test]
     fn a_life_without_a_directory_has_nowhere_to_save() {
-        let mut game = new_life(r#"{"life":{"biography":"student","ironman":false,"seed":7}}"#)
-            .expect("жизнь начинается");
+        let mut game = life(r#"{"life":{"biography":"student","ironman":false,"seed":7}}"#);
         assert_eq!(
             parsed(&apply(&mut game, r#"{"command":"save","slot":"first"}"#))["error"],
             "no_storage"
         );
         assert_eq!(
-            parsed(&new_life(r#"{"resume":"first"}"#).expect_err("слота без каталога нет"))["error"],
+            parsed(&start(r#"{"resume":"first"}"#).expect_err("слота без каталога нет"))["error"],
+            "no_storage"
+        );
+        assert_eq!(
+            parsed(&start("{}").expect_err("лобби без каталога нет"))["error"],
             "no_storage"
         );
     }
@@ -376,11 +416,10 @@ mod tests {
     #[test]
     fn a_life_saved_through_the_bridge_loads_and_resumes_with_the_same_view() {
         let directory = storage("saved_life");
-        let mut game = new_life(&start(
+        let mut game = life(&begin(
             &directory,
             r#""life":{"biography":"student","ironman":false,"seed":7}"#,
-        ))
-        .expect("жизнь начинается");
+        ));
         assert_eq!(advance(&mut game, 1800), Ok(true));
         assert_eq!(apply(&mut game, r#"{"command":"save","slot":"first"}"#), OK);
         let saved = view_json(&game);
@@ -398,21 +437,38 @@ mod tests {
         assert_ne!(view_json(&game), saved);
         assert_eq!(apply(&mut game, r#"{"command":"load","slot":"first"}"#), OK);
         assert_eq!(view_json(&game), saved);
-        let resumed = new_life(&start(&directory, r#""resume":"first""#)).expect("слот читается");
+        let resumed = life(&begin(&directory, r#""resume":"first""#));
         assert_eq!(view_json(&resumed), saved);
     }
 
     #[test]
     fn an_ironman_life_lies_in_its_slot_from_birth() {
         let directory = storage("ironman_life");
-        let game = new_life(&start(
+        let game = life(&begin(
             &directory,
             r#""life":{"biography":"student","ironman":true,"seed":7}"#,
-        ))
-        .expect("жизнь начинается");
-        let resumed = new_life(&start(&directory, r#""resume":"ironman""#))
-            .expect("ironman-жизнь в своём слоте");
+        ));
+        let resumed = life(&begin(&directory, r#""resume":"ironman""#));
         assert_eq!(view_json(&resumed), view_json(&game));
+    }
+
+    #[test]
+    fn a_lobby_opens_the_player_directory_without_a_life() {
+        let directory = storage("lobby");
+        let Session::Lobby(lobby) = start(&begin(&directory, "")).expect("лобби открывается")
+        else {
+            panic!("без жизни и слота открывается лобби");
+        };
+        let view: LobbyView =
+            serde_json::from_str(&lobby_view_json(&lobby)).expect("снимок лобби разбирается");
+        let student = view
+            .biographies
+            .iter()
+            .find(|biography| biography.biography == "student")
+            .expect("студент в данных");
+        assert!(student.unlocked, "стартовая биография открыта с начала");
+        assert!(view.notebook.is_empty() && view.records.ironman.is_empty());
+        assert!(!directory.join("saves").exists(), "лобби ничего не пишет");
     }
 
     #[test]

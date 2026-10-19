@@ -2,11 +2,13 @@ extends SceneTree
 ## Безголовая проверка моста для `cargo xtask bridge-smoke`: класс ядра создаётся из GDScript,
 ## жизнь начинается, снимок разбирается, команда доходит до ядра, advance двигает календарь,
 ## а покупка на толкучке кладёт товар в карман. С `--full` (`cargo xtask bridge-smoke --full`)
-## мост гоняет настоящее ядро дальше: тридцать дней с событием и выбором, покупка и продажа,
-## поездка, сохранение, загрузка и продолжение из слота в каталоге игрока и каждая команда
-## интерфейса с ответом «ок» или ошибкой с текстом для игрока.
+## мост гоняет настоящее ядро дальше: лобби каталога игрока с биографиями и без команд, тридцать
+## дней с событием и выбором, покупка и продажа, поездка, сохранение, загрузка и продолжение из
+## слота в каталоге игрока и каждая команда интерфейса с ответом «ок» или ошибкой с текстом для
+## игрока.
 
 const FULL_FLAG := "--full"
+const NO_LIFE := "no_life"
 const LIFE := {"biography": "student", "ironman": true, "seed": 7}
 const EXPECTED_CITY := "Москва"
 const EXPECTED_MARKET_ROWS := 31  # из сорока товаров девять появятся позже 1984 года
@@ -45,6 +47,7 @@ const EVERY_COMMAND := [
 	{"command": "hire", "business": "sewing_workshop@moscow", "candidate": "gena_kabanov"},
 	{"command": "fire", "business": "sewing_workshop@moscow", "employee": "gena_kabanov"},
 	{"command": "call", "contact": "kofi"},
+	{"command": "erase_pager_message", "message": 0},
 	{"command": "buy_housing", "housing": "communal_room"},
 	{"command": "retire", "ending": "rest"},
 	{"command": "set_work", "work": true},
@@ -103,6 +106,8 @@ func _full() -> bool:
 	var saves := Saves.new(SMOKE_ROOT)
 	_clear(saves)
 	var game := SpeculantGame.new()
+	if not _lobby(game, saves):
+		return false
 	var start := saves.new_life(LIFE["biography"], false, LIFE["seed"])
 	if not _ok(game.new_life(start), "new_life с каталогом"):
 		return false
@@ -119,6 +124,20 @@ func _full() -> bool:
 	if not _every_command_answers():
 		return false
 	_clear(saves)
+	return true
+
+
+## Лобби: каталог открыт, снимок — биографии со стартовой открытой, команды ждут жизни.
+func _lobby(game: SpeculantGame, saves: Saves) -> bool:
+	if not _ok(game.new_life(saves.lobby()), "лобби"):
+		return false
+	var lobby := _view(game)
+	var student: Array = lobby["biographies"].filter(func(biography: Dictionary) -> bool: return biography["biography"] == LIFE["biography"])
+	if student.is_empty() or not student[0]["unlocked"]:
+		return _fail("в лобби нет открытой биографии %s: %s" % [LIFE["biography"], lobby])
+	var refused: Dictionary = JSON.parse_string(game.apply(JSON.stringify(SPEED_COMMAND)))
+	if refused.get("error") != NO_LIFE:
+		return _fail("в лобби команда не отвергнута: %s" % [refused])
 	return true
 
 

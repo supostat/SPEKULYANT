@@ -1,5 +1,6 @@
 {
   "screen": "event",
+  "ironman": false,
   "header": {
     "city": "Москва",
     "date": "2 июня 1985, вс",

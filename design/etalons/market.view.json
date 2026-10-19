@@ -1,5 +1,6 @@
 {
   "screen": "market",
+  "ironman": false,
   "header": {
     "city": "Москва",
     "date": "14 марта 1986, пт",

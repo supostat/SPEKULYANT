@@ -1,0 +1,132 @@
+{
+  "screen": "pager",
+  "ironman": false,
+  "header": {
+    "city": "Москва",
+    "date": "22 октября 1996, вт",
+    "money": [
+      "$ 61 200",
+      "Курс: 5 410 р."
+    ]
+  },
+  "character": {
+    "name": "Макаров Михаил Васильевич",
+    "age": "22 года",
+    "health": "здоров",
+    "housing": "Койка в общежитии"
+  },
+  "homes": [],
+  "exits": [],
+  "time": {
+    "speed": 1,
+    "paused": false,
+    "fast_forward": null
+  },
+  "market": {
+    "place": "Толкучка у Рижского вокзала",
+    "goods": []
+  },
+  "travel": {
+    "journey": null,
+    "destinations": []
+  },
+  "pocket": {
+    "items": [
+      {
+        "label": "Связей",
+        "amount": "2"
+      }
+    ],
+    "danger": {
+      "label": "ОБХСС",
+      "level": 0,
+      "scale": 7
+    }
+  },
+  "rumors": [],
+  "messages": [],
+  "pending_event": null,
+  "pager": {
+    "device": "ПЕЙДЖЕР · абонент 4417",
+    "messages": [
+      {
+        "time": "09:12",
+        "text": "ГЕНА: ПЕРЕЗВОНИ. СРОЧНО",
+        "urgent": false
+      },
+      {
+        "time": "11:40",
+        "text": "КРЫША ПОДНИМАЕТ ДО 20%. ЖДУТ ДО ПЯТНИЦЫ",
+        "urgent": false
+      },
+      {
+        "time": "13:05",
+        "text": "ДОЛЛАР 5 410. ГОВОРЯТ, БУДЕТ БОЛЬШЕ",
+        "urgent": false
+      },
+      {
+        "time": "15:30",
+        "text": "ЛЕНА: ТЫ ГДЕ?",
+        "urgent": false
+      },
+      {
+        "time": "17:55",
+        "text": "КАБАНОВ ВИДЕЛ ТВОЮ ФУРУ НА ЛУЖНИКАХ",
+        "urgent": false
+      },
+      {
+        "time": "20:20",
+        "text": "БАНК «ТИТАН» НЕ ВЫДАЁТ ВКЛАДЫ",
+        "urgent": true
+      }
+    ]
+  },
+  "businesses": [],
+  "candidates": [],
+  "business_kinds": [],
+  "contacts": [],
+  "factions": [
+    {
+      "faction": "bandits",
+      "title": "Бандиты",
+      "level": 0,
+      "limit": 7
+    },
+    {
+      "faction": "militia",
+      "title": "Милиция",
+      "level": 0,
+      "limit": 7
+    },
+    {
+      "faction": "officials",
+      "title": "Чиновники",
+      "level": 0,
+      "limit": 7
+    },
+    {
+      "faction": "people",
+      "title": "Народ",
+      "level": 0,
+      "limit": 7
+    },
+    {
+      "faction": "traders",
+      "title": "Торговцы",
+      "level": 0,
+      "limit": 7
+    }
+  ],
+  "money": {
+    "places": [],
+    "rates": []
+  },
+  "notebook": [],
+  "records": {
+    "ironman": [],
+    "free": []
+  },
+  "zone": null,
+  "summary": null,
+  "biographies": []
+}

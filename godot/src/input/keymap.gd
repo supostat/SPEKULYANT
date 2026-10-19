@@ -1,7 +1,8 @@
 class_name Keymap
 extends RefCounted
 ## Ввод (docs/SPEKULYANT.md §13.1 п. 4): клавиатура в первую очередь — F1–F10, стрелки, цифры для
-## выборов, пробел — пауза, +/− — скорость, Esc — назад, Enter — подтвердить, Backspace — стереть;
+## выборов, буквы по латинской подписи клавиши, пробел — пауза, +/− — скорость, Esc — назад,
+## Enter — подтвердить, Backspace — стереть символ, Del — стереть строку, PgUp/PgDn — листать;
 ## мышь — щелчок по строке F-клавиш или по строке окна. Экраны получают действия, а не клавиши.
 
 const FUNCTION_KEYS := {
@@ -23,6 +24,9 @@ const NAMED_KEYS := {
 	KEY_ENTER: "confirm",
 	KEY_KP_ENTER: "confirm",
 	KEY_BACKSPACE: "erase",
+	KEY_DELETE: "delete",
+	KEY_PAGEUP: "page_up",
+	KEY_PAGEDOWN: "page_down",
 }
 ## Прочая клавиша — тоже действие: исход события закрывается любой клавишей.
 const OTHER_KEY := {"action": "other"}
@@ -49,7 +53,11 @@ static func key_action(event: InputEventKey) -> Dictionary:
 		return {"action": "digit", "digit": keycode - KEY_KP_0}
 	if NAMED_KEYS.has(keycode):
 		return {"action": NAMED_KEYS[keycode]}
-	return {} if event.echo else OTHER_KEY
+	if event.echo:
+		return {}
+	if keycode >= KEY_A and keycode <= KEY_Z:
+		return {"action": "letter", "letter": String.chr(keycode).to_lower()}
+	return OTHER_KEY
 
 
 static func _mouse_action(event: InputEventMouseButton, screen: TextScreen) -> Dictionary:

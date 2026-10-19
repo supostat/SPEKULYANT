@@ -1,0 +1,203 @@
+{
+  "screen": "manager",
+  "ironman": false,
+  "header": {
+    "city": "Москва",
+    "date": "9 сентября 1995, сб",
+    "money": [
+      "$ 18 400",
+      "Курс: 4 455 р."
+    ]
+  },
+  "character": {
+    "name": "Макаров Михаил Васильевич",
+    "age": "22 года",
+    "health": "здоров",
+    "housing": "Койка в общежитии"
+  },
+  "homes": [],
+  "exits": [],
+  "time": {
+    "speed": 1,
+    "paused": false,
+    "fast_forward": null
+  },
+  "market": {
+    "place": "Толкучка у Рижского вокзала",
+    "goods": []
+  },
+  "travel": {
+    "journey": null,
+    "destinations": []
+  },
+  "pocket": {
+    "items": [
+      {
+        "label": "Связей",
+        "amount": "2"
+      }
+    ],
+    "danger": {
+      "label": "ОБХСС",
+      "level": 0,
+      "scale": 7
+    }
+  },
+  "rumors": [],
+  "messages": [],
+  "pending_event": null,
+  "pager": null,
+  "businesses": [
+    {
+      "business": "kiosks@moscow",
+      "title": "Ларьки у «Тушинской» · 3 точки",
+      "city": "Москва",
+      "form": "ТОО",
+      "manager": {
+        "employee": "gena_kabanov",
+        "name": "Гена Кабанов",
+        "since": "с 1994 года",
+        "traits": [
+          {
+            "label": "Честность",
+            "level": 3,
+            "scale": 5
+          },
+          {
+            "label": "Хватка",
+            "level": 4,
+            "scale": 5
+          },
+          {
+            "label": "Лояльность",
+            "level": 2,
+            "scale": 5
+          }
+        ],
+        "habits": [
+          "Пьёт по пятницам.",
+          "Брат в милиции."
+        ]
+      },
+      "policies": [
+        {
+          "policy": "markup",
+          "label": "Наценка",
+          "options": [
+            "20%",
+            "30%",
+            "45%"
+          ],
+          "selected": 1
+        },
+        {
+          "policy": "roof",
+          "label": "Платить крыше",
+          "options": [
+            "нет",
+            "да, 10%",
+            "да, 15%"
+          ],
+          "selected": 2
+        },
+        {
+          "policy": "purchase",
+          "label": "Закупка",
+          "options": [
+            "сам, Черкизон",
+            "оптовик",
+            "через Гену"
+          ],
+          "selected": 0
+        },
+        {
+          "policy": "night_trade",
+          "label": "Ночная торговля",
+          "options": [
+            "нет",
+            "пиво",
+            "водка «Рояль»"
+          ],
+          "selected": 2
+        },
+        {
+          "policy": "inspection",
+          "label": "При проверке",
+          "options": [
+            "платить",
+            "звонить мне",
+            "закрыться"
+          ],
+          "selected": 1
+        },
+        {
+          "policy": "wage",
+          "label": "Зарплата",
+          "options": [
+            "ниже рынка",
+            "по рынку",
+            "+10% к рынку"
+          ],
+          "selected": 2
+        }
+      ],
+      "forecast": {
+        "revenue": "+18%",
+        "revenue_falls": false,
+        "raid_risk": "умеренный",
+        "raid_risk_high": false,
+        "theft_risk": "низкий",
+        "theft_risk_high": false
+      },
+      "closed_until": null,
+      "report": null
+    }
+  ],
+  "candidates": [],
+  "business_kinds": [],
+  "contacts": [],
+  "factions": [
+    {
+      "faction": "bandits",
+      "title": "Бандиты",
+      "level": 0,
+      "limit": 7
+    },
+    {
+      "faction": "militia",
+      "title": "Милиция",
+      "level": 0,
+      "limit": 7
+    },
+    {
+      "faction": "officials",
+      "title": "Чиновники",
+      "level": 0,
+      "limit": 7
+    },
+    {
+      "faction": "people",
+      "title": "Народ",
+      "level": 0,
+      "limit": 7
+    },
+    {
+      "faction": "traders",
+      "title": "Торговцы",
+      "level": 0,
+      "limit": 7
+    }
+  ],
+  "money": {
+    "places": [],
+    "rates": []
+  },
+  "notebook": [],
+  "records": {
+    "ironman": [],
+    "free": []
+  },
+  "zone": null,
+  "summary": null,
+  "biographies": []
+}

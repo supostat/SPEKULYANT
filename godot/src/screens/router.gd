@@ -1,27 +1,52 @@
 class_name Router
 extends RefCounted
-## Стек экранов (§13.3): верхний рисуется на узле TextScreen и получает действия ввода. Экран отвечает
-## намерением — команда ядру, экран поверх, вернуться назад или перерисоваться; ответ ядра на
-## команду возвращается экрану. Событие, которое ядро держит ожидающим, ложится поверх стека
-## модальным окном и снимается, когда исход прочитан.
+## Стек экранов сеанса (§13.3). Сеанс открывается заставкой в лобби — каталог игрока открыт, жизнь
+## не начата; жизнь стоит на экране режима, который выбирает ядро: рынок, зона или итоги. Событие,
+## которое ядро держит ожидающим, ложится поверх стека модальным окном и снимается, когда исход
+## прочитан. Верхний экран рисуется на узле TextScreen, получает действия ввода и отвечает
+## намерением:
+##   {"command": {…}} — команда ядру; ответ вернётся экрану в answered();
+##   {"push": имя, "with": {…}} — экран поверх; `with`, если есть, уходит ему в enter();
+##   {"switch": имя} — верхний экран уступает место соседнему;
+##   {"pop": true} — назад; {"home": true} — назад до экрана режима; {"redraw": true} — перерисовать;
+##   {"new_life": {"biography", "ironman", "seed"}} или {"resume": слот} — начать жизнь;
+##   {"lobby": имя} — в лобби, на экран `имя` поверх главного меню (или на само меню);
+##   {"quit": true} — выйти из игры.
+## Отказ ядра начать сеанс возвращается верхнему экрану в answered(). Реальное время двигает мир
+## только под экранами, где оно идёт, — рынок, поездка, зона; в остальных оно стоит.
 
+signal quit_requested
+
+const BOOT_SCREEN := "boot"
+const MENU_SCREEN := "main_menu"
 const EVENT_SCREEN := "event"
-const MARKET_SCREEN := "market"
+const TIME_SCREENS: Array[String] = ["market", "travel", "zone"]
+## Экраны режимов жизни по имени режима в снимке ядра: стек жизни стоит на том, что назвало ядро.
+## Итоги называются по макету дизайн-книги — «end».
+const MODE_SCREENS := {"market": "market", "zone": "zone", "summary": "end"}
+const DEFAULT_MODE := "market"
+const QUIT_COMMAND := {"command": "quit"}
 
 var _game: SpeculantGame
 var _screen: TextScreen
+var _saves: Saves
 var _stack: Array = []
 var _view: Dictionary = {}
+var _in_life := false
 
 
-func _init(game: SpeculantGame, screen: TextScreen) -> void:
+func _init(game: SpeculantGame, screen: TextScreen, saves: Saves) -> void:
 	_game = game
 	_screen = screen
-	_stack.append(ScreenRegistry.create(MARKET_SCREEN))
+	_saves = saves
+	_stack.append(ScreenRegistry.create(BOOT_SCREEN))
+	var answer := _start(_saves.lobby())
+	if answer.has("error"):
+		_stack.back().answered(answer)
 	refresh()
 
 
-## Снимок мира, который сейчас на экране.
+## Снимок ядра на экране — `StateView` жизни или `LobbyView` лобби — со слотами каталога.
 func view() -> Dictionary:
 	return _view
 
@@ -31,9 +56,10 @@ func top_name() -> String:
 	return ScreenRegistry.name_of(_stack.back())
 
 
-## Реальное время идёт: ядро двигает мир, и экран перерисовывается, если мир изменился.
+## Реальное время идёт: под экраном со временем ядро двигает мир, и экран перерисовывается, если
+## мир изменился.
 func tick(milliseconds: int) -> void:
-	if _game.advance(milliseconds):
+	if _in_life and top_name() in TIME_SCREENS and _game.advance(milliseconds):
 		refresh()
 
 
@@ -44,20 +70,34 @@ func press(action: Dictionary) -> void:
 	_follow(_stack.back().handle(action, _view))
 
 
-## Свежий снимок ядра: событие встаёт поверх стека или уходит с него, верхний экран сверяется с
-## миром, и всё перерисовывается.
+## Свежий снимок ядра: в жизни стек встаёт на экран режима, событие ложится поверх стека или
+## уходит с него, верхний экран сверяется с миром, и всё перерисовывается.
 func refresh() -> void:
 	_view = JSON.parse_string(_game.view_json())
-	var event_on_top := top_name() == EVENT_SCREEN
-	if _view["pending_event"] != null and not event_on_top:
-		_stack.append(ScreenRegistry.create(EVENT_SCREEN))
-	elif _view["pending_event"] == null and event_on_top:
-		_stack.pop_back()
+	_saves.annotate(_view)
+	if _in_life:
+		_follow_mode()
 	var intent: Dictionary = _stack.back().follow(_view)
 	if intent.is_empty():
 		_draw()
 	else:
 		_follow(intent)
+
+
+## Снимок жизни несёт экран режима; снимок лобби — нет.
+static func in_life(view: Dictionary) -> bool:
+	return view.has("screen")
+
+
+func _follow_mode() -> void:
+	var mode: String = MODE_SCREENS.get(_view["screen"], MODE_SCREENS[DEFAULT_MODE])
+	if _stack.is_empty() or ScreenRegistry.name_of(_stack.front()) != mode:
+		_stack = [ScreenRegistry.create(mode)]
+	var event_on_top := top_name() == EVENT_SCREEN
+	if _view["pending_event"] != null and not event_on_top:
+		_stack.append(ScreenRegistry.create(EVENT_SCREEN))
+	elif _view["pending_event"] == null and event_on_top:
+		_stack.pop_back()
 
 
 func _follow(intent: Dictionary) -> void:
@@ -66,13 +106,72 @@ func _follow(intent: Dictionary) -> void:
 		_stack.back().answered(answer)
 		refresh()
 	elif intent.has("push"):
-		_stack.append(ScreenRegistry.create(intent["push"]))
+		_stack.append(_created(intent["push"], intent.get("with", {})))
+		refresh()
+	elif intent.has("switch"):
+		_stack[-1] = _created(intent["switch"], {})
 		refresh()
 	elif intent.has("pop") and _stack.size() > 1:
 		_stack.pop_back()
 		refresh()
+	elif intent.has("home"):
+		_stack.resize(1)
+		refresh()
 	elif intent.has("redraw"):
 		_draw()
+	elif intent.has("new_life"):
+		var settings: Dictionary = intent["new_life"]
+		_begin_life(_saves.new_life(settings["biography"], settings["ironman"], settings["seed"]))
+	elif intent.has("resume"):
+		_begin_life(_saves.resume(intent["resume"]))
+	elif intent.has("lobby"):
+		_open_lobby(intent["lobby"])
+	elif intent.has("quit"):
+		_leave_life()
+		quit_requested.emit()
+
+
+func _created(screen_name: String, arguments: Dictionary) -> RefCounted:
+	var created := ScreenRegistry.create(screen_name)
+	if not arguments.is_empty():
+		created.enter(arguments)
+	return created
+
+
+## Жизнь начинается на экране режима; отказ ядра остаётся на экране, откуда её начинали.
+func _begin_life(start_json: String) -> void:
+	var answer := _start(start_json)
+	if answer.has("error"):
+		_stack.back().answered(answer)
+		_draw()
+		return
+	_in_life = true
+	_stack.clear()
+	refresh()
+
+
+func _open_lobby(screen_name: String) -> void:
+	_leave_life()
+	var answer := _start(_saves.lobby())
+	if answer.has("error"):
+		_stack.back().answered(answer)
+		_draw()
+		return
+	_in_life = false
+	_stack = [ScreenRegistry.create(MENU_SCREEN)]
+	if screen_name != MENU_SCREEN:
+		_stack.append(ScreenRegistry.create(screen_name))
+	refresh()
+
+
+## Уходя из жизни, ядро получает quit: ironman-жизнь ложится в свой слот.
+func _leave_life() -> void:
+	if _in_life:
+		_game.apply(JSON.stringify(QUIT_COMMAND))
+
+
+func _start(start_json: String) -> Dictionary:
+	return JSON.parse_string(_game.new_life(start_json))
 
 
 func _draw() -> void:

@@ -1,34 +1,86 @@
 extends SceneTree
-## Безголовый клавиатурный сценарий для `cargo xtask ui-flow-smoke`: настоящее ядро через мост и стек
-## экранов — рынок → F2 покупка в окне количества → пробел пауза и снова ход → событие → выбор →
-## исход → F4 поездка → прибытие. Клавиши проходят через Keymap, как в игре; после каждого шага
-## сверяется буфер экрана.
+## Безголовый клавиатурный сценарий для `cargo xtask ui-flow-smoke`: настоящее ядро через мост и
+## роутер экранов в чистом каталоге игрока — заставка → главное меню → новая жизнь (студент,
+## свободный режим, сид 7) → рынок: F2 покупка в окне количества, пробел пауза и снова ход, событие
+## → выбор → исход, F4 поездка → прибытие; дела, связи и пейджер — время в них стоит; меню выхода →
+## сохранение в слот → «Abort, Retry, Fail?» → F в главное меню → загрузка слота → снова рынок того
+## же дня; ironman-жизнь ложится в свой слот, «Продолжить» её возвращает, новая ironman-жизнь
+## поверх спрашивает подтверждения; из главного меню A — выход из игры. Клавиши проходят через
+## Keymap, как в игре; после шагов сверяется буфер экрана.
 
-const LIFE := {"life": {"biography": "student", "ironman": false, "seed": 7}}
+const SAVES_ROOT := "user://ui_flow"
+const BIOGRAPHY := "student"
+const SEED_KEY := KEY_7
 const DAY_MILLISECONDS := 1800
 const LONGEST_WAIT_STEPS := 2000
+const STANDSTILL_DAYS := 5
 const TRADE_GOOD := "chewing_gum"
 const POCKET_LABEL := "Жвачка"
 const DIGIT_KEYS := [KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9]
+const CONTINUE_ITEM := 1
+const NEW_LIFE_ITEM := 2
+const LOAD_ITEM := 3
+const SAVE_ITEM := 2
+## Пункты меню выхода до добровольных уходов и после них.
+const ITEMS_BEFORE_EXITS := 4
+const ITEMS_AFTER_EXITS := 1
 
 var _screen: TextScreen
 var _router: Router
+var _saves := Saves.new(SAVES_ROOT)
+var _quit_asked := false
 
 
 func _initialize() -> void:
+	_clear_saves()
 	_screen = TextScreen.new()
-	var game := SpeculantGame.new()
-	var started: Dictionary = JSON.parse_string(game.new_life(JSON.stringify(LIFE)))
-	if started.has("error"):
-		_finish(_fail("жизнь не начинается: %s" % [started]))
-		return
-	_router = Router.new(game, _screen)
-	_finish(_market() and _buy() and _pause() and _event() and _travel())
+	_router = Router.new(SpeculantGame.new(), _screen, _saves)
+	_router.quit_requested.connect(func() -> void: _quit_asked = true)
+	var passed := (
+		_boot_and_menu()
+		and _new_life(true)
+		and _buy()
+		and _pause()
+		and _event()
+		and _travel()
+		and _screens_stop_time()
+		and _save_and_load()
+		and _ironman()
+		and _quit()
+	)
+	_clear_saves()
+	_finish(passed)
 
 
-func _market() -> bool:
-	if _router.top_name() != "market" or not _shows("Купить") or not _shows("Время идёт"):
-		return _fail("рынок не открылся:\n" + _buffer())
+func _boot_and_menu() -> bool:
+	if _router.top_name() != "boot" or not _shows("SPEKUL.EXE"):
+		return _fail("сеанс не начался с заставки:\n" + _buffer())
+	_press(KEY_ENTER)
+	if _router.top_name() != "main_menu" or not _shows(" Главное меню "):
+		return _fail("любая клавиша не открыла главное меню:\n" + _buffer())
+	return true
+
+
+## Цифра 2 — новая жизнь; стрелками к студенту, F2 — свободный режим, цифра 7 — сид, Enter — жить.
+func _new_life(free: bool) -> bool:
+	_press(DIGIT_KEYS[NEW_LIFE_ITEM])
+	if _router.top_name() != "new_life":
+		return _fail("цифра %d не открыла новую жизнь:\n%s" % [NEW_LIFE_ITEM, _buffer()])
+	var biographies: Array = _router.view()["biographies"]
+	var row := biographies.find_custom(func(biography: Dictionary) -> bool: return biography["biography"] == BIOGRAPHY)
+	for _step in row:
+		_press(KEY_DOWN)
+	if free:
+		_press(KEY_F2)
+		if not _shows("свободный"):
+			return _fail("F2 не переключила режим:\n" + _buffer())
+	_press(SEED_KEY)
+	_press(KEY_ENTER)
+	var view := _router.view()
+	if _router.top_name() != "market" or view["ironman"] == free or view["header"]["city"] != "Москва":
+		return _fail("жизнь студента не открыла рынок:\n" + _buffer())
+	if not _shows("Купить") or not _shows("Время идёт"):
+		return _fail("рынок не нарисован:\n" + _buffer())
 	return true
 
 
@@ -107,6 +159,103 @@ func _travel() -> bool:
 	return true
 
 
+## F6 — дела, F5 — связи, F7 — пейджер: экраны открываются, дни в них не идут, Esc — назад к рынку.
+func _screens_stop_time() -> bool:
+	for step: Array in [[KEY_F6, "businesses", " Дела "], [KEY_F5, "contacts", " Связи "], [KEY_F7, "pager", "ПЕЙДЖЕР"]]:
+		_press(step[0])
+		if _router.top_name() != step[1] or not _shows(step[2]):
+			return _fail("клавиша не открыла экран %s:\n%s" % [step[1], _buffer()])
+		var date: String = _router.view()["header"]["date"]
+		for _day in STANDSTILL_DAYS:
+			_router.tick(DAY_MILLISECONDS)
+		if _router.view()["header"]["date"] != date:
+			return _fail("на экране %s время шло: %s → %s" % [step[1], date, _router.view()["header"]["date"]])
+		_press(KEY_ESCAPE)
+		if _router.top_name() != "market":
+			return _fail("Esc с экрана %s не вернул рынок:\n%s" % [step[1], _buffer()])
+	return true
+
+
+## F10 — меню выхода, «Сохранить», Enter на слоте 1; затем выход «F» в главное меню, «Загрузить»,
+## Enter на слоте 1 — и снова рынок того же дня.
+func _save_and_load() -> bool:
+	var saved_date: String = _router.view()["header"]["date"]
+	_press(KEY_F10)
+	if _router.top_name() != "game_menu":
+		return _fail("F10 не открыла меню выхода:\n" + _buffer())
+	_press(DIGIT_KEYS[SAVE_ITEM])
+	_press(KEY_ENTER)
+	if not _shows("Жизнь записана в слот 1.") or not "1" in _saves.slots():
+		return _fail("слот 1 не записан:\n" + _buffer())
+	_press(KEY_ESCAPE)
+	if not _to_main_menu():
+		return false
+	_press(DIGIT_KEYS[LOAD_ITEM])
+	_press(KEY_ENTER)
+	if _router.top_name() != "market" or _router.view()["header"]["date"] != saved_date:
+		return _fail("слот 1 не вернул жизнь %s:\n%s" % [saved_date, _buffer()])
+	return true
+
+
+## Из жизни: меню выхода, последний пункт — «Выйти из игры», и окно «Abort, Retry, Fail?».
+func _open_quit() -> bool:
+	if _router.top_name() != "game_menu":
+		_press(KEY_F10)
+	var exits: Array = _router.view()["exits"]
+	_press(DIGIT_KEYS[ITEMS_BEFORE_EXITS + exits.size() + ITEMS_AFTER_EXITS])
+	if _router.top_name() != "quit" or not _shows("Abort, Retry, Fail?"):
+		return _fail("последний пункт меню не открыл выход:\n" + _buffer())
+	return true
+
+
+## Ironman-жизнь сама ложится в слот; из главного меню «Продолжить» возвращает её, а новая
+## ironman-жизнь поверх спрашивает подтверждения — Esc его отменяет.
+func _ironman() -> bool:
+	if not _to_main_menu() or not _new_life(false):
+		return false
+	var date: String = _router.view()["header"]["date"]
+	if not _to_main_menu():
+		return false
+	if not Saves.IRONMAN_SLOT in _saves.slots():
+		return _fail("ironman-жизнь не легла в свой слот: %s" % [_saves.slots()])
+	_press(DIGIT_KEYS[CONTINUE_ITEM])
+	var view := _router.view()
+	if _router.top_name() != "market" or not view["ironman"] or view["header"]["date"] != date:
+		return _fail("«Продолжить» не вернул ironman-жизнь %s:\n%s" % [date, _buffer()])
+	if not _to_main_menu():
+		return false
+	_press(DIGIT_KEYS[NEW_LIFE_ITEM])
+	_press(KEY_ENTER)
+	if not _shows("Бросить незаконченную ironman-жизнь?"):
+		return _fail("новая ironman-жизнь не спросила про прежнюю:\n" + _buffer())
+	_press(KEY_ESCAPE)
+	_press(KEY_ESCAPE)
+	if _router.top_name() != "main_menu" or not Saves.IRONMAN_SLOT in _saves.slots():
+		return _fail("отказ не вернул в меню с прежней ironman-жизнью:\n" + _buffer())
+	return true
+
+
+## Из жизни через «Abort, Retry, Fail?»: F — в главное меню.
+func _to_main_menu() -> bool:
+	if not _open_quit():
+		return false
+	_press(KEY_F)
+	if _router.top_name() != "main_menu":
+		return _fail("F не вернула в главное меню:\n" + _buffer())
+	return true
+
+
+## Из главного меню: F10 — выход, A — выйти в DOS.
+func _quit() -> bool:
+	_press(KEY_F10)
+	if _router.top_name() != "quit" or not _shows("Abort, Retry, Fail?"):
+		return _fail("F10 главного меню не открыла выход:\n" + _buffer())
+	_press(KEY_A)
+	if not _quit_asked:
+		return _fail("A не попросила выйти из игры:\n" + _buffer())
+	return true
+
+
 func _settle_event() -> bool:
 	var choices: Array = _router.view()["pending_event"]["choices"]
 	var choice := choices.find_custom(func(shown: Dictionary) -> bool: return shown["available"]) + 1
@@ -137,10 +286,18 @@ func _buffer() -> String:
 	return "\n".join(rows)
 
 
+func _clear_saves() -> void:
+	var folder := SAVES_ROOT.path_join(Saves.SAVES_FOLDER)
+	for slot in _saves.slots():
+		DirAccess.remove_absolute(folder.path_join(slot + "." + Saves.EXTENSION))
+	if _saves.has_past_lives():
+		DirAccess.remove_absolute(SAVES_ROOT.path_join(Saves.META_FILE))
+
+
 func _finish(passed: bool) -> void:
 	_screen.free()
 	if passed:
-		print("ui_flow: рынок → покупка → пауза → событие → исход → поездка → прибытие")
+		print("ui_flow: заставка → меню → новая жизнь → рынок → покупка → пауза → событие → поездка → дела, связи, пейджер → сохранение → меню → загрузка → ironman → выход")
 		quit()
 
 

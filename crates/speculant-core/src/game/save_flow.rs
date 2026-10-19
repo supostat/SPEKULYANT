@@ -106,7 +106,8 @@ impl Game {
     }
 }
 
-fn read_meta(storage: &Storage) -> Result<Meta, CommandError> {
+/// Метапрогрессия из каталога игрока; файла нет — прошлых жизней не было.
+pub(super) fn read_meta(storage: &Storage) -> Result<Meta, CommandError> {
     let unreadable = |error: SaveError| CommandError::MetaUnreadable {
         reason: error.to_string(),
     };

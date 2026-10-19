@@ -9,6 +9,7 @@ mod event;
 mod faction;
 mod header;
 mod level;
+mod lobby;
 mod market;
 mod money;
 mod notebook;
@@ -32,6 +33,7 @@ pub use event::{ChoiceView, EventView, OutcomeView};
 pub use faction::FactionView;
 pub use header::HeaderView;
 pub use level::LevelView;
+pub use lobby::LobbyView;
 pub use market::{MarketRowView, MarketView};
 pub use money::{MoneyPlaceView, MoneyView};
 pub use notebook::NotebookEntryView;
@@ -49,6 +51,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct StateView {
     pub screen: Screen,
+    /// Ironman-жизнь сохраняется сама: меню не предлагает ни сохранения, ни загрузки.
+    pub ironman: bool,
     pub header: HeaderView,
     pub character: CharacterView,
     pub homes: Vec<HomeView>,

@@ -29,6 +29,15 @@ impl Pager {
     pub fn messages(&self) -> &[PagerMessage] {
         &self.messages
     }
+
+    /// Стирает сообщение — номер от нуля, от старых к новым; `false`, если такого нет.
+    pub fn erase(&mut self, message: usize) -> bool {
+        if message >= self.messages.len() {
+            return false;
+        }
+        self.messages.remove(message);
+        true
+    }
 }
 
 #[cfg(test)]
@@ -56,5 +65,21 @@ mod tests {
             .map(|message| message.text.as_str())
             .collect();
         assert_eq!(texts, ["два", "три"]);
+    }
+
+    #[test]
+    fn an_erased_message_leaves_the_feed_and_a_missing_one_is_refused() {
+        let mut pager = Pager::default();
+        for text in ["раз", "два", "три"] {
+            pager.record(message(text), 3);
+        }
+        assert!(pager.erase(1));
+        assert!(!pager.erase(2), "сообщений осталось два");
+        let texts: Vec<&str> = pager
+            .messages()
+            .iter()
+            .map(|message| message.text.as_str())
+            .collect();
+        assert_eq!(texts, ["раз", "три"]);
     }
 }

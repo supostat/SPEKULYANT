@@ -200,6 +200,10 @@ pub enum CommandError {
         name: String,
         until: String,
     },
+    NoSuchPagerMessage {
+        message: usize,
+        count: usize,
+    },
 }
 
 impl fmt::Display for CommandError {
@@ -337,6 +341,10 @@ impl fmt::Display for CommandError {
             Self::ContactAway { name, until } => {
                 write!(formatter, "{name} не на связи до {until}")
             }
+            Self::NoSuchPagerMessage { message, count } => write!(
+                formatter,
+                "на пейджере нет сообщения {message}: сообщений {count}, с нуля"
+            ),
         }
     }
 }

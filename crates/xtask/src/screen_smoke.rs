@@ -1,44 +1,151 @@
 use std::fs;
+use std::path::PathBuf;
 use std::sync::Arc;
 
-use anyhow::{Result, anyhow, bail};
-use speculant_core::{Content, Game, LifeSettings};
+use anyhow::{Context, Result, anyhow, bail};
+use speculant_core::content::EventId;
+use speculant_core::save::Storage;
+use speculant_core::{Command, Content, Game, LifeSettings, Lobby};
 
 use crate::project_root::project_root;
 use crate::screen_file::{COLUMNS, ROWS, ScreenFile};
 use crate::screen_runner;
 
-/// Снимок для экрана — новая жизнь студента с этим сидом на настоящих данных.
+/// Все экраны без макета и снимок, на котором их рисовать.
+const SCREENS: [(&str, Snapshot); 14] = [
+    ("main_menu", Snapshot::Lobby),
+    ("new_life", Snapshot::Lobby),
+    ("records", Snapshot::Lobby),
+    ("notebook", Snapshot::Lobby),
+    ("slots", Snapshot::Life),
+    ("quit", Snapshot::Life),
+    ("help", Snapshot::Life),
+    ("game_menu", Snapshot::Life),
+    ("travel", Snapshot::Life),
+    ("businesses", Snapshot::Life),
+    ("hire", Snapshot::Life),
+    ("contacts", Snapshot::Life),
+    ("money", Snapshot::Life),
+    ("zone", Snapshot::Zone),
+];
+const ALL: &str = "all";
+/// Снимок жизни — студент с этим сидом на настоящих данных.
 const BIOGRAPHY: &str = "student";
 const SEED: u64 = 7;
+/// В зону — моряк: денег хватает на сигнал в ОБХСС, а проверка кончается судом, если отпираться.
+const ZONE_BIOGRAPHY: &str = "sailor";
+const ZONE_CHAIN: [(&str, usize); 2] = [("obkhss_signal", 3), ("obkhss_visit", 3)];
+/// Лобби — каталог игрока, где прошлых жизней не было: лобби в нём ничего не пишет.
+const LOBBY_STORAGE: &str = ".tools/out/screen-smoke-lobby";
 const FKEY_ROW: usize = ROWS - 1;
 const KEY_COLORS: (char, char) = ('f', '0');
 const LABEL_COLORS: (char, char) = ('0', '3');
 
-/// `cargo xtask screen-smoke <экран>`: экран без эталона рисуется безголово на снимке настоящего
-/// ядра без ошибок Godot, и строка F-клавиш стоит на месте — с клавиши 1, номера белым на чёрном,
-/// подписи чёрным на бирюзовом во всю ширину.
+#[derive(Clone, Copy)]
+enum Snapshot {
+    Lobby,
+    Life,
+    Zone,
+}
+
+/// `cargo xtask screen-smoke <экран|all>`: экран без эталона рисуется безголово на снимке
+/// настоящего ядра без ошибок Godot, и строка F-клавиш стоит на месте — с клавиши 1, номера белым
+/// на чёрном, подписи чёрным на бирюзовом во всю ширину. `all` — все экраны без макета.
 pub fn run(screen: &str) -> Result<()> {
-    let data = project_root().join("data");
-    let content = Content::load(&data).map_err(|errors| {
+    let screens: Vec<(&str, Snapshot)> = if screen == ALL {
+        SCREENS.to_vec()
+    } else {
+        let known = SCREENS
+            .iter()
+            .find(|(name, _)| *name == screen)
+            .with_context(|| {
+                format!(
+                    "у экрана «{screen}» есть макет или его нет вовсе; без макета: {}",
+                    names()
+                )
+            })?;
+        vec![*known]
+    };
+    let content = content()?;
+    for (name, snapshot) in screens {
+        let view = write_view(name, snapshot, &content)?;
+        let dumped = screen_runner::dump_with(name, Some(&view))?;
+        check_fkeys(&dumped).with_context(|| format!("экран {name}"))?;
+        println!("screen-smoke {name}: экран рисуется на снимке ядра, строка F-клавиш на месте");
+    }
+    Ok(())
+}
+
+/// Снимок настоящего ядра для экрана без макета в `.tools/out/<экран>.live.view.json` — на нём
+/// экран рисуют smoke и `cargo xtask screenshot`.
+pub fn live_view(screen: &str) -> Result<PathBuf> {
+    let (name, snapshot) = SCREENS
+        .iter()
+        .find(|(name, _)| *name == screen)
+        .with_context(|| format!("у экрана «{screen}» нет живого снимка: {}", names()))?;
+    write_view(name, *snapshot, &content()?)
+}
+
+fn names() -> String {
+    let names: Vec<&str> = SCREENS.iter().map(|(name, _)| *name).collect();
+    names.join(", ")
+}
+
+fn content() -> Result<Arc<Content>> {
+    let content = Content::load(&project_root().join("data")).map_err(|errors| {
         anyhow!(
             "data/ не загружается ({} ошибок) — сначала cargo run -p speculant-validate -- data",
             errors.len()
         )
     })?;
+    Ok(Arc::new(content))
+}
+
+fn write_view(screen: &str, snapshot: Snapshot, content: &Arc<Content>) -> Result<PathBuf> {
+    let view = screen_runner::output_path(screen, "live.view.json")?;
+    fs::write(&view, snapshot_json(snapshot, content)?)?;
+    Ok(view)
+}
+
+fn snapshot_json(snapshot: Snapshot, content: &Arc<Content>) -> Result<String> {
+    let json = match snapshot {
+        Snapshot::Lobby => {
+            let directory = project_root().join(LOBBY_STORAGE);
+            let lobby = Lobby::open(Arc::clone(content), &Storage::new(directory))
+                .map_err(|error| anyhow!("лобби не открывается: {error}"))?;
+            serde_json::to_string(&lobby.view())?
+        }
+        Snapshot::Life => serde_json::to_string(&life(BIOGRAPHY, content)?.view())?,
+        Snapshot::Zone => serde_json::to_string(&zone_life(content)?.view())?,
+    };
+    Ok(json)
+}
+
+fn life(biography: &str, content: &Arc<Content>) -> Result<Game> {
     let settings = LifeSettings {
-        biography: BIOGRAPHY.to_owned(),
+        biography: biography.to_owned(),
         ironman: false,
         seed: SEED,
     };
-    let game = Game::new_life(&settings, Arc::new(content))
-        .map_err(|error| anyhow!("жизнь не начинается: {error}"))?;
-    let view = screen_runner::output_path(screen, "live.view.json")?;
-    fs::write(&view, serde_json::to_string(&game.view())?)?;
-    let dumped = screen_runner::dump_with(screen, Some(&view))?;
-    check_fkeys(&dumped)?;
-    println!("screen-smoke {screen}: экран рисуется на снимке ядра, строка F-клавиш на месте");
-    Ok(())
+    Game::new_life(&settings, Arc::clone(content))
+        .map_err(|error| anyhow!("жизнь не начинается: {error}"))
+}
+
+/// Жизнь, которую цепочка событий привела в зону.
+fn zone_life(content: &Arc<Content>) -> Result<Game> {
+    let mut game = life(ZONE_BIOGRAPHY, content)?;
+    for (event, choice) in ZONE_CHAIN {
+        game.start_event(&EventId::new(event))
+            .map_err(|error| anyhow!("событие {event} не начинается: {error}"))?;
+        for command in [Command::Choose { choice }, Command::Continue] {
+            game.apply(command)
+                .map_err(|error| anyhow!("событие {event}: {error}"))?;
+        }
+    }
+    if game.zone().is_none() {
+        bail!("цепочка {ZONE_CHAIN:?} не привела в зону");
+    }
+    Ok(game)
 }
 
 fn check_fkeys(screen: &ScreenFile) -> Result<()> {

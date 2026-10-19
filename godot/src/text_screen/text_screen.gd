@@ -22,6 +22,8 @@ const FKEY_KEY_FOREGROUND := 15
 const FKEY_KEY_BACKGROUND := 0
 const FKEY_LABEL_FOREGROUND := 0
 const FKEY_LABEL_BACKGROUND := 3
+const BAR_FILLED := "▓"
+const BAR_EMPTY := "░"
 
 var _characters := PackedStringArray()
 var _foreground := PackedByteArray()
@@ -171,6 +173,16 @@ static func pad_right(text: String, width: int) -> String:
 ## Дополняет пробелами слева — колонка, выровненная вправо; длинный текст не обрезается.
 static func pad_left(text: String, width: int) -> String:
 	return text if text.length() >= width else " ".repeat(width - text.length()) + text
+
+
+## Подпись с отточием до ширины: «Наценка.............».
+static func dot_leader(text: String, width: int) -> String:
+	return text + ".".repeat(width - text.length())
+
+
+## Шкала делениями: `level` закрашенных из `scale` — черты сотрудника, угроза эпохи, авторитет.
+static func bar(level: int, scale: int) -> String:
+	return BAR_FILLED.repeat(level) + BAR_EMPTY.repeat(scale - level)
 
 
 ## Переносит текст по словам в строки не длиннее ширины.

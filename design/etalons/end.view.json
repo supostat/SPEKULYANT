@@ -1,0 +1,123 @@
+{
+  "screen": "summary",
+  "ironman": false,
+  "header": {
+    "city": "Москва",
+    "date": "1 января 1984, вс",
+    "money": [
+      "Наличные: 150 р."
+    ]
+  },
+  "character": {
+    "name": "Макаров Михаил Васильевич",
+    "age": "22 года",
+    "health": "здоров",
+    "housing": "Койка в общежитии"
+  },
+  "homes": [],
+  "exits": [],
+  "time": {
+    "speed": 1,
+    "paused": true,
+    "fast_forward": null
+  },
+  "market": {
+    "place": "Толкучка у Рижского вокзала",
+    "goods": []
+  },
+  "travel": {
+    "journey": null,
+    "destinations": []
+  },
+  "pocket": {
+    "items": [
+      {
+        "label": "Связей",
+        "amount": "2"
+      }
+    ],
+    "danger": {
+      "label": "ОБХСС",
+      "level": 0,
+      "scale": 7
+    }
+  },
+  "rumors": [],
+  "messages": [],
+  "pending_event": null,
+  "pager": null,
+  "businesses": [],
+  "candidates": [],
+  "business_kinds": [],
+  "contacts": [],
+  "factions": [
+    {
+      "faction": "bandits",
+      "title": "Бандиты",
+      "level": 0,
+      "limit": 7
+    },
+    {
+      "faction": "militia",
+      "title": "Милиция",
+      "level": 0,
+      "limit": 7
+    },
+    {
+      "faction": "officials",
+      "title": "Чиновники",
+      "level": 0,
+      "limit": 7
+    },
+    {
+      "faction": "people",
+      "title": "Народ",
+      "level": 0,
+      "limit": 7
+    },
+    {
+      "faction": "traders",
+      "title": "Торговцы",
+      "level": 0,
+      "limit": 7
+    }
+  ],
+  "money": {
+    "places": [],
+    "rates": []
+  },
+  "notebook": [],
+  "records": {
+    "ironman": [],
+    "free": []
+  },
+  "zone": null,
+  "summary": {
+    "source": "«ВЕЧЕРНЯЯ МОСКВА» · 5 ноября 1997 · с. 14",
+    "headline": "ЛЫКОВ ПЁТР СЕРГЕЕВИЧ  1961–1997",
+    "text": "Начинал фарцовщиком у гостиницы «Интурист». В 1989 году открыл кооператив по пошиву варёнок. Пережил гиперинфляцию, двух компаньонов и одну налоговую проверку. Погиб 3 ноября 1997 года, отказавшись поднять долю крыше. Друзья помнят его щедрым, конкуренты — упрямым.",
+    "lines": [
+      {
+        "label": "Капитал на момент смерти",
+        "value": "$ 41 300"
+      },
+      {
+        "label": "Лучшая сделка",
+        "value": "ваучеры, 1993"
+      },
+      {
+        "label": "Худшая сделка",
+        "value": "банк «Титан», 1996"
+      },
+      {
+        "label": "Прожито",
+        "value": "13 лет 7 месяцев"
+      }
+    ],
+    "discoveries": [
+      "Открыто: биография «Бывший кооператор»",
+      "В записной книжке: +6 записей, +2 человека"
+    ]
+  },
+  "biographies": []
+}

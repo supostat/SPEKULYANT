@@ -6,6 +6,7 @@ mod consequences;
 mod event_flow;
 mod history_flow;
 mod life_flow;
+mod lobby;
 mod meta_flow;
 mod russian_count;
 mod save_flow;
@@ -35,6 +36,8 @@ use crate::travel::Journey;
 use crate::view::{Screen, StateView};
 use crate::zone::Zone;
 use world::World;
+
+pub use lobby::Lobby;
 
 /// Сколько последних сообщений помнит лента.
 const MESSAGE_LOG_LENGTH: usize = 20;
@@ -378,6 +381,14 @@ impl Game {
             Command::ApplyForParole => self.apply_for_parole()?,
             Command::BribeForRelease => self.bribe_for_release()?,
             Command::Call { contact } => self.call(&contact)?,
+            Command::ErasePagerMessage { message } => {
+                if !self.world.pager.erase(message) {
+                    return Err(CommandError::NoSuchPagerMessage {
+                        message,
+                        count: self.world.pager.messages().len(),
+                    });
+                }
+            }
             Command::Save { slot } => self.save(&slot)?,
             Command::Load { slot } => self.load(&slot)?,
             Command::Quit => self.autosave(),

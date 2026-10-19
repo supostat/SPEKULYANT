@@ -9,7 +9,7 @@ use speculant_core::content::{Content, EventId};
 use speculant_core::save::Storage;
 use speculant_core::time::GameDate;
 use speculant_core::view::{NotebookEntryView, RecordView, StateView};
-use speculant_core::{Command, CommandError, Game, LifeSettings};
+use speculant_core::{Command, CommandError, Game, LifeSettings, Lobby};
 
 const META: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/meta");
 const DAY_MILLISECONDS: u32 = 1800;
@@ -194,6 +194,55 @@ fn unlocks_and_knowledge_outlive_the_session_on_disk() {
     assert_eq!(next.character().biography().as_str(), "party_son");
     assert_eq!(next.view().notebook, first.view().notebook);
     assert_eq!(next.view().records, first.view().records);
+}
+
+#[test]
+fn the_lobby_shows_what_past_lives_left_in_the_directory() {
+    let content = load();
+    let storage = storage("lobby");
+    let empty = Lobby::open(Arc::clone(&content), &storage)
+        .expect("пустой каталог — лобби без прошлых жизней")
+        .view();
+    let party_son = |lobby: &speculant_core::LobbyView| {
+        lobby
+            .biographies
+            .iter()
+            .find(|biography| biography.biography == "party_son")
+            .expect("сын партработника в данных")
+            .clone()
+    };
+    assert!(!party_son(&empty).unlocked);
+    assert!(
+        party_son(&empty).unlock_hint.is_some(),
+        "закрытая — с условием"
+    );
+    assert!(empty.notebook.is_empty() && empty.records.free.is_empty());
+
+    let mut life =
+        Game::open(&student(7), Arc::clone(&content), storage.clone()).expect("жизнь начинается");
+    live_through(&mut life, "nomenklatura_offer");
+    live_through(&mut life, "kofi_favor");
+    retire(&mut life);
+    let lobby = Lobby::open(content, &storage)
+        .expect("каталог с прошлой жизнью")
+        .view();
+    assert!(party_son(&lobby).unlocked);
+    assert_eq!(party_son(&lobby).unlock_hint, None);
+    assert_eq!(lobby.biographies, life.view().biographies);
+    assert_eq!(lobby.notebook, life.view().notebook);
+    assert_eq!(lobby.records, life.view().records);
+}
+
+#[test]
+fn a_broken_meta_file_keeps_the_lobby_closed() {
+    let storage = storage("broken_lobby");
+    storage
+        .write_meta("не файл метапрогрессии")
+        .expect("каталог пишется");
+    assert!(matches!(
+        Lobby::open(load(), &storage),
+        Err(CommandError::MetaUnreadable { .. })
+    ));
 }
 
 #[test]

@@ -8,6 +8,26 @@ use speculant_core::view::Screen;
 use speculant_core::{Command, CommandError, Content, Game, LifeSettings, StateView};
 
 const MARKET_FIXTURE: &str = include_str!("../../../design/etalons/market.view.json");
+/// Фикстуры макетов дизайн-книги и экраны, которые они показывают.
+const ETALON_FIXTURES: [(&str, Screen); 5] = [
+    (MARKET_FIXTURE, Screen::Market),
+    (
+        include_str!("../../../design/etalons/event.view.json"),
+        Screen::Event,
+    ),
+    (
+        include_str!("../../../design/etalons/manager.view.json"),
+        Screen::Manager,
+    ),
+    (
+        include_str!("../../../design/etalons/pager.view.json"),
+        Screen::Pager,
+    ),
+    (
+        include_str!("../../../design/etalons/end.view.json"),
+        Screen::Summary,
+    ),
+];
 const DATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../data");
 
 fn life_settings() -> LifeSettings {
@@ -34,6 +54,15 @@ fn market_fixture_is_a_state_view_of_the_market_mockup() {
     assert_eq!(view.header.city, "Москва");
     assert_eq!(view.market.goods.len(), 8);
     assert_eq!(view.market.goods[4].buy, "4.50");
+}
+
+#[test]
+fn every_etalon_fixture_is_a_state_view_of_its_screen() {
+    for (fixture, screen) in ETALON_FIXTURES {
+        let view: StateView = serde_json::from_str(fixture)
+            .unwrap_or_else(|error| panic!("фикстура {screen:?} не разбирается: {error}"));
+        assert_eq!(view.screen, screen);
+    }
 }
 
 #[test]
@@ -89,6 +118,7 @@ fn every_command_survives_a_json_round_trip_under_its_own_name() {
         Command::Call {
             contact: "lena".to_owned(),
         },
+        Command::ErasePagerMessage { message: 2 },
         Command::Deposit {
             place: "savings_bank".to_owned(),
             amount: 500,
@@ -134,6 +164,7 @@ fn a_new_life_opens_on_the_market_of_the_start_city() {
         "из сорока товаров девять появятся позже 1984 года"
     );
     assert_eq!(view.pager, None, "пейджера в 1984 году нет");
+    assert!(view.ironman, "жизнь начата в режиме ironman");
 }
 
 #[test]

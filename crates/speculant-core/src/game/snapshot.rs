@@ -8,15 +8,17 @@ mod zone;
 use std::cmp::Ordering;
 
 use super::Game;
+use crate::content::Content;
 use crate::economy::{Currency, MoneyRules};
+use crate::meta::Meta;
 use crate::npc::Rival;
 use crate::reputation::{Availability, Contact};
 use crate::time::GameDate;
 use crate::travel::Access;
 use crate::view::{
     ChoiceView, ContactView, DestinationView, EventView, FactionView, HeaderView, JourneyView,
-    LevelView, MarketRowView, MarketView, MoneyPlaceView, MoneyView, OutcomeView, PagerMessageView,
-    PagerView, PocketItemView, PocketView, StateView, TimeView, TravelView,
+    LevelView, LobbyView, MarketRowView, MarketView, MoneyPlaceView, MoneyView, OutcomeView,
+    PagerMessageView, PagerView, PocketItemView, PocketView, StateView, TimeView, TravelView,
 };
 
 const CASH_LABEL: &str = "Наличные";
@@ -45,6 +47,7 @@ pub(super) fn snapshot(game: &Game) -> StateView {
     let today = game.world.clock.today();
     StateView {
         screen: game.world.screen,
+        ironman: game.world.ironman,
         header: header(game, today),
         character: life::character(game, today),
         homes: life::homes(game, today),
@@ -80,8 +83,8 @@ pub(super) fn snapshot(game: &Game) -> StateView {
             .collect(),
         factions: factions(game, today),
         money: money(game, today),
-        notebook: meta::notebook(game),
-        records: meta::records(game),
+        notebook: meta::notebook(&game.content, &game.meta),
+        records: meta::records(&game.content, &game.meta),
         zone: game
             .world
             .zone
@@ -92,7 +95,16 @@ pub(super) fn snapshot(game: &Game) -> StateView {
             .summary
             .as_ref()
             .map(|summary| life::summary(game, summary)),
-        biographies: life::biographies(game),
+        biographies: life::biographies(&game.content, &game.meta),
+    }
+}
+
+/// Лобби: биографии, записная книжка и рекорды зависят только от данных и метапрогрессии.
+pub(super) fn lobby(content: &Content, meta: &Meta) -> LobbyView {
+    LobbyView {
+        biographies: life::biographies(content, meta),
+        notebook: meta::notebook(content, meta),
+        records: meta::records(content, meta),
     }
 }
 

@@ -8,7 +8,7 @@ use speculant_core::content::{Content, GoodId};
 use speculant_core::life::PagerDevice;
 use speculant_core::time::GameDate;
 use speculant_core::view::{PagerMessageView, PagerView};
-use speculant_core::{Command, Game, LifeSettings};
+use speculant_core::{Command, CommandError, Game, LifeSettings};
 
 const HISTORY: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/history");
 const DAY_MILLISECONDS: u32 = 1800;
@@ -95,5 +95,28 @@ fn news_without_a_device_pass_the_pager_by() {
     assert_eq!(
         game.view().pager.map(|pager| pager.messages),
         Some(Vec::new())
+    );
+}
+
+#[test]
+fn an_erased_message_leaves_the_feed_for_good() {
+    let mut game = game();
+    buy_the_device(&mut game);
+    live_until(&mut game, after_the_denomination());
+    let before = game.view().pager.expect("пейджер в кармане").messages;
+    assert!(before.len() > 1, "в ленте несколько новостей");
+    game.apply(Command::ErasePagerMessage { message: 0 })
+        .expect("самое старое сообщение стирается");
+    assert_eq!(
+        game.view().pager.expect("пейджер в кармане").messages,
+        before[1..]
+    );
+    let left = before.len() - 1;
+    assert_eq!(
+        game.apply(Command::ErasePagerMessage { message: left }),
+        Err(CommandError::NoSuchPagerMessage {
+            message: left,
+            count: left,
+        })
     );
 }

@@ -40,10 +40,13 @@ const USAGE: &str = "\
   charset-check             строки godot/src/**/*.gd и data/** только из глифов шрифта
   etalons [--check]         снять эталоны шести макетов и палитру из дизайн-книги (Boa)
   screen-check <экран>      буфер экрана Godot против design/etalons/<экран>.screen
-  screen-smoke <экран>      экран без макета рисуется на снимке ядра, строка F-клавиш на месте
-  screenshot <экран>        PNG экрана в .tools/out/ (оконный запуск)
-  ui-flow-smoke             безголовый клавиатурный сценарий: рынок → покупка → пауза →
-                            событие → исход → поездка → прибытие
+  screen-smoke <экран|all>  экран без макета рисуется на снимке ядра, строка F-клавиш на месте;
+                            all — все экраны без макета
+  screenshot <экран>        PNG экрана в .tools/out/ (оконный запуск): экран макета — на его
+                            фикстуре, экран без макета — на снимке настоящего ядра
+  ui-flow-smoke             безголовый клавиатурный сценарий: заставка → меню → новая жизнь →
+                            рынок, событие, поездка → дела, связи, пейджер → сохранение →
+                            главное меню → загрузка → выход
   deps-check                ядро speculant-core без Godot; пин gdext согласован с tools.toml
   new-event <эпоха> <имя>   заготовка события в data/events/<эпоха>/<имя>.toml
   docs-check [--all-decided] маркеры DECIDED-15-N совпадают в документе и дизайн-книге
@@ -78,7 +81,12 @@ fn main() -> Result<()> {
         "screen-smoke" => screen_smoke::run(single_argument(flags, "screen-smoke <экран>")?),
         "ui-flow-smoke" => ui_flow_smoke::run(),
         "screenshot" => {
-            let png = screen_runner::screenshot(single_argument(flags, "screenshot <экран>")?)?;
+            let screen = single_argument(flags, "screenshot <экран>")?;
+            let png = if etalons::SCREENS.contains(&screen) {
+                screen_runner::screenshot(screen)?
+            } else {
+                screen_runner::screenshot_with(screen, Some(&screen_smoke::live_view(screen)?))?
+            };
             println!("screenshot: {}", png.display());
             Ok(())
         }

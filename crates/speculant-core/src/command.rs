@@ -66,6 +66,10 @@ pub enum Command {
     Call {
         contact: String,
     },
+    /// Стереть сообщение пейджера — номер от нуля в ленте снимка, от старых к новым.
+    ErasePagerMessage {
+        message: usize,
+    },
     /// Купить жильё за наличные; прежнее уходит в зачёт.
     BuyHousing {
         housing: String,
@@ -136,6 +140,7 @@ impl Command {
             Self::Hire { .. } => "hire",
             Self::Fire { .. } => "fire",
             Self::Call { .. } => "call",
+            Self::ErasePagerMessage { .. } => "erase_pager_message",
             Self::BuyHousing { .. } => "buy_housing",
             Self::Retire { .. } => "retire",
             Self::SetWork { .. } => "set_work",

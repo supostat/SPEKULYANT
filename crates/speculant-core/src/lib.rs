@@ -25,9 +25,9 @@ pub mod zone;
 pub use command::{Command, LifeSettings};
 pub use command_error::CommandError;
 pub use content::Content;
-pub use game::Game;
+pub use game::{Game, Lobby};
 pub use time::TimeRules;
-pub use view::StateView;
+pub use view::{LobbyView, StateView};
 
 /// Версия ядра из манифеста рабочей области.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

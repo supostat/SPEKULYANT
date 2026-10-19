@@ -2,8 +2,10 @@
 
 use super::super::Game;
 use super::super::russian_count::{MONTHS_IN_YEAR, YEARS, count, term};
+use crate::content::Content;
 use crate::economy::Currency;
 use crate::life::{DealRecord, LifeSummary};
+use crate::meta::Meta;
 use crate::time::GameDate;
 use crate::view::{
     BiographyView, CharacterView, ExitView, HomeView, LifeSummaryView, SummaryLineView,
@@ -81,12 +83,12 @@ pub(super) fn exits(game: &Game, today: GameDate) -> Vec<ExitView> {
 }
 
 /// Все биографии; закрытые — с подсказкой, чем их открыть.
-pub(super) fn biographies(game: &Game) -> Vec<BiographyView> {
-    game.content
+pub(super) fn biographies(content: &Content, meta: &Meta) -> Vec<BiographyView> {
+    content
         .biographies
         .iter()
         .map(|(id, biography)| {
-            let unlocked = biography.starts_unlocked || game.meta.unlocked().contains(id);
+            let unlocked = biography.starts_unlocked || meta.unlocked().contains(id);
             BiographyView {
                 biography: id.to_string(),
                 title: biography.title.clone(),
