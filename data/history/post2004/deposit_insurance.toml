@@ -1,0 +1,17 @@
+# Банковский кризис наоборот: государство страхует вклады.
+title = "Страхование вкладов"
+weight = 2
+rest_days = 1825
+
+[[outcomes]]
+weight = 2
+news = "Закон о страховании вкладов: деньги в банке снова в безопасности."
+set_flags = ["deposits_insured"]
+
+[[outcomes]]
+weight = 1
+news = "Закон о страховании вкладов отложили: банкам не доверяют."
+price_shocks = [
+  { good = "gold", factor = 1.1, days = 180 },
+]
+set_flags = ["deposits_uninsured"]

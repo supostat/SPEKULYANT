@@ -1,0 +1,17 @@
+title = "Амнистия к 70-летию Октября"
+weight = 8
+once = true
+text = """
+Зачитали Указ об амнистии к семидесятилетию Великого Октября. Спецчасть составляет списки \
+— твоя фамилия в них есть."""
+
+[conditions]
+window = { from = "1987-06-18", until = "1988-01-01" }
+authority = { at_most = 3 }
+
+[[choices]]
+text = "Собрать вещи"
+outcome = "Ворота открылись. За ними — воля."
+
+[choices.consequences]
+zone = { amnesty = true }

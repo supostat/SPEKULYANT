@@ -1,0 +1,24 @@
+# Налоговая реформа: акцизы на спиртное.
+title = "Акцизы на спиртное"
+weight = 2
+rest_days = 1095
+scale = { from = 0.8, to = 1.4 }
+
+[[outcomes]]
+weight = 2
+news = "Акцизы на спиртное подняли: водка и коньяк подорожали."
+price_shocks = [
+  { good = "vodka", factor = 1.35, days = 365 },
+  { good = "cognac", factor = 1.25, days = 365 },
+  { good = "whisky", factor = 1.25, days = 365 },
+]
+set_flags = ["alcohol_excise_raised"]
+
+[[outcomes]]
+weight = 1
+news = "Акцизы на спиртное снизили: подпольная водка уходит с рынка."
+price_shocks = [
+  { good = "vodka", factor = 0.85, days = 365 },
+  { good = "royal_spirit", factor = 0.7, days = 365 },
+]
+set_flags = ["alcohol_excise_cut"]

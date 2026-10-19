@@ -1,0 +1,17 @@
+title = "Амнистия к новой Конституции"
+weight = 8
+once = true
+text = """
+Государственная дума объявила амнистию в связи с принятием Конституции. Заодно выпускают \
+ГКЧП и защитников Белого дома."""
+
+[conditions]
+window = { from = "1994-02-23", until = "1994-09-01" }
+authority = { at_most = 3 }
+
+[[choices]]
+text = "Собрать вещи"
+outcome = "Ворота открылись. За ними — воля."
+
+[choices.consequences]
+zone = { amnesty = true }

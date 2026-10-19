@@ -1,0 +1,31 @@
+title = "Спор в бараке"
+weight = 3
+cooldown_days = 120
+text = """
+Двое мужиков не поделили посылку. Пришли к тебе: «Рассуди по понятиям, ты человек \
+уважаемый»."""
+
+[conditions]
+authority = { at_least = 3 }
+
+[[choices]]
+text = "Рассудить по понятиям"
+outcome = "Решение приняли оба. Твоё слово весит больше."
+
+[choices.consequences]
+zone = { authority = 1, cigarettes = 5 }
+
+[[choices]]
+text = "Взять долю за суд"
+outcome = "Посылку поделили на троих. Мужики ушли недовольные."
+
+[choices.consequences]
+zone = { tea = 3, cigarettes = 5 }
+reputation = [{ faction = "bandits", change = -1 }]
+
+[[choices]]
+text = "Отправить к смотрящему"
+outcome = "Мужики ушли к смотрящему. К тебе больше не ходят."
+
+[choices.consequences]
+zone = { authority = -1 }

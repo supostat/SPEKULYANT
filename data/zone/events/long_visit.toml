@@ -1,0 +1,24 @@
+title = "Длительное свидание"
+weight = 3
+cooldown_days = 180
+text = """
+Положено трое суток в комнате свиданий. Родня привезла сумки: сало, сгущёнку, чай. \
+Контролёр на входе смотрит на сумки внимательно."""
+
+[conditions]
+epochs = ["stagnation", "perestroika"]
+
+[[choices]]
+text = "Сунуть контролёру сигарет"
+outcome = "Сумки прошли целиком: чай и курево — в отряд."
+
+[choices.consequences]
+zone = { cigarettes = -5, tea = 5 }
+health = 4
+
+[[choices]]
+text = "Пройти как положено"
+outcome = "Половину сумок завернули. Трое суток всё равно счастье."
+
+[choices.consequences]
+health = 4

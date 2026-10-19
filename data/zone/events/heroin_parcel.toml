@@ -1,0 +1,31 @@
+title = "Посылка с начинкой"
+weight = 3
+cooldown_days = 365
+text = """
+Смотрящий просит: «Тебе придёт посылка от моих. Просто получи и передай. Что внутри — тебе \
+знать не надо. Отблагодарим»."""
+
+[conditions]
+epochs = ["wild_market", "stabilization"]
+
+[[choices]]
+text = "Получить посылку"
+outcome = "Посылку передал, благодарность получил. Пока тихо."
+
+[choices.consequences]
+zone = { cigarettes = 20, authority = 1 }
+reputation = [{ faction = "bandits", change = 2 }]
+set_flags = ["heroin_parcel"]
+
+[[choices.follow_ups]]
+event = "parcel_case"
+after_days = 21
+chance = 0.35
+
+[[choices]]
+text = "Отказаться"
+outcome = "Смотрящий недоволен: «Запомню»."
+
+[choices.consequences]
+zone = { authority = -1 }
+reputation = [{ faction = "bandits", change = -1 }]

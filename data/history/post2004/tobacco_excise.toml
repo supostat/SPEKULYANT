@@ -1,0 +1,15 @@
+# Налоговая реформа: табачный акциз.
+title = "Табачный акциз"
+weight = 2
+rest_days = 1095
+scale = { from = 0.8, to = 1.5 }
+
+[[outcomes]]
+weight = 1
+news = "Табачный акциз удвоили: сигареты подорожали за ночь."
+price_shocks = [
+  { good = "cigarettes", factor = 1.4, days = 365 },
+  { good = "java_cigarettes", factor = 1.4, days = 365 },
+  { good = "cigars", factor = 1.3, days = 365 },
+]
+set_flags = ["tobacco_excise_raised"]

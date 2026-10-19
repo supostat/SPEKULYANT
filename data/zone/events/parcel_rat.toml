@@ -1,0 +1,25 @@
+title = "Посылку раскурочили"
+weight = 4
+cooldown_days = 180
+text = """
+Ты вернулся с промзоны, а из тумбочки пропала половина передачи. Кто-то в бараке — крыса."""
+
+[[choices]]
+text = "Искать крысу самому"
+outcome = "Нашёл. Разобрался. Синяки сойдут через неделю."
+
+[choices.consequences]
+zone = { authority = 1 }
+health = -3
+
+[[choices]]
+text = "Пожаловаться смотрящему"
+outcome = "Смотрящий нашёл крысу и вернул тебе курево."
+
+[choices.consequences]
+zone = { cigarettes = 5 }
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Махнуть рукой"
+outcome = "Пропало и пропало. Тумбочку теперь носишь в голове."

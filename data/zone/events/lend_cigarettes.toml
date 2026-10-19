@@ -1,0 +1,23 @@
+title = "Сосед просит в долг"
+weight = 4
+cooldown_days = 120
+text = """
+Сосед по шконке стреляет курево в долг до передачи: «Вернём с процентом, как у вас на \
+рынке»."""
+
+[[choices]]
+text = "Дать в долг"
+outcome = "Сосед забрал пачки и спасибо сказал."
+
+[choices.consequences]
+zone = { cigarettes = -10 }
+set_flags = ["lent_cigarettes"]
+
+[[choices.follow_ups]]
+event = "debt_returned"
+after_days = 28
+chance = 0.7
+
+[[choices]]
+text = "Отказать"
+outcome = "«Барыга», — бурчит сосед, но без злобы."

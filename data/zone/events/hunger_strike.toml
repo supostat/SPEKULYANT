@@ -1,0 +1,31 @@
+title = "Голодовка"
+weight = 3
+cooldown_days = 365
+text = """
+Баланда третью неделю пахнет так, что не едят даже крысы. Отряд объявляет голодовку и \
+пишет в Москву."""
+
+[conditions]
+epochs = ["perestroika"]
+
+[[choices]]
+text = "Голодать вместе со всеми"
+outcome = "Из Москвы приехала комиссия. Баланда стала гуще."
+
+[choices.consequences]
+zone = { authority = 1 }
+health = -5
+
+[[choices]]
+text = "Есть втихаря свою сгущёнку"
+outcome = "Сгущёнка кончилась, а отряд всё помнит."
+
+[choices.consequences]
+zone = { authority = -1 }
+
+[[choices]]
+text = "Голодать, но не подписываться"
+outcome = "Неделю ходишь серый. Комиссия приехала и уехала."
+
+[choices.consequences]
+health = -2

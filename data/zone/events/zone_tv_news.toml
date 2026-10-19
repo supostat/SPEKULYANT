@@ -1,0 +1,21 @@
+title = "Новости в красном уголке"
+weight = 3
+cooldown_days = 180
+text = """
+Отряду поставили телевизор. В новостях бывшего соседа по рынку показывают депутатом: он \
+говорит о борьбе с преступностью."""
+
+[conditions]
+epochs = ["stabilization", "sandbox"]
+
+[[choices]]
+text = "Написать ему письмо"
+outcome = "Ответа нет. Через месяц к тебе пришёл адвокат от неизвестного доброжелателя."
+
+[choices.consequences]
+zone = { term_months = -2 }
+reputation = [{ faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Плюнуть в экран"
+outcome = "Отряд аплодирует. Дневальный записал."

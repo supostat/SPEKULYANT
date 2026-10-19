@@ -1,0 +1,30 @@
+title = "Мобила в бараке"
+weight = 3
+cooldown_days = 180
+text = """
+У смотрящего за бараком есть мобильный телефон — настоящий, с антенной. На ночь его сдают \
+в аренду: звони хоть в Стамбул."""
+
+[conditions]
+epochs = ["wild_market", "stabilization", "sandbox"]
+window = { from = "1996-01-01" }
+
+[[choices]]
+text = "Арендовать на ночь"
+outcome = "Дозвонился до своих: на воле все живы, дела идут."
+
+[choices.consequences]
+zone = { cigarettes = -10 }
+health = 2
+
+[[choices]]
+text = "Сдать смотрящего куму"
+outcome = "Мобилу отобрали. Смотрящий ищет, кто сдал."
+
+[choices.consequences]
+zone = { authority = -1, term_months = -2 }
+reputation = [{ faction = "militia", change = 1 }, { faction = "bandits", change = -2 }]
+
+[[choices]]
+text = "Не связываться"
+outcome = "Ночью кто-то шепчет в трубку про любовь. Не ты."

@@ -1,0 +1,25 @@
+title = "Долг за грев"
+weight = 1
+text = """
+Малява с воли: братве нужен твой ларёк под склад, пока ты сидишь. Или деньги — за грев, за \
+заботу, за то, что живой."""
+
+[conditions]
+flags_set = ["owes_brigade"]
+
+[[choices]]
+text = "Отдать деньгами"
+outcome = "Деньги ушли через адвоката. Братва довольна."
+
+[choices.consequences]
+money = -300
+reputation = [{ faction = "bandits", change = 1 }]
+clear_flags = ["owes_brigade"]
+
+[[choices]]
+text = "Пообещать отработать на воле"
+outcome = "«Ждём», — ответили коротко."
+
+[choices.consequences]
+reputation = [{ faction = "bandits", change = -1 }]
+clear_flags = ["owes_brigade"]

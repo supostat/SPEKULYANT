@@ -1,0 +1,24 @@
+title = "Долг вернули"
+weight = 1
+text = """
+Соседу пришла передача. Он сам подходит к твоей тумбочке и выкладывает курево — с \
+процентом, как обещал."""
+
+[conditions]
+flags_set = ["lent_cigarettes"]
+
+[[choices]]
+text = "Взять с процентом"
+outcome = "Слово сдержал. Таких в бараке мало."
+
+[choices.consequences]
+zone = { cigarettes = 15 }
+clear_flags = ["lent_cigarettes"]
+
+[[choices]]
+text = "Взять без процента"
+outcome = "Сосед жмёт руку: «Ты человек»."
+
+[choices.consequences]
+zone = { cigarettes = 10, authority = 1 }
+clear_flags = ["lent_cigarettes"]

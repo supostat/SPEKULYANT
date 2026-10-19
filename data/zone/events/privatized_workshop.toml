@@ -1,0 +1,28 @@
+title = "Цех сдан коммерсанту"
+weight = 3
+cooldown_days = 180
+text = """
+Хозяин колонии сдал пустой цех коммерсанту: тот собирает здесь табуретки и платит зекам \
+«Явой». Администрация получает конвертом."""
+
+[conditions]
+epochs = ["wild_market"]
+
+[[choices]]
+text = "Собирать табуретки"
+outcome = "Работа как работа. Курево есть."
+
+[choices.consequences]
+zone = { cigarettes = 6 }
+health = -1
+
+[[choices]]
+text = "Предложить коммерсанту сбыт"
+outcome = "Коммерсант оценил: «Выйдешь — заходи»."
+
+[choices.consequences]
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Сидеть в бараке"
+outcome = "Табуретки соберут и без тебя."

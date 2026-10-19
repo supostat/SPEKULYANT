@@ -1,0 +1,26 @@
+title = "Дань с барыги"
+weight = 4
+cooldown_days = 180
+text = """
+Блатные из соседнего отряда прослышали, что ты «торговый»: «Барыга должен делиться. На \
+общак — пачку чая и курево»."""
+
+[conditions]
+epochs = ["stagnation", "perestroika"]
+authority = { at_most = 2 }
+
+[[choices]]
+text = "Поделиться"
+outcome = "Блатные кивают: барыга понимает."
+
+[choices.consequences]
+zone = { cigarettes = -10, tea = -2 }
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Послать их"
+outcome = "Вечером в умывальнике тебя встретили трое. Но больше не просят."
+
+[choices.consequences]
+zone = { authority = 1 }
+health = -6

@@ -1,0 +1,23 @@
+# Запрет или разрешение товара: пошлины на подержанные иномарки.
+title = "Пошлины на иномарки"
+weight = 2
+rest_days = 1460
+scale = { from = 0.8, to = 1.4 }
+
+[[outcomes]]
+weight = 2
+news = "Пошлины на подержанные иномарки подняли: «Жигули» снова в почёте."
+price_shocks = [
+  { good = "mercedes", factor = 1.4, days = 730 },
+  { good = "zhiguli", factor = 1.15, days = 730 },
+]
+set_flags = ["car_duties_raised"]
+
+[[outcomes]]
+weight = 1
+news = "Пошлины на иномарки снизили: из Европы гонят машины вереницей."
+price_shocks = [
+  { good = "mercedes", factor = 0.8, days = 730 },
+  { good = "zhiguli", factor = 0.85, days = 730 },
+]
+set_flags = ["car_duties_cut"]

@@ -1,0 +1,21 @@
+# Запрет товара: ночная торговля спиртным.
+title = "Ночной запрет на спиртное"
+weight = 2
+rest_days = 1460
+
+[[outcomes]]
+weight = 2
+news = "Продажу спиртного ночью запретили: ларьки торгуют из-под прилавка."
+price_shocks = [
+  { good = "vodka", factor = 1.25, days = 365 },
+  { good = "canned_beer", factor = 1.3, days = 365 },
+]
+set_flags = ["night_alcohol_banned"]
+
+[[outcomes]]
+weight = 1
+news = "Ночной запрет на спиртное отменили: торговля вернулась к ларькам."
+price_shocks = [
+  { good = "vodka", factor = 0.9, days = 180 },
+]
+set_flags = ["night_alcohol_allowed"]

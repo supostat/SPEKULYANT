@@ -1,0 +1,17 @@
+# Банковский кризис: Центробанк отзывает лицензии.
+title = "Чистка банков"
+weight = 2
+rest_days = 1095
+
+[[outcomes]]
+weight = 2
+news = "Центробанк отозвал лицензии у сотни банков: вкладчики штурмуют уцелевшие."
+price_shocks = [
+  { good = "gold", factor = 1.15, days = 120 },
+]
+set_flags = ["banks_purged"]
+
+[[outcomes]]
+weight = 1
+news = "Центробанк пожурил банки, но лицензии оставил."
+set_flags = ["banks_warned"]

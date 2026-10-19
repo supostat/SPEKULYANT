@@ -1,0 +1,20 @@
+# Валютный шок наоборот: нефть дорожает, рубль крепнет, импорт дешевеет.
+title = "Крепкий рубль"
+weight = 2
+rest_days = 1095
+scale = { from = 0.6, to = 1.4 }
+
+[[outcomes]]
+weight = 2
+news = "Нефть дорожает, рубль крепнет: импорт подешевел."
+price_shocks = [
+  { good = "whisky", factor = 0.85, days = 365 },
+  { good = "mobile_phone", factor = 0.85, days = 365 },
+  { good = "mercedes", factor = 0.85, days = 365 },
+]
+set_flags = ["ruble_strong"]
+
+[[outcomes]]
+weight = 1
+news = "Центробанк держит рубль: импорт не дешевеет, экспортёры довольны."
+set_flags = ["ruble_held"]

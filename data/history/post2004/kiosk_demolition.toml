@@ -1,0 +1,19 @@
+# Запрет товара: столица сносит ларьки у метро.
+title = "Снос ларьков"
+weight = 1
+rest_days = 1825
+
+[[outcomes]]
+weight = 2
+news = "В Москве ночью снесли ларьки у метро: пиво и сигареты — только в магазинах."
+price_shocks = [
+  { good = "canned_beer", city = "moscow", factor = 1.25, days = 180 },
+  { good = "cigarettes", city = "moscow", factor = 1.15, days = 180 },
+  { good = "chewing_gum", city = "moscow", factor = 1.2, days = 180 },
+]
+set_flags = ["kiosks_demolished"]
+
+[[outcomes]]
+weight = 1
+news = "Снос ларьков отложили: мэрия не договорилась с владельцами."
+set_flags = ["kiosks_spared"]

@@ -1,0 +1,28 @@
+title = "Кооператив на промзоне"
+weight = 3
+cooldown_days = 180
+text = """
+Хозяин колонии договорился с московским кооперативом: промзона шьёт варёнки. Платят не \
+рублями — куревом и чаем, зато сразу."""
+
+[conditions]
+epochs = ["perestroika"]
+
+[[choices]]
+text = "Шить варёнки сверхурочно"
+outcome = "Пальцы в синих пятнах, тумбочка полна."
+
+[choices.consequences]
+zone = { cigarettes = 10, tea = 2 }
+health = -2
+
+[[choices]]
+text = "Подсказать кооперативу, как продавать"
+outcome = "Председатель записал тебя в консультанты и обещал место на воле."
+
+[choices.consequences]
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Работать по норме"
+outcome = "Варёнки уходят на рынок без твоего участия."

@@ -1,0 +1,21 @@
+title = "Политинформация"
+weight = 3
+cooldown_days = 120
+text = """
+В клубе отряда читают «Правду» вслух: успехи пятилетки, происки империализма, очереди в \
+Нью-Йорке. Сзади кто-то громко шепчет про очереди в Саранске."""
+
+[conditions]
+epochs = ["stagnation", "perestroika"]
+
+[[choices]]
+text = "Задать вопрос про дефицит"
+outcome = "Лектор краснеет. Отряд доволен."
+
+[choices.consequences]
+zone = { authority = 1 }
+reputation = [{ faction = "militia", change = -1 }]
+
+[[choices]]
+text = "Подремать в последнем ряду"
+outcome = "Два часа сна — подарок советской власти."

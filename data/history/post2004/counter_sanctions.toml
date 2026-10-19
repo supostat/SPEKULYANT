@@ -1,0 +1,25 @@
+# Запрет товара: встречные санкции против импортной еды и выпивки.
+title = "Встречные санкции"
+weight = 1
+rest_days = 1825
+scale = { from = 0.8, to = 1.4 }
+
+[[outcomes]]
+weight = 2
+news = "Запрещён ввоз импортных продуктов: бананы, кофе и виски в дефиците."
+price_shocks = [
+  { good = "bananas", factor = 1.4, days = 730 },
+  { good = "coffee", factor = 1.25, days = 730 },
+  { good = "whisky", factor = 1.5, days = 730 },
+  { good = "caviar", factor = 1.2, days = 730 },
+]
+set_flags = ["food_embargo"]
+
+[[outcomes]]
+weight = 1
+news = "Санкции смягчили: ввоз снова открыт, полки наполняются."
+price_shocks = [
+  { good = "bananas", factor = 0.85, days = 365 },
+  { good = "whisky", factor = 0.9, days = 365 },
+]
+set_flags = ["embargo_lifted"]

@@ -1,0 +1,26 @@
+title = "Побег"
+weight = 2
+cooldown_days = 730
+text = """
+Двое из отряда роют лаз из котельной. Им нужен третий, который знает, где на воле \
+переждать. Ты ведь из торговых, у тебя везде свои."""
+
+[[choices]]
+text = "Уйти с ними"
+outcome = "Вас взяли через сутки в соседнем лесу. Побег — это новый срок."
+
+[choices.consequences]
+zone = { authority = 1, term_months = 12 }
+health = -6
+
+[[choices]]
+text = "Сдать их куму"
+outcome = "Лаз засыпали, тебе — благодарность. Отряд узнал быстро."
+
+[choices.consequences]
+zone = { authority = -2, term_months = -3 }
+reputation = [{ faction = "militia", change = 1 }, { faction = "bandits", change = -2 }]
+
+[[choices]]
+text = "Не знать ни о каком лазе"
+outcome = "Через неделю лаз нашли без тебя. Беглецы поехали досиживать в крытку."

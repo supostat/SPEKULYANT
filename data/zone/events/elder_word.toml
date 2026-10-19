@@ -1,0 +1,21 @@
+title = "Слово смотрящего"
+weight = 3
+cooldown_days = 365
+text = """
+Смотрящий за зоной зовёт тебя к себе: «Отряду нужен свой человек — за порядком смотреть, \
+споры решать. Возьмёшься?»"""
+
+[conditions]
+authority = { at_least = 3 }
+
+[[choices]]
+text = "Взяться за отряд"
+outcome = "Теперь к тебе идут со спорами и с подарками."
+
+[choices.consequences]
+zone = { authority = 1, tea = 3 }
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Отказаться с почтением"
+outcome = "Смотрящий понимает: «Каждому своё»."

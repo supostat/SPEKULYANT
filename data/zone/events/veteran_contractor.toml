@@ -1,0 +1,28 @@
+title = "Контрактник из Чечни"
+weight = 2
+once = true
+text = """
+В отряд пришёл парень с контузией и без двух пальцев — продавал оружие со склада части. \
+Ночами он кричит и никого не подпускает."""
+
+[conditions]
+epochs = ["wild_market"]
+window = { from = "1995-01-01" }
+
+[[choices]]
+text = "Поделиться чаем и выслушать"
+outcome = "К утру он заснул. С тех пор он за тебя горой."
+
+[choices.consequences]
+zone = { tea = -2, authority = 1 }
+
+[[choices]]
+text = "Попросить перевести его в санчасть"
+outcome = "Лепила забрал его, отряд выспался."
+
+[choices.consequences]
+reputation = [{ faction = "militia", change = 1 }]
+
+[[choices]]
+text = "Держаться подальше"
+outcome = "Через неделю его увезли в областную больницу."

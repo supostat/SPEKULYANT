@@ -1,0 +1,25 @@
+title = "Пресс-хата"
+weight = 2
+cooldown_days = 730
+text = """
+Тебя переводят в камеру, где четверо крепких «сидельцев» объясняют: следствию нужна явка с \
+повинной ещё по одному эпизоду. Твоему бывшему партнёру — тоже."""
+
+[conditions]
+epochs = ["stabilization", "sandbox"]
+
+[[choices]]
+text = "Подписать явку"
+outcome = "Эпизод закрыли — и тебе к сроку добавили."
+
+[choices.consequences]
+zone = { term_months = 6 }
+reputation = [{ faction = "siloviki", change = 1 }, { faction = "traders", change = -1 }]
+
+[[choices]]
+text = "Не подписывать"
+outcome = "Неделя в пресс-хате. Ты не подписал, и тебя вернули в отряд."
+
+[choices.consequences]
+zone = { authority = 1 }
+health = -8

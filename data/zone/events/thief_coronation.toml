@@ -1,0 +1,21 @@
+title = "Вор приехал на зону"
+weight = 3
+cooldown_days = 365
+text = """
+Этапом пришёл вор в законе. К вечеру о нём знает вся зона, к утру — вся администрация. \
+Смотрящие ходят к нему по одному."""
+
+[conditions]
+epochs = ["wild_market", "stabilization"]
+
+[[choices]]
+text = "Подойти с уважением и чаем"
+outcome = "Вор запомнил твоё лицо и твоё дело на воле."
+
+[choices.consequences]
+zone = { tea = -3, authority = 1 }
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Держаться в стороне"
+outcome = "Воровские дела идут мимо тебя. Так спокойнее."

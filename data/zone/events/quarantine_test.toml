@@ -1,0 +1,27 @@
+title = "Прописка"
+weight = 6
+cooldown_days = 365
+text = """
+Новичка в отряде встречают вопросами с подвохом: «Что выберешь — нож в спину или вилку в \
+глаз?» Отвечать надо быстро и по понятиям."""
+
+[conditions]
+authority = { at_most = 1 }
+
+[[choices]]
+text = "Отшутиться по понятиям"
+outcome = "Отряд смеётся. Ты прописан."
+
+[choices.consequences]
+zone = { authority = 1 }
+
+[[choices]]
+text = "Угостить отряд чаем"
+outcome = "Чифирнули вместе — вопросы сами отпали."
+
+[choices.consequences]
+zone = { tea = -2, authority = 1 }
+
+[[choices]]
+text = "Промолчать"
+outcome = "Молчуна оставили в покое, но и в расчёт не берут."

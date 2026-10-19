@@ -1,0 +1,31 @@
+title = "Бунт в колонии"
+weight = 3
+once = true
+text = """
+Ночью соседний отряд жжёт матрасы и лезет на крыши: «Долой беспредел!» Утром в ворота \
+входит батальон внутренних войск со щитами."""
+
+[conditions]
+epochs = ["perestroika"]
+window = { from = "1989-01-01" }
+
+[[choices]]
+text = "Лезть на крышу с бунтующими"
+outcome = "Отряд запомнит тебя героем, суд — зачинщиком."
+
+[choices.consequences]
+zone = { authority = 2, term_months = 6 }
+health = -6
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Помогать администрации"
+outcome = "Тебя записали в надёжные. Бунтари — в должники."
+
+[choices.consequences]
+zone = { authority = -2, term_months = -3 }
+reputation = [{ faction = "militia", change = 1 }, { faction = "bandits", change = -2 }]
+
+[[choices]]
+text = "Лежать в бараке лицом в пол"
+outcome = "Щиты прошли мимо. Обошлось."

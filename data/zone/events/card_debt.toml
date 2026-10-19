@@ -1,0 +1,41 @@
+title = "Карточный долг"
+weight = 1
+text = """
+Ты проигрался: за одну ночь ушли и выигрыш, и всё сверху. Долг в зоне — святое, срок на \
+отдачу — до воскресенья."""
+
+[conditions]
+flags_set = ["card_debt"]
+
+[[choices]]
+text = "Отдать долг куревом и чаем"
+outcome = "Расплатился. Тумбочка пуста, зато честен."
+
+[choices.consequences]
+zone = { cigarettes = -20, tea = -5 }
+clear_flags = ["card_debt"]
+
+[[choices]]
+text = "Попросить денег с воли на расчёт"
+outcome = "Родня перевела деньги через ларёк. Долг закрыт."
+
+[choices.consequences]
+money = -60
+clear_flags = ["card_debt"]
+
+[[choices]]
+text = "Отработать долг за другого на промзоне"
+outcome = "Две смены подряд за чужую норму. Долг списан."
+
+[choices.consequences]
+health = -4
+clear_flags = ["card_debt"]
+
+[[choices]]
+text = "Не платить"
+outcome = "Фуфлыжнику в зоне не жить спокойно. Тебя били и будут помнить."
+
+[choices.consequences]
+zone = { authority = -2 }
+health = -8
+clear_flags = ["card_debt"]

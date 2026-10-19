@@ -1,0 +1,28 @@
+title = "Стенгазета отряда"
+weight = 3
+cooldown_days = 180
+text = """
+Замполиту нужна стенгазета к Седьмому ноября, а в отряде никто не держал в руках кисточку. \
+У тебя, говорят, почерк красивый."""
+
+[conditions]
+epochs = ["stagnation", "perestroika"]
+
+[[choices]]
+text = "Нарисовать с размахом"
+outcome = "Газету повесили в штабе. Замполит отсыпал чаю."
+
+[choices.consequences]
+zone = { tea = 3 }
+
+[[choices]]
+text = "Нарисовать карикатуру на кума"
+outcome = "Отряд хохочет. Кум запомнил почерк."
+
+[choices.consequences]
+zone = { authority = 1 }
+reputation = [{ faction = "militia", change = -1 }]
+
+[[choices]]
+text = "Сослаться на кривые руки"
+outcome = "Газету нарисовал бывший бухгалтер. Вышло скучно."

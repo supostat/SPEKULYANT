@@ -1,0 +1,22 @@
+title = "Секция дисциплины и порядка"
+weight = 3
+cooldown_days = 365
+text = """
+Замполит отряда предлагает надеть красную повязку СДП: «Активистам — характеристика и УДО. \
+Подумай о матери»."""
+
+[conditions]
+epochs = ["stagnation", "perestroika"]
+authority = { at_most = 2 }
+
+[[choices]]
+text = "Надеть повязку"
+outcome = "Характеристика пошла в гору. Здороваться с тобой перестали."
+
+[choices.consequences]
+zone = { authority = -1, term_months = -4 }
+reputation = [{ faction = "bandits", change = -1 }]
+
+[[choices]]
+text = "Отказаться"
+outcome = "Замполит вздыхает и вычёркивает тебя из списка."

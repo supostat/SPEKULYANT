@@ -1,0 +1,31 @@
+title = "Голодный год"
+weight = 3
+cooldown_days = 365
+text = """
+Колонию перестали снабжать: денег у государства нет. В баланде плавает капуста и надежда. \
+Хлеборез продаёт пайки налево."""
+
+[conditions]
+epochs = ["wild_market"]
+
+[[choices]]
+text = "Покупать пайку у хлебореза"
+outcome = "Сыт, хоть и не по закону."
+
+[choices.consequences]
+zone = { cigarettes = -8 }
+
+[[choices]]
+text = "Заказать посылку подороже"
+outcome = "Родня собрала, что смогла: сухари, чай, курево."
+
+[choices.consequences]
+money = -40
+zone = { cigarettes = 10, tea = 3 }
+
+[[choices]]
+text = "Перебиваться баландой"
+outcome = "Ремень пришлось затянуть на две дырки."
+
+[choices.consequences]
+health = -3

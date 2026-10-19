@@ -1,0 +1,20 @@
+# Запрет товара: рейды против подделок.
+title = "Борьба с контрафактом"
+weight = 2
+rest_days = 1095
+scale = { from = 0.8, to = 1.3 }
+
+[[outcomes]]
+weight = 2
+news = "Рейды против подделок: пиратские диски и «адидасы» конфискуют тоннами."
+price_shocks = [
+  { good = "compact_disc", factor = 1.4, days = 365 },
+  { good = "sneakers", factor = 1.2, days = 365 },
+  { good = "jeans", factor = 1.15, days = 365 },
+]
+set_flags = ["counterfeit_raided"]
+
+[[outcomes]]
+weight = 1
+news = "Рейды против подделок выдохлись: рынки торгуют как прежде."
+set_flags = ["counterfeit_tolerated"]

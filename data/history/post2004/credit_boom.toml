@@ -1,0 +1,24 @@
+# Банковский кризис: кредитный бум и его лопнувший пузырь.
+title = "Кредитный бум"
+weight = 2
+rest_days = 1460
+scale = { from = 0.8, to = 1.4 }
+
+[[outcomes]]
+weight = 2
+news = "Банки раздают кредиты всем подряд: машины и холодильники уходят в рассрочку."
+price_shocks = [
+  { good = "mercedes", factor = 1.2, days = 365 },
+  { good = "zhiguli", factor = 1.15, days = 365 },
+  { good = "fridge", factor = 1.15, days = 365 },
+]
+set_flags = ["credit_boom"]
+
+[[outcomes]]
+weight = 1
+news = "Кредитный пузырь лопнул: машины продают за долги."
+price_shocks = [
+  { good = "mercedes", factor = 0.8, days = 365 },
+  { good = "zhiguli", factor = 0.85, days = 365 },
+]
+set_flags = ["credit_bust"]

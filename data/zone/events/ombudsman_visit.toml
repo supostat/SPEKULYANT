@@ -1,0 +1,29 @@
+title = "Уполномоченный по правам человека"
+weight = 3
+cooldown_days = 365
+text = """
+В колонию приехал аппарат уполномоченного по правам человека. Начальник колонии заранее \
+раздал новые простыни и предупредил, кто болеет."""
+
+[conditions]
+epochs = ["stabilization", "sandbox"]
+
+[[choices]]
+text = "Пожаловаться на пресс-хаты"
+outcome = "Жалобу приняли, в отряде о ней узнали к вечеру."
+
+[choices.consequences]
+zone = { authority = 1 }
+reputation = [{ faction = "people", change = 1 }, { faction = "siloviki", change = -1 }]
+
+[[choices]]
+text = "Хвалить новые простыни"
+outcome = "Начальник колонии одобрительно кивает."
+
+[choices.consequences]
+zone = { term_months = -1 }
+reputation = [{ faction = "siloviki", change = 1 }]
+
+[[choices]]
+text = "Сказать, что всё хорошо"
+outcome = "Уполномоченный пишет в отчёт: «Жалоб нет»."

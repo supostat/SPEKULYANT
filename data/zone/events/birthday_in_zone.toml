@@ -1,0 +1,21 @@
+title = "День рождения в бараке"
+weight = 2
+cooldown_days = 365
+text = """
+Сегодня тебе стукнуло ещё на год больше. Отряд об этом знает: в зоне дни рождения не \
+забывают — особенно чужие."""
+
+[[choices]]
+text = "Накрыть стол на отряд"
+outcome = "Чифир, сгущёнка, сигареты. Год ты прожил не зря."
+
+[choices.consequences]
+zone = { cigarettes = -8, tea = -2, authority = 1 }
+health = 2
+
+[[choices]]
+text = "Отметить тихо с семейкой"
+outcome = "Посидели втроём. Хорошо."
+
+[choices.consequences]
+health = 1

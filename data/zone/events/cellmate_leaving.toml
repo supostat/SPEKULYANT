@@ -1,0 +1,25 @@
+title = "Лёха выходит"
+weight = 3
+once = true
+text = """
+Сосед по нарам Лёха отсидел своё. Собирает узелок и спрашивает: «Кому что передать на \
+воле? Я надёжный»."""
+
+[[choices]]
+text = "Передать письмо своим"
+outcome = "Лёха спрятал письмо в подкладку: «Найду»."
+
+[choices.consequences]
+contacts = [{ npc = "cellmate_lyokha", relation = 2, favours = 1 }]
+
+[[choices]]
+text = "Подарить ему пачку чая в дорогу"
+outcome = "Лёха растроган: «Должник твой»."
+
+[choices.consequences]
+zone = { tea = -1 }
+contacts = [{ npc = "cellmate_lyokha", relation = 3, favours = 2 }]
+
+[[choices]]
+text = "Пожелать удачи"
+outcome = "Лёха уходит за ворота не оглядываясь."

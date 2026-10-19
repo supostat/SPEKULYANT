@@ -1,0 +1,23 @@
+title = "Карты в бараке"
+weight = 4
+cooldown_days = 120
+text = """
+В углу барака играют в буру самодельной колодой. Зовут присесть: «Играем на интерес, по \
+маленькой»."""
+
+[[choices]]
+text = "Сыграть на интерес"
+outcome = "Первые партии — твои. Игроки переглядываются и поднимают ставки."
+
+[choices.consequences]
+zone = { cigarettes = 10 }
+set_flags = ["card_debt"]
+
+[[choices.follow_ups]]
+event = "card_debt"
+after_days = 7
+chance = 0.5
+
+[[choices]]
+text = "Не садиться"
+outcome = "«На интерес» в зоне играют только раз. Ты это знаешь."

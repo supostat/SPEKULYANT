@@ -1,0 +1,30 @@
+title = "Курсы в профучилище колонии"
+weight = 2
+cooldown_days = 730
+text = """
+В колонии открыли профучилище: компьютеры, бухгалтерия, сварка. Записываться надо у \
+начальника отряда, и не бесплатно."""
+
+[conditions]
+epochs = ["stabilization", "sandbox"]
+window = { from = "2001-01-01" }
+
+[[choices]]
+text = "Учиться бухгалтерии"
+outcome = "Свидетельство с печатью, баланс сводится. На воле пригодится."
+
+[choices.consequences]
+zone = { cigarettes = -5, term_months = -1 }
+reputation = [{ faction = "traders", change = 1 }]
+
+[[choices]]
+text = "Учиться сварке"
+outcome = "Сварщик на воле не пропадёт. Характеристика тоже растёт."
+
+[choices.consequences]
+zone = { term_months = -1 }
+health = -1
+
+[[choices]]
+text = "Не учиться"
+outcome = "Время идёт и так."

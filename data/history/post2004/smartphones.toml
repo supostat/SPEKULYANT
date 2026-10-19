@@ -1,0 +1,16 @@
+# Технологическая волна: телефон заменяет всё, что было в кармане.
+title = "Смартфоны"
+weight = 1
+rest_days = 3650
+scale = { from = 0.8, to = 1.4 }
+
+[[outcomes]]
+weight = 1
+news = "Телефон с экраном во всю ладонь заменил плеер, часы и пейджер."
+price_shocks = [
+  { good = "mobile_phone", factor = 0.6, days = 730 },
+  { good = "pager", factor = 0.3, days = 730 },
+  { good = "cassette_player", factor = 0.5, days = 730 },
+  { good = "watch", factor = 0.8, days = 730 },
+]
+set_flags = ["smartphones"]

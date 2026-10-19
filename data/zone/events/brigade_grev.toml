@@ -1,0 +1,27 @@
+title = "Грев от братвы"
+weight = 4
+cooldown_days = 180
+text = """
+С воли пришёл грев: блок сигарет, чай, сало. На записке — привет от людей, которых ты \
+знаешь по рынку. Даром такое не греют."""
+
+[conditions]
+epochs = ["wild_market"]
+
+[[choices]]
+text = "Принять грев"
+outcome = "Тумбочка ломится. Где-то на воле открылся счёт."
+
+[choices.consequences]
+zone = { cigarettes = 20, tea = 5 }
+reputation = [{ faction = "bandits", change = 1 }]
+set_flags = ["owes_brigade"]
+
+[[choices.follow_ups]]
+event = "grev_debt"
+after_days = 60
+chance = 0.6
+
+[[choices]]
+text = "Отослать грев обратно"
+outcome = "На воле поняли: ты не их человек. Пока что."

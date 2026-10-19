@@ -1,0 +1,24 @@
+title = "Хозяин заначки"
+weight = 1
+text = """
+Кто-то видел, как ты выходил из сушилки. К тебе подходят двое: «Чай был наш. Объясни»."""
+
+[conditions]
+flags_set = ["took_stash"]
+
+[[choices]]
+text = "Вернуть с лихвой"
+outcome = "Отдал всё и сверху. Тему закрыли."
+
+[choices.consequences]
+zone = { tea = -6 }
+clear_flags = ["took_stash"]
+
+[[choices]]
+text = "Отпираться"
+outcome = "Тебе не поверили. Крысой назвали при всех."
+
+[choices.consequences]
+zone = { authority = -2 }
+health = -5
+clear_flags = ["took_stash"]

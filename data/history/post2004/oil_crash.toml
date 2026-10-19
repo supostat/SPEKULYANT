@@ -1,0 +1,24 @@
+# Валютный шок: нефть падает, рубль за ней.
+title = "Обвал нефти"
+weight = 2
+rest_days = 1460
+scale = { from = 0.7, to = 1.6 }
+
+[[outcomes]]
+weight = 3
+news = "Нефть обвалилась вдвое, рубль — за ней: иномарки и техника дорожают."
+price_shocks = [
+  { good = "mercedes", factor = 1.4, days = 365 },
+  { good = "computer", factor = 1.3, days = 365 },
+  { good = "whisky", factor = 1.3, days = 365 },
+  { good = "coffee", factor = 1.2, days = 365 },
+]
+set_flags = ["oil_crash"]
+
+[[outcomes]]
+weight = 1
+news = "Нефть дрогнула и отскочила: паника на бирже кончилась за неделю."
+price_shocks = [
+  { good = "gold", factor = 1.1, days = 60 },
+]
+set_flags = ["oil_wobble"]

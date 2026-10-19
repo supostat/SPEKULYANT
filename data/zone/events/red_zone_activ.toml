@@ -1,0 +1,22 @@
+title = "Актив колонии"
+weight = 4
+cooldown_days = 365
+text = """
+Зона «красная»: порядок держит актив, а не смотрящие. Начальник отряда предлагает \
+записаться: «Дневальный, библиотекарь — выбирай»."""
+
+[conditions]
+epochs = ["stabilization", "sandbox"]
+authority = { at_most = 3 }
+
+[[choices]]
+text = "Записаться в библиотекари"
+outcome = "Тепло, тихо, книги. Характеристика идёт в гору."
+
+[choices.consequences]
+zone = { authority = -1, term_months = -3 }
+reputation = [{ faction = "siloviki", change = 1 }]
+
+[[choices]]
+text = "Остаться мужиком"
+outcome = "Начальник отряда пожимает плечами: «Как знаешь»."

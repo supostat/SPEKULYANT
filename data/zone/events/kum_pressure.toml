@@ -1,0 +1,26 @@
+title = "Кум не забыл"
+weight = 1
+text = """
+На утренней проверке у тебя «находят» заточку, которой ты в глаза не видел. Кум стоит \
+рядом: «Может, всё-таки поговорим?»"""
+
+[conditions]
+flags_set = ["kum_grudge"]
+
+[[choices]]
+text = "Сдаться и поговорить"
+outcome = "Заточку списали на соседа. Отряд косится."
+
+[choices.consequences]
+zone = { authority = -1 }
+reputation = [{ faction = "militia", change = 1 }, { faction = "bandits", change = -1 }]
+clear_flags = ["kum_grudge"]
+
+[[choices]]
+text = "Идти в ШИЗО"
+outcome = "Пятнадцать суток на бетоне. Зато в отряде теперь уважают."
+
+[choices.consequences]
+zone = { authority = 1 }
+health = -5
+clear_flags = ["kum_grudge"]

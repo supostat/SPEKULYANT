@@ -1,0 +1,23 @@
+title = "Драка в столовой"
+weight = 4
+cooldown_days = 180
+text = """
+Здоровый мужик из соседнего отряда сдвигает твою миску: «Твоё место — у параши, первоход»."""
+
+[conditions]
+authority = { at_most = 2 }
+
+[[choices]]
+text = "Ответить кулаком"
+outcome = "Дрались до прихода контролёров. Место за столом — твоё."
+
+[choices.consequences]
+zone = { authority = 1 }
+health = -6
+
+[[choices]]
+text = "Убрать миску и уйти"
+outcome = "Обед пропал, гордость тоже. Зато цел."
+
+[choices.consequences]
+zone = { authority = -1 }

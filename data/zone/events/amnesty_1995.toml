@@ -1,0 +1,16 @@
+title = "Амнистия к 50-летию Победы"
+weight = 8
+once = true
+text = """
+Дума объявила амнистию к пятидесятилетию Победы. В спецчасти очередь, в отряде — праздник."""
+
+[conditions]
+window = { from = "1995-04-19", until = "1995-11-01" }
+authority = { at_most = 3 }
+
+[[choices]]
+text = "Собрать вещи"
+outcome = "Ворота открылись. За ними — воля."
+
+[choices.consequences]
+zone = { amnesty = true }

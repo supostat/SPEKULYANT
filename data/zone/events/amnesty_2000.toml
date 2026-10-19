@@ -1,0 +1,17 @@
+title = "Амнистия к 55-летию Победы"
+weight = 8
+once = true
+text = """
+Дума объявила большую амнистию к пятьдесят пятой годовщине Победы. Говорят, выйдет каждый \
+седьмой."""
+
+[conditions]
+window = { from = "2000-05-26", until = "2000-12-01" }
+authority = { at_most = 3 }
+
+[[choices]]
+text = "Собрать вещи"
+outcome = "Ворота открылись. За ними — воля."
+
+[choices.consequences]
+zone = { amnesty = true }

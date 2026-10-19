@@ -1,0 +1,28 @@
+title = "Цеховик на соседней шконке"
+weight = 3
+once = true
+text = """
+Сосед — тихий седой человек, шил левые джинсы на трёх фабриках сразу. По вечерам он \
+рассказывает, как держать двойную бухгалтерию и кому давать."""
+
+[conditions]
+epochs = ["stagnation", "perestroika"]
+
+[[choices]]
+text = "Слушать и запоминать"
+outcome = "На воле такие уроки стоят дороже лагерного срока."
+
+[choices.consequences]
+reputation = [{ faction = "traders", change = 1 }, { faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Поделиться чаем за науку"
+outcome = "Цеховик оценил: обещал свести с нужными людьми."
+
+[choices.consequences]
+zone = { tea = -2 }
+reputation = [{ faction = "traders", change = 2 }, { faction = "officials", change = 1 }]
+
+[[choices]]
+text = "Не лезть в чужие дела"
+outcome = "Цеховик пожимает плечами и замолкает навсегда."

@@ -1,0 +1,31 @@
+title = "Туберкулёз в отряде"
+weight = 2
+cooldown_days = 365
+text = """
+Сосед кашляет кровью третью неделю. Лепила разводит руками: лекарств нет, их продают на \
+сторону. Отряд держится подальше от его шконки."""
+
+[conditions]
+epochs = ["wild_market", "stabilization"]
+
+[[choices]]
+text = "Купить лекарства через адвоката"
+outcome = "Таблетки пришли с воли. Ты здоров, сосед тоже выкарабкался."
+
+[choices.consequences]
+money = -80
+zone = { authority = 1 }
+
+[[choices]]
+text = "Дать лепиле на лапу"
+outcome = "Тебя перевели в другой барак, подальше от кашля."
+
+[choices.consequences]
+zone = { cigarettes = -10 }
+
+[[choices]]
+text = "Надеяться на авось"
+outcome = "Пронесло, но месяц тебя тоже бил кашель."
+
+[choices.consequences]
+health = -4

@@ -1,0 +1,29 @@
+title = "Корреспондент «Огонька»"
+weight = 3
+once = true
+text = """
+Гласность добралась до колонии: корреспондент журнала ходит по баракам с диктофоном. \
+Хозяин колонии улыбается так, что сводит скулы."""
+
+[conditions]
+epochs = ["perestroika"]
+
+[[choices]]
+text = "Рассказать правду про зону"
+outcome = "Статью напечатали. Хозяину объявили выговор, тебе — войну."
+
+[choices.consequences]
+zone = { authority = 1 }
+reputation = [{ faction = "people", change = 1 }, { faction = "militia", change = -2 }]
+
+[[choices]]
+text = "Хвалить администрацию"
+outcome = "Корреспондент разочарован, хозяин — нет."
+
+[choices.consequences]
+zone = { authority = -1, term_months = -2 }
+reputation = [{ faction = "militia", change = 1 }]
+
+[[choices]]
+text = "Отмолчаться"
+outcome = "Диктофон уходит дальше по бараку."

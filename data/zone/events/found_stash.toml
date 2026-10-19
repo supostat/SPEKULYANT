@@ -1,0 +1,30 @@
+title = "Чужая заначка"
+weight = 3
+cooldown_days = 365
+text = """
+Под половицей в сушилке ты нашёл чью-то заначку: чай в целлофане. Хозяина не видно."""
+
+[[choices]]
+text = "Забрать себе"
+outcome = "Чай перекочевал в твою тумбочку. Никто не видел. Вроде бы."
+
+[choices.consequences]
+zone = { tea = 4 }
+set_flags = ["took_stash"]
+
+[[choices.follow_ups]]
+event = "stash_owner"
+after_days = 14
+chance = 0.35
+
+[[choices]]
+text = "Отнести смотрящему"
+outcome = "Смотрящий забрал чай на общак и запомнил тебя."
+
+[choices.consequences]
+zone = { authority = 1 }
+reputation = [{ faction = "bandits", change = 1 }]
+
+[[choices]]
+text = "Положить на место"
+outcome = "Половица легла на место. Ты ничего не видел."

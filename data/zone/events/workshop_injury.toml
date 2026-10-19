@@ -1,0 +1,22 @@
+title = "Станок на промзоне"
+weight = 2
+cooldown_days = 365
+text = """
+Старый станок на промзоне сорвался с упора — рука в крови. Мастер орёт, чтобы не портил \
+статистику травматизма."""
+
+[[choices]]
+text = "Требовать акт о травме"
+outcome = "Акт составили, санчасть зашила. Мастер затаил злобу."
+
+[choices.consequences]
+health = -2
+reputation = [{ faction = "militia", change = -1 }]
+
+[[choices]]
+text = "Замотать тряпкой и молчать"
+outcome = "Рана заживает долго, зато мастер доволен."
+
+[choices.consequences]
+health = -4
+zone = { cigarettes = 5 }

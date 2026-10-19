@@ -1,0 +1,21 @@
+title = "Ударная вахта"
+weight = 4
+cooldown_days = 120
+text = """
+К съезду партии промзона берёт повышенные обязательства. Мастер обходит цех: «Кто в две \
+смены — тому премия куревом»."""
+
+[conditions]
+epochs = ["stagnation", "perestroika"]
+
+[[choices]]
+text = "Встать в две смены"
+outcome = "Руки не разгибаются, зато пачки в тумбочке."
+
+[choices.consequences]
+zone = { cigarettes = 8 }
+health = -3
+
+[[choices]]
+text = "Работать как все"
+outcome = "План выполнили и без тебя — как всегда, на бумаге."
