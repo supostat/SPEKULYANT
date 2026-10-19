@@ -13,3 +13,11 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.94"
 publish = false
+
+# Симулятор и проверка баланса гоняют сотни жизней и в отладочной сборке: ядро и симулятор
+# оптимизируются всегда, остальное собирается как обычно.
+[profile.dev.package.speculant-core]
+opt-level = 3
+
+[profile.dev.package.speculant-sim]
+opt-level = 3

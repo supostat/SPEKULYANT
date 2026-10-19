@@ -218,7 +218,7 @@ impl Game {
 
     /// Капитал в рублях 1984 года: деньги, товар по средней цене города, точки дел по цене
     /// открытия и жильё по цене.
-    pub(super) fn capital(&self, date: GameDate) -> Real {
+    pub(super) fn capital_on(&self, date: GameDate) -> Real {
         let content = &self.content;
         let money = self.world.player.money().real_total(&content.money, date);
         let goods: f64 = self
@@ -305,7 +305,7 @@ impl Game {
             ),
             headline: fill(&data.headline),
             text: text.join(" "),
-            capital: self.capital(date),
+            capital: self.capital_on(date),
             best_deal: self.world.chronicle.best_deal().cloned(),
             worst_deal: self.world.chronicle.worst_deal().cloned(),
             businesses: self

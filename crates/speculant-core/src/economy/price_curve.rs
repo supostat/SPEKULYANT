@@ -27,8 +27,11 @@ impl PriceCurve {
 
     /// Реальная цена на дату в копейках 1984 года; `None`, пока товара ещё нет — до первой точки.
     pub fn kopecks_on(&self, date: GameDate) -> Option<f64> {
-        log_interpolate(&self.points, date, |point| {
-            (point.year, point.price.kopecks() as f64)
-        })
+        log_interpolate(
+            &self.points,
+            date,
+            |point| point.year,
+            |point| point.price.kopecks() as f64,
+        )
     }
 }

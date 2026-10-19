@@ -28,12 +28,16 @@ impl RubleCurve {
 
     /// Рубли до деноминации на дату. Кривая начинается 1 января 1984 года — это проверяет загрузка.
     pub fn old_rubles_on(&self, date: GameDate, denomination: Denomination) -> f64 {
-        log_interpolate(&self.points, date, |point| {
-            let starts = GameDate::new_year(point.year)
-                .expect("год опорной точки проверен загрузкой контента");
-            let divisor = denomination.divisor_on(starts) as f64;
-            (point.year, point.rubles * divisor)
-        })
+        log_interpolate(
+            &self.points,
+            date,
+            |point| point.year,
+            |point| {
+                let starts = GameDate::new_year(point.year)
+                    .expect("год опорной точки проверен загрузкой контента");
+                point.rubles * denomination.divisor_on(starts) as f64
+            },
+        )
         .expect("рублёвая кривая начинается 1 января 1984 года")
     }
 }

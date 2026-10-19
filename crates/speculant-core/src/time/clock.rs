@@ -36,11 +36,16 @@ impl ClockSettings {
         })
     }
 
+    /// Длительность дня на скорости 1–3 без перемотки: так симулятор проживает мир по дню.
+    pub fn day_milliseconds_at(&self, speed: u8) -> u32 {
+        self.day_milliseconds[usize::from(speed) - 1]
+    }
+
     fn day_milliseconds(&self, speed: u8, fast_forward: bool) -> u64 {
         let milliseconds = if fast_forward {
             self.fast_forward_day_milliseconds
         } else {
-            self.day_milliseconds[usize::from(speed) - 1]
+            self.day_milliseconds_at(speed)
         };
         u64::from(milliseconds)
     }

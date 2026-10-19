@@ -1796,7 +1796,11 @@ dependencies = [
 name = "speculant-sim"
 version = "0.1.0"
 dependencies = [
+ "rand_chacha",
+ "serde",
+ "serde_json",
  "speculant-core",
+ "toml",
 ]
 
 [[package]]
@@ -2407,6 +2411,7 @@ dependencies = [
  "serde_json",
  "sha2",
  "speculant-core",
+ "speculant-sim",
  "toml",
  "ttf-parser",
  "ureq",

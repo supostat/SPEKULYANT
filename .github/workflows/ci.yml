@@ -25,6 +25,8 @@ jobs:
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
       - run: cargo run -p speculant-validate -- data
+      - name: Двести жизней ботов на настоящем ядре и данных
+        run: cargo run -p speculant-sim -- --lives 200 --seed 1
       - run: cargo xtask godot-fetch
       - run: cargo xtask godot-check
       - run: cargo xtask gd-check

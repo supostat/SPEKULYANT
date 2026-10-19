@@ -20,7 +20,7 @@ use crate::business::{Business, BusinessId};
 use crate::command::{Command, LifeSettings};
 use crate::command_error::CommandError;
 use crate::content::{BiographyId, CityId, Content, GoodId, MoneyPlaceId, NpcId};
-use crate::economy::{Currency, Deal, Markets, Money, Trader};
+use crate::economy::{Currency, Deal, Markets, Money, Real, Trader};
 use crate::events::{EventEngine, JournalEntry, Situation};
 use crate::history::Timeline;
 use crate::life::{Character, Chronicle, LifeSummary};
@@ -183,6 +183,11 @@ impl Game {
     /// Ironman-жизнь сохраняется сама и не откатывается.
     pub fn is_ironman(&self) -> bool {
         self.world.ironman
+    }
+
+    /// Капитал сегодня в рублях 1984 года — тот, что итоги запишут, если жизнь кончится сейчас.
+    pub fn capital(&self) -> Real {
+        self.capital_on(self.today())
     }
 
     /// Итоги, если жизнь кончилась.

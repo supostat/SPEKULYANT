@@ -1,6 +1,7 @@
 //! Сквозные команды проекта. Запуск: `cargo xtask <команда>`.
 //! Каждая команда — один argv без shell, чтобы служить критерием готовности фазы.
 
+mod balance_check;
 mod bridge_smoke;
 mod build_godot;
 mod charset_check;
@@ -40,7 +41,9 @@ const USAGE: &str = "\
   docs-check [--all-decided] маркеры DECIDED-15-N совпадают в документе и дизайн-книге
   content-count <вид>       сколько в data/ товаров, городов, соперников (npc), событий
                             (events:<эпоха>, zone-events), шаблонов (post2004-templates)
-                            — не меньше порога [volume] из data/balance.toml";
+                            — не меньше порога [volume] из data/balance.toml
+  balance-check <эпоха|all> прогон [balance] lives жизней всеми стратегиями и сверка эпохи
+                            или всех эпох с порогами [balance] из data/balance.toml";
 
 fn main() -> Result<()> {
     let arguments: Vec<String> = std::env::args().skip(1).collect();
@@ -71,6 +74,7 @@ fn main() -> Result<()> {
         "deps-check" => deps_check::run(),
         "docs-check" => docs_check::run(flags.iter().any(|flag| flag == "--all-decided")),
         "content-count" => content_count::run(single_argument(flags, "content-count <вид>")?),
+        "balance-check" => balance_check::run(single_argument(flags, "balance-check <эпоха|all>")?),
         unknown => bail!("неизвестная команда xtask: {unknown}\n{USAGE}"),
     }
 }

@@ -301,6 +301,16 @@ fn an_event_can_end_a_life_and_its_outcome_is_read_first() {
 }
 
 #[test]
+fn a_newborn_is_worth_his_cash_and_his_home() {
+    let game = game_with(load(), 7);
+    assert_eq!(
+        game.capital().kopecks(),
+        500_000,
+        "5 000 р. наличными, а койка в общежитии ничего не стоит"
+    );
+}
+
+#[test]
 fn the_summary_counts_capital_deals_years_and_businesses() {
     let mut game = game_with(load(), 7);
     live_through(&mut game, "windfall");
@@ -324,6 +334,7 @@ fn the_summary_counts_capital_deals_years_and_businesses() {
         play(&mut game, command);
     }
     live_until(&mut game, date(1985, 3, 10));
+    let capital_today = game.capital();
     play(
         &mut game,
         Command::Retire {
@@ -331,6 +342,10 @@ fn the_summary_counts_capital_deals_years_and_businesses() {
         },
     );
     let summary = game.summary().expect("итоги").clone();
+    assert_eq!(
+        summary.capital, capital_today,
+        "итоги записывают капитал дня финала"
+    );
     let cash = game.player().money().cash().minor_units();
     assert_eq!(
         summary.capital.kopecks(),

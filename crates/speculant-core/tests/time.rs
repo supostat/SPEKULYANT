@@ -74,6 +74,19 @@ fn epochs_follow_the_frame_of_section_3() {
 }
 
 #[test]
+fn a_day_lasts_as_decision_15_3_says_on_each_speed() {
+    let settings = rules().clock;
+    let days = [1, 2, 3].map(|speed| settings.day_milliseconds_at(speed));
+    assert_eq!(days, [1800, 1000, 500]);
+    let mut clock = clock();
+    assert_eq!(
+        clock.advance(days[0]).len(),
+        1,
+        "на первой скорости — ровно день"
+    );
+}
+
+#[test]
 fn time_rules_refuse_broken_calendars() {
     let slower_second_speed = TIME_TOML.replace("[1800, 1000, 500]", "[1800, 2000, 500]");
     assert_eq!(

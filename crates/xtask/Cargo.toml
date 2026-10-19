@@ -1,6 +1,6 @@
 [package]
 name = "xtask"
-description = "Сквозные команды проекта: пин Godot, проверки GDScript, зависимостей и документов."
+description = "Сквозные команды проекта: пин Godot, проверки GDScript, зависимостей, документов и баланса."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -14,6 +14,7 @@ serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 sha2 = "0.11.1"
 speculant-core = { path = "../speculant-core" }
+speculant-sim = { path = "../speculant-sim" }
 toml = "1.1.8"
 ttf-parser = "0.25.1"
 ureq = "3.4.2"
