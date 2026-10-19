@@ -1,0 +1,74 @@
+name: release
+
+# Релиз по тегу v<версия>: версия сверяется с тегом до любой сборки, каждая платформа
+# экспортируется на своём раннере тем же гейтом, что и локально (export-check), а три архива
+# прикладываются к релизу GitHub. Мост macOS — universal (arm64 + x86_64).
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    name: Версия совпадает с тегом
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Тулчейн Rust из rust-toolchain.toml
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo xtask version-check
+
+  export:
+    name: Экспорт ${{ matrix.platform }}
+    needs: version
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows-x86_64
+          - os: ubuntu-latest
+            platform: linux-x86_64
+          - os: macos-latest
+            platform: macos-universal
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Тулчейн Rust из rust-toolchain.toml
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - name: Кэш пина Godot и шаблонов экспорта
+        uses: actions/cache@v4
+        with:
+          path: .tools/godot
+          key: godot-templates-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('tools.toml') }}
+      - run: cargo xtask godot-fetch --templates
+      - run: cargo xtask version-check
+      - run: cargo xtask export-check
+      - run: cargo xtask export ${{ matrix.platform }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: .tools/dist/Speculant-*-${{ matrix.platform }}.zip
+          if-no-files-found: error
+
+  publish:
+    name: Релиз ${{ github.ref_name }}
+    needs: export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Три архива — к релизу
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "${{ github.ref_name }}" dist/*.zip
+          --repo "${{ github.repository }}"
+          --title "Спекулянтъ ${{ github.ref_name }}"
+          --generate-notes

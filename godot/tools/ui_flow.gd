@@ -6,8 +6,9 @@ extends SceneTree
 ## событие с бипом → выбор → исход, F4 поездка → прибытие; дела, связи и пейджер — время в них
 ## стоит; меню выхода → сохранение в слот → «Abort, Retry, Fail?» → F в главное меню → загрузка
 ## слота → снова рынок того же дня; ironman-жизнь ложится в свой слот, «Продолжить» её возвращает,
-## новая ironman-жизнь поверх спрашивает подтверждения; из главного меню A — выход из игры. Клавиши
-## проходят через Keymap, как в игре; после шагов сверяется буфер экрана.
+## новая ironman-жизнь поверх спрашивает подтверждения; из главного меню F10 и R — передумать,
+## закрытие окна — «Abort, Retry, Fail?», повторное — выход. Клавиши проходят через Keymap, как в
+## игре; после шагов сверяется буфер экрана.
 
 const SAVES_ROOT := "user://ui_flow"
 const SETTINGS_FILE := "user://ui_flow/settings.cfg"
@@ -286,14 +287,21 @@ func _to_main_menu() -> bool:
 	return true
 
 
-## Из главного меню: F10 — выход, A — выйти в DOS.
+## Из главного меню: F10 — выход, R — передумать; закрытие окна открывает тот же выход, а
+## повторное закрытие выходит из игры.
 func _quit() -> bool:
 	_press(KEY_F10)
 	if _router.top_name() != "quit" or not _shows("Abort, Retry, Fail?"):
 		return _fail("F10 главного меню не открыла выход:\n" + _buffer())
-	_press(KEY_A)
+	_press(KEY_R)
+	if _router.top_name() != "main_menu" or _quit_asked:
+		return _fail("R не вернула в меню:\n" + _buffer())
+	_router.request_quit()
+	if _router.top_name() != "quit" or _quit_asked:
+		return _fail("закрытие окна не спросило «Abort, Retry, Fail?»:\n" + _buffer())
+	_router.request_quit()
 	if not _quit_asked:
-		return _fail("A не попросила выйти из игры:\n" + _buffer())
+		return _fail("повторное закрытие окна не вышло из игры:\n" + _buffer())
 	return true
 
 

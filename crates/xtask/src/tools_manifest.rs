@@ -18,6 +18,7 @@ pub struct GodotPin {
     pub version: String,
     pub release_base_url: String,
     pub archives: BTreeMap<String, GodotArchive>,
+    pub templates: GodotTemplates,
 }
 
 #[derive(Deserialize)]
@@ -25,6 +26,14 @@ pub struct GodotArchive {
     pub file: String,
     pub sha256: String,
     pub binary: String,
+}
+
+/// Архив шаблонов экспорта и шаблоны из него, которые ставятся.
+#[derive(Deserialize)]
+pub struct GodotTemplates {
+    pub file: String,
+    pub sha256: String,
+    pub files: Vec<String>,
 }
 
 #[derive(Deserialize)]

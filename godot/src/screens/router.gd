@@ -27,6 +27,7 @@ signal melody(tones: Array)
 const BOOT_SCREEN := "boot"
 const MENU_SCREEN := "main_menu"
 const EVENT_SCREEN := "event"
+const QUIT_SCREEN := "quit"
 const TIME_SCREENS: Array[String] = ["market", "travel", "zone"]
 ## Экраны режимов жизни по имени режима в снимке ядра: стек жизни стоит на том, что назвало ядро.
 ## Итоги называются по макету дизайн-книги — «end».
@@ -81,6 +82,14 @@ func top_name() -> String:
 func tick(milliseconds: int) -> void:
 	if _in_life and top_name() in TIME_SCREENS and _game.advance(milliseconds):
 		refresh()
+
+
+## Окно просят закрыть: первый раз — окно выхода «Abort, Retry, Fail?», повторно — выход.
+func request_quit() -> void:
+	if top_name() == QUIT_SCREEN:
+		_follow({"quit": true})
+	else:
+		_follow({"push": QUIT_SCREEN})
 
 
 ## Действие ввода — верхнему экрану.

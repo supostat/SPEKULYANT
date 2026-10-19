@@ -53,6 +53,15 @@ pub fn build_host_debug() -> Result<PathBuf> {
     build_host(Profile::Debug)
 }
 
+/// Релизная сборка моста для экспорта: на macOS — universal, на остальных — для хоста.
+pub fn build_release(universal: bool) -> Result<PathBuf> {
+    if universal {
+        build_macos_universal(Profile::Release)
+    } else {
+        build_host(Profile::Release)
+    }
+}
+
 /// Собирает cdylib моста для хоста и кладёт туда, куда смотрит `godot/speculant.gdextension`.
 fn build_host(profile: Profile) -> Result<PathBuf> {
     cargo_build(profile, None)?;

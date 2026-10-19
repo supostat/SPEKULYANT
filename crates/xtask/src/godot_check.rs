@@ -39,14 +39,7 @@ pub fn run_godot(binary: &Path, arguments: &[&str]) -> Result<()> {
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
     );
-    let error_lines: Vec<&str> = combined
-        .lines()
-        .filter(|line| {
-            ERROR_PREFIXES
-                .iter()
-                .any(|prefix| line.trim_start().starts_with(prefix))
-        })
-        .collect();
+    let error_lines = godot_errors(&combined);
     if !output.status.success() || !error_lines.is_empty() {
         bail!(
             "Godot {arguments:?}: код {}, строк ошибок {}\n{}",
@@ -56,4 +49,15 @@ pub fn run_godot(binary: &Path, arguments: &[&str]) -> Result<()> {
         );
     }
     Ok(())
+}
+
+/// Строки ошибок Godot в выводе или в файле лога.
+pub fn godot_errors(text: &str) -> Vec<&str> {
+    text.lines()
+        .filter(|line| {
+            ERROR_PREFIXES
+                .iter()
+                .any(|prefix| line.trim_start().starts_with(prefix))
+        })
+        .collect()
 }

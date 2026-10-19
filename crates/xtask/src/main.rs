@@ -10,9 +10,12 @@ mod coverage_check;
 mod deps_check;
 mod docs_check;
 mod etalons;
+mod export;
+mod export_check;
 mod font_glyphs;
 mod gd_check;
 mod godot_check;
+mod godot_config;
 mod godot_pin;
 mod new_event;
 mod project_root;
@@ -23,13 +26,15 @@ mod screen_smoke;
 mod sound_smoke;
 mod tools_manifest;
 mod ui_flow_smoke;
+mod version_check;
 
 use anyhow::{Result, bail};
 
 const USAGE: &str = "\
 Использование: cargo xtask <команда>
 
-  godot-fetch               скачать пин Godot из tools.toml в .tools/ (проверка sha256)
+  godot-fetch [--templates] скачать пин Godot из tools.toml в .tools/ (проверка sha256);
+                            --templates — и настольные шаблоны экспорта в его editor_data/
   build-godot [--release] [--universal]
                             собрать cdylib моста в godot/bin/ (universal — arm64+x86_64 на macOS)
   bridge-smoke [--full]     безголово создать SpeculantGame в Godot и прочитать снимок ядра;
@@ -51,6 +56,13 @@ const USAGE: &str = "\
                             главное меню → загрузка → выход
   sound-smoke               безголово: пищалка PC-speaker выдаёт ноту заданной частоты, мелодия
                             заставки приходит из данных через мост
+  export <платформа>        экспорт игры на родной системе платформы (windows-x86_64,
+                            linux-x86_64, macos-universal) в .tools/dist/ и архив релиза
+                            Speculant-<версия>-<платформа>.zip
+  export-check              пресеты трёх платформ валидны; экспорт хоста собирается и
+                            запускается --headless --quit без ошибок
+  version-check             версия Cargo.toml = project.godot, пресеты её не переопределяют,
+                            тег релиза — v<версия>
   deps-check                ядро speculant-core без Godot; пин gdext согласован с tools.toml
   new-event <эпоха> <имя>   заготовка события в data/events/<эпоха>/<имя>.toml
   docs-check [--all-decided] маркеры DECIDED-15-N совпадают в документе и дизайн-книге
@@ -72,6 +84,14 @@ fn main() -> Result<()> {
         "godot-fetch" => {
             let binary = godot_pin::fetch()?;
             println!("Godot: {}", binary.display());
+            match flags {
+                [] => {}
+                [flag] if flag == "--templates" => {
+                    let templates = godot_pin::fetch_templates()?;
+                    println!("Шаблоны экспорта: {}", templates.display());
+                }
+                _ => bail!("использование: cargo xtask godot-fetch [--templates]"),
+            }
             Ok(())
         }
         "build-godot" => build_godot::run(flags),
@@ -100,6 +120,9 @@ fn main() -> Result<()> {
             println!("screenshot: {}", png.display());
             Ok(())
         }
+        "export" => export::run(single_argument(flags, "export <платформа>")?),
+        "export-check" => export_check::run(),
+        "version-check" => version_check::run(),
         "new-event" => new_event::run(flags),
         "deps-check" => deps_check::run(),
         "docs-check" => docs_check::run(flags.iter().any(|flag| flag == "--all-decided")),
