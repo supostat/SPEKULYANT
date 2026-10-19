@@ -13,10 +13,11 @@ pub struct SpeculantGame {
 
 #[godot_api]
 impl SpeculantGame {
-    /// Начинает жизнь по настройкам `{"biography", "ironman", "seed"}`; отвечает `{"ok":true}` или ошибкой.
+    /// Начинает жизнь: `{"storage": <каталог игрока>, "life": {"biography", "ironman", "seed"}}`
+    /// или `{"storage": <каталог игрока>, "resume": <слот>}`; отвечает `{"ok":true}` или ошибкой.
     #[func]
-    fn new_life(&mut self, settings_json: GString) -> GString {
-        match bridge_json::new_life(&settings_json.to_string()) {
+    fn new_life(&mut self, start_json: GString) -> GString {
+        match bridge_json::new_life(&start_json.to_string()) {
             Ok(game) => {
                 self.game = Some(game);
                 GString::from(bridge_json::OK)

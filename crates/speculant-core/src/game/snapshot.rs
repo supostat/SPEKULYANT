@@ -1,5 +1,4 @@
-//! Снимок мира для интерфейса: состояние жизни строками, готовыми к показу (§13.3). Подсистемы,
-//! которых ещё нет в мире (пейджер), отдают пустые окна.
+//! Снимок мира для интерфейса: состояние жизни строками, готовыми к показу (§13.3).
 
 mod business;
 mod life;
@@ -16,8 +15,8 @@ use crate::time::GameDate;
 use crate::travel::Access;
 use crate::view::{
     ChoiceView, ContactView, DestinationView, EventView, FactionView, HeaderView, JourneyView,
-    LevelView, MarketRowView, MarketView, MoneyPlaceView, MoneyView, OutcomeView, PocketItemView,
-    PocketView, StateView, TimeView, TravelView,
+    LevelView, MarketRowView, MarketView, MoneyPlaceView, MoneyView, OutcomeView, PagerMessageView,
+    PagerView, PocketItemView, PocketView, StateView, TimeView, TravelView,
 };
 
 const CASH_LABEL: &str = "Наличные";
@@ -38,6 +37,9 @@ const CONTACT_OWES: &str = "За ним услуг";
 const REACHABLE: &str = "на связи";
 const AWAY_UNTIL: &str = "не на связи до";
 const LOST: &str = "потерян";
+/// Номер абонента — четыре цифры из сида жизни.
+const FIRST_PAGER_NUMBER: u64 = 1000;
+const PAGER_NUMBERS: u64 = 9000;
 
 pub(super) fn snapshot(game: &Game) -> StateView {
     let today = game.world.clock.today();
@@ -60,7 +62,7 @@ pub(super) fn snapshot(game: &Game) -> StateView {
         rumors: meta::rumors(game, today),
         messages: game.world.messages.clone(),
         pending_event: pending_event(game, today),
-        pager: None,
+        pager: pager(game),
         businesses: business::businesses(game, today),
         candidates: business::candidates(game, today),
         business_kinds: business::kinds(game, today),
@@ -399,4 +401,25 @@ fn money(game: &Game, today: GameDate) -> MoneyView {
 fn rate(rules: &MoneyRules, currency: Currency, today: GameDate) -> String {
     let one = rules.whole_units(currency, 1, today);
     rules.format_money(rules.exchange(one, Currency::Ruble, today), today)
+}
+
+/// Пейджер — если устройство при игроке: заголовок с номером абонента и лента от старых сообщений к
+/// новым, заглавными, как их показывает экран пейджера.
+fn pager(game: &Game) -> Option<PagerView> {
+    let device = game.pager_device()?;
+    let number = FIRST_PAGER_NUMBER + game.world.rng.seed() % PAGER_NUMBERS;
+    Some(PagerView {
+        device: device.title.replace("{number}", &number.to_string()),
+        messages: game
+            .world
+            .pager
+            .messages()
+            .iter()
+            .map(|message| PagerMessageView {
+                time: message.date.day_and_month(),
+                text: message.text.to_uppercase(),
+                urgent: message.urgent,
+            })
+            .collect(),
+    })
 }

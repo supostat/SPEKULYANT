@@ -1,6 +1,7 @@
 //! Фасад ядра: интерфейс и симулятор видят мир только через `Game`.
 
 mod business_flow;
+mod call_flow;
 mod consequences;
 mod event_flow;
 mod history_flow;
@@ -23,7 +24,7 @@ use crate::content::{BiographyId, CityId, Content, GoodId, MoneyPlaceId, NpcId};
 use crate::economy::{Currency, Deal, Markets, Money, Real, Trader};
 use crate::events::{EventEngine, JournalEntry, Situation};
 use crate::history::Timeline;
-use crate::life::{Character, Chronicle, LifeSummary};
+use crate::life::{Character, Chronicle, LifeSummary, Pager, PagerDevice, PagerMessage};
 use crate::meta::Meta;
 use crate::npc::Rivals;
 use crate::reputation::{Contact, FactionReputation};
@@ -120,6 +121,7 @@ impl Game {
             journey: None,
             zone: None,
             messages: Vec::new(),
+            pager: Pager::default(),
             screen: Screen::Market,
         };
         let mut game = Self {
@@ -375,13 +377,10 @@ impl Game {
             Command::OrderParcel => self.order_parcel()?,
             Command::ApplyForParole => self.apply_for_parole()?,
             Command::BribeForRelease => self.bribe_for_release()?,
+            Command::Call { contact } => self.call(&contact)?,
             Command::Save { slot } => self.save(&slot)?,
             Command::Load { slot } => self.load(&slot)?,
-            other => {
-                return Err(CommandError::NotSimulatedYet {
-                    command: other.name().to_owned(),
-                });
-            }
+            Command::Quit => self.autosave(),
         }
         if deed {
             self.autosave();
@@ -464,6 +463,32 @@ impl Game {
         if self.world.messages.len() > MESSAGE_LOG_LENGTH {
             self.world.messages.remove(0);
         }
+    }
+
+    /// Сообщение на пейджер — дела, крыша, рынок, потери, — если устройство при игроке; без
+    /// устройства оно проходит мимо.
+    fn page(&mut self, text: String, urgent: bool) {
+        if self.pager_device().is_none() {
+            return;
+        }
+        let message = PagerMessage {
+            date: self.today(),
+            text,
+            urgent,
+        };
+        self.world
+            .pager
+            .record(message, self.content.life.pager.messages);
+    }
+
+    /// Устройство пейджера — первое по правилам, что лежит в кармане.
+    fn pager_device(&self) -> Option<&PagerDevice> {
+        self.content
+            .life
+            .pager
+            .devices
+            .iter()
+            .find(|device| self.world.player.pocket().quantity(&device.good) > 0)
     }
 }
 

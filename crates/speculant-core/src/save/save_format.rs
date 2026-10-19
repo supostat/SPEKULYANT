@@ -1,6 +1,6 @@
 use serde::Serialize;
 use serde::de::DeserializeOwned;
-use serde_json::{Map, Value};
+use serde_json::{Map, Value, json};
 
 use super::SaveError;
 
@@ -9,6 +9,7 @@ const VERSION_KEY: &str = "version";
 const CONTENT_KEY: &str = "content";
 const BODY_KEY: &str = "body";
 const FIRST_VERSION: u32 = 1;
+const PAGER_KEY: &str = "pager";
 
 /// Вид файла и версия формата его тела. Когда тело меняется, версия растёт и добавляется шаг
 /// миграции: `migrations[i]` переводит тело версии `i + 1` в версию `i + 2`, поэтому файлы любой
@@ -19,11 +20,11 @@ pub struct SaveFormat {
     pub migrations: &'static [fn(Value) -> Value],
 }
 
-/// Файл жизни: мир одной жизни.
+/// Файл жизни: мир одной жизни. Версия 2 добавила ленту пейджера.
 pub const LIFE: SaveFormat = SaveFormat {
     kind: "speculant-life",
-    version: 1,
-    migrations: &[],
+    version: 2,
+    migrations: &[add_pager],
 };
 
 /// Файл метапрогрессии: открытия, книжка, история и рекорды.
@@ -32,6 +33,14 @@ pub const META: SaveFormat = SaveFormat {
     version: 1,
     migrations: &[],
 };
+
+/// Жизнь версии 1 — до пейджера: лента пуста, пришедшие раньше сообщения не сохранялись.
+fn add_pager(mut body: Value) -> Value {
+    if let Value::Object(world) = &mut body {
+        world.insert(PAGER_KEY.to_owned(), json!({ "messages": [] }));
+    }
+    body
+}
 
 impl SaveFormat {
     /// Текст файла: вид, версия, отпечаток данных игры, если файл к ним привязан, и тело.

@@ -279,6 +279,7 @@ impl Game {
             }
         }
         for message in messages {
+            self.page(message.clone(), false);
             self.log(message);
         }
         out_of_policy

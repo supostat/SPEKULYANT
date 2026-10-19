@@ -1788,6 +1788,7 @@ version = "0.1.0"
 dependencies = [
  "godot",
  "include_dir",
+ "serde",
  "serde_json",
  "speculant-core",
 ]

@@ -107,7 +107,9 @@ impl Game {
         );
         self.world.player.lose_from(place, lost);
         let shown = content.money.format_money(lost, date);
-        self.log(format!("{}: {STASH_LOST} {shown}", housing.title));
+        let message = format!("{}: {STASH_LOST} {shown}", housing.title);
+        self.page(message.clone(), true);
+        self.log(message);
     }
 
     /// Новое жильё за наличные: прежнее уходит в зачёт по доле своей цены; если зачёт больше

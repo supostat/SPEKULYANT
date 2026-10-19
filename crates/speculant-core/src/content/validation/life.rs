@@ -11,6 +11,8 @@ use crate::life::{EndingKind, LifeRules};
 const ENDING_PLACEHOLDERS: [&str; 6] = ["name", "NAME", "born", "ended", "date", "age"];
 /// Подстановки фразы некролога о деле.
 const BUSINESS_PLACEHOLDERS: [&str; 2] = ["year", "business"];
+/// Подстановка заголовка устройства пейджера.
+const PAGER_PLACEHOLDERS: [&str; 1] = ["number"];
 
 pub(super) fn validate(parsed: &Parsed<'_>, known: &Known, errors: &mut Vec<ContentError>) {
     if let Some((file, rules)) = &parsed.life {
@@ -22,6 +24,7 @@ pub(super) fn validate(parsed: &Parsed<'_>, known: &Known, errors: &mut Vec<Cont
         check_rules(
             rules,
             &endings,
+            known,
             &mut Report {
                 file,
                 errors: &mut *errors,
@@ -112,7 +115,13 @@ pub(super) fn check_biography(biography: &Biography, known: &Known, report: &mut
     }
 }
 
-fn check_rules(rules: &LifeRules, endings: &[(&str, &Ending)], report: &mut Report<'_, '_>) {
+fn check_rules(
+    rules: &LifeRules,
+    endings: &[(&str, &Ending)],
+    known: &Known,
+    report: &mut Report<'_, '_>,
+) {
+    check_pager(rules, known, report);
     if rules.health_max <= 0 || !(1..=rules.health_max).contains(&rules.start_health) {
         report.at(
             report.file.line_of("start_health"),
@@ -280,6 +289,27 @@ fn check_ending(ending: &Ending, known: &Known, report: &mut Report<'_, '_>) {
     }
     check_placeholders(&ending.headline, &ENDING_PLACEHOLDERS, "headline", report);
     check_placeholders(&ending.text, &ENDING_PLACEHOLDERS, "text", report);
+}
+
+/// Пейджер: лента держит хотя бы одно сообщение, устройства — товары из `goods/`, а в заголовке
+/// только номер абонента.
+fn check_pager(rules: &LifeRules, known: &Known, report: &mut Report<'_, '_>) {
+    if rules.pager.messages == 0 {
+        report.at(
+            report.file.line_of("messages ="),
+            "лента пейджера держит хотя бы одно сообщение".to_owned(),
+        );
+    }
+    for device in &rules.pager.devices {
+        check_reference(
+            &known.goods,
+            device.good.as_str(),
+            "товара",
+            "goods/",
+            report,
+        );
+        check_placeholders(&device.title, &PAGER_PLACEHOLDERS, "title", report);
+    }
 }
 
 fn check_placeholders(text: &str, allowed: &[&str], key: &str, report: &mut Report<'_, '_>) {

@@ -29,7 +29,9 @@ const USAGE: &str = "\
   godot-fetch               скачать пин Godot из tools.toml в .tools/ (проверка sha256)
   build-godot [--release] [--universal]
                             собрать cdylib моста в godot/bin/ (universal — arm64+x86_64 на macOS)
-  bridge-smoke              безголово создать SpeculantGame в Godot и прочитать снимок ядра
+  bridge-smoke [--full]     безголово создать SpeculantGame в Godot и прочитать снимок ядра;
+                            --full — тридцать дней с событием, торговля, поездка, сохранения
+                            и каждая команда интерфейса через мост
   godot-check               безголовый импорт проекта godot/ пином Godot и собранным мостом
   font-glyphs               записать godot/assets/fonts/glyphs.txt из TTF шрифта игры
   gd-check                  проверить парсером Godot все скрипты godot/src и godot/tools
@@ -61,7 +63,7 @@ fn main() -> Result<()> {
             Ok(())
         }
         "build-godot" => build_godot::run(flags),
-        "bridge-smoke" => bridge_smoke::run(),
+        "bridge-smoke" => bridge_smoke::run(flags.iter().any(|flag| flag == "--full")),
         "godot-check" => godot_check::run(),
         "font-glyphs" => font_glyphs::run(),
         "gd-check" => gd_check::run(),

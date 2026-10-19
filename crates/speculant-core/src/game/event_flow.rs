@@ -12,7 +12,8 @@ use crate::events::{EventEngine, PendingEvent, Resolution, Substitutions};
 use crate::time::GameDate;
 use crate::view::Screen;
 
-const EVENTS_STREAM: &str = "events";
+/// Поток случая событий: розыгрыш дня, продолжения, дорога и звонки.
+pub(super) const EVENTS_STREAM: &str = "events";
 
 impl Game {
     /// Начинает событие сейчас, если оно готово: так приходят продолжения цепочек, звонки
@@ -92,6 +93,9 @@ impl Game {
             .ready_incident_events(&self.situation(date), incident);
         match EventEngine::pick(self.world.rng.stream(EVENTS_STREAM), &ready) {
             Some(event) => {
+                let name = self.world.businesses[business].name(&self.content);
+                let title = &self.content.events[&event].title;
+                self.page(format!("{name}: {title}"), true);
                 self.begin_event(event, date, Some(business.clone()));
                 true
             }

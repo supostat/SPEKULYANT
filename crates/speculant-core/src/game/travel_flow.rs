@@ -4,6 +4,7 @@
 use std::sync::Arc;
 
 use super::Game;
+use super::event_flow::EVENTS_STREAM;
 use crate::command_error::CommandError;
 use crate::content::{CityId, Route};
 use crate::economy::Currency;
@@ -11,7 +12,6 @@ use crate::events::EventEngine;
 use crate::time::GameDate;
 use crate::travel::{Access, Journey};
 
-const EVENTS_STREAM: &str = "events";
 const DEPARTED: &str = "Выехал";
 const ARRIVED: &str = "Приехал";
 const HELPED_TO_LEAVE: &str = "помог с выездом";

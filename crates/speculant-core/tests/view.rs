@@ -175,20 +175,6 @@ fn speed_outside_one_to_three_is_refused() {
 }
 
 #[test]
-fn commands_of_unsimulated_subsystems_are_refused_by_name() {
-    let mut game = new_life();
-    let refusal = game.apply(Command::Call {
-        contact: "kofi".to_owned(),
-    });
-    assert_eq!(
-        refusal,
-        Err(CommandError::NotSimulatedYet {
-            command: "call".to_owned()
-        })
-    );
-}
-
-#[test]
 fn command_errors_serialize_with_their_kind() {
     let json = serde_json::to_value(CommandError::InvalidSpeed { speed: 9, max: 3 })
         .expect("ошибка сериализуется");

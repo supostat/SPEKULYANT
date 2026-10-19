@@ -493,3 +493,59 @@ fn a_price_placeholder_shows_the_local_tag() {
         format!("В «Берёзку» завезли джинсы, на толкучке их отдают по {jeans_buy} р.")
     );
 }
+
+fn call(game: &mut Game, contact: &str) -> Result<(), CommandError> {
+    game.apply(Command::Call {
+        contact: contact.to_owned(),
+    })
+}
+
+#[test]
+fn a_call_starts_a_ready_event_about_the_contact() {
+    let mut game = quiet_game_on(date(1987, 6, 10), 1);
+    call(&mut game, "kofi").expect("Кофи на связи");
+    assert_eq!(pending(&game).title, "Кофи едет домой");
+}
+
+#[test]
+fn a_contact_with_nothing_to_say_does_not_answer() {
+    let mut game = quiet_game_on(date(1985, 3, 1), 1);
+    call(&mut game, "kofi").expect("звонок проходит");
+    assert!(game.view().pending_event.is_none());
+    assert_eq!(
+        game.view().messages.last().map(String::as_str),
+        Some("Кофи не берёт трубку")
+    );
+}
+
+#[test]
+fn only_a_reachable_contact_can_be_called() {
+    let mut game = quiet_game_on(date(1987, 6, 10), 1);
+    assert_eq!(
+        call(&mut game, "vodka_man"),
+        Err(CommandError::NotAContact {
+            contact: "vodka_man".to_owned()
+        })
+    );
+    call(&mut game, "kofi").expect("Кофи на связи");
+    choose(&mut game, 1);
+    game.apply(Command::Continue).expect("исход прочитан");
+    assert_eq!(
+        call(&mut game, "kofi"),
+        Err(CommandError::ContactAway {
+            name: "Кофи".to_owned(),
+            until: "09.08.1987".to_owned()
+        }),
+        "уехал на каникулы на 60 дней"
+    );
+    let mut quarrel = quiet_game_on(date(1987, 6, 10), 1);
+    call(&mut quarrel, "kofi").expect("Кофи на связи");
+    choose(&mut quarrel, 3);
+    quarrel.apply(Command::Continue).expect("исход прочитан");
+    assert_eq!(
+        call(&mut quarrel, "kofi"),
+        Err(CommandError::ContactLost {
+            name: "Кофи".to_owned()
+        })
+    );
+}

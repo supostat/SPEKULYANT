@@ -8,6 +8,8 @@ mod ending_kind;
 mod good_prices;
 mod life_rules;
 mod life_summary;
+mod pager;
+mod pager_rules;
 mod price_note;
 
 pub use character::Character;
@@ -17,4 +19,6 @@ pub use ending_kind::EndingKind;
 pub use good_prices::GoodPrices;
 pub use life_rules::{HealthState, LifeRules, NamePools};
 pub use life_summary::LifeSummary;
+pub use pager::{Pager, PagerMessage};
+pub use pager_rules::{PagerDevice, PagerRules};
 pub use price_note::PriceNote;

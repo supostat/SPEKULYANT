@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use speculant_core::content::{Content, EventId};
-use speculant_core::save::Storage;
+use speculant_core::save::{LIFE, Storage};
 use speculant_core::time::GameDate;
 use speculant_core::{Command, CommandError, Game, LifeSettings};
 
@@ -272,6 +272,38 @@ fn free_saves_keep_to_their_rules() {
 }
 
 #[test]
+fn quitting_puts_an_ironman_life_away_and_leaves_a_free_one_unsaved() {
+    let content = Arc::new(Content::load(Path::new(SAVE)).expect("фикстура сохранений валидна"));
+    let ironman_place = storage("quit_ironman");
+    let mut ironman = Game::open(
+        &settings(7, true),
+        Arc::clone(&content),
+        ironman_place.clone(),
+    )
+    .expect("ironman-жизнь начинается");
+    play(&mut ironman, Command::SetSpeed { speed: 3 });
+    play(&mut ironman, Command::Quit);
+    let resumed = Game::resume(Arc::clone(&content), ironman_place, "ironman")
+        .expect("ironman-жизнь в слоте");
+    assert_eq!(resumed.view().time.speed, 3, "слот дописан при выходе");
+    let free_place = storage("quit_free");
+    let mut free = Game::open(
+        &settings(7, false),
+        Arc::clone(&content),
+        free_place.clone(),
+    )
+    .expect("свободная жизнь начинается");
+    play(&mut free, Command::Quit);
+    assert_eq!(
+        Game::resume(content, free_place, "ironman").err(),
+        Some(CommandError::NoSuchSave {
+            slot: "ironman".to_owned()
+        }),
+        "свободная жизнь при выходе сама не сохраняется"
+    );
+}
+
+#[test]
 fn a_version_one_directory_still_loads() {
     let content = Arc::new(Content::load(Path::new(SAVE)).expect("фикстура сохранений валидна"));
     let mut game =
@@ -287,6 +319,10 @@ fn a_version_one_directory_still_loads() {
         Some("Гена Кабанов")
     );
     assert_eq!(view.records.free.len(), 1, "рекорд из файла метапрогрессии");
+    assert_eq!(
+        view.pager, None,
+        "лента пейджера версии 1 пуста, а устройства в наборе нет"
+    );
     assert!(
         game.advance(DAY_MILLISECONDS),
         "жизнь из старого файла идёт"
@@ -301,8 +337,12 @@ fn newer_broken_and_foreign_files_are_refused() {
         .read_life("golden")
         .expect("файл версии 1");
     let storage = storage("refused");
+    let newer = LIFE.version + 1;
     for (slot, text) in [
-        ("newer", golden.replace("\"version\":1", "\"version\":2")),
+        (
+            "newer",
+            golden.replace("\"version\":1", &format!("\"version\":{newer}")),
+        ),
         ("broken", golden[..golden.len() / 2].to_owned()),
         ("meta", golden.replace("speculant-life", "speculant-meta")),
     ] {
@@ -318,7 +358,10 @@ fn newer_broken_and_foreign_files_are_refused() {
     };
     assert_eq!(
         reason("newer", &save_content),
-        "файл версии 2, а игра читает до версии 1"
+        format!(
+            "файл версии {newer}, а игра читает до версии {}",
+            LIFE.version
+        )
     );
     assert!(reason("broken", &save_content).starts_with("файл испорчен"));
     assert_eq!(reason("meta", &save_content), "это не тот файл");

@@ -15,6 +15,7 @@ impl Game {
         let nodes: Vec<_> = self.world.timeline.on(date).cloned().collect();
         for node in nodes {
             let outcome = node.outcome(&content);
+            self.page(outcome.news.clone(), false);
             self.log(outcome.news.clone());
             for shock in &outcome.price_shocks {
                 self.world.markets.apply_shock(

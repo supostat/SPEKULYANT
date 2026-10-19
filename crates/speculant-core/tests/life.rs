@@ -6,7 +6,8 @@ use std::collections::BTreeSet;
 use std::path::Path;
 use std::sync::Arc;
 
-use speculant_core::content::{Content, EventId, HousingId};
+use speculant_core::content::{Content, EventId, GoodId, HousingId};
+use speculant_core::life::PagerDevice;
 use speculant_core::time::GameDate;
 use speculant_core::view::{Screen, StateView, SummaryLineView};
 use speculant_core::{Command, CommandError, Game, LifeSettings};
@@ -480,6 +481,42 @@ fn housing_is_bought_with_the_old_one_in_part_exchange() {
     live_until(&mut game, date(1992, 7, 1));
     play(&mut game, buy("apartment"));
     assert_eq!(game.view().character.housing, "Квартира в центре");
+}
+
+#[test]
+fn a_loss_under_the_mattress_pages_urgently() {
+    let mut leaky = load();
+    leaky
+        .housing
+        .get_mut(&HousingId::new("dorm_bed"))
+        .expect("койка в фикстуре")
+        .stash_risk = 1.0;
+    leaky.life.pager.devices = vec![PagerDevice {
+        good: GoodId::new("chewing_gum"),
+        title: "ПЕЙДЖЕР · абонент {number}".to_owned(),
+    }];
+    let mut game = game_with(leaky, 7);
+    play(
+        &mut game,
+        Command::Buy {
+            good: "chewing_gum".to_owned(),
+            quantity: 1,
+        },
+    );
+    play(
+        &mut game,
+        Command::Deposit {
+            place: "mattress".to_owned(),
+            amount: 1000,
+        },
+    );
+    live_until(&mut game, date(1984, 2, 1));
+    let pager = game.view().pager.expect("пейджер в кармане");
+    let loss = pager.messages.last().expect("потеря на пейджере");
+    assert_eq!(
+        (loss.text.as_str(), loss.urgent),
+        ("КОЙКА В ОБЩЕЖИТИИ: ИЗ-ПОД МАТРАСА ПРОПАЛО 1 000 Р.", true)
+    );
 }
 
 #[test]

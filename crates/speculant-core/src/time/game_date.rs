@@ -173,6 +173,12 @@ impl GameDate {
         format!("{day:02}.{month:02}.{year}")
     }
 
+    /// День и месяц для ленты пейджера: «22.10».
+    pub fn day_and_month(self) -> String {
+        let (_, month, day) = self.year_month_day();
+        format!("{day:02}.{month:02}")
+    }
+
     /// Полных лет человеку, родившемуся `birth`, на эту дату.
     pub fn age_on(self, birth: Self) -> u32 {
         let (year, month, day) = self.year_month_day();

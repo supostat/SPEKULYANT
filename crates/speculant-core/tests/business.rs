@@ -6,10 +6,11 @@ use std::path::Path;
 use std::sync::Arc;
 
 use speculant_core::business::BusinessId;
-use speculant_core::content::{BusinessKindId, CityId, Content, HabitId};
+use speculant_core::content::{BusinessKindId, CityId, Content, GoodId, HabitId};
+use speculant_core::life::PagerDevice;
 use speculant_core::npc::Strategy;
 use speculant_core::time::GameDate;
-use speculant_core::view::{BusinessView, LevelView, StateView};
+use speculant_core::view::{BusinessView, LevelView, PagerMessageView, StateView};
 use speculant_core::{Command, CommandError, Game, LifeSettings};
 
 const BUSINESS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/business");
@@ -755,6 +756,33 @@ fn incidents_outside_the_policies_come_to_the_owner_as_events() {
     assert_eq!(
         business(&game.view(), STALL).closed_until.as_deref(),
         Some("закрыто до 06.01.1984")
+    );
+}
+
+#[test]
+fn an_incident_that_needs_the_owner_pages_him_urgently() {
+    let mut paged = raids_every_day(1.0);
+    paged.life.pager.devices = vec![PagerDevice {
+        good: GoodId::new("chewing_gum"),
+        title: "ПЕЙДЖЕР · абонент {number}".to_owned(),
+    }];
+    let mut game = stall_with_gena(paged);
+    play(
+        &mut game,
+        Command::Buy {
+            good: "chewing_gum".to_owned(),
+            quantity: 1,
+        },
+    );
+    day(&mut game);
+    let pager = game.view().pager.expect("пейджер в кармане");
+    assert_eq!(
+        pager.messages.last(),
+        Some(&PagerMessageView {
+            time: "02.01".to_owned(),
+            text: "ПАЛАТКА У МЕТРО, МОСКВА: НАЕЗД".to_owned(),
+            urgent: true,
+        })
     );
 }
 

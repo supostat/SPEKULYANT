@@ -190,8 +190,15 @@ pub enum CommandError {
         option: usize,
         count: usize,
     },
-    NotSimulatedYet {
-        command: String,
+    NotAContact {
+        contact: String,
+    },
+    ContactLost {
+        name: String,
+    },
+    ContactAway {
+        name: String,
+        until: String,
     },
 }
 
@@ -325,8 +332,10 @@ impl fmt::Display for CommandError {
                 formatter,
                 "у политики {policy} нет варианта {option}: вариантов {count}, с нуля"
             ),
-            Self::NotSimulatedYet { command } => {
-                write!(formatter, "команда {command} ещё не симулируется ядром")
+            Self::NotAContact { contact } => write!(formatter, "{contact} нет среди связей"),
+            Self::ContactLost { name } => write!(formatter, "{name}: связь потеряна"),
+            Self::ContactAway { name, until } => {
+                write!(formatter, "{name} не на связи до {until}")
             }
         }
     }
