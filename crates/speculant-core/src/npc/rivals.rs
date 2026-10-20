@@ -130,14 +130,14 @@ impl Rivals {
             .sum()
     }
 
-    /// Соперники в деле, подходящие под условие события: стратегия, отношение к игроку и давность
-    /// обиды.
+    /// Соперники, подходящие под условие события: судьба (без неё — в деле), стратегия, отношение к
+    /// игроку и давность обиды.
     pub fn matching(&self, condition: &RivalCondition, today: GameDate) -> Vec<&NpcId> {
         self.rivals
             .values()
             .filter(|rival| {
                 let relation = rival.memory().relation();
-                rival.fate().is_active()
+                rival.fate().kind() == condition.fate
                     && condition
                         .strategy
                         .is_none_or(|strategy| strategy == rival.strategy())

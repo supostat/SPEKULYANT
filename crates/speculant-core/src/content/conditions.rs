@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use super::{CityId, EpochId, FactionId, FlagId, GoodId, NpcId, TimelineNodeId};
 use crate::economy::Real;
-use crate::npc::Strategy;
+use crate::npc::{FateKind, Strategy};
 use crate::time::GameDate;
 
 /// Условия события или выбора (§10.1) — структурные таблицы, а не строки-выражения.
@@ -40,11 +40,14 @@ pub struct AuthorityCondition {
     pub at_most: Option<u8>,
 }
 
-/// Какой соперник участвует (§8): стратегия, отношение к игроку и давность обиды — так «кинутый
-/// партнёр возвращается через полгода».
+/// Какой соперник участвует (§8): судьба, стратегия, отношение к игроку и давность обиды — так
+/// «кинутый партнёр возвращается через полгода», а бывший соперник звонит уже депутатом.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct RivalCondition {
+    /// Судьба соперника; без поля — соперник в деле.
+    #[serde(default)]
+    pub fate: FateKind,
     pub strategy: Option<Strategy>,
     pub relation_at_least: Option<i32>,
     pub relation_at_most: Option<i32>,

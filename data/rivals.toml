@@ -11,6 +11,7 @@ trade_chance = 0.5
 lot = 3
 prison_chance = 0.0001
 death_chance = 0.00003
+deputy_chance = 0.0001   # коммерсант в думе: тот, с кем игрок поссорился, приходит депутатом
 business_chance = 0.05
 
 [strategies.shuttle]

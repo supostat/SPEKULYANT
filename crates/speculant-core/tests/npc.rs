@@ -6,9 +6,9 @@ use std::collections::BTreeSet;
 use std::path::Path;
 use std::sync::Arc;
 
-use speculant_core::content::{CityId, Content, EventId, GoodId, NpcId};
+use speculant_core::content::{CityId, Content, EventId, GoodId, NpcId, RivalCondition};
 use speculant_core::economy::{Currency, Markets, Money, Real};
-use speculant_core::npc::{DealSide, Fate, Rival, Rivals, Strategy};
+use speculant_core::npc::{DealSide, Fate, FateKind, Rival, Rivals, Strategy};
 use speculant_core::rng::WorldRng;
 use speculant_core::time::GameDate;
 use speculant_core::{Command, Game, LifeSettings};
@@ -394,4 +394,60 @@ fn an_event_about_a_particular_rival_needs_him_in_this_world() {
             "сид {seed}"
         );
     }
+}
+
+/// Соперники мира, чья судьба подходит под отбор, — набором.
+fn rivals_where(game: &Game, fits: impl Fn(Fate) -> bool) -> BTreeSet<NpcId> {
+    game.rivals()
+        .iter()
+        .filter(|rival| fits(rival.fate()))
+        .map(|rival| rival.npc().clone())
+        .collect()
+}
+
+#[test]
+fn an_event_about_a_deputy_picks_a_deputy_and_others_pick_rivals_in_business() {
+    let mut content = load();
+    content
+        .rival_rules
+        .strategies
+        .get_mut(&Strategy::Official)
+        .expect("чиновник в правилах фикстуры")
+        .deputy_chance = 1.0;
+    let mut game = game_with(content, seed_with(Strategy::Official));
+    let deputy_call = EventId::new("deputy_call");
+    assert!(
+        game.start_event(&deputy_call).is_err(),
+        "пока депутатов нет, звонить некому"
+    );
+    days(&mut game, 1);
+    let deputies = rivals_where(&game, |fate| fate == Fate::Deputy);
+    assert!(!deputies.is_empty(), "чиновник ушёл в депутаты");
+    let in_business = rivals_where(&game, Fate::is_active);
+    let matching = |condition: RivalCondition| -> BTreeSet<NpcId> {
+        game.rivals()
+            .matching(&condition, game.today())
+            .into_iter()
+            .cloned()
+            .collect()
+    };
+    assert_eq!(
+        matching(RivalCondition {
+            fate: FateKind::Deputy,
+            ..RivalCondition::default()
+        }),
+        deputies
+    );
+    assert_eq!(
+        matching(RivalCondition::default()),
+        in_business,
+        "без судьбы в условии — соперники в деле"
+    );
+    game.start_event(&deputy_call).expect("депутат в мире");
+    let caller = game
+        .events()
+        .pending()
+        .and_then(|pending| pending.rival.clone())
+        .expect("сид выбрал соперника");
+    assert!(deputies.contains(&caller), "звонит депутат");
 }

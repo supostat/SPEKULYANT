@@ -4,7 +4,7 @@ cooldown_days = 365
 text = "{npc} стал депутатом и помнит вашу вражду. Проверки к тебе приходят чаще."
 
 [conditions]
-rival = { relation_at_most = -1 }
+rival = { fate = "deputy", relation_at_most = -1 }
 
 [[choices]]
 text = "Помириться через общих знакомых"

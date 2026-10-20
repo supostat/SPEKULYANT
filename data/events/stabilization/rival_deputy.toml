@@ -5,7 +5,7 @@ text = """
 {npc}, с которым вы делили рынок в девяностые, теперь депутат областной думы. Звонит сам."""
 
 [conditions]
-rival = { relation_at_least = 0 }
+rival = { fate = "deputy", relation_at_least = 0 }
 
 [[choices]]
 text = "Поддержать его фонд"

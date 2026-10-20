@@ -1,0 +1,13 @@
+title = "Звонок депутата"
+weight = 1
+text = "{npc} теперь депутат и звонит сам."
+
+[conditions]
+rival = { fate = "deputy" }
+
+[[choices]]
+text = "Поздравить"
+outcome = "Депутат доволен."
+
+[choices.consequences]
+rival = { relation = 1 }
