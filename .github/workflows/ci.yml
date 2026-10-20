@@ -16,11 +16,13 @@ jobs:
       - name: Тулчейн Rust из rust-toolchain.toml
         run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
-      - name: Кэш пина Godot
+      # Только скачанный архив: godot-fetch сверяет его sha256 и распаковывает заново, а состояние
+      # редактора (editor_data) одного прогона не переезжает в следующий.
+      - name: Кэш архива пина Godot
         uses: actions/cache@v4
         with:
-          path: .tools/godot
-          key: godot-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('tools.toml') }}
+          path: .tools/godot/*/*.zip
+          key: godot-archive-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('tools.toml') }}
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace

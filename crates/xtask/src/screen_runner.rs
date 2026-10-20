@@ -13,6 +13,9 @@ use crate::screen_file::ScreenFile;
 const DUMP_TOOL: &str = "res://tools/dump_screen.gd";
 const SCREENSHOT_TOOL: &str = "res://tools/screenshot.gd";
 const CRT_FLAG: &str = "--crt";
+/// Экрану звук не нужен, а у раннера CI нет звукового устройства: Godot в окне иначе пишет ошибку
+/// открытия ALSA.
+const SILENT_AUDIO: [&str; 2] = ["--audio-driver", "Dummy"];
 
 /// Рисует экран макета безголово на его фикстуре и возвращает буфер из `.tools/out/<screen>.screen`.
 pub fn dump(screen: &str) -> Result<ScreenFile> {
@@ -80,6 +83,7 @@ fn run_screen_tool(
     if headless {
         arguments.push("--headless");
     }
+    arguments.extend(SILENT_AUDIO);
     arguments.extend([
         "--path",
         "godot",
