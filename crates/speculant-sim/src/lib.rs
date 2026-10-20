@@ -13,9 +13,12 @@ mod simulation;
 mod strategy;
 #[cfg(test)]
 mod test_worlds;
+mod trade_report;
 
-pub use balance_check::{CheckError, CheckScope, Violation, check};
-pub use balance_file::{BALANCE_FILE, BalanceFile, BalanceFileError, BalanceRules, CoverageRules};
+pub use balance_check::{CheckError, CheckScope, Violation, arbitrage_edge, check};
+pub use balance_file::{
+    BALANCE_FILE, BalanceFile, BalanceFileError, BalanceRules, Bounds, CoverageRules, TradeRules,
+};
 pub use life_outcome::LifeOutcome;
 pub use life_plan::LifePlan;
 pub use life_run::{horizon, play_life};
@@ -24,3 +27,4 @@ pub use report::{
 };
 pub use simulation::{SimulationSettings, plan_lives, simulate};
 pub use strategy::Strategy;
+pub use trade_report::{EpochTrade, TradeReport};

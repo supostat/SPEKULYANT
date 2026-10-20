@@ -5,8 +5,8 @@ market = "Рынок Ябаолу"
 opens = "1992-01-01"
 
 [multipliers]
-electronics = 0.6
-clothes = 0.6
-sweets = 0.7
-media = 0.7
-prestige = 0.9
+electronics = 0.68
+clothes = 0.68
+sweets = 0.76
+media = 0.76
+prestige = 0.92

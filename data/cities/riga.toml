@@ -4,7 +4,7 @@ region = "baltic"
 market = "Центральный рынок"
 
 [multipliers]
-clothes = 0.8
-sweets = 0.85
-food = 0.9
-media = 0.9
+clothes = 0.7
+sweets = 0.77
+food = 0.85
+media = 0.85

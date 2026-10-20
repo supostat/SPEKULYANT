@@ -133,6 +133,7 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "categories/tobacco.toml: у категории tobacco нет ни одного товара",
         "cities/moscow.toml:4: категории electronics нет в categories/",
         "economy/market.toml:1: spread = 1.5: доля должна быть больше 0 и меньше 1",
+        "economy/market.toml:4: elasticity = 0: крутизна отклика цены должна быть больше 0",
         "economy/money.toml:2: индекс 1984 года — единица",
         "events/perestroika/cooperative.toml: каталога events/perestroika/ нет среди эпох календаря",
         "events/stagnation/broken.toml:3: подстановка {npc} в событии без условия npc",

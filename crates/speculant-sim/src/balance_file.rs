@@ -5,15 +5,17 @@ use std::num::NonZeroUsize;
 use std::path::Path;
 
 use serde::Deserialize;
+use speculant_core::economy::Real;
 
 /// Файл порогов в каталоге данных; игра его не читает.
 pub const BALANCE_FILE: &str = "balance.toml";
 
-/// Пороги баланса и покрытия из `data/balance.toml`, снятые калибровкой от измеренной базы
-/// прогона; `[volume]` того же файла читает `cargo xtask content-count`.
+/// Пороги баланса, торговли и покрытия из `data/balance.toml`, снятые калибровкой от измеренной
+/// базы прогона; `[volume]` того же файла читает `cargo xtask content-count`.
 #[derive(Clone, Debug, PartialEq, Deserialize)]
 pub struct BalanceFile {
     pub balance: BalanceRules,
+    pub trade: TradeRules,
     pub coverage: CoverageRules,
 }
 
@@ -31,6 +33,34 @@ pub struct BalanceRules {
     pub mortality: BTreeMap<String, f64>,
     /// Дней жизни на одно событие по эпохам — не больше.
     pub quiet_days: BTreeMap<String, f64>,
+}
+
+/// Торговля окупается, но не ломает экономику: выгода лучшего рейса и перевес перекупщика над
+/// ботом, который не торгует с толком.
+#[derive(Clone, Debug, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TradeRules {
+    /// Кошелёк, с которым меряется рейс, в рублях 1984 года.
+    pub purse: Real,
+    /// Медиана выгоды лучшего рейса по неделям эпохи — прибыль к кошельку.
+    pub trip_return: Bounds,
+    /// Во сколько раз медиана капитала арбитражника к концу эпохи выше медианы случайного бота —
+    /// по эпохам.
+    pub arbitrage_over_random: BTreeMap<String, Bounds>,
+}
+
+/// Пределы величины, оба включительно.
+#[derive(Clone, Copy, Debug, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Bounds {
+    pub from: f64,
+    pub to: f64,
+}
+
+impl Bounds {
+    pub fn contains(self, value: f64) -> bool {
+        self.from <= value && value <= self.to
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Deserialize)]

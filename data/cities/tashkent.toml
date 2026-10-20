@@ -4,10 +4,10 @@ region = "asia"
 market = "Алайский базар"
 
 [multipliers]
-food = 0.6
-clothes = 1.3
-electronics = 1.3
-media = 1.4
-sweets = 1.2
-alcohol = 1.1
-prestige = 1.1
+food = 0.4
+clothes = 1.45
+electronics = 1.45
+media = 1.6
+sweets = 1.3
+alcohol = 1.15
+prestige = 1.15

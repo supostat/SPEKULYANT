@@ -14,12 +14,15 @@ const IDLE_DAYS: u32 = 7;
 /// Перекупщик между городами: продаёт всё, с чем приехал, и везёт товар туда, где он даст больше
 /// всего за день пути, ставя долю наличных и оставляя на проезд. Если из города везти нечего,
 /// едет порожняком туда, откуда выгодная поездка окупит и этот переезд; если и ехать некуда —
-/// неделю ждёт, пока рынки сдвинутся.
+/// неделю ждёт, пока рынки сдвинутся. Приехав, он продаёт товар и несколько дней живёт дома, как
+/// живёт игрок, — события города находят его, а не только дорожные.
 pub(crate) struct Arbitrage {
     /// Доля наличных, которую бот ставит на одну поездку.
     pub stake: f64,
     /// Самый долгий маршрут, на который бот согласен.
     pub longest_route_days: u32,
+    /// Сколько дней после прибытия бот живёт дома, прежде чем ехать снова.
+    pub rest_days: u32,
     /// До какого дня бот ждёт, не пересчитывая поездок.
     pub idle_until: Option<GameDate>,
 }
@@ -50,11 +53,19 @@ impl Arbitrage {
         if let Some(trip) = self.best_trip(game, game.city(), cash) {
             deals::buy(game, &trip.good, trip.quantity);
             travel(game, &trip.destination);
+            self.rest_after_arrival(game);
         } else if let Some(destination) = self.best_move(game, cash) {
             travel(game, &destination);
+            self.rest_after_arrival(game);
         } else {
             self.idle_until = Some(game.today().after_days(IDLE_DAYS));
         }
+    }
+
+    /// Бот только что выехал: после прибытия он продаст товар и `rest_days` дней поживёт дома.
+    fn rest_after_arrival(&mut self, game: &Game) {
+        let arrives = game.journey().expect("бот только что выехал").arrives;
+        self.idle_until = Some(arrives.after_days(self.rest_days));
     }
 
     /// Маршруты из города, на которые бот согласен и которые открыты сегодня.
@@ -184,12 +195,13 @@ mod tests {
     use speculant_core::economy::Money;
 
     use super::Arbitrage;
-    use crate::test_worlds::{new_life, real_data};
+    use crate::test_worlds::{live_until, new_life, real_data};
 
     fn trader() -> Arbitrage {
         Arbitrage {
             stake: 0.9,
             longest_route_days: u32::MAX,
+            rest_days: 0,
             idle_until: None,
         }
     }
@@ -245,5 +257,27 @@ mod tests {
         };
         resting.trade(&mut game);
         assert_eq!(game.journey(), None);
+    }
+
+    #[test]
+    fn after_a_trip_the_trader_sells_on_arrival_and_lives_at_home_for_his_rest_days() {
+        let mut game = new_life(&real_data(), "engineer");
+        let mut resting = Arbitrage {
+            rest_days: 3,
+            ..trader()
+        };
+        resting.trade(&mut game);
+        let arrives = game.journey().expect("перекупщик уехал").arrives;
+        live_until(&mut game, arrives);
+        resting.trade(&mut game);
+        assert_eq!(game.journey(), None, "приехал — живёт дома");
+        assert_eq!(
+            game.player().pocket().goods().count(),
+            0,
+            "товар продан в день прибытия"
+        );
+        live_until(&mut game, arrives.after_days(3));
+        resting.trade(&mut game);
+        assert!(game.journey().is_some(), "отдохнул — снова в пути");
     }
 }

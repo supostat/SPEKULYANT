@@ -129,12 +129,16 @@ mod tests {
 
     #[test]
     fn a_hoarder_short_of_cash_for_vodka_takes_the_next_best_growth() {
+        let half_stake = Hoarding {
+            stake: 0.5,
+            ..HOARDER
+        };
         let mut game = new_life(&real_data(), "student");
-        HOARDER.trade(&mut game);
+        half_stake.trade(&mut game);
         assert_eq!(
             held(&game),
             vec![&GoodId::new("cognac")],
-            "ящик водки дороже ставки студента, коньяк к 1986-му дорожает в полтора раза"
+            "ящик водки дороже половины денег студента, коньяк к 1986-му дорожает в полтора раза"
         );
     }
 }

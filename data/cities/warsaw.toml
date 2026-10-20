@@ -5,7 +5,7 @@ market = "Стадион Десятилетия"
 opens = "1990-07-01"
 
 [multipliers]
-clothes = 0.7
-sweets = 0.6
-electronics = 0.8
-tobacco = 0.8
+clothes = 0.76
+sweets = 0.68
+electronics = 0.84
+tobacco = 0.84

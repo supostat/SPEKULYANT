@@ -683,6 +683,15 @@ fn check_market(rules: &MarketRules, report: &mut Report<'_, '_>) {
             );
         }
     }
+    if !(rules.elasticity.is_finite() && rules.elasticity > 0.0) {
+        report.at(
+            report.file.line_of("elasticity"),
+            format!(
+                "elasticity = {}: крутизна отклика цены должна быть больше 0",
+                rules.elasticity
+            ),
+        );
+    }
 }
 
 fn check_money(rules: &MoneyRules, report: &mut Report<'_, '_>) {

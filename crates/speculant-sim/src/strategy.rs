@@ -62,6 +62,7 @@ impl Strategy {
                 trade: Trade::Arbitrage(Arbitrage {
                     stake: 0.9,
                     longest_route_days: u32::MAX,
+                    rest_days: 4,
                     idle_until: None,
                 }),
                 choices: ChoiceStyle::Sensible,
@@ -84,6 +85,7 @@ impl Strategy {
                 trade: Trade::Arbitrage(Arbitrage {
                     stake: 0.8,
                     longest_route_days: u32::MAX,
+                    rest_days: 5,
                     idle_until: None,
                 }),
                 choices: ChoiceStyle::Sensible,
@@ -95,6 +97,7 @@ impl Strategy {
                 trade: Trade::Arbitrage(Arbitrage {
                     stake: 0.5,
                     longest_route_days: 1,
+                    rest_days: 7,
                     idle_until: None,
                 }),
                 choices: ChoiceStyle::Safest,
@@ -109,6 +112,7 @@ impl Strategy {
                 trade: Trade::Arbitrage(Arbitrage {
                     stake: 1.0,
                     longest_route_days: u32::MAX,
+                    rest_days: 3,
                     idle_until: None,
                 }),
                 choices: ChoiceStyle::Greediest,

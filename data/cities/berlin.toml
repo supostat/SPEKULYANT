@@ -5,9 +5,9 @@ market = "Толкучка у Александерплац"
 connections_only_until = "1990-01-01"
 
 [multipliers]
-electronics = 0.7
-clothes = 0.75
-media = 0.8
-sweets = 0.7
-prestige = 0.8
-alcohol = 1.1
+electronics = 0.76
+clothes = 0.8
+media = 0.84
+sweets = 0.76
+prestige = 0.84
+alcohol = 1.08

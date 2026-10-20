@@ -1,4 +1,5 @@
-# Маршруты (§4, решение 15.1): дни в пути и билет в рублях 1984 года.
+# Маршруты (§4, решение 15.1): дни в пути и билет в рублях 1984 года. Билеты вдвое дешевле
+# первоначальных (спека living-market): проезд не должен съедать выгоду рейса.
 # Закрытые города и «по блату» решают сами города; road_events — дорожные
 # события эпох (road = true) с весами на маршруте.
 
@@ -6,7 +7,7 @@
 from = "moscow"
 to = "leningrad"
 days = 1
-fare = 15
+fare = 7.5
 road_events = [
   { event = "conductor_nina", weight = 3 },
   { event = "transport_militia", weight = 2 },
@@ -23,7 +24,7 @@ road_events = [
 from = "leningrad"
 to = "moscow"
 days = 1
-fare = 15
+fare = 7.5
 road_events = [
   { event = "conductor_nina", weight = 3 },
   { event = "transport_militia", weight = 2 },
@@ -40,7 +41,7 @@ road_events = [
 from = "moscow"
 to = "gorky"
 days = 1
-fare = 8
+fare = 4
 road_events = [
   { event = "conductor_nina", weight = 3 },
   { event = "transport_militia", weight = 2 },
@@ -57,7 +58,7 @@ road_events = [
 from = "gorky"
 to = "moscow"
 days = 1
-fare = 8
+fare = 4
 road_events = [
   { event = "conductor_nina", weight = 3 },
   { event = "transport_militia", weight = 2 },
@@ -74,7 +75,7 @@ road_events = [
 from = "moscow"
 to = "riga"
 days = 1
-fare = 15
+fare = 7.5
 road_events = [
   { event = "conductor_nina", weight = 3 },
   { event = "transport_militia", weight = 2 },
@@ -91,7 +92,7 @@ road_events = [
 from = "riga"
 to = "moscow"
 days = 1
-fare = 15
+fare = 7.5
 road_events = [
   { event = "conductor_nina", weight = 3 },
   { event = "transport_militia", weight = 2 },
@@ -108,7 +109,7 @@ road_events = [
 from = "moscow"
 to = "tashkent"
 days = 4
-fare = 60
+fare = 30
 road_events = [
   { event = "conductor_nina", weight = 3 },
   { event = "transport_militia", weight = 2 },
@@ -125,7 +126,7 @@ road_events = [
 from = "tashkent"
 to = "moscow"
 days = 4
-fare = 60
+fare = 30
 road_events = [
   { event = "conductor_nina", weight = 3 },
   { event = "transport_militia", weight = 2 },
@@ -142,7 +143,7 @@ road_events = [
 from = "moscow"
 to = "tbilisi"
 days = 3
-fare = 45
+fare = 22.5
 road_events = [
   { event = "conductor_nina", weight = 3 },
   { event = "transport_militia", weight = 2 },
@@ -159,7 +160,7 @@ road_events = [
 from = "tbilisi"
 to = "moscow"
 days = 3
-fare = 45
+fare = 22.5
 road_events = [
   { event = "conductor_nina", weight = 3 },
   { event = "transport_militia", weight = 2 },
@@ -176,7 +177,7 @@ road_events = [
 from = "moscow"
 to = "berlin"
 days = 2
-fare = 80
+fare = 40
 road_events = [
   { event = "gdr_customs", weight = 3 },
   { event = "fellow_traveller", weight = 1 },
@@ -186,7 +187,7 @@ road_events = [
 from = "berlin"
 to = "moscow"
 days = 2
-fare = 80
+fare = 40
 road_events = [
   { event = "gdr_customs", weight = 3 },
   { event = "fellow_traveller", weight = 1 },
@@ -196,7 +197,7 @@ road_events = [
 from = "moscow"
 to = "warsaw"
 days = 2
-fare = 50
+fare = 25
 road_events = [
   { event = "polish_border", weight = 3 },
   { event = "shuttle_bus", weight = 3 },
@@ -207,7 +208,7 @@ road_events = [
 from = "warsaw"
 to = "moscow"
 days = 2
-fare = 50
+fare = 25
 road_events = [
   { event = "polish_border", weight = 3 },
   { event = "shuttle_bus", weight = 3 },
@@ -218,7 +219,7 @@ road_events = [
 from = "moscow"
 to = "istanbul"
 days = 3
-fare = 150
+fare = 75
 road_events = [
   { event = "turkish_customs", weight = 3 },
 ]
@@ -227,7 +228,7 @@ road_events = [
 from = "istanbul"
 to = "moscow"
 days = 3
-fare = 150
+fare = 75
 road_events = [
   { event = "turkish_customs", weight = 3 },
 ]
@@ -236,7 +237,7 @@ road_events = [
 from = "moscow"
 to = "beijing"
 days = 6
-fare = 120
+fare = 60
 road_events = [
   { event = "beijing_train", weight = 3 },
   { event = "train_robbery", weight = 1 },
@@ -246,7 +247,7 @@ road_events = [
 from = "beijing"
 to = "moscow"
 days = 6
-fare = 120
+fare = 60
 road_events = [
   { event = "beijing_train", weight = 3 },
   { event = "train_robbery", weight = 1 },
@@ -256,7 +257,7 @@ road_events = [
 from = "leningrad"
 to = "riga"
 days = 1
-fare = 12
+fare = 6
 road_events = [
   { event = "conductor_nina", weight = 3 },
   { event = "transport_militia", weight = 2 },
@@ -273,7 +274,7 @@ road_events = [
 from = "riga"
 to = "leningrad"
 days = 1
-fare = 12
+fare = 6
 road_events = [
   { event = "conductor_nina", weight = 3 },
   { event = "transport_militia", weight = 2 },
@@ -290,7 +291,7 @@ road_events = [
 from = "leningrad"
 to = "berlin"
 days = 2
-fare = 85
+fare = 42.5
 road_events = [
   { event = "gdr_customs", weight = 3 },
   { event = "fellow_traveller", weight = 1 },
@@ -300,7 +301,7 @@ road_events = [
 from = "berlin"
 to = "leningrad"
 days = 2
-fare = 85
+fare = 42.5
 road_events = [
   { event = "gdr_customs", weight = 3 },
   { event = "fellow_traveller", weight = 1 },
@@ -310,7 +311,7 @@ road_events = [
 from = "warsaw"
 to = "berlin"
 days = 1
-fare = 25
+fare = 12.5
 road_events = [
   { event = "polish_border", weight = 3 },
   { event = "shuttle_bus", weight = 3 },
@@ -321,7 +322,7 @@ road_events = [
 from = "berlin"
 to = "warsaw"
 days = 1
-fare = 25
+fare = 12.5
 road_events = [
   { event = "polish_border", weight = 3 },
   { event = "shuttle_bus", weight = 3 },
@@ -332,7 +333,7 @@ road_events = [
 from = "tbilisi"
 to = "istanbul"
 days = 2
-fare = 60
+fare = 30
 road_events = [
   { event = "turkish_customs", weight = 3 },
 ]
@@ -341,7 +342,7 @@ road_events = [
 from = "istanbul"
 to = "tbilisi"
 days = 2
-fare = 60
+fare = 30
 road_events = [
   { event = "turkish_customs", weight = 3 },
 ]
@@ -350,7 +351,7 @@ road_events = [
 from = "tashkent"
 to = "beijing"
 days = 5
-fare = 90
+fare = 45
 road_events = [
   { event = "beijing_train", weight = 3 },
 ]
@@ -359,7 +360,7 @@ road_events = [
 from = "beijing"
 to = "tashkent"
 days = 5
-fare = 90
+fare = 45
 road_events = [
   { event = "beijing_train", weight = 3 },
 ]

@@ -1,9 +1,9 @@
-//! Сверка прогона с порогами `[balance]`: беды и тишина каждой эпохи и стратегии, к её концу
-//! ломающие экономику.
+//! Сверка прогона с порогами `[balance]` и `[trade]`: беды и тишина каждой эпохи, стратегии, к её
+//! концу ломающие экономику, выгода лучшего рейса и перевес перекупщика над случайным ботом.
 
 use std::fmt;
 
-use crate::{BalanceRules, EpochReport, Report, Strategy};
+use crate::{BalanceFile, Bounds, EpochReport, EpochTrade, Report, Strategy, TradeReport};
 
 /// Что сверять: одну эпоху или все.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -44,6 +44,18 @@ pub enum Violation {
         measured: f64,
         limit: f64,
     },
+    /// Медиана выгоды лучшего рейса вне пределов: торговля не окупается или даёт слишком легко.
+    TripReturn {
+        epoch: String,
+        measured: f64,
+        bounds: Bounds,
+    },
+    /// Арбитражник к концу эпохи богаче случайного бота не во столько раз, сколько задано.
+    ArbitrageEdge {
+        epoch: String,
+        measured: f64,
+        bounds: Bounds,
+    },
 }
 
 /// Сверить нельзя: эпохи нет среди эпох прогона или для неё нет порога.
@@ -61,10 +73,13 @@ pub enum CheckError {
 
 const MORTALITY: &str = "[balance.mortality]";
 const QUIET_DAYS: &str = "[balance.quiet_days]";
+const ARBITRAGE_OVER_RANDOM: &str = "[trade.arbitrage_over_random]";
 
+/// Прогон `report` и замер торговли `trade` против порогов файла `rules` — для эпохи или всех.
 pub fn check(
     report: &Report,
-    rules: &BalanceRules,
+    trade: &TradeReport,
+    rules: &BalanceFile,
     scope: &CheckScope,
 ) -> Result<Vec<Violation>, CheckError> {
     let epochs: Vec<&EpochReport> = match scope {
@@ -88,11 +103,73 @@ pub fn check(
     let mut violations = Vec::new();
     for epoch in epochs {
         violations.extend(check_epoch(epoch, rules)?);
+        let measured = trade
+            .epoch(&epoch.epoch)
+            .ok_or_else(|| CheckError::UnknownEpoch {
+                epoch: epoch.epoch.clone(),
+                known: trade
+                    .epochs
+                    .iter()
+                    .map(|epoch| epoch.epoch.clone())
+                    .collect(),
+            })?;
+        violations.extend(check_trade(epoch, measured, rules)?);
     }
     Ok(violations)
 }
 
-fn check_epoch(epoch: &EpochReport, rules: &BalanceRules) -> Result<Vec<Violation>, CheckError> {
+/// Выгода лучшего рейса эпохи и перевес арбитражника над случайным ботом к её концу, если он
+/// меряется.
+fn check_trade(
+    epoch: &EpochReport,
+    measured: &EpochTrade,
+    rules: &BalanceFile,
+) -> Result<Vec<Violation>, CheckError> {
+    let trade = &rules.trade;
+    let mut violations = Vec::new();
+    if !trade.trip_return.contains(measured.trip_return) {
+        violations.push(Violation::TripReturn {
+            epoch: epoch.epoch.clone(),
+            measured: measured.trip_return,
+            bounds: trade.trip_return,
+        });
+    }
+    let bounds = *trade
+        .arbitrage_over_random
+        .get(&epoch.epoch)
+        .ok_or_else(|| CheckError::MissingThreshold {
+            epoch: epoch.epoch.clone(),
+            section: ARBITRAGE_OVER_RANDOM,
+        })?;
+    if let Some(edge) = arbitrage_edge(epoch)
+        && !bounds.contains(edge)
+    {
+        violations.push(Violation::ArbitrageEdge {
+            epoch: epoch.epoch.clone(),
+            measured: edge,
+            bounds,
+        });
+    }
+    Ok(violations)
+}
+
+/// Во сколько раз медиана капитала арбитражника к концу эпохи выше медианы случайного бота;
+/// `None`, если до конца эпохи не дожил кто-то из двоих или случайный бот ничего не имеет.
+pub fn arbitrage_edge(epoch: &EpochReport) -> Option<f64> {
+    let median = |strategy: Strategy| {
+        let capital = epoch.capital.as_ref()?;
+        let own = capital
+            .strategies
+            .iter()
+            .find(|capital| capital.strategy == strategy)?;
+        Some(own.median.kopecks() as f64)
+    };
+    let random = median(Strategy::Random).filter(|random| *random > 0.0)?;
+    Some(median(Strategy::Arbitrage)? / random)
+}
+
+fn check_epoch(epoch: &EpochReport, rules: &BalanceFile) -> Result<Vec<Violation>, CheckError> {
+    let rules = &rules.balance;
     let threshold = |section: &'static str,
                      thresholds: &std::collections::BTreeMap<String, f64>| {
         thresholds
@@ -173,6 +250,28 @@ impl fmt::Display for Violation {
                 formatter,
                 "{epoch}: медиана капитала {strategy} к концу эпохи — {measured:.2} общих медиан, \
                  порог {limit:.2} [balance] breaking_medians"
+            ),
+            Self::TripReturn {
+                epoch,
+                measured,
+                bounds,
+            } => write!(
+                formatter,
+                "{epoch}: выгода лучшего рейса — {:.1}% кошелька, пределы {:.1}–{:.1}% [trade] \
+                 trip_return",
+                measured * 100.0,
+                bounds.from * 100.0,
+                bounds.to * 100.0
+            ),
+            Self::ArbitrageEdge {
+                epoch,
+                measured,
+                bounds,
+            } => write!(
+                formatter,
+                "{epoch}: арбитражник к концу эпохи богаче случайного бота в {measured:.1} раза, \
+                 пределы {:.1}–{:.1} {ARBITRAGE_OVER_RANDOM}",
+                bounds.from, bounds.to
             ),
         }
     }

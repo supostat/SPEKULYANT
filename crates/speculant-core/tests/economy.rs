@@ -6,7 +6,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use speculant_core::content::{CityId, Content, GoodId, MoneyPlaceId};
-use speculant_core::economy::{Currency, Markets, Money, Real, Trader};
+use speculant_core::economy::{CityMarket, Currency, MarketRules, Markets, Money, Real, Trader};
 use speculant_core::rng::WorldRng;
 use speculant_core::time::GameDate;
 use speculant_core::view::{MoneyPlaceView, PocketItemView};
@@ -216,6 +216,40 @@ fn a_city_multiplier_scales_only_its_category() {
     assert_eq!(
         price("leningrad", "video_recorder"),
         price("moscow", "video_recorder")
+    );
+}
+
+/// Наценка последней штуки запаса к средней цене без половины разницы цен покупки и продажи.
+fn last_unit_markup(content: &Content, elasticity: f64) -> f64 {
+    let jeans = good("jeans");
+    let normal_stock = content.goods[&jeans].stock;
+    let rules = MarketRules {
+        elasticity,
+        ..content.market
+    };
+    let normal_kopecks = 10_000.0;
+    let last = CityMarket::new(&content.goods).buy_price_after(
+        &jeans,
+        normal_kopecks,
+        normal_stock,
+        &rules,
+        normal_stock - 1,
+    );
+    last / rules.markup() / normal_kopecks
+}
+
+#[test]
+fn the_elasticity_of_the_rules_softens_how_a_buyout_raises_the_price() {
+    let content = content();
+    let steep = last_unit_markup(&content, 1.0);
+    let soft = last_unit_markup(&content, 0.5);
+    assert!(
+        steep > 1.5,
+        "при крутизне 1 последняя штука почти вдвое дороже средней"
+    );
+    assert!(
+        (soft - steep.sqrt()).abs() < 1e-12,
+        "при крутизне 0,5 наценка — корень из наценки при 1: {soft} против {steep}"
     );
 }
 

@@ -4,8 +4,8 @@ region = "caucasus"
 market = "Дезертирский рынок"
 
 [multipliers]
-alcohol = 0.7
-food = 0.7
-clothes = 1.2
-media = 1.2
-sweets = 1.2
+alcohol = 0.55
+food = 0.55
+clothes = 1.3
+media = 1.3
+sweets = 1.3

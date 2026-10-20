@@ -10,8 +10,6 @@ use crate::content::{Good, GoodId};
 /// Цена штуки считается по запасу посередине между «до» и «после» сделки, поэтому купить штуку и
 /// тут же продать её обратно всегда дороже, чем выручить.
 const HALF_UNIT: f64 = 0.5;
-/// Пустой рынок продаёт вдвое дороже средней цены.
-const EMPTY_MARKET_MARKUP: f64 = 2.0;
 
 /// Толкучка одного города (§5.2 п. 3): сколько каждого товара сейчас у торговцев. Спрос выражен в
 /// цене: чем больше товара против обычного запаса, тем дешевле его и покупают, и продают. Крупная
@@ -64,7 +62,7 @@ impl CityMarket {
         bought: u32,
     ) -> f64 {
         let between = f64::from(self.stock(good)) - f64::from(bought) - HALF_UNIT;
-        unit_price(normal_kopecks, normal_stock, between) * rules.markup()
+        unit_price(normal_kopecks, normal_stock, between, rules) * rules.markup()
     }
 
     /// Реальные цены штук при продаже `quantity` подряд: рынок заваливается, каждая следующая дешевле.
@@ -80,7 +78,7 @@ impl CityMarket {
         (0..quantity)
             .map(|sold| {
                 let between = stock + f64::from(sold) + HALF_UNIT;
-                unit_price(normal_kopecks, normal_stock, between) * rules.markdown()
+                unit_price(normal_kopecks, normal_stock, between, rules) * rules.markdown()
             })
             .collect()
     }
@@ -132,10 +130,16 @@ impl CityMarket {
 }
 
 /// Цена штуки при запасе `stock_between`: при обычном запасе — средняя цена, на пустом рынке —
-/// вдвое дороже, на заваленном — дешевле в разы.
-fn unit_price(normal_kopecks: f64, normal_stock: u32, stock_between: f64) -> f64 {
+/// дороже в 2 в степени крутизны, на заваленном — дешевле; крутизна — из правил толкучки.
+fn unit_price(
+    normal_kopecks: f64,
+    normal_stock: u32,
+    stock_between: f64,
+    rules: &MarketRules,
+) -> f64 {
     let normal_stock = f64::from(normal_stock);
-    normal_kopecks * EMPTY_MARKET_MARKUP * normal_stock / (stock_between + normal_stock)
+    let pressure = 2.0 * normal_stock / (stock_between + normal_stock);
+    normal_kopecks * libm::pow(pressure, rules.elasticity)
 }
 
 /// Равновероятное целое от `-amplitude` до `amplitude`.
