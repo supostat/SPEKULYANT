@@ -2,10 +2,12 @@ name: release
 
 # Релиз по тегу v<версия>: версия сверяется с тегом до любой сборки, каждая платформа
 # экспортируется на своём раннере тем же гейтом, что и локально (export-check), а три архива
-# прикладываются к релизу GitHub. Мост macOS — universal (arm64 + x86_64).
+# прикладываются к релизу GitHub. Мост macOS — universal (arm64 + x86_64). Ручной запуск
+# (Actions → release → Run workflow) собирает те же три архива как артефакты прогона, без релиза.
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -58,6 +60,7 @@ jobs:
   publish:
     name: Релиз ${{ github.ref_name }}
     needs: export
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
