@@ -13,6 +13,8 @@ use speculant_core::view::{MoneyPlaceView, PocketItemView};
 use speculant_core::{Command, CommandError, Game, LifeSettings};
 
 const ECONOMY: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/economy");
+/// Дрейф цен в фикстуре выключен: сид дрейфа рынков ни на что не влияет.
+const DRIFT_SEED: u64 = 1;
 
 fn content() -> Arc<Content> {
     Arc::new(Content::load(Path::new(ECONOMY)).expect("фикстура экономики валидна"))
@@ -205,7 +207,7 @@ fn amounts_read_like_a_dos_price_tag() {
 #[test]
 fn a_city_multiplier_scales_only_its_category() {
     let content = content();
-    let markets = Markets::new(&content);
+    let markets = Markets::new(&content, DRIFT_SEED);
     let day = date(1986, 3, 14);
     let price = |city_id: &str, good_id: &str| {
         markets
@@ -287,7 +289,7 @@ fn a_big_sale_crashes_the_price_and_the_market_recovers_in_days() {
     let content = content();
     let jeans = good("jeans");
     let moscow = city("moscow");
-    let mut markets = Markets::new(&content);
+    let mut markets = Markets::new(&content, DRIFT_SEED);
     let mut rng = WorldRng::new(7);
     let mut today = date(1986, 3, 14);
     let before = markets
@@ -316,7 +318,7 @@ fn a_big_sale_crashes_the_price_and_the_market_recovers_in_days() {
         6,
         "за восемь дней — обычный запас"
     );
-    let untouched = Markets::new(&content);
+    let untouched = Markets::new(&content, DRIFT_SEED);
     assert_eq!(
         markets.quote(&content, &moscow, &jeans, today),
         untouched.quote(&content, &moscow, &jeans, today)
@@ -330,7 +332,7 @@ fn a_shock_moves_a_price_for_its_term_and_a_permanent_one_stays() {
     let video_recorder = good("video_recorder");
     let moscow = city("moscow");
     let leningrad = city("leningrad");
-    let mut markets = Markets::new(&content);
+    let mut markets = Markets::new(&content, DRIFT_SEED);
     let mut rng = WorldRng::new(7);
     let start = date(1986, 3, 14);
     let price = |markets: &Markets, city: &CityId, good: &GoodId, day: GameDate| {
@@ -339,7 +341,7 @@ fn a_shock_moves_a_price_for_its_term_and_a_permanent_one_stays() {
             .expect("товар продают")
     };
     let calm = |city: &CityId, good: &GoodId, day: GameDate| {
-        price(&Markets::new(&content), city, good, day)
+        price(&Markets::new(&content, DRIFT_SEED), city, good, day)
     };
     markets.apply_shock(jeans.clone(), Some(moscow.clone()), 2.0, Some(10), start);
     assert!(

@@ -5,13 +5,11 @@
 use super::super::Game;
 use crate::content::CityId;
 use crate::economy::Shock;
-use crate::rng::fnv1a;
+use crate::rng::{fnv1a, fraction_of};
 use crate::time::GameDate;
 
 const DEFICIT: &str = "дефицит";
 const GLUT: &str = "завал";
-/// Старшие биты хэша — равномерная доля от нуля до единицы.
-const FRACTION_BITS: u32 = 53;
 
 /// Слухи о действующих шоках городов, кроме того, где игрок: «Рига: дефицит — Джинсы».
 pub(super) fn price_rumors(game: &Game, today: GameDate) -> Vec<String> {
@@ -46,8 +44,7 @@ fn told_city<'a>(game: &'a Game, shock: &Shock, city: &'a CityId, today: GameDat
             .chain(city.as_str().bytes())
             .chain(until.to_le_bytes()),
     );
-    let share = (hash >> (u64::BITS - FRACTION_BITS)) as f64 / (1_u64 << FRACTION_BITS) as f64;
-    if share < game.content.swings.rumor_accuracy {
+    if fraction_of(hash) < game.content.swings.rumor_accuracy {
         return city;
     }
     let others: Vec<&CityId> = game

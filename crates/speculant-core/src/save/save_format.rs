@@ -12,6 +12,10 @@ const FIRST_VERSION: u32 = 1;
 const PAGER_KEY: &str = "pager";
 const PRICE_HISTORY_KEY: &str = "price_history";
 const SEEN_PRICES_KEY: &str = "seen_prices";
+const MARKETS_KEY: &str = "markets";
+const RNG_KEY: &str = "rng";
+const SEED_KEY: &str = "seed";
+const DRIFT_KEY: &str = "drift";
 
 /// Вид файла и версия формата его тела. Когда тело меняется, версия растёт и добавляется шаг
 /// миграции: `migrations[i]` переводит тело версии `i + 1` в версию `i + 2`, поэтому файлы любой
@@ -23,11 +27,16 @@ pub struct SaveFormat {
 }
 
 /// Файл жизни: мир одной жизни. Версия 2 добавила ленту пейджера, версия 3 — историю цен,
-/// версия 4 — цены, какими игрок видел толкучки.
+/// версия 4 — цены, какими игрок видел толкучки, версия 5 — дрейф цен.
 pub const LIFE: SaveFormat = SaveFormat {
     kind: "speculant-life",
-    version: 4,
-    migrations: &[add_pager, add_price_history, add_seen_prices],
+    version: 5,
+    migrations: &[
+        add_pager,
+        add_price_history,
+        add_seen_prices,
+        add_drift_seed,
+    ],
 };
 
 /// Файл метапрогрессии: открытия, книжка, история и рекорды.
@@ -60,6 +69,20 @@ fn add_price_history(mut body: Value) -> Value {
 fn add_seen_prices(mut body: Value) -> Value {
     if let Value::Object(world) = &mut body {
         world.insert(SEEN_PRICES_KEY.to_owned(), json!({ "cities": {} }));
+    }
+    body
+}
+
+/// Жизнь версии 4 — до дрейфа цен: дрейф берёт сид мира, как у новой жизни.
+fn add_drift_seed(mut body: Value) -> Value {
+    if let Value::Object(world) = &mut body
+        && let Some(seed) = world
+            .get(RNG_KEY)
+            .and_then(|rng| rng.get(SEED_KEY))
+            .cloned()
+        && let Some(Value::Object(markets)) = world.get_mut(MARKETS_KEY)
+    {
+        markets.insert(DRIFT_KEY.to_owned(), json!({ SEED_KEY: seed }));
     }
     body
 }

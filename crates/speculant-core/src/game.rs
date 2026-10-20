@@ -113,7 +113,7 @@ impl Game {
             rng,
             timeline,
             city: biography.start_city.clone(),
-            markets: Markets::new(&content),
+            markets: Markets::new(&content, settings.seed),
             price_history: PriceHistory::default(),
             seen_prices: SeenPrices::default(),
             player: Trader::new(cash, &content),

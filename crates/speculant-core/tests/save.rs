@@ -1,12 +1,13 @@
 //! Сохранения (§11.4, решение 15.10): загруженная жизнь показывает побайтно тот же снимок и живёт
 //! дальше так же, как несохранённая; ironman сохраняется сам после каждого дня и поступка, не
 //! откатывается и стирается в финале; свободный режим пишет именованные слоты; файлы версии 1
-//! читаются, а файлы новее, испорченные и сделанные с другими данными — нет.
+//! читаются, файлы версии 4 берут дрейф цен из сида мира, а файлы новее, испорченные и сделанные с
+//! другими данными — нет.
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use speculant_core::content::{Content, EventId};
+use speculant_core::content::{Content, EventId, GoodId};
 use speculant_core::save::{LIFE, Storage};
 use speculant_core::time::GameDate;
 use speculant_core::{Command, CommandError, Game, LifeSettings};
@@ -326,6 +327,65 @@ fn a_version_one_directory_still_loads() {
     assert!(
         game.advance(DAY_MILLISECONDS),
         "жизнь из старого файла идёт"
+    );
+}
+
+#[test]
+fn a_version_four_life_takes_its_price_drift_from_the_world_seed() {
+    let mut content = Content::load(Path::new(SAVE)).expect("фикстура сохранений валидна");
+    content.drift.amplitude = 0.3;
+    let content = Arc::new(content);
+    let storage = storage("version_four");
+    let mut game = Game::open(&settings(7, false), Arc::clone(&content), storage.clone())
+        .expect("жизнь начинается");
+    live_frames_until(&mut game, 40);
+    play(
+        &mut game,
+        Command::Save {
+            slot: "five".to_owned(),
+        },
+    );
+    let jeans = GoodId::new("jeans");
+    let item = &content.goods[&jeans];
+    let curve = item
+        .curve
+        .kopecks_on(game.today())
+        .expect("джинсы продаются")
+        * content.cities[game.city()].multiplier(&item.category);
+    let normal = game
+        .markets()
+        .normal_kopecks(&content, game.city(), &jeans, game.today())
+        .expect("джинсы продаются");
+    assert!(
+        (normal / curve - 1.0).abs() > 1e-6,
+        "цена в этом мире ушла от кривой"
+    );
+
+    let mut file: serde_json::Value =
+        serde_json::from_str(&storage.read_life("five").expect("файл версии 5"))
+            .expect("файл жизни — JSON");
+    file["version"] = 4.into();
+    file["body"]["markets"]
+        .as_object_mut()
+        .expect("рынки в теле")
+        .remove("drift")
+        .expect("дрейф в файле версии 5");
+    storage
+        .write_life("four", &file.to_string())
+        .expect("файл пишется");
+    let mut resumed =
+        Game::resume(Arc::clone(&content), storage, "four").expect("файл версии 4 читается");
+    assert_eq!(
+        view_json(&resumed),
+        view_json(&game),
+        "цены те же: дрейф взял сид мира"
+    );
+    live_frames_until(&mut game, 120);
+    live_frames_until(&mut resumed, 120);
+    assert_eq!(
+        view_json(&resumed),
+        view_json(&game),
+        "и дальше идут так же"
     );
 }
 

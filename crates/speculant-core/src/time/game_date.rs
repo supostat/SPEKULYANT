@@ -31,7 +31,8 @@ const MONTHS_NOMINATIVE: [&str; 12] = [
 ];
 const WEEKDAYS_SHORT: [&str; 7] = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"];
 const MONTHS_IN_YEAR: i64 = 12;
-const UNIX_DAY_OF_START: i64 = days_from_civil(1984, 1, 1);
+const START_YEAR: i64 = 1984;
+const UNIX_DAY_OF_START: i64 = days_from_civil(START_YEAR, 1, 1);
 const UNIX_EPOCH_WEEKDAY: i64 = 3;
 
 /// День календаря как номер от 1 января 1984 года — первого дня каждой жизни. Даты раньше старта
@@ -129,14 +130,15 @@ impl GameDate {
     /// Сколько дней в месяце этой даты.
     pub fn days_in_month(self) -> u32 {
         let (year, month, _) = self.year_month_day();
-        let (next_year, next_month) = if month == 12 {
-            (year + 1, 1)
-        } else {
-            (year, month + 1)
-        };
-        let days = days_from_civil(i64::from(next_year), next_month, 1)
-            - days_from_civil(i64::from(year), month, 1);
-        u32::try_from(days).expect("в месяце 28–31 день")
+        month_length(year, month)
+    }
+
+    /// Месяцы от 1 января 1984 года до начала этого дня с прошедшей долей текущего месяца:
+    /// 1 января 1984 года — 0, 15 февраля 1984 года — 1 + 14/29; даты раньше старта отрицательны.
+    pub fn months_from_start(self) -> f64 {
+        let (year, month, day) = self.year_month_day();
+        let whole = (i64::from(year) - START_YEAR) * MONTHS_IN_YEAR + i64::from(month - 1);
+        whole as f64 + f64::from(day - 1) / f64::from(month_length(year, month))
     }
 
     /// Вчерашний день.
@@ -210,6 +212,18 @@ impl<'de> Deserialize<'de> for GameDate {
         Self::parse_iso(&text)
             .ok_or_else(|| D::Error::custom(format!("«{text}» — не дата в форме ГГГГ-ММ-ДД")))
     }
+}
+
+/// Сколько дней в месяце года.
+fn month_length(year: i32, month: u32) -> u32 {
+    let (next_year, next_month) = if month == 12 {
+        (year + 1, 1)
+    } else {
+        (year, month + 1)
+    };
+    let days = days_from_civil(i64::from(next_year), next_month, 1)
+        - days_from_civil(i64::from(year), month, 1);
+    u32::try_from(days).expect("в месяце 28–31 день")
 }
 
 /// Номер дня от 1970-01-01 по григорианскому календарю (алгоритм Говарда Хиннанта).

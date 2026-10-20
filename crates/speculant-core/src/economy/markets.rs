@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
-use super::{CityMarket, Money, Shock};
+use super::{CityMarket, Money, PriceDrift, Shock};
 use crate::content::{CityId, Content, GoodId};
 use crate::rng::WorldRng;
 use crate::time::GameDate;
@@ -16,17 +16,19 @@ pub struct Quote {
     pub stock: u32,
 }
 
-/// Рынки всех городов и действующие шоки цен (§5.2). Цена в городе — кривая товара, множитель
-/// города по категории, шоки событий и местный запас; соперники торгуют по тем же правилам.
+/// Рынки всех городов, действующие шоки цен и дрейф (§5.2). Цена в городе — кривая товара,
+/// множитель города по категории, дрейф и сезон, шоки событий и местный запас; соперники торгуют
+/// по тем же правилам.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Markets {
     cities: BTreeMap<CityId, CityMarket>,
     shocks: Vec<Shock>,
+    drift: PriceDrift,
 }
 
 impl Markets {
-    /// Рынки каждого города с обычным запасом каждого товара.
-    pub fn new(content: &Content) -> Self {
+    /// Рынки каждого города с обычным запасом каждого товара; цены дрейфуют по сиду мира.
+    pub fn new(content: &Content, seed: u64) -> Self {
         Self {
             cities: content
                 .cities
@@ -34,6 +36,7 @@ impl Markets {
                 .map(|city| (city.clone(), CityMarket::new(&content.goods)))
                 .collect(),
             shocks: Vec::new(),
+            drift: PriceDrift::new(seed),
         }
     }
 
@@ -54,7 +57,8 @@ impl Markets {
     }
 
     /// Средняя реальная цена штуки при обычном запасе в копейках 1984 года: кривая товара,
-    /// множитель города по категории и действующие шоки; `None`, пока товара ещё нет.
+    /// множитель города по категории, дрейф и сезон и действующие шоки; `None`, пока товара ещё
+    /// нет.
     pub fn normal_kopecks(
         &self,
         content: &Content,
@@ -65,13 +69,19 @@ impl Markets {
         let item = &content.goods[good];
         let curve = item.curve.kopecks_on(date)?;
         let multiplier = content.cities[city].multiplier(&item.category);
+        let drift = self.drift.factor(
+            &content.drift,
+            good,
+            &content.categories[&item.category],
+            date,
+        );
         let shocks: f64 = self
             .shocks
             .iter()
             .filter(|shock| shock.applies_to(good, city))
             .map(|shock| shock.factor)
             .product();
-        Some(curve * multiplier * shocks)
+        Some(curve * multiplier * drift * shocks)
     }
 
     /// Ценники `quantity` штук подряд при покупке; `None`, пока товара ещё нет. Хватает ли запаса,

@@ -12,8 +12,9 @@ use crate::project_root::project_root;
 
 /// `cargo xtask balance-check <эпоха|all>`: прогон `[balance] lives` жизней всеми стратегиями с
 /// сидом `[balance] seed` на настоящем ядре и данных, замер выгоды рейсов с кошельком
-/// `[trade] purse` и сверка эпохи или всех эпох с порогами `[balance]` и `[trade]` из
-/// `data/balance.toml` — беды, тишина, стратегии, ломающие экономику, и окупаемость торговли.
+/// `[trade] purse` при дрейфе цен того же сида и сверка эпохи или всех эпох с порогами
+/// `[balance]` и `[trade]` из `data/balance.toml` — беды, тишина, стратегии, ломающие экономику,
+/// и окупаемость торговли.
 pub fn run(scope: &str) -> Result<()> {
     let data = project_root().join("data");
     let content = Content::load(&data).map_err(|errors| {
@@ -32,7 +33,7 @@ pub fn run(scope: &str) -> Result<()> {
         curiosity: 0.0,
     };
     let report = Report::build(&content, settings.seed, &simulate(&content, &settings));
-    let trade = TradeReport::build(&content, rules.trade.purse);
+    let trade = TradeReport::build(&content, rules.trade.purse, settings.seed);
     let violations = check(&report, &trade, &rules, &CheckScope::parse(scope))?;
     for epoch in &report.epochs {
         let trip = trade.epoch(&epoch.epoch).map(|trade| trade.trip_return);

@@ -15,6 +15,8 @@ use speculant_core::{Command, Game, LifeSettings};
 
 const NPC: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/npc");
 const DAY_MILLISECONDS: u32 = 1800;
+/// Дрейф цен в фикстуре выключен: сид дрейфа рынков ни на что не влияет.
+const DRIFT_SEED: u64 = 1;
 
 fn load() -> Content {
     Content::load(Path::new(NPC)).expect("фикстура соперников валидна")
@@ -182,13 +184,13 @@ fn a_shuttle_picks_its_cargo_by_todays_prices_of_both_markets() {
             .map(|deal| (deal.good.to_string(), deal.side))
             .collect()
     };
-    let mut usual = Markets::new(&content);
+    let mut usual = Markets::new(&content, DRIFT_SEED);
     assert_eq!(
         cargo(&mut usual),
         [("jeans".to_owned(), DealSide::Bought)],
         "джинсы в Ленинграде дороже в 1,3 раза"
     );
-    let mut glutted = Markets::new(&content);
+    let mut glutted = Markets::new(&content, DRIFT_SEED);
     glutted.apply_shock(
         GoodId::new("chewing_gum"),
         Some(CityId::new("moscow")),
@@ -201,7 +203,7 @@ fn a_shuttle_picks_its_cargo_by_todays_prices_of_both_markets() {
         [("chewing_gum".to_owned(), DealSide::Bought)],
         "завал жвачки в Москве — сегодня она выгоднее джинсов"
     );
-    let mut flooded = Markets::new(&content);
+    let mut flooded = Markets::new(&content, DRIFT_SEED);
     flooded.put(&CityId::new("leningrad"), &GoodId::new("jeans"), 60);
     assert_eq!(
         cargo(&mut flooded),
@@ -242,7 +244,7 @@ fn a_shuttle_deal_on_the_players_market_is_a_line_in_the_feed() {
 fn racketeers_collect_and_bankers_grow_rich() {
     let content = load();
     let mut rng = WorldRng::new(seed_with(Strategy::Banker));
-    let mut markets = Markets::new(&content);
+    let mut markets = Markets::new(&content, DRIFT_SEED);
     let mut rivals = Rivals::new(&content, &mut rng, GameDate::START);
     let mut today = GameDate::START;
     for _ in 0..365 {
@@ -271,7 +273,7 @@ fn fates_take_rivals_out_and_the_zone_lets_them_back() {
         rules.prison_chance = 1.0;
     }
     let mut rng = WorldRng::new(7);
-    let mut markets = Markets::new(&calm);
+    let mut markets = Markets::new(&calm, DRIFT_SEED);
     let mut rivals = Rivals::new(&calm, &mut rng, GameDate::START);
     let day_one = GameDate::START.next();
     rivals.next_day(&doomed, &mut markets, &mut rng, day_one);
@@ -305,7 +307,7 @@ fn fates_take_rivals_out_and_the_zone_lets_them_back() {
     }
     let mut rng = WorldRng::new(7);
     let mut rivals = Rivals::new(&poor, &mut rng, GameDate::START);
-    let mut markets = Markets::new(&poor);
+    let mut markets = Markets::new(&poor, DRIFT_SEED);
     rivals.next_day(&poor, &mut markets, &mut rng, day_one);
     assert!(
         rivals

@@ -12,7 +12,7 @@ use super::{
     Policy, Route, TimelineNodeId, ZoneService, ZoneServiceId,
 };
 use crate::business::{BusinessRules, PolicyKind};
-use crate::economy::{MarketRules, MoneyRules, SwingRules};
+use crate::economy::{DriftRules, MarketRules, MoneyRules, SwingRules};
 use crate::events::EventRules;
 use crate::history::HistoryGenerator;
 use crate::life::LifeRules;
@@ -25,6 +25,7 @@ use crate::zone::ZoneRules;
 const TIME_FILE: &str = "epochs/time.toml";
 const MARKET_FILE: &str = "economy/market.toml";
 const SWINGS_FILE: &str = "economy/swings.toml";
+const DRIFT_FILE: &str = "economy/drift.toml";
 const MONEY_FILE: &str = "economy/money.toml";
 const ROUTES_FILE: &str = "routes.toml";
 const REPUTATION_FILE: &str = "reputation.toml";
@@ -50,6 +51,7 @@ pub(super) struct Parsed<'a> {
     pub time: Option<TimeRules>,
     pub market: Option<(&'a ContentFile, MarketRules)>,
     pub swings: Option<(&'a ContentFile, SwingRules)>,
+    pub drift: Option<(&'a ContentFile, DriftRules)>,
     pub money: Option<(&'a ContentFile, MoneyRules)>,
     pub reputation: Option<(&'a ContentFile, ReputationRules)>,
     pub event_rules: Option<(&'a ContentFile, EventRules)>,
@@ -111,6 +113,9 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
             None,
             "нет правил дефицитов и завалов",
         ));
+    }
+    if parsed.drift.is_none() {
+        errors.push(ContentError::new(DRIFT_FILE, None, "нет правил дрейфа цен"));
     }
     if parsed.money.is_none() {
         errors.push(ContentError::new(
@@ -187,6 +192,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
     let (
         Some((_, market)),
         Some((_, swings)),
+        Some((_, drift)),
         Some((_, money)),
         Some((_, reputation)),
         Some((_, event_rules)),
@@ -199,6 +205,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
     ) = (
         parsed.market,
         parsed.swings,
+        parsed.drift,
         parsed.money,
         parsed.reputation,
         parsed.event_rules,
@@ -216,6 +223,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         time,
         market,
         swings,
+        drift,
         money,
         reputation,
         event_rules,
@@ -297,6 +305,11 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
                 parsed.swings = Some((file, rules));
             }
         }
+        ["economy", "drift.toml"] => {
+            if let Some(rules) = parse::<DriftRules>(file, errors) {
+                parsed.drift = Some((file, rules));
+            }
+        }
         ["economy", "money.toml"] => {
             if let Some(rules) = parse::<MoneyRules>(file, errors) {
                 parsed.money = Some((file, rules));
@@ -373,7 +386,7 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         _ => errors.push(ContentError::new(
             &file.path,
             None,
-            format!("путь не входит в раскладку data/ (goods/, categories/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {SWINGS_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, {LIFE_FILE}, housing/, endings/, epochs/, biographies/, npc/, events/<эпоха>/, {ZONE_RULES_FILE}, zone/services/, zone/events/, {HISTORY_GENERATOR_FILE}, history/, history/post2004/, {BOOT_MELODY_FILE}, balance.toml)"),
+            format!("путь не входит в раскладку data/ (goods/, categories/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {SWINGS_FILE}, {DRIFT_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, {LIFE_FILE}, housing/, endings/, epochs/, biographies/, npc/, events/<эпоха>/, {ZONE_RULES_FILE}, zone/services/, zone/events/, {HISTORY_GENERATOR_FILE}, history/, history/post2004/, {BOOT_MELODY_FILE}, balance.toml)"),
         )),
     }
 }

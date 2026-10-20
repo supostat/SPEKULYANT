@@ -1,6 +1,7 @@
 //! Выгода торговли (§5.2): лучший рейс с кошельком `[trade] purse` раз в неделю каждой эпохи — по
-//! открытым маршрутам из открытых городов, при обычном запасе обеих толкучек, за вычетом проезда.
-//! Выгода — прибыль к кошельку: деньги, которые рынок не смог принять, простаивают.
+//! открытым маршрутам из открытых городов, при обычном запасе обеих толкучек и дрейфе цен по сиду,
+//! за вычетом проезда. Выгода — прибыль к кошельку: деньги, которые рынок не смог принять,
+//! простаивают.
 
 use serde::Serialize;
 use speculant_core::Content;
@@ -28,8 +29,8 @@ pub struct EpochTrade {
 }
 
 impl TradeReport {
-    pub fn build(content: &Content, purse: Real) -> Self {
-        let markets = Markets::new(content);
+    pub fn build(content: &Content, purse: Real, seed: u64) -> Self {
+        let markets = Markets::new(content, seed);
         let epochs = content
             .time
             .epochs

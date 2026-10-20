@@ -13,7 +13,7 @@ use super::{
     Biography, BusinessChange, Choice, City, Conditions, Consequences, ContentError, ContentFile,
     EpochProfile, Event, Faction, Good, GoodId, MoneyPlace, NpcTemplate, PriceShock,
 };
-use crate::economy::{MarketRules, MoneyRules, RubleCurve, SwingRules};
+use crate::economy::{DriftRules, MarketRules, MoneyRules, RubleCurve, SwingRules};
 use crate::events::EventRules;
 use crate::npc::RivalRules;
 use crate::reputation::ReputationRules;
@@ -306,6 +306,15 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
             },
         );
     }
+    if let Some((file, rules)) = &parsed.drift {
+        check_drift(
+            rules,
+            &mut Report {
+                file,
+                errors: &mut *errors,
+            },
+        );
+    }
     if let Some((file, rules)) = &parsed.money {
         check_money(
             rules,
@@ -402,7 +411,7 @@ fn check_good(entry: &Entry<'_, Good>, known: &Known, report: &mut Report<'_, '_
 }
 
 /// Категория называется и собирает товары: пустая категория ни о чём не говорит ни городу, ни
-/// экрану поездки.
+/// экрану поездки; множители сезона цену не обнуляют.
 fn check_categories(parsed: &Parsed<'_>, errors: &mut Vec<ContentError>) {
     let used: BTreeSet<&str> = parsed
         .goods
@@ -424,6 +433,17 @@ fn check_categories(parsed: &Parsed<'_>, errors: &mut Vec<ContentError>) {
             report.at(
                 None,
                 format!("у категории {} нет ни одного товара", entry.id),
+            );
+        }
+        if let Some(season) = entry.value.season
+            && let Some(month) = season.iter().position(|multiplier| *multiplier <= 0.0)
+        {
+            report.at(
+                report.file.line_of("season"),
+                format!(
+                    "season: множитель месяца {} должен быть больше нуля",
+                    month + 1
+                ),
             );
         }
     }
@@ -661,6 +681,19 @@ fn check_biography(biography: &Biography, known: &Known, report: &mut Report<'_,
         );
     }
     life::check_biography(biography, known, report);
+}
+
+/// Дрейф уводит цену от кривой меньше чем на всю её величину: цена не доходит до нуля.
+fn check_drift(rules: &DriftRules, report: &mut Report<'_, '_>) {
+    if !(0.0..1.0).contains(&rules.amplitude) {
+        report.at(
+            report.file.line_of("amplitude"),
+            format!(
+                "amplitude = {}: дрейф — доля от 0 до 1, не включая 1",
+                rules.amplitude
+            ),
+        );
+    }
 }
 
 /// Доли — от нуля до единицы, дефицит поднимает цену, завал опускает, а срок не пуст.

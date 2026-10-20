@@ -1,5 +1,6 @@
 //! Выгода торговли: лучший рейс с кошельком раз в неделю каждой эпохи — по открытым маршрутам из
-//! открытых городов, при обычном запасе, за вычетом проезда; выгода — прибыль к кошельку.
+//! открытых городов, при обычном запасе и дрейфе цен по сиду, за вычетом проезда; выгода — прибыль
+//! к кошельку.
 
 use std::path::Path;
 
@@ -16,15 +17,14 @@ const TRAVEL: &str = concat!(
 const EPOCHS: [&str; 4] = ["stagnation", "perestroika", "wild_market", "stabilization"];
 /// Недель в застое: с 1 января 1984 года по 31 декабря 1987-го.
 const STAGNATION_WEEKS: usize = 209;
+/// Дрейф цен в фикстуре поездок выключен: сид ни на что не влияет.
+const DRIFT_SEED: u64 = 1;
 
 #[test]
 fn on_the_real_data_the_best_trip_of_every_epoch_pays_its_fare() {
     let content = Content::load(Path::new(DATA)).expect("data/ валиден");
-    let purse = BalanceFile::read(Path::new(DATA))
-        .expect("data/balance.toml разбирается")
-        .trade
-        .purse;
-    let trade = TradeReport::build(&content, purse);
+    let rules = BalanceFile::read(Path::new(DATA)).expect("data/balance.toml разбирается");
+    let trade = TradeReport::build(&content, rules.trade.purse, rules.balance.seed);
     let epochs: Vec<&str> = trade
         .epochs
         .iter()
@@ -51,7 +51,7 @@ fn a_trip_from_a_city_that_is_still_closed_does_not_count() {
         .expect("Варшава в фикстуре")
         .multipliers
         .insert(CategoryId::new("clothes"), 0.3);
-    let trade = TradeReport::build(&content, Real::from_kopecks(50_000));
+    let trade = TradeReport::build(&content, Real::from_kopecks(50_000), DRIFT_SEED);
     let stagnation = trade.epoch("stagnation").expect("застой с концом");
     assert!(
         stagnation.trip_return < 0.0,
