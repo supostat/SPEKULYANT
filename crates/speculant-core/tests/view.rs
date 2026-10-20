@@ -276,6 +276,57 @@ fn jeans_row(game: &Game) -> speculant_core::view::MarketRowView {
         .expect("джинсы на толкучке")
 }
 
+fn gum_row(game: &Game) -> speculant_core::view::MarketRowView {
+    game.view()
+        .market
+        .goods
+        .into_iter()
+        .find(|row| row.good == "chewing_gum")
+        .expect("жвачка на толкучке")
+}
+
+fn last_message(game: &Game) -> String {
+    game.view()
+        .messages
+        .last()
+        .cloned()
+        .expect("сделка в ленте")
+}
+
+#[test]
+fn the_deal_totals_are_what_the_deal_pays() {
+    let mut game = quiet_life();
+    let market = gum_row(&game);
+    assert_eq!(
+        market.buy_totals.len().to_string(),
+        market.stock,
+        "покупка — до всего запаса толкучки"
+    );
+    assert!(market.sell_totals.is_empty(), "продавать нечего");
+    game.apply(Command::Buy {
+        good: "chewing_gum".to_owned(),
+        quantity: 3,
+    })
+    .expect("жвачка по карману");
+    assert!(
+        last_message(&game).ends_with(&format!(" за {}", market.buy_totals[2])),
+        "{}",
+        last_message(&game)
+    );
+    let bought = gum_row(&game);
+    assert_eq!(bought.sell_totals.len(), 3, "продажа — до всего, что есть");
+    game.apply(Command::Sell {
+        good: "chewing_gum".to_owned(),
+        quantity: 3,
+    })
+    .expect("жвачка в кармане");
+    assert!(
+        last_message(&game).ends_with(&format!(" за {}", bought.sell_totals[2])),
+        "{}",
+        last_message(&game)
+    );
+}
+
 #[test]
 fn the_price_chart_starts_at_birth_and_grows_by_a_week() {
     let mut game = quiet_life();

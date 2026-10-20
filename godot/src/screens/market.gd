@@ -3,9 +3,10 @@ extends RefCounted
 ## Рынок, главный экран (docs/SPEKULYANT.md §13.3 п. 1, макет «Рынок» дизайн-книги): шапка, толкучка
 ## — цены, запас толкучки и сколько товара у игрока, — карман с угрозой эпохи, слухи, сообщения, ход
 ## времени и строка F-клавиш. Стрелки выбирают товар, Enter открывает график его цены,
-## F2 и F3 открывают окно количества для покупки и продажи, пробел — пауза, +/− — скорость, F4 —
-## поездка; F1 — помощь, F5 — связи, F6 — дела, F7 — пейджер, F10 и Esc — меню выхода. Пока открыто
-## окно количества, время стоит.
+## F2 и F3 открывают окно количества для покупки и продажи — с ценой первой штуки и итогом сделки,
+## ведь каждая следующая штука сдвигает цену; пробел — пауза, +/− — скорость, F4 — поездка; F1 —
+## помощь, F5 — связи, F6 — дела, F7 — пейджер, F10 и Esc — меню выхода. Пока открыто окно
+## количества, время стоит.
 
 const TEXT := 7
 const BACKGROUND := 1
@@ -66,16 +67,20 @@ const SLOWEST := 1
 const FASTEST := 3
 const LONGEST_QUANTITY := 4
 const DEALS := {
-	"buy": {"title": "Купить", "price": "buy", "verb": "купить"},
-	"sell": {"title": "Продать", "price": "sell", "verb": "продать"},
+	"buy": {"title": "Купить", "price": "buy", "totals": "buy_totals", "verb": "купить"},
+	"sell": {"title": "Продать", "price": "sell", "totals": "sell_totals", "verb": "продать"},
 }
-const PRICE_LABEL := "Цена за единицу: "
+const PRICE_LABEL := "Первая штука: "
+const TOTAL_LABEL := "Итого: "
+const NO_TOTAL := "—"
 const QUANTITY_LABEL := "Количество:"
 
 var _goods := ListCursor.new(GOODS_VISIBLE)
 ## Окно количества и сделка, которую оно подтверждает: «buy» или «sell» и товар; без окна — null.
 var _dialog: NumberDialog
 var _deal := {}
+## Итоги сделки на 1, 2, … штук из строки товара: пока окно открыто, время стоит и они не меняются.
+var _totals: Array = []
 
 
 func draw(view: Dictionary, screen: TextScreen) -> void:
@@ -164,7 +169,9 @@ func _open_dialog(deal: String, goods: Array) -> Dictionary:
 	var row: Dictionary = goods[_goods.selected]
 	var terms: Dictionary = DEALS[deal]
 	_deal = {"command": deal, "good": row["good"]}
+	_totals = row[terms["totals"]]
 	_dialog = NumberDialog.new(terms["title"], row["name"], PRICE_LABEL + row[terms["price"]], QUANTITY_LABEL, terms["verb"], LONGEST_QUANTITY)
+	_show_total()
 	return {"redraw": true}
 
 
@@ -176,8 +183,17 @@ func _handle_dialog(action: Dictionary) -> Dictionary:
 			_dialog = null
 			return {"redraw": true}
 		NumberDialog.EDITED:
+			_show_total()
 			return {"redraw": true}
 	return {}
+
+
+## Итог для набранного количества; больше запаса толкучки или того, что есть у игрока, — прочерк, а
+## ядро объяснит отказ, когда сделку подтвердят.
+func _show_total() -> void:
+	var quantity := _dialog.number()
+	var known := quantity >= 1 and quantity <= _totals.size()
+	_dialog.total = TOTAL_LABEL + (_totals[quantity - 1] if known else NO_TOTAL)
 
 
 func _draw_goods(market: Dictionary, screen: TextScreen) -> void:

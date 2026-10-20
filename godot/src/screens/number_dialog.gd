@@ -1,10 +1,10 @@
 class_name NumberDialog
 extends RefCounted
 ## Окно ввода числа поверх экрана — количество на рынке, сумма на экране денег: заголовок, предмет,
-## строка о цене или остатке, поле числа, отказ ядра и подсказка. Первая цифра набирает число
-## заново, Backspace стирает, ↑↓ — ±1, Enter — подтвердить, Esc — отмена.
+## строка о цене или остатке, поле числа, итог для набранного числа, отказ ядра и подсказка. Первая
+## цифра набирает число заново, Backspace стирает, ↑↓ — ±1, Enter — подтвердить, Esc — отмена.
 
-const AREA := Rect2i(18, 7, 44, 9)
+const AREA := Rect2i(18, 6, 44, 10)
 const BACKGROUND := 1
 const FOREGROUND := 15
 const TEXT := 7
@@ -23,6 +23,8 @@ const IGNORED := ""
 
 ## Отказ ядра остаётся в окне до следующей правки.
 var warning := ""
+## Итог для набранного числа — его ставит экран, который открыл окно; пусто — строки нет.
+var total := ""
 var _title: String
 var _subject: String
 var _detail: String
@@ -79,7 +81,8 @@ func draw(screen: TextScreen) -> void:
 	screen.put(left, top + 4, _label, TEXT, BACKGROUND)
 	var field := TextScreen.pad_left(_number, _longest + 2)
 	screen.put(left + _label.length() + 1, top + 4, field, FIELD_FOREGROUND, FIELD_BACKGROUND)
+	screen.put(left, top + 5, total, FOREGROUND, BACKGROUND)
 	var lines := TextScreen.wrap(warning, AREA.size.x - 2 * COLUMN)
 	for index in mini(lines.size(), WARNING_ROWS):
-		screen.put(left, top + 5 + index, lines[index], WARNING_FOREGROUND, BACKGROUND)
-	screen.put(left, top + 7, HINT % _verb, HINT_FOREGROUND, BACKGROUND)
+		screen.put(left, top + 6 + index, lines[index], WARNING_FOREGROUND, BACKGROUND)
+	screen.put(left, top + 8, HINT % _verb, HINT_FOREGROUND, BACKGROUND)

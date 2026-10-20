@@ -21,6 +21,7 @@ const LONGEST_WAIT_STEPS := 2000
 const STANDSTILL_DAYS := 5
 const TRADE_GOOD := "chewing_gum"
 const POCKET_LABEL := "Жвачка"
+const TOTAL_LABEL := "Итого: "
 const DIGIT_KEYS := FlowDriver.DIGIT_KEYS
 const CONTINUE_ITEM := 1
 const NEW_LIFE_ITEM := 2
@@ -95,9 +96,12 @@ func _settings() -> bool:
 	return true
 
 
-## F3 на товаре, которого нет в кармане, Enter — ядро отказывает, пищалка даёт бип отказа, Esc.
+## F3 на товаре, которого нет в кармане: итога нет; Enter — ядро отказывает, пищалка даёт бип
+## отказа, Esc.
 func _refused_sale() -> bool:
 	_flow.press(KEY_F3)
+	if not _flow.shows(TOTAL_LABEL + "—"):
+		return _fail("продажа без товара показала итог:\n" + _flow.buffer())
 	_flow.press(KEY_ENTER)
 	if _cues.back() != Speaker.ERROR or not _flow.shows("Количество:"):
 		return _fail("продажа без товара не дала бип отказа: %s\n%s" % [_cues, _flow.buffer()])
@@ -128,8 +132,8 @@ func _new_life(free: bool) -> bool:
 	return true
 
 
-## Стрелками к жвачке, F2 — окно количества, пока оно открыто, время стоит; цифра 2, Enter — две
-## пачки в кармане.
+## Стрелками к жвачке, F2 — окно количества, пока оно открыто, время стоит; цифра 2 — итог за две
+## пачки из строки товара, Enter — они в кармане.
 func _buy() -> bool:
 	var goods: Array = _router.view()["market"]["goods"]
 	var row := goods.find_custom(func(good: Dictionary) -> bool: return good["good"] == TRADE_GOOD)
@@ -146,6 +150,8 @@ func _buy() -> bool:
 	if _router.view()["header"]["date"] != date:
 		return _fail("пока открыто окно количества, время шло: %s → %s" % [date, _router.view()["header"]["date"]])
 	_flow.press(KEY_2)
+	if not _flow.shows(TOTAL_LABEL + goods[row]["buy_totals"][1]):
+		return _fail("окно количества не показало итог за две пачки:\n" + _flow.buffer())
 	_flow.press(KEY_ENTER)
 	if _flow.shows("Количество:"):
 		return _fail("окно количества не закрылось после покупки:\n" + _flow.buffer())

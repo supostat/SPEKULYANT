@@ -208,20 +208,24 @@ fn market(game: &Game, today: GameDate) -> MarketView {
         .goods
         .iter()
         .filter_map(|(id, good)| {
-            let quote = game
-                .world
-                .markets
-                .quote(content, &game.world.city, id, today)?;
+            let markets = &game.world.markets;
+            let city = &game.world.city;
+            let quote = markets.quote(content, city, id, today)?;
+            let held = game.world.player.pocket().quantity(id);
+            let buy_tags = markets.buy_tags(content, city, id, quote.stock, today)?;
+            let sell_tags = markets.sell_tags(content, city, id, held, today)?;
             Some(MarketRowView {
                 good: id.to_string(),
                 name: good.name.clone(),
                 buy: content.money.format_number(quote.buy, today),
                 sell: content.money.format_number(quote.sell, today),
                 stock: quote.stock.to_string(),
-                held: match game.world.player.pocket().quantity(id) {
+                held: match held {
                     0 => String::new(),
                     quantity => quantity.to_string(),
                 },
+                buy_totals: deal_totals(&content.money, buy_tags, today),
+                sell_totals: deal_totals(&content.money, sell_tags, today),
                 chart: price_chart(game, &game.world.city, id),
                 cities: city_prices::city_prices(game, id, today),
             })
@@ -231,6 +235,16 @@ fn market(game: &Game, today: GameDate) -> MarketView {
         place: content.cities[&game.world.city].market.clone(),
         goods,
     }
+}
+
+/// Итоги сделки на 1, 2, … штук подряд по ценникам штук — ровно столько сделка спишет или принесёт.
+fn deal_totals(rules: &MoneyRules, tags: Vec<Money>, today: GameDate) -> Vec<String> {
+    tags.into_iter()
+        .scan(Money::zero(Currency::Ruble), |total, tag| {
+            *total = total.plus(tag);
+            Some(rules.format_money(*total, today))
+        })
+        .collect()
 }
 
 /// График цены товара в городе: недели истории в номинале своего дня; самая низкая и самая высокая
