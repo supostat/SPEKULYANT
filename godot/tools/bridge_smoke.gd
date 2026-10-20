@@ -2,10 +2,10 @@ extends SceneTree
 ## Безголовая проверка моста для `cargo xtask bridge-smoke`: класс ядра создаётся из GDScript,
 ## жизнь начинается, снимок разбирается, команда доходит до ядра, advance двигает календарь,
 ## а покупка на толкучке кладёт товар в карман. С `--full` (`cargo xtask bridge-smoke --full`)
-## мост гоняет настоящее ядро дальше: лобби каталога игрока с биографиями и без команд, тридцать
-## дней с событием и выбором, покупка и продажа, поездка, сохранение, загрузка и продолжение из
-## слота в каталоге игрока и каждая команда интерфейса с ответом «ок» или ошибкой с текстом для
-## игрока.
+## мост гоняет настоящее ядро дальше: лобби каталога игрока с биографиями и без команд, покупка и
+## продажа, поездка — пока стартовые деньги на месте, — тридцать дней с событием и выбором,
+## сохранение, загрузка и продолжение из слота в каталоге игрока и каждая команда интерфейса с
+## ответом «ок» или ошибкой с текстом для игрока.
 
 const FULL_FLAG := "--full"
 const NO_LIFE := "no_life"
@@ -69,7 +69,7 @@ func _initialize() -> void:
 	if FULL_FLAG in OS.get_cmdline_user_args():
 		if not _full():
 			return
-		print("bridge_smoke --full: тридцать дней с событием, торговля, поездка, сохранение и все команды через мост")
+		print("bridge_smoke --full: торговля, поездка, тридцать дней с событием, сохранение и все команды через мост")
 	quit()
 
 
@@ -111,13 +111,13 @@ func _full() -> bool:
 	var start := saves.new_life(LIFE["biography"], false, LIFE["seed"])
 	if not _ok(game.new_life(start), "new_life с каталогом"):
 		return false
-	if not _live_days_with_an_event(game):
-		return false
 	if not _ok(game.apply(JSON.stringify(BUY_COMMAND)), "buy"):
 		return false
 	if not _ok(game.apply(JSON.stringify(SELL_COMMAND)), "sell"):
 		return false
 	if not _travel(game):
+		return false
+	if not _live_days_with_an_event(game):
 		return false
 	if not _save_load_and_resume(game, saves):
 		return false

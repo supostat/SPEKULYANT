@@ -122,7 +122,8 @@ func _new_life(free: bool) -> bool:
 	return true
 
 
-## Стрелками к жвачке, F2, цифра 2, Enter — две пачки в кармане.
+## Стрелками к жвачке, F2 — окно количества, пока оно открыто, время стоит; цифра 2, Enter — две
+## пачки в кармане.
 func _buy() -> bool:
 	var goods: Array = _router.view()["market"]["goods"]
 	var row := goods.find_custom(func(good: Dictionary) -> bool: return good["good"] == TRADE_GOOD)
@@ -133,6 +134,11 @@ func _buy() -> bool:
 	_flow.press(KEY_F2)
 	if not _flow.shows("Количество:"):
 		return _fail("F2 не открыла окно количества:\n" + _flow.buffer())
+	var date: String = _router.view()["header"]["date"]
+	for _day in STANDSTILL_DAYS:
+		_router.tick(DAY_MILLISECONDS)
+	if _router.view()["header"]["date"] != date:
+		return _fail("пока открыто окно количества, время шло: %s → %s" % [date, _router.view()["header"]["date"]])
 	_flow.press(KEY_2)
 	_flow.press(KEY_ENTER)
 	if _flow.shows("Количество:"):

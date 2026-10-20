@@ -117,6 +117,11 @@ func answered(answer: Dictionary) -> void:
 	_warning = answer["message"] if answer.has("error") else ""
 
 
+## В пути время идёт без остановок: события дороги приходят своим окном.
+func holds_time() -> bool:
+	return false
+
+
 ## Поездка кончилась — экран уступает место рынку нового города.
 func follow(view: Dictionary) -> Dictionary:
 	var traveling: bool = view["travel"]["journey"] != null

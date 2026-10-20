@@ -140,6 +140,11 @@ func answered(answer: Dictionary) -> void:
 	_warning = answer["message"] if answer.has("error") else ""
 
 
+## В зоне неделя идёт за днём, пока игрок не поставит паузу.
+func holds_time() -> bool:
+	return false
+
+
 func follow(_view: Dictionary) -> Dictionary:
 	return {}
 
