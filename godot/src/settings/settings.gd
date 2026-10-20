@@ -30,9 +30,13 @@ func enabled(key: String) -> bool:
 	return _config.get_value(SECTION, key, DEFAULTS[key])
 
 
+## Переключает настройку и записывает файл; каталог файла появляется при первой записи, как
+## каталог сохранений у ядра.
 func toggle(key: String) -> void:
 	_config.set_value(SECTION, key, not enabled(key))
-	var saved := _config.save(_path)
+	var saved := DirAccess.make_dir_recursive_absolute(_path.get_base_dir())
+	if saved == OK:
+		saved = _config.save(_path)
 	if saved != OK:
 		push_error("настройки не записаны в %s: %s" % [_path, error_string(saved)])
 	changed.emit()

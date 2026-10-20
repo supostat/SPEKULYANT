@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
+use std::thread;
 
 use anyhow::{Context, Result, anyhow, bail};
 use boa_engine::{Context as JsContext, Source};
@@ -15,6 +16,10 @@ const PALETTE_FILE: &str = "palette.txt";
 const EGA_SCRIPT: &str = "godot/src/text_screen/ega.gd";
 const PALETTE_SIZE: usize = 16;
 const DOM_SHIM: &str = include_str!("etalons/dom_shim.js");
+/// Стек потока, где Boa исполняет скрипт дизайн-книги: разбор скрипта в отладочной сборке глубоко
+/// рекурсивен — мегабайта, который Windows даёт главному потоку, не хватает, двух уже хватает на
+/// macOS; здесь — с восьмикратным запасом.
+const SCRIPT_STACK_BYTES: usize = 16 * 1024 * 1024;
 
 pub fn etalon_path(screen: &str) -> PathBuf {
     project_root()
@@ -73,14 +78,11 @@ fn screens_html(book: &str) -> Result<BTreeMap<String, String>> {
         .context("в дизайн-книге нет блока <script>")?;
     let ids = serde_json::to_string(&SCREENS)?;
     let program = format!("{DOM_SHIM}\n{script}\n__etalonScreens({ids});");
-    let mut context = JsContext::default();
-    let value = context
-        .eval(Source::from_bytes(&program))
-        .map_err(|error| anyhow!("скрипт дизайн-книги упал в Boa: {error}"))?;
-    let json = value
-        .to_string(&mut context)
-        .map_err(|error| anyhow!("Boa не отдал результат строкой: {error}"))?
-        .to_std_string_escaped();
+    let json = thread::Builder::new()
+        .stack_size(SCRIPT_STACK_BYTES)
+        .spawn(move || evaluate(&program))?
+        .join()
+        .map_err(|_| anyhow!("поток Boa упал"))??;
     let screens: BTreeMap<String, String> = serde_json::from_str(&json)?;
     for screen in SCREENS {
         if screens.get(screen).is_none_or(String::is_empty) {
@@ -88,6 +90,18 @@ fn screens_html(book: &str) -> Result<BTreeMap<String, String>> {
         }
     }
     Ok(screens)
+}
+
+/// Исполняет программу движком Boa и отдаёт её результат строкой.
+fn evaluate(program: &str) -> Result<String> {
+    let mut context = JsContext::default();
+    let value = context
+        .eval(Source::from_bytes(program))
+        .map_err(|error| anyhow!("скрипт дизайн-книги упал в Boa: {error}"))?;
+    Ok(value
+        .to_string(&mut context)
+        .map_err(|error| anyhow!("Boa не отдал результат строкой: {error}"))?
+        .to_std_string_escaped())
 }
 
 /// Разбирает вывод `Scr.html()` книги: строки через `\n`, в строке — span'ы с классами `bN fM`.
