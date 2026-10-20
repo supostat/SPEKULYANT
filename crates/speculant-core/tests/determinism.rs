@@ -93,7 +93,15 @@ fn play_scripted_life(seed: u64) -> String {
         if day != acted_on {
             acted_on = day;
             if let Some(command) = scripted_command(day) {
+                let sale = matches!(command, Command::Sell { .. });
                 game.apply(command).expect("команда сценария выполнима");
+                assert!(
+                    !sale
+                        || game.view().messages.last().is_some_and(|message| {
+                            message.starts_with("Продал: Жвачка, блок, 3 бл за")
+                        }),
+                    "продажа сценария дошла до мира"
+                );
             }
         }
         if day == 200 && paused_frames == 0 {
@@ -122,10 +130,6 @@ fn the_same_seed_and_script_give_the_same_world_after_400_days() {
     assert!(
         first.contains("\"date\":\"4 февраля 1985, пн\""),
         "400-й день после 1 января 1984"
-    );
-    assert!(
-        first.contains("Продал: Жвачка, блок, 3 бл за"),
-        "сделки сценария дошли до мира"
     );
 }
 

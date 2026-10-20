@@ -82,7 +82,7 @@ pub use scale_range::ScaleRange;
 pub use zone_service::ZoneService;
 
 use crate::business::{BusinessRules, PolicyKind};
-use crate::economy::{MarketRules, MoneyRules};
+use crate::economy::{MarketRules, MoneyRules, SwingRules};
 use crate::events::EventRules;
 use crate::history::HistoryGenerator;
 use crate::life::LifeRules;
@@ -95,6 +95,8 @@ use crate::zone::{Camp, ZoneRules};
 pub struct Content {
     pub time: TimeRules,
     pub market: MarketRules,
+    /// Дефициты и завалы толкучек.
+    pub swings: SwingRules,
     pub money: MoneyRules,
     pub reputation: ReputationRules,
     pub event_rules: EventRules,

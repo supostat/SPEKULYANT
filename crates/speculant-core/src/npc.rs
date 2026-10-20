@@ -3,6 +3,7 @@
 
 mod fate;
 mod rival;
+mod rival_deal;
 mod rival_rules;
 mod rivals;
 mod strategy;
@@ -10,6 +11,7 @@ mod strategy_rules;
 
 pub use fate::Fate;
 pub use rival::Rival;
+pub use rival_deal::{DealSide, RivalDeal};
 pub use rival_rules::RivalRules;
 pub use rivals::Rivals;
 pub use strategy::Strategy;

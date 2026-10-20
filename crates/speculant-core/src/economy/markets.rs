@@ -37,6 +37,11 @@ impl Markets {
         }
     }
 
+    /// Действующие и отжившие, но ещё не убранные шоки — от старых к новым.
+    pub fn shocks(&self) -> &[Shock] {
+        &self.shocks
+    }
+
     pub fn city(&self, city: &CityId) -> &CityMarket {
         self.cities
             .get(city)

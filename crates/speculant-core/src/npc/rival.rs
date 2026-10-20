@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 use rand_chacha::ChaCha8Rng;
 use rand_chacha::rand_core::Rng;
 
-use super::{Fate, Strategy, StrategyRules};
+use super::{DealSide, Fate, RivalDeal, Strategy, StrategyRules};
 use crate::business::{MonthlyBudget, Operation, Policies};
 use crate::content::{BusinessKindId, CityId, Content, GoodId, NpcId};
 use crate::economy::{Currency, Markets, Money, Real, Trader};
@@ -132,7 +132,7 @@ impl Rival {
     }
 
     /// День соперника: выход из зоны, доход, проценты, судьба, торговля, первого числа — месяц
-    /// дел, и проверка на разорение.
+    /// дел, и проверка на разорение; возвращает сделки челнока за день.
     /// Все розыгрыши идут подряд из одного потока, поэтому день одного соперника не зависит от
     /// того, торговал ли другой.
     pub fn live_day(
@@ -141,14 +141,14 @@ impl Rival {
         markets: &mut Markets,
         rng: &mut ChaCha8Rng,
         today: GameDate,
-    ) {
+    ) -> Vec<RivalDeal> {
         if let Fate::Prison { until } = self.fate
             && today >= until
         {
             self.fate = Fate::Active;
         }
         if !self.fate.is_active() {
-            return;
+            return Vec::new();
         }
         let rules = content.rival_rules.strategies[&self.strategy];
         if rules.daily_income.is_positive() {
@@ -165,11 +165,12 @@ impl Rival {
                 .receive_cash(Money::new(Currency::Ruble, interest.round() as i64));
         }
         if self.meets_fate(&rules, rng, content, today) {
-            return;
+            return Vec::new();
         }
+        let mut deals = Vec::new();
         if self.strategy.trades() && EventEngine::roll(rng, rules.trade_chance) {
             match &self.partner_city {
-                Some(_) => self.shuttle(content, markets, rng, rules.lot, today),
+                Some(_) => deals = self.shuttle(content, markets, rng, rules.lot, today),
                 None => self.trade_at_home(content, markets, rng, rules.lot, today),
             }
         }
@@ -182,6 +183,7 @@ impl Rival {
         if self.capital(content, markets, today) < content.rival_rules.ruin_below {
             self.fate = Fate::Ruined;
         }
+        deals
     }
 
     /// Месяц дел по расчёту игрока, только грубее: политики по умолчанию, управляющий средней
@@ -362,8 +364,9 @@ impl Rival {
         count
     }
 
-    /// Челнок: дома скупает товар, который во втором городе дороже всего относительно дома, и
-    /// едет туда; там продаёт всё и возвращается. В пути ничего не делает.
+    /// Челнок: дома скупает товар, который по нынешним ценникам во втором городе продастся дороже
+    /// всего относительно дома, и едет туда; там продаёт всё и возвращается. В пути ничего не
+    /// делает. Возвращает сделки дня.
     fn shuttle(
         &mut self,
         content: &Content,
@@ -371,10 +374,11 @@ impl Rival {
         rng: &mut ChaCha8Rng,
         lot: u32,
         today: GameDate,
-    ) {
+    ) -> Vec<RivalDeal> {
+        let mut deals = Vec::new();
         if let Some((destination, arrives)) = &self.journey {
             if today < *arrives {
-                return;
+                return deals;
             }
             self.city = destination.clone();
             self.journey = None;
@@ -386,14 +390,16 @@ impl Rival {
         if self.city == self.home {
             let Some(fare) = self.fare(content, &partner, today) else {
                 self.trade_at_home(content, markets, rng, lot, today);
-                return;
+                return deals;
             };
             if let Some(good) = self.best_cargo(content, markets, &partner, today) {
                 let quantity = self.affordable(content, markets, &good, lot, fare, today);
-                if quantity > 0 {
-                    self.trader
+                if quantity > 0
+                    && let Ok(deal) = self
+                        .trader
                         .buy(markets, content, &self.city, &good, quantity, today)
-                        .ok();
+                {
+                    deals.push(self.deal(&good, deal.quantity, DealSide::Bought));
                 }
             }
             if self.trader.pocket().goods().next().is_some() {
@@ -407,18 +413,33 @@ impl Rival {
                 .map(|(good, quantity)| (good.clone(), quantity))
                 .collect();
             for (good, quantity) in held {
-                self.trader
+                if let Ok(deal) = self
+                    .trader
                     .sell(markets, content, &self.city, &good, quantity, today)
-                    .ok();
+                {
+                    deals.push(self.deal(&good, deal.quantity, DealSide::Sold));
+                }
             }
             let home = self.home.clone();
             if !self.depart(content, home, today) {
                 self.trade_at_home(content, markets, rng, lot, today);
             }
         }
+        deals
     }
 
-    /// Товар, который во втором городе дороже, чем дома, сильнее всех; `None`, если такого нет.
+    fn deal(&self, good: &GoodId, quantity: u32, side: DealSide) -> RivalDeal {
+        RivalDeal {
+            rival: self.npc.clone(),
+            city: self.city.clone(),
+            good: good.clone(),
+            quantity,
+            side,
+        }
+    }
+
+    /// Товар, который по нынешним ценникам — с шоками и запасом обеих толкучек — во втором городе
+    /// продастся дороже, чем покупается здесь, сильнее всех; `None`, если такого нет.
     fn best_cargo(
         &self,
         content: &Content,
@@ -430,9 +451,10 @@ impl Rival {
             .goods
             .keys()
             .filter_map(|good| {
-                let here = markets.normal_kopecks(content, &self.city, good, today)?;
-                let there = markets.normal_kopecks(content, partner, good, today)?;
-                (there > here).then_some((good, there / here))
+                let here = markets.quote(content, &self.city, good, today)?;
+                let there = markets.quote(content, partner, good, today)?;
+                let (buy, sell) = (here.buy.minor_units(), there.sell.minor_units());
+                (here.stock > 0 && sell > buy).then_some((good, sell as f64 / buy as f64))
             })
             .max_by(|left, right| left.1.total_cmp(&right.1))
             .map(|(good, _)| good.clone())

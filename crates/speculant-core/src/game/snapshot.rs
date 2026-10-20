@@ -4,6 +4,7 @@ mod business;
 mod city_prices;
 mod life;
 mod meta;
+mod price_rumors;
 mod zone;
 
 use std::cmp::Ordering;
@@ -64,7 +65,10 @@ pub(super) fn snapshot(game: &Game) -> StateView {
         market: market(game, today),
         travel: travel(game, today),
         pocket: pocket(game, today),
-        rumors: meta::rumors(game, today),
+        rumors: meta::history_rumors(game, today)
+            .into_iter()
+            .chain(price_rumors::price_rumors(game, today))
+            .collect(),
         messages: game.world.messages.clone(),
         pending_event: pending_event(game, today),
         pager: pager(game),

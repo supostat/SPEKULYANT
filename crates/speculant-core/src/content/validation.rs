@@ -13,7 +13,7 @@ use super::{
     Biography, BusinessChange, Choice, City, Conditions, Consequences, ContentError, ContentFile,
     EpochProfile, Event, Faction, Good, GoodId, MoneyPlace, NpcTemplate, PriceShock,
 };
-use crate::economy::{MarketRules, MoneyRules, RubleCurve};
+use crate::economy::{MarketRules, MoneyRules, RubleCurve, SwingRules};
 use crate::events::EventRules;
 use crate::npc::RivalRules;
 use crate::reputation::ReputationRules;
@@ -290,6 +290,15 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
     }
     if let Some((file, rules)) = &parsed.market {
         check_market(
+            rules,
+            &mut Report {
+                file,
+                errors: &mut *errors,
+            },
+        );
+    }
+    if let Some((file, rules)) = &parsed.swings {
+        check_swings(
             rules,
             &mut Report {
                 file,
@@ -652,6 +661,51 @@ fn check_biography(biography: &Biography, known: &Known, report: &mut Report<'_,
         );
     }
     life::check_biography(biography, known, report);
+}
+
+/// Доли — от нуля до единицы, дефицит поднимает цену, завал опускает, а срок не пуст.
+fn check_swings(rules: &SwingRules, report: &mut Report<'_, '_>) {
+    for (key, value) in [
+        ("daily_chance", rules.daily_chance),
+        ("deficit_share", rules.deficit_share),
+        ("rumor_accuracy", rules.rumor_accuracy),
+    ] {
+        if !(0.0..=1.0).contains(&value) {
+            report.at(
+                report.file.line_of(key),
+                format!("{key} = {value}: доля от 0 до 1"),
+            );
+        }
+    }
+    let deficit = rules.deficit_factor;
+    if !(1.0 < deficit.from && deficit.from <= deficit.to) {
+        report.at(
+            report.file.line_of("deficit_factor"),
+            format!(
+                "deficit_factor {}–{}: дефицит поднимает цену — больше 1, from не больше to",
+                deficit.from, deficit.to
+            ),
+        );
+    }
+    let glut = rules.glut_factor;
+    if !(0.0 < glut.from && glut.from <= glut.to && glut.to < 1.0) {
+        report.at(
+            report.file.line_of("glut_factor"),
+            format!(
+                "glut_factor {}–{}: завал опускает цену — от 0 до 1, from не больше to",
+                glut.from, glut.to
+            ),
+        );
+    }
+    if !(1 <= rules.days.from && rules.days.from <= rules.days.to) {
+        report.at(
+            report.file.line_of("days"),
+            format!(
+                "days {}–{}: срок хотя бы день, from не больше to",
+                rules.days.from, rules.days.to
+            ),
+        );
+    }
 }
 
 fn check_market(rules: &MarketRules, report: &mut Report<'_, '_>) {

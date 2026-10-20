@@ -240,13 +240,17 @@ func _draw_pocket(pocket: Dictionary, screen: TextScreen) -> void:
 		screen.put(POCKET_COLUMN, DANGER_ROW, danger["label"] + " " + bar, DANGER_FOREGROUND, BACKGROUND)
 
 
+## Слухи по порядку ядра — только те, что помещаются в окно целиком.
 func _draw_rumors(rumors: Array, screen: TextScreen) -> void:
 	_box(screen, RUMORS_BOX, RUMORS_TITLE, false)
 	var lines := PackedStringArray()
-	for rumor: String in rumors:
-		lines.append_array(TextScreen.wrap(rumor, RUMOR_WRAP_WIDTH))
 	var visible_rows := RUMORS_BOX.size.y - 2
-	for index in mini(lines.size(), visible_rows):
+	for rumor: String in rumors:
+		var wrapped := TextScreen.wrap(rumor, RUMOR_WRAP_WIDTH)
+		if lines.size() + wrapped.size() > visible_rows:
+			break
+		lines.append_array(wrapped)
+	for index in lines.size():
 		screen.put(RUMOR_COLUMN, RUMORS_BOX.position.y + 1 + index, lines[index], RUMOR_FOREGROUND, BACKGROUND)
 
 

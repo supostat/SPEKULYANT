@@ -90,7 +90,7 @@ pub(super) fn records(content: &Content, meta: &Meta) -> RecordsView {
 /// Стартовые слухи (§11.3): исторические узлы, которые видели прошлые жизни, — если прошлая жизнь
 /// видела их в этом году или в следующем, а в этом мире они ещё не случились. История плавает по
 /// сиду, поэтому слух даёт преимущество, но не гарантию.
-pub(super) fn rumors(game: &Game, today: GameDate) -> Vec<String> {
+pub(super) fn history_rumors(game: &Game, today: GameDate) -> Vec<String> {
     let content = &game.content;
     let soon = today.year()..=today.year() + RUMOR_YEARS_AHEAD;
     let mut rumors: Vec<(i32, &str)> = game

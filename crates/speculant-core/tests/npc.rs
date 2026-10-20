@@ -1,5 +1,6 @@
 //! Соперники (§8): состав по сиду из пула шаблонов, торговля по правилам игрока и её след на
-//! рынке, челноки между городами, доходы и судьбы, память обид и события с соперником.
+//! рынке, челноки между городами по сегодняшним ценам и их сделки в ленте игрока, доходы и судьбы,
+//! память обид и события с соперником.
 
 use std::collections::BTreeSet;
 use std::path::Path;
@@ -7,7 +8,7 @@ use std::sync::Arc;
 
 use speculant_core::content::{CityId, Content, EventId, GoodId, NpcId};
 use speculant_core::economy::{Currency, Markets, Money, Real};
-use speculant_core::npc::{Fate, Rivals, Strategy};
+use speculant_core::npc::{DealSide, Fate, Rival, Rivals, Strategy};
 use speculant_core::rng::WorldRng;
 use speculant_core::time::GameDate;
 use speculant_core::{Command, Game, LifeSettings};
@@ -155,6 +156,86 @@ fn a_shuttle_carries_goods_to_the_dearer_city_and_comes_back_empty() {
     }
     assert!(loaded_trips >= 10, "с грузом в пути {loaded_trips} дней");
     assert!(empty_trips >= 10, "порожняком назад {empty_trips} дней");
+}
+
+/// Челнок Толик из Москвы в Ленинград с деньгами на любой лот.
+fn shuttle_from_moscow(content: &Content) -> Rival {
+    Rival::new(
+        NpcId::new("shuttle_tolik"),
+        Strategy::Shuttle,
+        Money::new(Currency::Ruble, 100_000),
+        CityId::new("moscow"),
+        Some(CityId::new("leningrad")),
+        content,
+    )
+}
+
+#[test]
+fn a_shuttle_picks_its_cargo_by_todays_prices_of_both_markets() {
+    let content = load();
+    let today = GameDate::START;
+    let mut rng = WorldRng::new(7);
+    let mut cargo = |markets: &mut Markets| -> Vec<(String, DealSide)> {
+        shuttle_from_moscow(&content)
+            .live_day(&content, markets, rng.stream("npc"), today)
+            .into_iter()
+            .map(|deal| (deal.good.to_string(), deal.side))
+            .collect()
+    };
+    let mut usual = Markets::new(&content);
+    assert_eq!(
+        cargo(&mut usual),
+        [("jeans".to_owned(), DealSide::Bought)],
+        "джинсы в Ленинграде дороже в 1,3 раза"
+    );
+    let mut glutted = Markets::new(&content);
+    glutted.apply_shock(
+        GoodId::new("chewing_gum"),
+        Some(CityId::new("moscow")),
+        0.3,
+        Some(30),
+        today,
+    );
+    assert_eq!(
+        cargo(&mut glutted),
+        [("chewing_gum".to_owned(), DealSide::Bought)],
+        "завал жвачки в Москве — сегодня она выгоднее джинсов"
+    );
+    let mut flooded = Markets::new(&content);
+    flooded.put(&CityId::new("leningrad"), &GoodId::new("jeans"), 60);
+    assert_eq!(
+        cargo(&mut flooded),
+        [],
+        "Ленинград завален джинсами — по сегодняшним ценам везти нечего"
+    );
+}
+
+#[test]
+fn a_shuttle_deal_on_the_players_market_is_a_line_in_the_feed() {
+    let seed = seed_with(Strategy::Shuttle);
+    let mut game = game_with(load(), seed);
+    let shuttles: Vec<String> = game
+        .rivals()
+        .iter()
+        .filter(|rival| rival.strategy() == Strategy::Shuttle)
+        .map(|rival| game.content().npcs[rival.npc()].name.clone())
+        .collect();
+    let mut deals = BTreeSet::new();
+    for _ in 0..60 {
+        days(&mut game, 1);
+        deals.extend(
+            game.view()
+                .messages
+                .into_iter()
+                .filter(|line| line.starts_with("Скупка: ") || line.starts_with("Привоз: ")),
+        );
+    }
+    assert!(
+        deals.iter().any(|line| shuttles
+            .iter()
+            .any(|name| line.ends_with(&format!("— {name}")))),
+        "сделки челноков {shuttles:?} в Москве видны в ленте: {deals:?}"
+    );
 }
 
 #[test]

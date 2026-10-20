@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 
 use rand_chacha::rand_core::Rng;
 
-use super::{Rival, Strategy};
+use super::{Rival, RivalDeal, Strategy};
 use crate::content::{BusinessKindId, CityId, Content, NpcId, RivalCondition};
 use crate::economy::{Currency, Markets};
 use crate::rng::WorldRng;
@@ -106,18 +106,19 @@ impl Rivals {
         self.rivals.is_empty()
     }
 
-    /// День всех соперников по порядку идентификаторов.
+    /// День всех соперников по порядку идентификаторов; возвращает сделки челноков за день.
     pub fn next_day(
         &mut self,
         content: &Content,
         markets: &mut Markets,
         rng: &mut WorldRng,
         today: GameDate,
-    ) {
+    ) -> Vec<RivalDeal> {
         let stream = rng.stream(NPC_STREAM);
-        for rival in self.rivals.values_mut() {
-            rival.live_day(content, markets, stream, today);
-        }
+        self.rivals
+            .values_mut()
+            .flat_map(|rival| rival.live_day(content, markets, stream, today))
+            .collect()
     }
 
     /// Сколько точек этого типа держат в городе соперники, которые в деле.

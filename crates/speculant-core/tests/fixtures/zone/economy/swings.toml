@@ -1,0 +1,8 @@
+# Дефициты и завалы выключены: тесты включают их там, где проверяют.
+daily_chance = 0
+deficit_share = 0.5
+deficit_factor = { from = 1.5, to = 2.0 }
+glut_factor = { from = 0.5, to = 0.75 }
+days = { from = 10, to = 20 }
+rumor_accuracy = 1
+rumors = 3

@@ -67,6 +67,7 @@ pub struct StateView {
     pub market: MarketView,
     pub travel: TravelView,
     pub pocket: PocketView,
+    /// Слухи: сначала об истории из прошлых жизней, потом о ценах других городов.
     pub rumors: Vec<String>,
     pub messages: Vec<String>,
     pub pending_event: Option<EventView>,

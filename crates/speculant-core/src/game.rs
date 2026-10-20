@@ -7,6 +7,7 @@ mod event_flow;
 mod history_flow;
 mod life_flow;
 mod lobby;
+mod market_flow;
 mod meta_flow;
 mod russian_count;
 mod save_flow;
@@ -241,7 +242,8 @@ impl Game {
     }
 
     /// Двигает мир на `milliseconds` реального времени; `true`, если наступил хотя бы один день.
-    /// Каждый день рынки приходят в себя и колеблются по сиду, вклады получают проценты,
+    /// Каждый день рынки приходят в себя и колеблются по сиду, где-то случается дефицит или завал,
+    /// вклады получают проценты,
     /// репутация дрейфует к нулю в темпе эпохи, соперники живут свой день, случаются узлы истории
     /// этого дня, персонаж и дела живут свой день, а затем может
     /// случиться событие — дома, в дороге или в зоне, где неделя идёт за время одного дня.
@@ -413,18 +415,20 @@ impl Game {
         self.world
             .markets
             .next_day(&self.content, &mut self.world.rng, date);
+        self.roll_market_swing(date);
         if PriceHistory::is_record_day(date) {
             self.record_prices(date);
         }
         self.world.player.next_day(&self.content, date);
         let drift_days = self.content.epoch_profile_on(date).reputation_drift_days;
         self.world.reputation.next_day(drift_days);
-        self.world.rivals.next_day(
+        let deals = self.world.rivals.next_day(
             &self.content,
             &mut self.world.markets,
             &mut self.world.rng,
             date,
         );
+        self.log_rival_deals(&deals);
         self.live_history(date);
         if self.live_character(date) || self.live_businesses(date) {
             return true;
