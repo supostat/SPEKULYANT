@@ -1,12 +1,15 @@
 //! Цены от знакомых и газета (§9, §13.3): знакомый из другого города без своего повода за услугу
 //! диктует цены своей толкучки, и они ложатся в цены по городам; раз в неделю газета называет самый
-//! большой сдвиг цены за неделю с настоящими ценниками обеих недель, а дефицит или завал — по имени.
+//! большой сдвиг цены за неделю с настоящими ценниками обеих недель, а дефицит, поднявший цену, или
+//! завал, опустивший её, — по имени.
 
+use std::cmp::Ordering;
 use std::path::Path;
 use std::sync::Arc;
 
 use speculant_core::content::{CityId, Content, GoodId, NpcId};
 use speculant_core::economy::{FactorRange, WEEK_DAYS};
+use speculant_core::history::DayRange;
 use speculant_core::view::ContactView;
 use speculant_core::{Command, Game, LifeSettings};
 
@@ -89,7 +92,8 @@ fn newspapers(game: &Game) -> Vec<String> {
 }
 
 /// Сдвиг цены покупки каждой пары «город × товар» за последнюю неделю истории — модуль логарифма
-/// отношения — и строка газеты, какой она была бы об этой паре.
+/// отношения — и строка газеты, какой она была бы об этой паре: дефицит она называет, только если
+/// цена выросла, завал — если упала.
 fn weekly_shifts(game: &Game) -> Vec<(f64, String)> {
     let content = game.content();
     let rules = &content.money;
@@ -120,10 +124,10 @@ fn weekly_shifts(game: &Game) -> Vec<(f64, String)> {
                         && !shock.is_over_on(today)
                 })
                 .map_or("", |shock| {
-                    if shock.factor > 1.0 {
-                        ", дефицит"
-                    } else {
-                        ", завал"
+                    match (shock.factor > 1.0, now_kopecks.cmp(&before_kopecks)) {
+                        (true, Ordering::Greater) => ", дефицит",
+                        (false, Ordering::Less) => ", завал",
+                        _ => "",
                     }
                 });
             let line = format!(
@@ -262,4 +266,27 @@ fn the_newspaper_calls_a_deficit_by_its_name() {
     assert_todays_newspaper_is_about_the_largest_shift(&game);
     let newspaper = newspapers(&game).pop().expect("газета вышла");
     assert!(newspaper.contains(", дефицит — "), "{newspaper}");
+}
+
+#[test]
+fn a_deficit_that_did_not_raise_the_price_is_not_in_the_newspaper() {
+    let mut content = quiet();
+    content.swings.daily_chance = 1.0;
+    content.swings.deficit_share = 1.0;
+    content.swings.days = DayRange { from: 400, to: 400 };
+    let mut game = start(content);
+    live(&mut game, 4 * WEEK_DAYS);
+    let mut unnamed = 0;
+    for _ in 0..10 {
+        live(&mut game, WEEK_DAYS);
+        assert_todays_newspaper_is_about_the_largest_shift(&game);
+        let newspaper = newspapers(&game).pop().expect("газета вышла");
+        if !newspaper.contains(", дефицит — ") {
+            unnamed += 1;
+        }
+    }
+    assert!(
+        unnamed > 0,
+        "все пары давно в дефиците, и за десять недель запас хоть раз опускал цену"
+    );
 }

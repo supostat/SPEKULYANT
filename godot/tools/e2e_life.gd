@@ -1,12 +1,14 @@
 extends SceneTree
 ## Сквозная жизнь для `cargo xtask e2e`: настоящие ядро, мост, роутер и экраны; подменён только
 ## каталог игрока — `user://e2e`. Заставка → главное меню → новая жизнь: студент, ironman, сид 7 →
-## шестьдесят дней на рынке с покупками и продажами, события — первым доступным выбором → график
-## цены товара за эти недели → поездка в первый доступный город с подсказкой, что там дешевле и
-## дороже → цены товара по городам: Москва — какой её оставили → выход в главное меню (ironman
-## сохраняется сам) и «Продолжить» из его слота: снимок ядра тот же → ещё месяц торговли → уход на
-## покой → итоги жизни: заметка, слот ironman стёрт, знания легли в метапрогрессию, жизнь — в
-## «Рейтинг Форбс». После каждого шага сверяются буфер экрана и снимок ядра.
+## шестьдесят дней на рынке с покупками и продажами, события — первым доступным выбором → рынок
+## жил сам: в ленте или слухах дефицит или завал, в ленте газета → график цены товара за эти
+## недели → поездка в первый доступный город с подсказкой, что там дешевле и дороже → цены товара
+## по городам: Москва — какой её оставили → звонок Кофи: из другого города он диктует цены Москвы,
+## и в ценах по городам она — с днём звонка → выход в главное меню (ironman сохраняется сам) и
+## «Продолжить» из его слота: снимок ядра тот же → ещё месяц торговли → уход на покой → итоги
+## жизни: заметка, слот ironman стёрт, знания легли в метапрогрессию, жизнь — в «Рейтинг Форбс».
+## После каждого шага сверяются буфер экрана и снимок ядра.
 
 const FlowDriver := preload("res://tools/flow_driver.gd")
 const ROOT := "user://e2e"
@@ -30,6 +32,15 @@ const CHART_TITLE := "Цена покупки по неделям"
 const CITY_PRICES_TITLE := "Цены по городам"
 const CHEAPER_LABEL := "Там дешевле: "
 const DEARER_LABEL := "Там дороже: "
+## Слова, которыми лента и слухи называют дефицит и завал толкучки.
+const SWING_WORDS := ["дефицит", "завал"]
+const NEWSPAPER := "Газета: "
+## Знакомый студента, который живёт в Москве: из другого города он диктует её цены.
+const PHONE_CONTACT := "kofi"
+const PHONE_PRICES := "Цены по телефону"
+const CONTACTS_TITLE := "Связи"
+## Если у знакомого есть своё событие, звонок начинает его; звонков хватит, чтобы дойти до цен.
+const CALL_ATTEMPTS := 3
 ## Записи при рождении и каждые семь дней: за шестьдесят дней их девять.
 const MIN_CHART_WEEKS := 9
 ## Что роутер кладёт в снимок поверх ядра: слоты каталога и настройки.
@@ -38,6 +49,7 @@ const ANNOTATIONS := ["slots", "settings"]
 var _flow: FlowDriver
 var _router: Router
 var _name := ""
+var _home := ""
 var _buys := 0
 var _sells := 0
 var _events := 0
@@ -50,9 +62,11 @@ func _initialize() -> void:
 	var passed := (
 		_new_life()
 		and _trade_for(TRADING_DAYS)
+		and _living_market()
 		and _chart()
 		and _travel()
 		and _city_prices()
+		and _phone_prices()
 		and _quit_and_continue()
 		and _trade_for(MORE_DAYS)
 		and _retire()
@@ -62,7 +76,7 @@ func _initialize() -> void:
 	_flow.dispose()
 	if passed:
 		print(
-			"e2e: %s — %d покупок, %d продаж, %d событий с выбором, поездка, выход и «Продолжить», покой и итоги"
+			"e2e: %s — %d покупок, %d продаж, %d событий с выбором, живой рынок, поездка, цены по телефону, выход и «Продолжить», покой и итоги"
 			% [_name, _buys, _sells, _events]
 		)
 		quit()
@@ -86,6 +100,7 @@ func _new_life() -> bool:
 	if not Saves.IRONMAN_SLOT in _flow.saves.slots():
 		return _fail("ironman-жизнь не легла в свой слот при рождении")
 	_name = view["character"]["name"]
+	_home = view["header"]["city"]
 	return _on_market()
 
 
@@ -149,6 +164,20 @@ func _select_good() -> bool:
 	for _step in _good_row():
 		_flow.press(KEY_DOWN)
 	return true
+
+
+## За два месяца торговли рынок жил сам: дефицит или завал — в ленте своей толкучки или в слухах о
+## других городах, а газета раз в неделю называет самый большой сдвиг цены.
+func _living_market() -> bool:
+	var view := _router.view()
+	var messages: Array = view["messages"]
+	var heard: Array = messages + view["rumors"]
+	var swing := heard.any(func(line: String) -> bool: return SWING_WORDS.any(func(word: String) -> bool: return word in line))
+	if not swing:
+		return _fail("за два месяца ни дефицита, ни завала — ни в ленте, ни в слухах: %s" % [heard])
+	if not messages.any(func(line: String) -> bool: return line.begins_with(NEWSPAPER)):
+		return _fail("за два месяца в ленте нет газеты: %s" % [messages])
+	return _on_market()
 
 
 ## Enter на товаре — график цены: за два месяца в истории не меньше девяти недель, ↓ — соседний
@@ -223,6 +252,42 @@ func _city_prices() -> bool:
 	_flow.press(KEY_LEFT)
 	if _router.top_name() != "chart" or not _flow.shows(CHART_TITLE):
 		return _fail("◄ не вернул график:\n" + _flow.buffer())
+	_flow.press(KEY_ESCAPE)
+	return _on_market()
+
+
+## F5 — связи, Enter на Кофи: он живёт в Москве и из другого города за услугу диктует её цены —
+## строка звонка внизу экрана связей; если у него есть своё событие, оно идёт первым, и звонок
+## повторяется. Потом в ценах по городам Москва — с днём звонка, как город, где игрок сейчас.
+func _phone_prices() -> bool:
+	_flow.press(KEY_F5)
+	var people: Array = _router.view()["contacts"]
+	var row := people.find_custom(func(person: Dictionary) -> bool: return person["contact"] == PHONE_CONTACT)
+	if _router.top_name() != "contacts" or not _flow.shows(CONTACTS_TITLE) or row < 0:
+		return _fail("F5 не открыла связи с Кофи:\n" + _flow.buffer())
+	for _step in row:
+		_flow.press(KEY_DOWN)
+	var dictated := "%s: %s — %s" % [PHONE_PRICES, _home, people[row]["name"]]
+	for _attempt in CALL_ATTEMPTS:
+		_flow.press(KEY_ENTER)
+		if _router.top_name() != "event":
+			break
+		if not _settle():
+			return false
+	if _router.top_name() != "contacts" or not _flow.shows(dictated):
+		return _fail("звонок Кофи не продиктовал цены Москвы:\n" + _flow.buffer())
+	_flow.press(KEY_ESCAPE)
+	if not _on_market():
+		return false
+	var cities: Array = _router.view()["market"]["goods"][_good_row()]["cities"]
+	var here := cities.find_custom(func(city: Dictionary) -> bool: return city["here"])
+	var home := cities.find_custom(func(city: Dictionary) -> bool: return city["name"] == _home)
+	if here < 0 or home < 0 or cities[home]["seen"] != cities[here]["seen"]:
+		return _fail("в ценах по городам Москва не с днём звонка: %s" % [cities])
+	_flow.press(KEY_ENTER)
+	_flow.press(KEY_RIGHT)
+	if _router.top_name() != "city_prices" or not _flow.shows(_home) or not _flow.shows(cities[home]["seen"]):
+		return _fail("цены по городам не показывают Москву с днём звонка:\n" + _flow.buffer())
 	_flow.press(KEY_ESCAPE)
 	return _on_market()
 

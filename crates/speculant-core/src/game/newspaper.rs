@@ -1,6 +1,9 @@
 //! Газета недели (§13.3): раз в неделю, в день записи истории цен, — строка в ленте о самом
 //! большом сдвиге цены за неделю на толкучках открытых городов, с настоящими ценниками обеих недель.
-//! Если на товаре в том городе дефицит или завал, газета называет и его.
+//! Если сдвиг объясняет дефицит или завал на товаре в том городе — рост дефицит, падение завал, —
+//! газета называет и его.
+
+use std::cmp::Ordering;
 
 use super::Game;
 use crate::content::{CityId, GoodId};
@@ -18,6 +21,8 @@ struct Shift<'a> {
     good: &'a GoodId,
     before: PriceWeek,
     now: PriceWeek,
+    /// Куда цена ушла: выросла, упала или стоит.
+    direction: Ordering,
     /// Насколько цена ушла, в обе стороны одинаково: модуль логарифма отношения.
     size: f64,
 }
@@ -47,7 +52,11 @@ impl Game {
                     && shock.good == *shift.good
                     && !shock.is_over_on(date)
             })
-            .map(|shock| if shock.factor > 1.0 { DEFICIT } else { GLUT });
+            .and_then(|shock| match (shock.factor > 1.0, shift.direction) {
+                (true, Ordering::Greater) => Some(DEFICIT),
+                (false, Ordering::Less) => Some(GLUT),
+                _ => None,
+            });
         let place = match swing {
             Some(swing) => format!("{}, {swing}", content.cities[shift.city].name),
             None => content.cities[shift.city].name.clone(),
@@ -73,12 +82,14 @@ impl Game {
             .flat_map(|(city, _)| content.goods.keys().map(move |good| (city, good)))
             .filter_map(|(city, good)| {
                 let [before, now] = history.last_two_weeks(city, good)?;
-                let ratio = f64::from(now.real_kopecks?) / f64::from(before.real_kopecks?);
+                let (before_kopecks, now_kopecks) = (before.real_kopecks?, now.real_kopecks?);
+                let ratio = f64::from(now_kopecks) / f64::from(before_kopecks);
                 Some(Shift {
                     city,
                     good,
                     before,
                     now,
+                    direction: now_kopecks.cmp(&before_kopecks),
                     size: ratio.ln().abs(),
                 })
             })
