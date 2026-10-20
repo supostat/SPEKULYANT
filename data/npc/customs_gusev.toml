@@ -1,4 +1,5 @@
 name = "Таможенник Гусев"
 role = "таможенник в порту"
 faction = "militia"
+city = "leningrad"
 description = "Строг ровно настолько, насколько ему не заплатили."

@@ -1,4 +1,5 @@
 name = "Соседка Клава"
 role = "соседка по площадке"
 faction = "people"
+city = "moscow"
 description = "Видит всё в глазок и пишет туда, куда надо."

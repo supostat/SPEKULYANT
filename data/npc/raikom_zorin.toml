@@ -1,4 +1,5 @@
 name = "Секретарь Зорин"
 role = "секретарь райкома комсомола"
 faction = "officials"
+city = "moscow"
 description = "Видит в каждом кооперативе будущее — своё."

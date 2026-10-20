@@ -440,10 +440,14 @@ fn person_view(game: &Game, memory: &Contact, rival: bool, availability: String)
         Ordering::Equal => None,
         Ordering::Greater => Some(format!("{CONTACT_OWES}: {}", memory.debt())),
     };
+    let role = match &template.city {
+        Some(city) => format!("{}, {}", template.role, game.content.cities[city].name),
+        None => template.role.clone(),
+    };
     ContactView {
         contact: memory.npc().to_string(),
         name: template.name.clone(),
-        role: template.role.clone(),
+        role,
         rival,
         relation: relation.to_owned(),
         debt,

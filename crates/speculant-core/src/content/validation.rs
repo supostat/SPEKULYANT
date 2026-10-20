@@ -587,6 +587,15 @@ fn check_npc(
         ),
         (None, None) => {}
     }
+    if let Some(city) = &npc.city {
+        check_reference(&known.cities, city.as_str(), "города", "cities/", report);
+        if npc.strategy.is_some() {
+            report.at(
+                report.file.line_of("city"),
+                "у соперника со стратегией города нет: его дом выбирает сид".to_owned(),
+            );
+        }
+    }
     if let Some(traits) = &npc.employee {
         if npc.strategy.is_some() {
             report.at(

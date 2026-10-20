@@ -169,6 +169,8 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "money/sock.toml:3: дома деньги лежат в одном месте, а оно уже есть: jar",
         "music/song.toml: путь не входит в раскладку data/",
         "npc/lonely_rival.toml:4: у соперника со стратегией нет капитала capital",
+        "npc/lonely_rival.toml:6: у соперника со стратегией города нет: его дом выбирает сид",
+        "npc/vodka_man.toml:5: города kiev нет в cities/",
         "routes.toml:3: города riga нет в cities/",
         "routes.toml:6: событие vodka_crate стоит на маршруте, но не помечено road = true",
     ];

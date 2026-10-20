@@ -1,4 +1,5 @@
 name = "Отец"
 role = "инструктор горкома партии"
 faction = "officials"
+city = "moscow"
 description = "Звонит нужным людям и не любит, когда звонят ему."

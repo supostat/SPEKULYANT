@@ -9,6 +9,7 @@ mod life_flow;
 mod lobby;
 mod market_flow;
 mod meta_flow;
+mod newspaper;
 mod russian_count;
 mod save_flow;
 mod snapshot;
@@ -162,6 +163,10 @@ impl Game {
 
     pub fn markets(&self) -> &Markets {
         &self.world.markets
+    }
+
+    pub fn price_history(&self) -> &PriceHistory {
+        &self.world.price_history
     }
 
     pub fn player(&self) -> &Trader {
@@ -418,6 +423,7 @@ impl Game {
         self.roll_market_swing(date);
         if PriceHistory::is_record_day(date) {
             self.record_prices(date);
+            self.print_newspaper(date);
         }
         self.world.player.next_day(&self.content, date);
         let drift_days = self.content.epoch_profile_on(date).reputation_drift_days;
@@ -458,16 +464,15 @@ impl Game {
         self.world.price_history.record(date, prices);
     }
 
-    /// Игрок уезжает из города и запоминает ценники его толкучки.
-    fn remember_market(&mut self, date: GameDate) {
+    /// Игрок запоминает ценники толкучки города: уезжая из него или по телефону от знакомого.
+    fn remember_market(&mut self, city: CityId, date: GameDate) {
         let content = &self.content;
-        let city = &self.world.city;
         let markets = &self.world.markets;
         let goods = content
             .goods
             .keys()
             .filter_map(|good| {
-                let quote = markets.quote(content, city, good, date)?;
+                let quote = markets.quote(content, &city, good, date)?;
                 let price = SeenPrice {
                     buy: quote.buy,
                     sell: quote.sell,
@@ -477,7 +482,7 @@ impl Game {
             .collect();
         self.world
             .seen_prices
-            .remember(city.clone(), SeenMarket { date, goods });
+            .remember(city, SeenMarket { date, goods });
     }
 
     /// Положение дел для условий событий.

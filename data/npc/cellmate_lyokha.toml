@@ -1,4 +1,5 @@
 name = "Лёха"
 role = "сосед по нарам"
 faction = "bandits"
+city = "gorky"
 description = "Вышел раньше и помнит, кто ему должен."

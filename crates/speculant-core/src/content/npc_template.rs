@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use super::{EmployeeTraits, FactionId};
+use super::{CityId, EmployeeTraits, FactionId};
 use crate::economy::Real;
 use crate::npc::Strategy;
 
@@ -19,5 +19,8 @@ pub struct NpcTemplate {
     pub capital: Option<Real>,
     /// Черты, если человека можно нанять управляющим; соперник не нанимается.
     pub employee: Option<EmployeeTraits>,
+    /// Город, где живёт знакомый: позвонишь ему из другого города без повода — продиктует цены
+    /// своей толкучки. Без поля человек своего города не держит; дом соперника выбирает сид.
+    pub city: Option<CityId>,
     pub description: String,
 }

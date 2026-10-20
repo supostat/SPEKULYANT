@@ -7,22 +7,23 @@ use crate::content::{CityId, GoodId};
 use crate::time::GameDate;
 
 /// Цены толкучек, какими их видел игрок (§4): уезжая из города, он помнит ценники покупки и
-/// продажи каждого товара в номинале того дня. Новый отъезд из города заменяет прошлую память о
-/// нём; товара, которого тогда ещё не продавали, в памяти нет. Из зоны игрок выходит в тот же
+/// продажи каждого товара в номинале того дня, а знакомый из другого города диктует их по
+/// телефону (§9). Новый отъезд или звонок заменяет прошлую память о городе; товара, которого тогда
+/// ещё не продавали, в памяти нет. Из зоны игрок выходит в тот же
 /// город, где его взяли, поэтому арест памяти не нужен.
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SeenPrices {
     cities: BTreeMap<CityId, SeenMarket>,
 }
 
-/// Толкучка города в день отъезда.
+/// Толкучка города в день отъезда или звонка.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SeenMarket {
     pub date: GameDate,
     pub goods: BTreeMap<GoodId, SeenPrice>,
 }
 
-/// Ценники следующей штуки товара в день отъезда.
+/// Ценники следующей штуки товара в день отъезда или звонка.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SeenPrice {
     pub buy: Money,

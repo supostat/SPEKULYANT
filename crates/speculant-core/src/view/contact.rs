@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 pub struct ContactView {
     pub contact: String,
     pub name: String,
+    /// Кто он, а у знакомого со своим городом — и город: «боцман сухогруза, Рига».
     pub role: String,
     pub rival: bool,
     pub relation: String,

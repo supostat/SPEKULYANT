@@ -77,6 +77,26 @@ impl PriceHistory {
             .collect()
     }
 
+    /// Две последние недели товара в городе, от старой к новой; `None` — записей ещё меньше двух.
+    pub fn last_two_weeks(&self, city: &CityId, good: &GoodId) -> Option<[PriceWeek; 2]> {
+        let newest = self.newest?;
+        let prices = self.weeks.get(city)?.get(good)?;
+        let [.., previous, latest] = prices.as_slice() else {
+            return None;
+        };
+        let week = i32::try_from(WEEK_DAYS).expect("неделя мала");
+        Some([
+            PriceWeek {
+                date: GameDate::from_day_index(newest.day_index() - week),
+                real_kopecks: *previous,
+            },
+            PriceWeek {
+                date: newest,
+                real_kopecks: *latest,
+            },
+        ])
+    }
+
     /// День записи: каждый седьмой день от 1 января 1984 года — первого дня каждой жизни.
     pub fn is_record_day(date: GameDate) -> bool {
         date.day_index() % i32::try_from(WEEK_DAYS).expect("неделя мала") == 0

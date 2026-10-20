@@ -1,4 +1,5 @@
 name = "Пётр Аркадьевич"
 role = "завлаб НИИ"
 faction = "officials"
+city = "moscow"
 description = "Подпишет командировку и не спросит, что ты из неё привёз."

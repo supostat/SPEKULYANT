@@ -69,7 +69,7 @@ impl Game {
             }
         }
         self.world.player.pay_cash(fare);
-        self.remember_market(today);
+        self.remember_market(self.world.city.clone(), today);
         self.world.journey = Some(Journey {
             from: self.world.city.clone(),
             to,

@@ -1,4 +1,5 @@
 name = "Участковый Сёмин"
 role = "участковый"
 faction = "militia"
+city = "moscow"
 description = "Знает всех во дворе. Закрывает глаза, пока не шумят."

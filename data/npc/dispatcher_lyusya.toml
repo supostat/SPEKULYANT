@@ -1,4 +1,5 @@
 name = "Диспетчер Люся"
 role = "диспетчер таксопарка"
 faction = "people"
+city = "moscow"
 description = "Знает, кто куда едет и что везёт."
