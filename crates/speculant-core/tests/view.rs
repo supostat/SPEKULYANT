@@ -259,3 +259,45 @@ fn a_market_row_shows_how_much_of_the_good_the_player_holds() {
     assert_eq!(held(&game, "chewing_gum"), "2");
     assert_eq!(held(&game, "jeans"), "", "чего нет, то пусто");
 }
+
+/// Жизнь на настоящих данных без событий дня: дни идут ровно, по одному на шаг.
+fn quiet_life() -> Game {
+    let mut content = Content::load(Path::new(DATA)).expect("data/ валиден");
+    content.event_rules.daily_chance = 0.0;
+    Game::new_life(&life_settings(), Arc::new(content)).expect("жизнь начинается")
+}
+
+fn jeans_row(game: &Game) -> speculant_core::view::MarketRowView {
+    game.view()
+        .market
+        .goods
+        .into_iter()
+        .find(|row| row.good == "jeans")
+        .expect("джинсы на толкучке")
+}
+
+#[test]
+fn the_price_chart_starts_at_birth_and_grows_by_a_week() {
+    let mut game = quiet_life();
+    let born = jeans_row(&game);
+    assert_eq!(
+        born.chart.weeks.len(),
+        1,
+        "первая неделя записана при рождении"
+    );
+    assert_eq!(born.chart.low, born.buy, "подпись — тот же ценник");
+    assert_eq!(born.chart.high, born.buy);
+    assert_eq!(born.chart.from, "01.01.1984");
+    assert_eq!(born.chart.to, "01.01.1984");
+    for _day in 0..21 {
+        assert!(game.advance(1800), "день проходит");
+    }
+    let lived = jeans_row(&game);
+    assert_eq!(lived.chart.weeks.len(), 4, "день рождения и три недели");
+    assert!(
+        lived.chart.weeks.iter().all(Option::is_some),
+        "джинсы продаются с начала"
+    );
+    assert_eq!(lived.chart.from, "01.01.1984");
+    assert_eq!(lived.chart.to, "22.01.1984");
+}

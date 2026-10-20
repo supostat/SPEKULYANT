@@ -8,8 +8,8 @@ mod zone;
 use std::cmp::Ordering;
 
 use super::Game;
-use crate::content::{Content, Pitch};
-use crate::economy::{Currency, MoneyRules};
+use crate::content::{CityId, Content, GoodId, Pitch};
+use crate::economy::{Currency, Money, MoneyRules};
 use crate::meta::Meta;
 use crate::npc::Rival;
 use crate::reputation::{Availability, Contact};
@@ -18,8 +18,8 @@ use crate::travel::Access;
 use crate::view::{
     ChoiceView, ContactView, DestinationView, EventView, FactionView, HeaderView, JourneyView,
     LevelView, LobbyView, MarketRowView, MarketView, MoneyPlaceView, MoneyView, OutcomeView,
-    PagerMessageView, PagerView, PocketItemView, PocketView, StateView, TimeView, ToneView,
-    TravelView,
+    PagerMessageView, PagerView, PocketItemView, PocketView, PriceChartView, StateView, TimeView,
+    ToneView, TravelView,
 };
 
 const CASH_LABEL: &str = "Наличные";
@@ -221,12 +221,42 @@ fn market(game: &Game, today: GameDate) -> MarketView {
                     0 => String::new(),
                     quantity => quantity.to_string(),
                 },
+                chart: price_chart(game, &game.world.city, id),
             })
         })
         .collect();
     MarketView {
         place: content.cities[&game.world.city].market.clone(),
         goods,
+    }
+}
+
+/// График цены товара в городе: недели истории в номинале своего дня; самая низкая и самая высокая
+/// цена подписываются так, как их показывал ценник в ту неделю.
+fn price_chart(game: &Game, city: &CityId, good: &GoodId) -> PriceChartView {
+    let rules = &game.content.money;
+    let weeks = game.world.price_history.weeks(city, good);
+    let (Some(first), Some(last)) = (weeks.first(), weeks.last()) else {
+        return PriceChartView::default();
+    };
+    let tags: Vec<Option<(Money, GameDate)>> = weeks
+        .iter()
+        .map(|week| {
+            week.real_kopecks
+                .map(|kopecks| (rules.price_tag(f64::from(kopecks), week.date), week.date))
+        })
+        .collect();
+    let shown = |(tag, date): (Money, GameDate)| rules.shown_minor_units(tag, date);
+    let label = |extreme: Option<&(Money, GameDate)>| {
+        extreme.map_or_else(String::new, |(tag, date)| rules.format_number(*tag, *date))
+    };
+    let present = || tags.iter().flatten();
+    PriceChartView {
+        weeks: tags.iter().map(|tag| tag.map(shown)).collect(),
+        low: label(present().min_by_key(|tag| shown(**tag))),
+        high: label(present().max_by_key(|tag| shown(**tag))),
+        from: first.date.numeric(),
+        to: last.date.numeric(),
     }
 }
 

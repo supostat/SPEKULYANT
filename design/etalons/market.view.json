@@ -13,14 +13,14 @@
   "market": {
     "place": "Толкучка у Рижского вокзала",
     "goods": [
-      { "good": "jeans", "name": "Джинсы (фирма)", "buy": "160", "sell": "140", "stock": "6", "held": "3" },
-      { "good": "videocassette", "name": "Видеокассета E-180", "buy": "70", "sell": "58", "stock": "12", "held": "" },
-      { "good": "records", "name": "Пластинки (фирма)", "buy": "45", "sell": "38", "stock": "9", "held": "" },
-      { "good": "chewing_gum", "name": "Жвачка, блок", "buy": "25", "sell": "19", "stock": "30", "held": "2" },
-      { "good": "cigarettes", "name": "Сигареты (импорт)", "buy": "4.50", "sell": "3.60", "stock": "40", "held": "" },
-      { "good": "sneakers", "name": "Кроссовки (импорт)", "buy": "120", "sell": "100", "stock": "3", "held": "" },
-      { "good": "watch", "name": "Часы «Электроника»", "buy": "35", "sell": "27", "stock": "8", "held": "" },
-      { "good": "vodka", "name": "Водка, ящик", "buy": "140", "sell": "118", "stock": "2", "held": "" }
+      { "good": "jeans", "name": "Джинсы (фирма)", "buy": "160", "sell": "140", "stock": "6", "held": "3", "chart": { "weeks": [], "low": "", "high": "", "from": "", "to": "" } },
+      { "good": "videocassette", "name": "Видеокассета E-180", "buy": "70", "sell": "58", "stock": "12", "held": "", "chart": { "weeks": [], "low": "", "high": "", "from": "", "to": "" } },
+      { "good": "records", "name": "Пластинки (фирма)", "buy": "45", "sell": "38", "stock": "9", "held": "", "chart": { "weeks": [], "low": "", "high": "", "from": "", "to": "" } },
+      { "good": "chewing_gum", "name": "Жвачка, блок", "buy": "25", "sell": "19", "stock": "30", "held": "2", "chart": { "weeks": [], "low": "", "high": "", "from": "", "to": "" } },
+      { "good": "cigarettes", "name": "Сигареты (импорт)", "buy": "4.50", "sell": "3.60", "stock": "40", "held": "", "chart": { "weeks": [], "low": "", "high": "", "from": "", "to": "" } },
+      { "good": "sneakers", "name": "Кроссовки (импорт)", "buy": "120", "sell": "100", "stock": "3", "held": "", "chart": { "weeks": [], "low": "", "high": "", "from": "", "to": "" } },
+      { "good": "watch", "name": "Часы «Электроника»", "buy": "35", "sell": "27", "stock": "8", "held": "", "chart": { "weeks": [], "low": "", "high": "", "from": "", "to": "" } },
+      { "good": "vodka", "name": "Водка, ящик", "buy": "140", "sell": "118", "stock": "2", "held": "", "chart": { "weeks": [], "low": "", "high": "", "from": "", "to": "" } }
     ]
   },
   "travel": { "journey": null, "destinations": [] },

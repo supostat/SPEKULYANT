@@ -2,7 +2,7 @@ class_name MarketScreen
 extends RefCounted
 ## Рынок, главный экран (docs/SPEKULYANT.md §13.3 п. 1, макет «Рынок» дизайн-книги): шапка, толкучка
 ## — цены, запас толкучки и сколько товара у игрока, — карман с угрозой эпохи, слухи, сообщения, ход
-## времени и строка F-клавиш. Стрелки выбирают товар,
+## времени и строка F-клавиш. Стрелки выбирают товар, Enter открывает график его цены,
 ## F2 и F3 открывают окно количества для покупки и продажи, пробел — пауза, +/− — скорость, F4 —
 ## поездка; F1 — помощь, F5 — связи, F6 — дела, F7 — пейджер, F10 и Esc — меню выхода. Пока открыто
 ## окно количества, время стоит.
@@ -23,7 +23,7 @@ const HELD_WIDTH := 7
 const GOODS_LINE_WIDTH := NAME_WIDTH + BUY_WIDTH + SELL_WIDTH + STOCK_WIDTH + HELD_WIDTH
 const SELECTED_FOREGROUND := 0
 const SELECTED_BACKGROUND := 3
-const GOODS_HINT := "↑↓ выбрать   F2 купить   F3 продать"
+const GOODS_HINT := "↑↓ выбрать   Enter график   F2 купить   F3 продать"
 const GOODS_HINT_ROW := 14
 const GOODS_HINT_FOREGROUND := 8
 const GOODS_VISIBLE := GOODS_HINT_ROW - GOODS_FIRST_ROW
@@ -125,6 +125,9 @@ func handle(action: Dictionary, view: Dictionary) -> Dictionary:
 					return {"push": "pager"}
 				EXIT_KEY:
 					return {"push": "game_menu"}
+		"confirm":
+			if not goods.is_empty():
+				return {"push": "chart", "with": {"good": goods[_goods.selected]["good"]}}
 		"back":
 			return {"push": "game_menu"}
 		"pause":

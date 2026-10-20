@@ -22,7 +22,7 @@ use crate::business::{Business, BusinessId};
 use crate::command::{Command, LifeSettings};
 use crate::command_error::CommandError;
 use crate::content::{BiographyId, CityId, Content, GoodId, MoneyPlaceId, NpcId};
-use crate::economy::{Currency, Deal, Markets, Money, Real, Trader};
+use crate::economy::{Currency, Deal, Markets, Money, PriceHistory, Real, Trader};
 use crate::events::{EventEngine, JournalEntry, Situation};
 use crate::history::Timeline;
 use crate::life::{Character, Chronicle, LifeSummary, Pager, PagerDevice, PagerMessage};
@@ -111,6 +111,7 @@ impl Game {
             timeline,
             city: biography.start_city.clone(),
             markets: Markets::new(&content),
+            price_history: PriceHistory::default(),
             player: Trader::new(cash, &content),
             reputation: FactionReputation::new(&content.factions),
             contacts: biography
@@ -133,6 +134,7 @@ impl Game {
             storage,
             world,
         };
+        game.record_prices(today);
         game.autosave();
         Ok(game)
     }
@@ -408,6 +410,9 @@ impl Game {
         self.world
             .markets
             .next_day(&self.content, &mut self.world.rng, date);
+        if PriceHistory::is_record_day(date) {
+            self.record_prices(date);
+        }
         self.world.player.next_day(&self.content, date);
         let drift_days = self.content.epoch_profile_on(date).reputation_drift_days;
         self.world.reputation.next_day(drift_days);
@@ -431,6 +436,19 @@ impl Game {
             return true;
         }
         self.arrive_if_due(date)
+    }
+
+    /// Неделя истории цен: цена покупки штуки каждого товара в каждом городе в этот день.
+    fn record_prices(&mut self, date: GameDate) {
+        let content = &self.content;
+        let markets = &self.world.markets;
+        let prices = content.cities.keys().flat_map(|city| {
+            content.goods.keys().map(move |good| {
+                let kopecks = markets.buy_real_kopecks(content, city, good, date);
+                (city, good, kopecks.map(|kopecks| kopecks.round() as u32))
+            })
+        });
+        self.world.price_history.record(date, prices);
     }
 
     /// Положение дел для условий событий.

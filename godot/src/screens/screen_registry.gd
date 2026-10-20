@@ -13,6 +13,7 @@ const SCREENS := {
 	"help": preload("res://src/screens/help.gd"),
 	"settings": preload("res://src/screens/settings.gd"),
 	"market": preload("res://src/screens/market.gd"),
+	"chart": preload("res://src/screens/chart.gd"),
 	"event": preload("res://src/screens/event.gd"),
 	"travel": preload("res://src/screens/travel.gd"),
 	"businesses": preload("res://src/screens/businesses.gd"),

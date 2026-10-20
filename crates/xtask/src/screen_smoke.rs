@@ -5,6 +5,7 @@ use std::sync::Arc;
 use anyhow::{Context, Result, anyhow, bail};
 use speculant_core::content::EventId;
 use speculant_core::save::Storage;
+use speculant_core::time::GameDate;
 use speculant_core::{Command, Content, Game, LifeSettings, Lobby};
 
 use crate::project_root::project_root;
@@ -12,7 +13,7 @@ use crate::screen_file::{COLUMNS, ROWS, ScreenFile};
 use crate::screen_runner;
 
 /// Все экраны без макета и снимок, на котором их рисовать.
-const SCREENS: [(&str, Snapshot); 15] = [
+const SCREENS: [(&str, Snapshot); 16] = [
     ("main_menu", Snapshot::Lobby),
     ("settings", Snapshot::Lobby),
     ("new_life", Snapshot::Lobby),
@@ -28,11 +29,15 @@ const SCREENS: [(&str, Snapshot); 15] = [
     ("contacts", Snapshot::Life),
     ("money", Snapshot::Life),
     ("zone", Snapshot::Zone),
+    ("chart", Snapshot::Lived),
 ];
 const ALL: &str = "all";
 /// Снимок жизни — студент с этим сидом на настоящих данных.
 const BIOGRAPHY: &str = "student";
 const SEED: u64 = 7;
+/// Прожитая жизнь — двадцать недель истории цен.
+const LIVED_DAYS: u32 = 140;
+const DAY_MILLISECONDS: u32 = 1800;
 /// В зону — моряк: денег хватает на сигнал в ОБХСС, а проверка кончается судом, если отпираться.
 const ZONE_BIOGRAPHY: &str = "sailor";
 const ZONE_CHAIN: [(&str, usize); 2] = [("obkhss_signal", 3), ("obkhss_visit", 3)];
@@ -46,6 +51,8 @@ const LABEL_COLORS: (char, char) = ('0', '3');
 enum Snapshot {
     Lobby,
     Life,
+    /// Жизнь, прожитая несколько месяцев: у толкучки есть история цен.
+    Lived,
     Zone,
 }
 
@@ -117,6 +124,7 @@ fn snapshot_json(snapshot: Snapshot, content: &Arc<Content>) -> Result<String> {
             serde_json::to_string(&lobby.view())?
         }
         Snapshot::Life => serde_json::to_string(&life(BIOGRAPHY, content)?.view())?,
+        Snapshot::Lived => serde_json::to_string(&lived_life(content)?.view())?,
         Snapshot::Zone => serde_json::to_string(&zone_life(content)?.view())?,
     };
     Ok(json)
@@ -130,6 +138,33 @@ fn life(biography: &str, content: &Arc<Content>) -> Result<Game> {
     };
     Game::new_life(&settings, Arc::clone(content))
         .map_err(|error| anyhow!("жизнь не начинается: {error}"))
+}
+
+/// Жизнь студента, прожитая `LIVED_DAYS` дней на первой скорости: события закрыты первым
+/// доступным выбором, жизнь осталась на воле.
+fn lived_life(content: &Arc<Content>) -> Result<Game> {
+    let mut game = life(BIOGRAPHY, content)?;
+    let until = GameDate::START.after_days(LIVED_DAYS);
+    while game.today() < until {
+        if let Some(event) = game.view().pending_event {
+            let choice = event
+                .choices
+                .iter()
+                .position(|choice| choice.available)
+                .with_context(|| format!("в событии «{}» нет доступного выбора", event.title))?
+                + 1;
+            for command in [Command::Choose { choice }, Command::Continue] {
+                game.apply(command)
+                    .map_err(|error| anyhow!("событие «{}»: {error}", event.title))?;
+            }
+            continue;
+        }
+        if game.summary().is_some() || game.zone().is_some() {
+            bail!("за {LIVED_DAYS} дней жизнь ушла с воли");
+        }
+        game.advance(DAY_MILLISECONDS);
+    }
+    Ok(game)
 }
 
 /// Жизнь, которую цепочка событий привела в зону.

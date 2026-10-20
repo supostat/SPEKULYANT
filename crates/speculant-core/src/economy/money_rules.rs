@@ -84,10 +84,7 @@ impl MoneyRules {
     /// если они есть («4.50», «3»), крупнее — целыми с разбивкой по три цифры («1 240»). Рубли
     /// после деноминации — новые.
     pub fn format_number(&self, money: Money, date: GameDate) -> String {
-        let shown = divide_rounded(
-            money.minor_units(),
-            self.shown_divisor(money.currency(), date),
-        );
+        let shown = self.shown_minor_units(money, date);
         let has_kopecks = shown % Currency::MINOR_UNITS != 0;
         if shown.abs() < WHOLE_UNITS_FROM_MINOR && has_kopecks {
             let sign = if shown < 0 { "-" } else { "" };
@@ -97,6 +94,15 @@ impl MoneyRules {
         } else {
             grouped(divide_rounded(shown, Currency::MINOR_UNITS))
         }
+    }
+
+    /// Сумма в копейках (центах) так, как её показывает ценник дня: рубли после деноминации —
+    /// новые. По этому числу график цен сравнивает недели.
+    pub fn shown_minor_units(&self, money: Money, date: GameDate) -> i64 {
+        divide_rounded(
+            money.minor_units(),
+            self.shown_divisor(money.currency(), date),
+        )
     }
 
     /// Во сколько раз единица на ценнике крупнее единицы счёта ядра: деноминация трогает только рубли.

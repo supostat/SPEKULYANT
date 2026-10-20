@@ -96,6 +96,25 @@ impl Markets {
         Some(tags(content, prices, date))
     }
 
+    /// Реальная цена следующей штуки при покупке в копейках 1984 года — то, что история цен
+    /// записывает раз в неделю; `None`, пока товара ещё нет.
+    pub fn buy_real_kopecks(
+        &self,
+        content: &Content,
+        city: &CityId,
+        good: &GoodId,
+        date: GameDate,
+    ) -> Option<f64> {
+        let normal = self.normal_kopecks(content, city, good, date)?;
+        Some(self.city(city).buy_price_after(
+            good,
+            normal,
+            content.goods[good].stock,
+            &content.market,
+            0,
+        ))
+    }
+
     /// Ценники `quantity` штук подряд при продаже; `None`, пока товара ещё нет.
     pub fn sell_tags(
         &self,

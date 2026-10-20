@@ -10,6 +10,7 @@ const CONTENT_KEY: &str = "content";
 const BODY_KEY: &str = "body";
 const FIRST_VERSION: u32 = 1;
 const PAGER_KEY: &str = "pager";
+const PRICE_HISTORY_KEY: &str = "price_history";
 
 /// Вид файла и версия формата его тела. Когда тело меняется, версия растёт и добавляется шаг
 /// миграции: `migrations[i]` переводит тело версии `i + 1` в версию `i + 2`, поэтому файлы любой
@@ -20,11 +21,11 @@ pub struct SaveFormat {
     pub migrations: &'static [fn(Value) -> Value],
 }
 
-/// Файл жизни: мир одной жизни. Версия 2 добавила ленту пейджера.
+/// Файл жизни: мир одной жизни. Версия 2 добавила ленту пейджера, версия 3 — историю цен.
 pub const LIFE: SaveFormat = SaveFormat {
     kind: "speculant-life",
-    version: 2,
-    migrations: &[add_pager],
+    version: 3,
+    migrations: &[add_pager, add_price_history],
 };
 
 /// Файл метапрогрессии: открытия, книжка, история и рекорды.
@@ -38,6 +39,17 @@ pub const META: SaveFormat = SaveFormat {
 fn add_pager(mut body: Value) -> Value {
     if let Value::Object(world) = &mut body {
         world.insert(PAGER_KEY.to_owned(), json!({ "messages": [] }));
+    }
+    body
+}
+
+/// Жизнь версии 2 — до истории цен: история пуста и начнётся с ближайшей недели.
+fn add_price_history(mut body: Value) -> Value {
+    if let Value::Object(world) = &mut body {
+        world.insert(
+            PRICE_HISTORY_KEY.to_owned(),
+            json!({ "newest": null, "weeks": {} }),
+        );
     }
     body
 }

@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::business::{Business, BusinessId};
 use crate::content::{CityId, NpcId};
-use crate::economy::{Markets, Trader};
+use crate::economy::{Markets, PriceHistory, Trader};
 use crate::events::EventEngine;
 use crate::history::Timeline;
 use crate::life::{Character, Chronicle, LifeSummary, Pager};
@@ -18,7 +18,8 @@ use crate::travel::Journey;
 use crate::view::Screen;
 use crate::zone::Zone;
 
-/// Мир жизни: режим, персонаж и летопись, итоги, часы и случай, история, город, рынки, кошелёк,
+/// Мир жизни: режим, персонаж и летопись, итоги, часы и случай, история, город, рынки и история их
+/// цен, кошелёк,
 /// репутация, связи, соперники, дела, события, дорога, зона, лента, пейджер и открытый экран.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(super) struct World {
@@ -34,6 +35,8 @@ pub(super) struct World {
     pub(super) timeline: Timeline,
     pub(super) city: CityId,
     pub(super) markets: Markets,
+    /// Цены толкучек раз в неделю за последний год — для графика цены.
+    pub(super) price_history: PriceHistory,
     pub(super) player: Trader,
     pub(super) reputation: FactionReputation,
     pub(super) contacts: BTreeMap<NpcId, Contact>,

@@ -12,7 +12,7 @@
  ║ Часы «Электроника»         35       27     8        ║ │ В ГУМ, говорят,    │ 
  ║ Водка, ящик               140      118     2        ║ │ завезут финские    │ 
  ║                                                     ║ │ сапоги.            │ 
- ║ ↑↓ выбрать   F2 купить   F3 продать                 ║ │ Участковый новый,  │ 
+ ║ ↑↓ выбрать   Enter график   F2 купить   F3 продать  ║ │ Участковый новый,  │ 
  ║                                                     ║ │ злой.              │ 
  ╚═════════════════════════════════════════════════════╝ └────────────────────┘ 
  ┌──────────────────────────────── Сообщения ─────────────────────────────────┐ 
@@ -38,7 +38,7 @@ ffffffffffff00000000000000000000000000000000000000000000000000000000000000000000
 7ff777777777777777777777777777777777777777777777777777ff7ffbbbbbbbbbbbbbbbfffff7
 7ff777777777777777777777777777777777777777777777777777ff7ffbbbbbbbbbbbbbbbfffff7
 7fffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffbbbbbbbfffffffffffff7
-7ff88888888888888888888888888888888888ffffffffffffffffff7ffbbbbbbbbbbbbbbbbbfff7
+7ff88888888888888888888888888888888888888888888888888fff7ffbbbbbbbbbbbbbbbbbfff7
 7fffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffbbbbbfffffffffffffff7
 7fffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffff7
 77777777777777777777777777777777777777777777777777777777777777777777777777777777

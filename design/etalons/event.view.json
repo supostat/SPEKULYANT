@@ -31,7 +31,14 @@
         "buy": "160",
         "sell": "140",
         "stock": "6",
-        "held": ""
+        "held": "",
+        "chart": {
+          "weeks": [],
+          "low": "",
+          "high": "",
+          "from": "",
+          "to": ""
+        }
       },
       {
         "good": "videocassette",
@@ -39,7 +46,14 @@
         "buy": "70",
         "sell": "58",
         "stock": "12",
-        "held": ""
+        "held": "",
+        "chart": {
+          "weeks": [],
+          "low": "",
+          "high": "",
+          "from": "",
+          "to": ""
+        }
       },
       {
         "good": "records",
@@ -47,7 +61,14 @@
         "buy": "45",
         "sell": "38",
         "stock": "9",
-        "held": ""
+        "held": "",
+        "chart": {
+          "weeks": [],
+          "low": "",
+          "high": "",
+          "from": "",
+          "to": ""
+        }
       },
       {
         "good": "chewing_gum",
@@ -55,7 +76,14 @@
         "buy": "25",
         "sell": "19",
         "stock": "30",
-        "held": ""
+        "held": "",
+        "chart": {
+          "weeks": [],
+          "low": "",
+          "high": "",
+          "from": "",
+          "to": ""
+        }
       },
       {
         "good": "cigarettes",
@@ -63,7 +91,14 @@
         "buy": "4.50",
         "sell": "3.60",
         "stock": "40",
-        "held": ""
+        "held": "",
+        "chart": {
+          "weeks": [],
+          "low": "",
+          "high": "",
+          "from": "",
+          "to": ""
+        }
       },
       {
         "good": "sneakers",
@@ -71,7 +106,14 @@
         "buy": "120",
         "sell": "100",
         "stock": "3",
-        "held": ""
+        "held": "",
+        "chart": {
+          "weeks": [],
+          "low": "",
+          "high": "",
+          "from": "",
+          "to": ""
+        }
       },
       {
         "good": "watch",
@@ -79,7 +121,14 @@
         "buy": "35",
         "sell": "27",
         "stock": "8",
-        "held": ""
+        "held": "",
+        "chart": {
+          "weeks": [],
+          "low": "",
+          "high": "",
+          "from": "",
+          "to": ""
+        }
       },
       {
         "good": "vodka",
@@ -87,7 +136,14 @@
         "buy": "140",
         "sell": "118",
         "stock": "2",
-        "held": ""
+        "held": "",
+        "chart": {
+          "weeks": [],
+          "low": "",
+          "high": "",
+          "from": "",
+          "to": ""
+        }
       }
     ]
   },

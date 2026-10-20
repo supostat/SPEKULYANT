@@ -1,11 +1,11 @@
 extends SceneTree
 ## Сквозная жизнь для `cargo xtask e2e`: настоящие ядро, мост, роутер и экраны; подменён только
 ## каталог игрока — `user://e2e`. Заставка → главное меню → новая жизнь: студент, ironman, сид 7 →
-## шестьдесят дней на рынке с покупками и продажами, события — первым доступным выбором → поездка в
-## первый доступный город → выход в главное меню (ironman сохраняется сам) и «Продолжить» из его
-## слота: снимок ядра тот же → ещё месяц торговли → уход на покой → итоги жизни: заметка, слот
-## ironman стёрт, знания легли в метапрогрессию, жизнь — в «Рейтинг Форбс». После каждого шага
-## сверяются буфер экрана и снимок ядра.
+## шестьдесят дней на рынке с покупками и продажами, события — первым доступным выбором → график
+## цены товара за эти недели → поездка в первый доступный город → выход в главное меню (ironman
+## сохраняется сам) и «Продолжить» из его слота: снимок ядра тот же → ещё месяц торговли → уход на
+## покой → итоги жизни: заметка, слот ironman стёрт, знания легли в метапрогрессию, жизнь — в
+## «Рейтинг Форбс». После каждого шага сверяются буфер экрана и снимок ядра.
 
 const FlowDriver := preload("res://tools/flow_driver.gd")
 const ROOT := "user://e2e"
@@ -25,6 +25,9 @@ const RECORDS_ITEM := 5
 const ITEMS_BEFORE_EXITS := 5
 const ITEMS_AFTER_EXITS := 1
 const REST_ENDING := "rest"
+const CHART_TITLE := "Цена покупки по неделям"
+## Записи при рождении и каждые семь дней: за шестьдесят дней их девять.
+const MIN_CHART_WEEKS := 9
 ## Что роутер кладёт в снимок поверх ядра: слоты каталога и настройки.
 const ANNOTATIONS := ["slots", "settings"]
 
@@ -43,6 +46,7 @@ func _initialize() -> void:
 	var passed := (
 		_new_life()
 		and _trade_for(TRADING_DAYS)
+		and _chart()
 		and _travel()
 		and _quit_and_continue()
 		and _trade_for(MORE_DAYS)
@@ -140,6 +144,25 @@ func _select_good() -> bool:
 	for _step in _good_row():
 		_flow.press(KEY_DOWN)
 	return true
+
+
+## Enter на товаре — график цены: за два месяца в истории не меньше девяти недель, ↓ — соседний
+## товар, Esc — снова рынок.
+func _chart() -> bool:
+	var goods: Array = _router.view()["market"]["goods"]
+	var row := _good_row()
+	_flow.press(KEY_ENTER)
+	if _router.top_name() != "chart" or not _flow.shows(CHART_TITLE) or not _flow.shows(goods[row]["name"]):
+		return _fail("Enter на товаре не открыл его график:\n" + _flow.buffer())
+	var weeks: Array = goods[row]["chart"]["weeks"]
+	if weeks.size() < MIN_CHART_WEEKS or not _flow.shows(goods[row]["chart"]["to"]):
+		return _fail("в графике %d недель вместо хотя бы %d:\n%s" % [weeks.size(), MIN_CHART_WEEKS, _flow.buffer()])
+	_flow.press(KEY_DOWN)
+	var next := mini(row + 1, goods.size() - 1)
+	if not _flow.shows(goods[next]["name"]):
+		return _fail("↓ не переключил график на соседний товар:\n" + _flow.buffer())
+	_flow.press(KEY_ESCAPE)
+	return _on_market()
 
 
 ## F4 — направления, Enter на первом доступном, перемотка до прибытия; события дороги решаются.
