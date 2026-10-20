@@ -38,7 +38,8 @@
           "high": "",
           "from": "",
           "to": ""
-        }
+        },
+        "cities": []
       },
       {
         "good": "videocassette",
@@ -53,7 +54,8 @@
           "high": "",
           "from": "",
           "to": ""
-        }
+        },
+        "cities": []
       },
       {
         "good": "records",
@@ -68,7 +70,8 @@
           "high": "",
           "from": "",
           "to": ""
-        }
+        },
+        "cities": []
       },
       {
         "good": "chewing_gum",
@@ -83,7 +86,8 @@
           "high": "",
           "from": "",
           "to": ""
-        }
+        },
+        "cities": []
       },
       {
         "good": "cigarettes",
@@ -98,7 +102,8 @@
           "high": "",
           "from": "",
           "to": ""
-        }
+        },
+        "cities": []
       },
       {
         "good": "sneakers",
@@ -113,7 +118,8 @@
           "high": "",
           "from": "",
           "to": ""
-        }
+        },
+        "cities": []
       },
       {
         "good": "watch",
@@ -128,7 +134,8 @@
           "high": "",
           "from": "",
           "to": ""
-        }
+        },
+        "cities": []
       },
       {
         "good": "vodka",
@@ -143,7 +150,8 @@
           "high": "",
           "from": "",
           "to": ""
-        }
+        },
+        "cities": []
       }
     ]
   },

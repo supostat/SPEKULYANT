@@ -1,6 +1,7 @@
 //! Снимок мира для интерфейса: состояние жизни строками, готовыми к показу (§13.3).
 
 mod business;
+mod city_prices;
 mod life;
 mod meta;
 mod zone;
@@ -222,6 +223,7 @@ fn market(game: &Game, today: GameDate) -> MarketView {
                     quantity => quantity.to_string(),
                 },
                 chart: price_chart(game, &game.world.city, id),
+                cities: city_prices::city_prices(game, id, today),
             })
         })
         .collect();
@@ -260,8 +262,9 @@ fn price_chart(game: &Game, city: &CityId, good: &GoodId) -> PriceChartView {
     }
 }
 
-/// Поездка: в пути — откуда, куда и когда приезд; дома — открытые направления из города с днями
-/// и ценой в номинале дня. Закрытые города не показываются, из зоны не ездят.
+/// Поездка: в пути — откуда, куда и когда приезд; дома — открытые направления из города с днями,
+/// ценой в номинале дня и тем, что там дешевле и дороже, чем здесь. Закрытые города не
+/// показываются, из зоны не ездят.
 fn travel(game: &Game, today: GameDate) -> TravelView {
     let content = &game.content;
     if game.world.zone.is_some() {
@@ -307,6 +310,8 @@ fn travel(game: &Game, today: GameDate) -> TravelView {
                 fare: content.money.format_money(fare, today),
                 by_connections,
                 available: cash.covers(fare) && (!by_connections || someone_helps),
+                cheaper: carried(content, &route.to, &route.from),
+                dearer: carried(content, &route.from, &route.to),
             })
         })
         .collect();
@@ -314,6 +319,23 @@ fn travel(game: &Game, today: GameDate) -> TravelView {
         journey: None,
         destinations,
     }
+}
+
+/// Категории товаров, которые выгодно везти из `from` в `to`, — названия по алфавиту.
+fn carried(content: &Content, from: &CityId, to: &CityId) -> Vec<String> {
+    let (from, to) = (&content.cities[from], &content.cities[to]);
+    let mut titles: Vec<String> = content
+        .categories
+        .iter()
+        .filter(|(id, _)| {
+            content
+                .market
+                .pays_to_carry(from.multiplier(id), to.multiplier(id))
+        })
+        .map(|(_, category)| category.title.clone())
+        .collect();
+    titles.sort();
+    titles
 }
 
 /// Карман: товар при себе, чеки и доллары, число связей и угроза эпохи.

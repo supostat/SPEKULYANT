@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::business::{Business, BusinessId};
 use crate::content::{CityId, NpcId};
-use crate::economy::{Markets, PriceHistory, Trader};
+use crate::economy::{Markets, PriceHistory, SeenPrices, Trader};
 use crate::events::EventEngine;
 use crate::history::Timeline;
 use crate::life::{Character, Chronicle, LifeSummary, Pager};
@@ -18,9 +18,9 @@ use crate::travel::Journey;
 use crate::view::Screen;
 use crate::zone::Zone;
 
-/// Мир жизни: режим, персонаж и летопись, итоги, часы и случай, история, город, рынки и история их
-/// цен, кошелёк,
-/// репутация, связи, соперники, дела, события, дорога, зона, лента, пейджер и открытый экран.
+/// Мир жизни: режим, персонаж и летопись, итоги, часы и случай, история, город, рынки, история их
+/// цен и цены, какими их видел игрок, кошелёк, репутация, связи, соперники, дела, события, дорога,
+/// зона, лента, пейджер и открытый экран.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(super) struct World {
     /// Ironman-жизнь сохраняется сама и не откатывается.
@@ -37,6 +37,8 @@ pub(super) struct World {
     pub(super) markets: Markets,
     /// Цены толкучек раз в неделю за последний год — для графика цены.
     pub(super) price_history: PriceHistory,
+    /// Толкучки, какими игрок видел их в день отъезда, — для цен по городам.
+    pub(super) seen_prices: SeenPrices,
     pub(super) player: Trader,
     pub(super) reputation: FactionReputation,
     pub(super) contacts: BTreeMap<NpcId, Contact>,

@@ -11,6 +11,7 @@ const BODY_KEY: &str = "body";
 const FIRST_VERSION: u32 = 1;
 const PAGER_KEY: &str = "pager";
 const PRICE_HISTORY_KEY: &str = "price_history";
+const SEEN_PRICES_KEY: &str = "seen_prices";
 
 /// Вид файла и версия формата его тела. Когда тело меняется, версия растёт и добавляется шаг
 /// миграции: `migrations[i]` переводит тело версии `i + 1` в версию `i + 2`, поэтому файлы любой
@@ -21,11 +22,12 @@ pub struct SaveFormat {
     pub migrations: &'static [fn(Value) -> Value],
 }
 
-/// Файл жизни: мир одной жизни. Версия 2 добавила ленту пейджера, версия 3 — историю цен.
+/// Файл жизни: мир одной жизни. Версия 2 добавила ленту пейджера, версия 3 — историю цен,
+/// версия 4 — цены, какими игрок видел толкучки.
 pub const LIFE: SaveFormat = SaveFormat {
     kind: "speculant-life",
-    version: 3,
-    migrations: &[add_pager, add_price_history],
+    version: 4,
+    migrations: &[add_pager, add_price_history, add_seen_prices],
 };
 
 /// Файл метапрогрессии: открытия, книжка, история и рекорды.
@@ -50,6 +52,14 @@ fn add_price_history(mut body: Value) -> Value {
             PRICE_HISTORY_KEY.to_owned(),
             json!({ "newest": null, "weeks": {} }),
         );
+    }
+    body
+}
+
+/// Жизнь версии 3 — до памяти о ценах: игрок ещё ниоткуда не уезжал с ней.
+fn add_seen_prices(mut body: Value) -> Value {
+    if let Value::Object(world) = &mut body {
+        world.insert(SEEN_PRICES_KEY.to_owned(), json!({ "cities": {} }));
     }
     body
 }

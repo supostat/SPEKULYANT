@@ -14,6 +14,7 @@ const SCREENS := {
 	"settings": preload("res://src/screens/settings.gd"),
 	"market": preload("res://src/screens/market.gd"),
 	"chart": preload("res://src/screens/chart.gd"),
+	"city_prices": preload("res://src/screens/city_prices.gd"),
 	"event": preload("res://src/screens/event.gd"),
 	"travel": preload("res://src/screens/travel.gd"),
 	"businesses": preload("res://src/screens/businesses.gd"),

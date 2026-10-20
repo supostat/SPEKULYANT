@@ -19,7 +19,8 @@ const DAYS: &str = "дн.";
 
 impl Game {
     /// Ехать: маршрут из текущего города, город открыт, проезд по карману, а «по блату» — нашёлся
-    /// знакомый, который поможет за услугу. Проезд платится сразу, дни в пути идут дальше.
+    /// знакомый, который поможет за услугу. Проезд платится сразу, цены толкучки игрок увозит в
+    /// памяти, дни в пути идут дальше.
     pub(super) fn travel(&mut self, destination: &str) -> Result<(), CommandError> {
         let content = Arc::clone(&self.content);
         let to = CityId::new(destination);
@@ -68,6 +69,7 @@ impl Game {
             }
         }
         self.world.player.pay_cash(fare);
+        self.remember_market(today);
         self.world.journey = Some(Journey {
             from: self.world.city.clone(),
             to,

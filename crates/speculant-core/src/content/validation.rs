@@ -93,11 +93,7 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
             .map(|epoch| epoch.id.clone())
             .collect(),
         goods: ids(&parsed.goods),
-        categories: parsed
-            .goods
-            .iter()
-            .map(|entry| entry.value.category.clone())
-            .collect(),
+        categories: ids(&parsed.categories),
         cities: ids(&parsed.cities),
         npcs: ids(&parsed.npcs),
         factions: ids(&parsed.factions),
@@ -254,12 +250,14 @@ pub(super) fn validate(parsed: &Parsed<'_>, time: &TimeRules, errors: &mut Vec<C
     for entry in &parsed.goods {
         check_good(
             entry,
+            &known,
             &mut Report {
                 file: entry.file,
                 errors: &mut *errors,
             },
         );
     }
+    check_categories(parsed, errors);
     for entry in &parsed.cities {
         check_city(
             entry,
@@ -355,7 +353,14 @@ fn ids<T>(entries: &[Entry<'_, T>]) -> BTreeSet<String> {
     entries.iter().map(|entry| entry.id.clone()).collect()
 }
 
-fn check_good(entry: &Entry<'_, Good>, report: &mut Report<'_, '_>) {
+fn check_good(entry: &Entry<'_, Good>, known: &Known, report: &mut Report<'_, '_>) {
+    check_reference(
+        &known.categories,
+        entry.value.category.as_str(),
+        "категории",
+        "categories/",
+        report,
+    );
     if entry.value.stock == 0 {
         report.at(
             report.file.line_of("stock"),
@@ -387,6 +392,34 @@ fn check_good(entry: &Entry<'_, Good>, report: &mut Report<'_, '_>) {
     }
 }
 
+/// Категория называется и собирает товары: пустая категория ни о чём не говорит ни городу, ни
+/// экрану поездки.
+fn check_categories(parsed: &Parsed<'_>, errors: &mut Vec<ContentError>) {
+    let used: BTreeSet<&str> = parsed
+        .goods
+        .iter()
+        .map(|entry| entry.value.category.as_str())
+        .collect();
+    for entry in &parsed.categories {
+        let mut report = Report {
+            file: entry.file,
+            errors: &mut *errors,
+        };
+        if entry.value.title.trim().is_empty() {
+            report.at(
+                report.file.line_of("title"),
+                "у категории нет названия: title пустой".to_owned(),
+            );
+        }
+        if !used.contains(entry.id.as_str()) {
+            report.at(
+                None,
+                format!("у категории {} нет ни одного товара", entry.id),
+            );
+        }
+    }
+}
+
 fn check_city(entry: &Entry<'_, City>, known: &Known, report: &mut Report<'_, '_>) {
     if entry.value.market.trim().is_empty() {
         report.at(
@@ -395,15 +428,15 @@ fn check_city(entry: &Entry<'_, City>, known: &Known, report: &mut Report<'_, '_
         );
     }
     for (category, multiplier) in &entry.value.multipliers {
-        if !known.categories.contains(category) {
+        if !known.categories.contains(category.as_str()) {
             report.at(
-                report.file.line_of(category),
-                format!("категории {category} нет ни у одного товара"),
+                report.file.line_of(category.as_str()),
+                format!("категории {category} нет в categories/"),
             );
         }
         if !(multiplier.is_finite() && *multiplier > 0.0) {
             report.at(
-                report.file.line_of(category),
+                report.file.line_of(category.as_str()),
                 format!("множитель категории {category} должен быть больше нуля"),
             );
         }

@@ -13,7 +13,7 @@ use crate::screen_file::{COLUMNS, ROWS, ScreenFile};
 use crate::screen_runner;
 
 /// Все экраны без макета и снимок, на котором их рисовать.
-const SCREENS: [(&str, Snapshot); 16] = [
+const SCREENS: [(&str, Snapshot); 17] = [
     ("main_menu", Snapshot::Lobby),
     ("settings", Snapshot::Lobby),
     ("new_life", Snapshot::Lobby),
@@ -30,6 +30,7 @@ const SCREENS: [(&str, Snapshot); 16] = [
     ("money", Snapshot::Life),
     ("zone", Snapshot::Zone),
     ("chart", Snapshot::Lived),
+    ("city_prices", Snapshot::Lived),
 ];
 const ALL: &str = "all";
 /// Снимок жизни — студент с этим сидом на настоящих данных.
@@ -51,7 +52,8 @@ const LABEL_COLORS: (char, char) = ('0', '3');
 enum Snapshot {
     Lobby,
     Life,
-    /// Жизнь, прожитая несколько месяцев: у толкучки есть история цен.
+    /// Поездка и несколько месяцев жизни: у толкучки есть история цен, а игрок помнит цены
+    /// города, откуда уехал.
     Lived,
     Zone,
 }
@@ -140,12 +142,32 @@ fn life(biography: &str, content: &Arc<Content>) -> Result<Game> {
         .map_err(|error| anyhow!("жизнь не начинается: {error}"))
 }
 
-/// Жизнь студента, прожитая `LIVED_DAYS` дней на первой скорости: события закрыты первым
-/// доступным выбором, жизнь осталась на воле.
+/// Жизнь студента: поездка из стартового города в первый доступный, пока на неё есть деньги, и
+/// `LIVED_DAYS` дней на первой скорости там.
 fn lived_life(content: &Arc<Content>) -> Result<Game> {
     let mut game = life(BIOGRAPHY, content)?;
+    let destination = game
+        .view()
+        .travel
+        .destinations
+        .into_iter()
+        .find(|destination| destination.available)
+        .context("из города некуда ехать")?;
+    game.apply(Command::Travel {
+        destination: destination.city.clone(),
+    })
+    .map_err(|error| anyhow!("поездка в {}: {error}", destination.name))?;
     let until = GameDate::START.after_days(LIVED_DAYS);
-    while game.today() < until {
+    live_while(&mut game, |game| {
+        game.journey().is_some() || game.today() < until
+    })?;
+    Ok(game)
+}
+
+/// Живёт по дню на первой скорости, пока `going` держится: события закрыты первым доступным
+/// выбором, жизнь осталась на воле.
+fn live_while(game: &mut Game, going: impl Fn(&Game) -> bool) -> Result<()> {
+    while going(game) {
         if let Some(event) = game.view().pending_event {
             let choice = event
                 .choices
@@ -160,11 +182,11 @@ fn lived_life(content: &Arc<Content>) -> Result<Game> {
             continue;
         }
         if game.summary().is_some() || game.zone().is_some() {
-            bail!("за {LIVED_DAYS} дней жизнь ушла с воли");
+            bail!("жизнь ушла с воли к {}", game.today().numeric());
         }
         game.advance(DAY_MILLISECONDS);
     }
-    Ok(game)
+    Ok(())
 }
 
 /// Жизнь, которую цепочка событий привела в зону.

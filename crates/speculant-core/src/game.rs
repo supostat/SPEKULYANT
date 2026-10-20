@@ -22,7 +22,9 @@ use crate::business::{Business, BusinessId};
 use crate::command::{Command, LifeSettings};
 use crate::command_error::CommandError;
 use crate::content::{BiographyId, CityId, Content, GoodId, MoneyPlaceId, NpcId};
-use crate::economy::{Currency, Deal, Markets, Money, PriceHistory, Real, Trader};
+use crate::economy::{
+    Currency, Deal, Markets, Money, PriceHistory, Real, SeenMarket, SeenPrice, SeenPrices, Trader,
+};
 use crate::events::{EventEngine, JournalEntry, Situation};
 use crate::history::Timeline;
 use crate::life::{Character, Chronicle, LifeSummary, Pager, PagerDevice, PagerMessage};
@@ -112,6 +114,7 @@ impl Game {
             city: biography.start_city.clone(),
             markets: Markets::new(&content),
             price_history: PriceHistory::default(),
+            seen_prices: SeenPrices::default(),
             player: Trader::new(cash, &content),
             reputation: FactionReputation::new(&content.factions),
             contacts: biography
@@ -449,6 +452,28 @@ impl Game {
             })
         });
         self.world.price_history.record(date, prices);
+    }
+
+    /// Игрок уезжает из города и запоминает ценники его толкучки.
+    fn remember_market(&mut self, date: GameDate) {
+        let content = &self.content;
+        let city = &self.world.city;
+        let markets = &self.world.markets;
+        let goods = content
+            .goods
+            .keys()
+            .filter_map(|good| {
+                let quote = markets.quote(content, city, good, date)?;
+                let price = SeenPrice {
+                    buy: quote.buy,
+                    sell: quote.sell,
+                };
+                Some((good.clone(), price))
+            })
+            .collect();
+        self.world
+            .seen_prices
+            .remember(city.clone(), SeenMarket { date, goods });
     }
 
     /// Положение дел для условий событий.

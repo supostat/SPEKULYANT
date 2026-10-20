@@ -8,7 +8,9 @@ pub struct TravelView {
 }
 
 /// Направление: город, дни в пути, стоимость в номинале дня; по блату — через знакомого.
-/// Недоступно, если не хватает денег или по блату помочь некому.
+/// Недоступно, если не хватает денег или по блату помочь некому. Категории товаров, которые там
+/// дешевле или дороже, чем здесь, — по множителям городов, если разница окупает разницу цен
+/// покупки и продажи; названия — по алфавиту.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DestinationView {
     pub city: String,
@@ -17,6 +19,10 @@ pub struct DestinationView {
     pub fare: String,
     pub by_connections: bool,
     pub available: bool,
+    /// Что выгодно везти оттуда сюда.
+    pub cheaper: Vec<String>,
+    /// Что выгодно везти отсюда туда.
+    pub dearer: Vec<String>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

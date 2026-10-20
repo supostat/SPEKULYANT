@@ -7,8 +7,6 @@ use crate::rng::WorldRng;
 use crate::time::GameDate;
 
 const MARKET_STREAM: &str = "market";
-/// Город без множителя категории продаёт товар по кривой.
-const NEUTRAL_MULTIPLIER: f64 = 1.0;
 
 /// Ценники следующей штуки на толкучке и запас товара.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -61,11 +59,7 @@ impl Markets {
     ) -> Option<f64> {
         let item = &content.goods[good];
         let curve = item.curve.kopecks_on(date)?;
-        let multiplier = content.cities[city]
-            .multipliers
-            .get(&item.category)
-            .copied()
-            .unwrap_or(NEUTRAL_MULTIPLIER);
+        let multiplier = content.cities[city].multiplier(&item.category);
         let shocks: f64 = self
             .shocks
             .iter()

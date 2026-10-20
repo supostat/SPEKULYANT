@@ -1,13 +1,15 @@
-//! Контент как данные (§10, §14.1): товары, города, маршруты, эпохи, правила толкучки, индекс цен
-//! и курсы, места хранения денег, фракции и правила репутации, биографии, жильё, финалы и правила
-//! жизни, шаблоны NPC, дела — формы, типы, политики, привычки и правила, — события и правила их
-//! розыгрыша, правила зоны и её услуги, исторические узлы, шаблоны генератора песочницы и мелодия
-//! заставки. Формат — TOML, файл на сущность в `data/`, имя файла — идентификатор (решение 15.7).
-//! Загрузка проверяет схему и ссылки и возвращает все ошибки сразу, каждая — «файл:строка».
+//! Контент как данные (§10, §14.1): товары и их категории, города, маршруты, эпохи, правила
+//! толкучки, индекс цен и курсы, места хранения денег, фракции и правила репутации, биографии,
+//! жильё, финалы и правила жизни, шаблоны NPC, дела — формы, типы, политики, привычки и правила, —
+//! события и правила их розыгрыша, правила зоны и её услуги, исторические узлы, шаблоны генератора
+//! песочницы и мелодия заставки. Формат — TOML, файл на сущность в `data/`, имя файла —
+//! идентификатор (решение 15.7). Загрузка проверяет схему и ссылки и возвращает все ошибки сразу,
+//! каждая — «файл:строка».
 
 mod biography;
 mod business_form;
 mod business_kind;
+mod category;
 mod city;
 mod conditions;
 mod consequences;
@@ -42,6 +44,7 @@ use std::path::Path;
 pub use biography::{AgeRange, Biography};
 pub use business_form::BusinessForm;
 pub use business_kind::BusinessKind;
+pub use category::Category;
 pub use city::City;
 pub use conditions::{
     AuthorityCondition, Conditions, DateWindow, GoodCondition, MoneyCondition, ReputationCondition,
@@ -65,8 +68,9 @@ pub use history_outcome::HistoryOutcome;
 pub use history_template::HistoryTemplate;
 pub use housing::Housing;
 pub use ids::{
-    BiographyId, BusinessFormId, BusinessKindId, CityId, EndingId, EpochId, EventId, FactionId,
-    FlagId, GoodId, HabitId, HousingId, MoneyPlaceId, NpcId, TimelineNodeId, ZoneServiceId,
+    BiographyId, BusinessFormId, BusinessKindId, CategoryId, CityId, EndingId, EpochId, EventId,
+    FactionId, FlagId, GoodId, HabitId, HousingId, MoneyPlaceId, NpcId, TimelineNodeId,
+    ZoneServiceId,
 };
 pub use melody::{Melody, Note, Pitch};
 pub use money_place::{InterestPoint, MoneyPlace};
@@ -103,6 +107,7 @@ pub struct Content {
     pub boot_melody: Melody,
     pub epochs: BTreeMap<EpochId, EpochProfile>,
     pub goods: BTreeMap<GoodId, Good>,
+    pub categories: BTreeMap<CategoryId, Category>,
     pub cities: BTreeMap<CityId, City>,
     pub routes: Vec<Route>,
     pub money_places: BTreeMap<MoneyPlaceId, MoneyPlace>,

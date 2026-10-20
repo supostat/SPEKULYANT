@@ -16,6 +16,7 @@ mod price_curve;
 mod price_history;
 mod real;
 mod ruble_curve;
+mod seen_prices;
 mod shock;
 mod trader;
 
@@ -32,5 +33,6 @@ pub use price_curve::{PriceCurve, PricePoint};
 pub use price_history::{HISTORY_WEEKS, PriceHistory, PriceWeek, WEEK_DAYS};
 pub use real::Real;
 pub use ruble_curve::{RubleCurve, RublePoint};
+pub use seen_prices::{SeenMarket, SeenPrice, SeenPrices};
 pub use shock::Shock;
 pub use trader::{Deal, Trader};

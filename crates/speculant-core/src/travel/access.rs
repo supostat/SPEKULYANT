@@ -15,7 +15,7 @@ pub enum Access {
 impl Access {
     pub fn of(route: &Route, content: &Content, date: GameDate) -> Self {
         let city = &content.cities[&route.to];
-        if city.opens.is_some_and(|opens| date < opens) {
+        if !city.is_open_on(date) {
             Self::Closed
         } else if city
             .connections_only_until

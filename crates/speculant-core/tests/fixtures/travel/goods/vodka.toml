@@ -1,0 +1,6 @@
+name = "Водка «Столичная»"
+short_name = "Водка"
+category = "alcohol"
+unit = "бут"
+stock = 20
+curve = [{ year = 1984, price = 10 }]

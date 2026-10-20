@@ -30,6 +30,7 @@ fn the_minimal_set_loads_every_kind_of_content() {
     assert_eq!(content.time.epochs.epochs().len(), 1);
     assert_eq!(content.epochs.len(), 1);
     assert_eq!(content.goods.len(), 3);
+    assert_eq!(content.categories.len(), 3);
     assert_eq!(content.cities.len(), 2);
     assert_eq!(content.routes.len(), 2);
     assert_eq!(content.money_places.len(), 1);
@@ -128,7 +129,9 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "npc/foreman.toml:7: skill = 9: черта от 1 до 5",
         "npc/foreman.toml:10: привычки lazy нет в business/habits/",
         "cities/leningrad.toml:4: unknown field `population`",
-        "cities/moscow.toml:4: категории electronics нет ни у одного товара",
+        "categories/tobacco.toml:1: у категории нет названия: title пустой",
+        "categories/tobacco.toml: у категории tobacco нет ни одного товара",
+        "cities/moscow.toml:4: категории electronics нет в categories/",
         "economy/market.toml:1: spread = 1.5: доля должна быть больше 0 и меньше 1",
         "economy/money.toml:2: индекс 1984 года — единица",
         "events/perestroika/cooperative.toml: каталога events/perestroika/ нет среди эпох календаря",
@@ -154,6 +157,7 @@ fn the_broken_set_reports_every_defect_with_its_place() {
         "events/stagnation/vodka_crate.toml:37: фракции police нет в factions/",
         "goods/Black-Caviar.toml: имя файла «Black-Caviar» — не идентификатор",
         "goods/jeans.toml:6: годы опорных точек кривой должны строго возрастать",
+        "goods/vodka.toml:3: категории alcohol нет в categories/",
         "goods/sugar.toml:1: invalid basic string",
         "housing/shack.toml:2: жильё без цены не продаётся",
         "housing/shack.toml:3: stash_risk = 2: доля от 0 до 1",

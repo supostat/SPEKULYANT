@@ -63,9 +63,8 @@ impl CityMarket {
         rules: &MarketRules,
         bought: u32,
     ) -> f64 {
-        let markup = 1.0 + rules.spread / 2.0;
         let between = f64::from(self.stock(good)) - f64::from(bought) - HALF_UNIT;
-        unit_price(normal_kopecks, normal_stock, between) * markup
+        unit_price(normal_kopecks, normal_stock, between) * rules.markup()
     }
 
     /// Реальные цены штук при продаже `quantity` подряд: рынок заваливается, каждая следующая дешевле.
@@ -78,11 +77,10 @@ impl CityMarket {
         quantity: u32,
     ) -> Vec<f64> {
         let stock = f64::from(self.stock(good));
-        let markdown = 1.0 - rules.spread / 2.0;
         (0..quantity)
             .map(|sold| {
                 let between = stock + f64::from(sold) + HALF_UNIT;
-                unit_price(normal_kopecks, normal_stock, between) * markdown
+                unit_price(normal_kopecks, normal_stock, between) * rules.markdown()
             })
             .collect()
     }

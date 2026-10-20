@@ -7,7 +7,7 @@ use std::sync::Arc;
 use speculant_core::content::{BiographyId, Content, EventId, NpcId};
 use speculant_core::economy::Real;
 use speculant_core::time::{FastForward, GameDate};
-use speculant_core::view::{DestinationView, JourneyView};
+use speculant_core::view::{CityPriceView, DestinationView, JourneyView, MarketRowView};
 use speculant_core::{Command, CommandError, Game, LifeSettings};
 
 const TRAVEL: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests/fixtures/travel");
@@ -81,6 +81,8 @@ fn the_city_lists_open_destinations_with_days_and_fare() {
                 fare: "15 р.".to_owned(),
                 by_connections: false,
                 available: true,
+                cheaper: Vec::new(),
+                dearer: Vec::new(),
             },
             DestinationView {
                 city: "berlin".to_owned(),
@@ -89,9 +91,12 @@ fn the_city_lists_open_destinations_with_days_and_fare() {
                 fare: "120 р.".to_owned(),
                 by_connections: true,
                 available: true,
+                cheaper: vec!["одежда".to_owned()],
+                dearer: vec!["алкоголь".to_owned()],
             },
         ],
-        "Варшава до 1990 года закрыта и не показывается"
+        "Варшава до 1990 года закрыта и не показывается; одежда в Ленинграде дешевле на 5% — \
+         разницу съедает разница цен покупки и продажи"
     );
     assert_eq!(game.view().travel.journey, None);
 }
@@ -145,6 +150,83 @@ fn a_trip_costs_its_fare_takes_its_days_and_ends_in_another_market() {
         .map(|destination| destination.name.clone())
         .collect();
     assert_eq!(back, vec!["Москва"]);
+}
+
+fn jeans_row(game: &Game) -> MarketRowView {
+    game.view()
+        .market
+        .goods
+        .into_iter()
+        .find(|row| row.good == "jeans")
+        .expect("джинсы на толкучке")
+}
+
+fn unknown(name: &str) -> CityPriceView {
+    CityPriceView {
+        name: name.to_owned(),
+        here: false,
+        seen: None,
+        buy: String::new(),
+        sell: String::new(),
+        cheapest: false,
+        dearest: false,
+    }
+}
+
+#[test]
+fn the_player_knows_the_prices_here_and_remembers_the_market_he_left() {
+    let mut game = quiet_game();
+    let born = jeans_row(&game);
+    assert_eq!(
+        born.cities,
+        vec![
+            CityPriceView {
+                name: "Москва".to_owned(),
+                here: true,
+                seen: Some("01.01.1984".to_owned()),
+                buy: born.buy.clone(),
+                sell: born.sell.clone(),
+                cheapest: false,
+                dearest: false,
+            },
+            unknown("Берлин"),
+            unknown("Ленинград"),
+        ],
+        "здесь — первым, остальные — по названию; сравнивать не с чем, Варшава закрыта"
+    );
+    game.apply(Command::Buy {
+        good: "jeans".to_owned(),
+        quantity: 2,
+    })
+    .expect("джинсы по карману");
+    let left = jeans_row(&game);
+    ride(&mut game, "leningrad");
+    let arrived = jeans_row(&game);
+    assert_eq!(
+        arrived.cities,
+        vec![
+            CityPriceView {
+                name: "Ленинград".to_owned(),
+                here: true,
+                seen: Some("02.01.1984".to_owned()),
+                buy: arrived.buy.clone(),
+                sell: arrived.sell.clone(),
+                cheapest: true,
+                dearest: false,
+            },
+            unknown("Берлин"),
+            CityPriceView {
+                name: "Москва".to_owned(),
+                here: false,
+                seen: Some("01.01.1984".to_owned()),
+                buy: left.buy,
+                sell: left.sell,
+                cheapest: false,
+                dearest: true,
+            },
+        ],
+        "Москва — какой игрок оставил её после покупки: запас меньше, цены выше"
+    );
 }
 
 #[test]

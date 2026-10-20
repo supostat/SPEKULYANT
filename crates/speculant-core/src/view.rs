@@ -4,6 +4,7 @@
 mod biography;
 mod business;
 mod character;
+mod city_price;
 mod contact;
 mod event;
 mod faction;
@@ -30,6 +31,7 @@ pub use business::{
     ReportView,
 };
 pub use character::{CharacterView, ExitView, HomeView};
+pub use city_price::CityPriceView;
 pub use contact::ContactView;
 pub use event::{ChoiceView, EventView, OutcomeView};
 pub use faction::FactionView;

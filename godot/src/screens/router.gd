@@ -7,7 +7,7 @@ extends RefCounted
 ## намерением:
 ##   {"command": {…}} — команда ядру; ответ вернётся экрану в answered();
 ##   {"push": имя, "with": {…}} — экран поверх; `with`, если есть, уходит ему в enter();
-##   {"switch": имя} — верхний экран уступает место соседнему;
+##   {"switch": имя, "with": {…}} — соседний экран на месте верхнего; `with` — как у push;
 ##   {"pop": true} — назад; {"home": true} — назад до экрана режима; {"redraw": true} — перерисовать;
 ##   {"new_life": {"biography", "ironman", "seed"}} или {"resume": слот} — начать жизнь;
 ##   {"lobby": имя} — в лобби, на экран `имя` поверх главного меню (или на само меню);
@@ -162,7 +162,7 @@ func _follow(intent: Dictionary) -> void:
 		_stack.append(_created(intent["push"], intent.get("with", {})))
 		refresh()
 	elif intent.has("switch"):
-		_stack[-1] = _created(intent["switch"], {})
+		_stack[-1] = _created(intent["switch"], intent.get("with", {}))
 		refresh()
 	elif intent.has("pop") and _stack.size() > 1:
 		_stack.pop_back()

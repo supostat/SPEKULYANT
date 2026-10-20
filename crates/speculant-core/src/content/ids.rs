@@ -32,6 +32,10 @@ content_id!(
     GoodId
 );
 content_id!(
+    /// Категория товаров — имя файла в `data/categories/`.
+    CategoryId
+);
+content_id!(
     /// Город — имя файла в `data/cities/`.
     CityId
 );

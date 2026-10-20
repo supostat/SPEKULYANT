@@ -1,9 +1,10 @@
 class_name TravelScreen
 extends RefCounted
 ## Поездка (docs/SPEKULYANT.md §13.3 п. 3, правила §XIII дизайн-книги): направления из города со
-## сроком и ценой проезда, «по блату» — через знакомого; Enter — в путь. В пути окно показывает,
-## откуда и куда, день прибытия и сколько осталось; Enter перематывает до прибытия, а события
-## дороги приходят своим окном. По прибытии экран уступает место рынку.
+## сроком и ценой проезда, «по блату» — через знакомого, а под списком — что в выбранном городе
+## дешевле и что дороже, чем здесь; Enter — в путь. В пути окно показывает, откуда и куда, день
+## прибытия и сколько осталось; Enter перематывает до прибытия, а события дороги приходят своим
+## окном. По прибытии экран уступает место рынку.
 
 const TEXT := 7
 const BACKGROUND := 1
@@ -13,13 +14,18 @@ const COLUMN := 5
 const HEADINGS := ["Куда", "Дней", "Проезд", "Как"]
 const HEADINGS_FOREGROUND := 14
 const FIRST_ROW := 5
-const DESTINATIONS_VISIBLE := 12
+const DESTINATIONS_VISIBLE := 9
 const NAME_WIDTH := 22
 const DAYS_WIDTH := 6
 const FARE_WIDTH := 13
 const ACCESS_WIDTH := 22
 const LINE_WIDTH := NAME_WIDTH + DAYS_WIDTH + FARE_WIDTH + 3 + ACCESS_WIDTH
 const BY_CONNECTIONS := "по блату"
+const PRICES_ROW := FIRST_ROW + DESTINATIONS_VISIBLE + 1
+const CHEAPER_LABEL := "Там дешевле: "
+const DEARER_LABEL := "Там дороже: "
+const SAME_PRICES := "Цены там почти как здесь."
+const LABEL_FOREGROUND := 14
 const SELECTED_FOREGROUND := 0
 const SELECTED_BACKGROUND := 3
 const UNAVAILABLE_FOREGROUND := 8
@@ -154,6 +160,25 @@ func _draw_destinations(destinations: Array, screen: TextScreen) -> void:
 			foreground = SELECTED_FOREGROUND
 			background = SELECTED_BACKGROUND
 		screen.put(COLUMN, FIRST_ROW + index - _destinations.first, TextScreen.pad_right(line, LINE_WIDTH), foreground, background)
+	if not destinations.is_empty():
+		_draw_prices(destinations[_destinations.selected], screen)
+
+
+## Что в выбранном городе дешевле и что дороже, чем здесь: подпись — жёлтым, перечень — с переносом.
+func _draw_prices(destination: Dictionary, screen: TextScreen) -> void:
+	var row := PRICES_ROW
+	for item: Array in [[CHEAPER_LABEL, destination["cheaper"]], [DEARER_LABEL, destination["dearer"]]]:
+		var categories: Array = item[1]
+		if categories.is_empty():
+			continue
+		var label: String = item[0]
+		var lines := TextScreen.wrap(label + ", ".join(categories), LINE_WIDTH)
+		for line in lines:
+			screen.put(COLUMN, row, line, TEXT, BACKGROUND)
+			row += 1
+		screen.put(COLUMN, row - lines.size(), label, LABEL_FOREGROUND, BACKGROUND)
+	if row == PRICES_ROW:
+		screen.put(COLUMN, row, SAME_PRICES, TEXT, BACKGROUND)
 
 
 func _draw_journey(journey: Dictionary, screen: TextScreen) -> void:

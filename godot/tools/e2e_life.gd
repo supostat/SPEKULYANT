@@ -2,7 +2,8 @@ extends SceneTree
 ## Сквозная жизнь для `cargo xtask e2e`: настоящие ядро, мост, роутер и экраны; подменён только
 ## каталог игрока — `user://e2e`. Заставка → главное меню → новая жизнь: студент, ironman, сид 7 →
 ## шестьдесят дней на рынке с покупками и продажами, события — первым доступным выбором → график
-## цены товара за эти недели → поездка в первый доступный город → выход в главное меню (ironman
+## цены товара за эти недели → поездка в первый доступный город с подсказкой, что там дешевле и
+## дороже → цены товара по городам: Москва — какой её оставили → выход в главное меню (ironman
 ## сохраняется сам) и «Продолжить» из его слота: снимок ядра тот же → ещё месяц торговли → уход на
 ## покой → итоги жизни: заметка, слот ironman стёрт, знания легли в метапрогрессию, жизнь — в
 ## «Рейтинг Форбс». После каждого шага сверяются буфер экрана и снимок ядра.
@@ -26,6 +27,9 @@ const ITEMS_BEFORE_EXITS := 5
 const ITEMS_AFTER_EXITS := 1
 const REST_ENDING := "rest"
 const CHART_TITLE := "Цена покупки по неделям"
+const CITY_PRICES_TITLE := "Цены по городам"
+const CHEAPER_LABEL := "Там дешевле: "
+const DEARER_LABEL := "Там дороже: "
 ## Записи при рождении и каждые семь дней: за шестьдесят дней их девять.
 const MIN_CHART_WEEKS := 9
 ## Что роутер кладёт в снимок поверх ядра: слоты каталога и настройки.
@@ -48,6 +52,7 @@ func _initialize() -> void:
 		and _trade_for(TRADING_DAYS)
 		and _chart()
 		and _travel()
+		and _city_prices()
 		and _quit_and_continue()
 		and _trade_for(MORE_DAYS)
 		and _retire()
@@ -165,7 +170,8 @@ func _chart() -> bool:
 	return _on_market()
 
 
-## F4 — направления, Enter на первом доступном, перемотка до прибытия; события дороги решаются.
+## F4 — направления, на первом доступном — что там дешевле и дороже, Enter — в путь, перемотка до
+## прибытия; события дороги решаются.
 func _travel() -> bool:
 	_flow.press(KEY_F4)
 	var destinations: Array = _router.view()["travel"]["destinations"]
@@ -175,6 +181,8 @@ func _travel() -> bool:
 	for _step in row:
 		_flow.press(KEY_DOWN)
 	var destination: String = destinations[row]["name"]
+	if not _shows_prices_of(destinations[row]):
+		return _fail("поездка не говорит, что в городе %s дешевле и дороже:\n%s" % [destination, _flow.buffer()])
 	_flow.press(KEY_ENTER)
 	_flow.press(KEY_ENTER)
 	for _step in LONGEST_WAIT_STEPS:
@@ -188,6 +196,34 @@ func _travel() -> bool:
 				_router.tick(DAY_MILLISECONDS)
 	if _router.view()["header"]["city"] != destination:
 		return _fail("не доехали до %s:\n%s" % [destination, _flow.buffer()])
+	return _on_market()
+
+
+## Под списком направлений — что в выбранном городе дешевле и дороже: подпись и первая категория.
+func _shows_prices_of(destination: Dictionary) -> bool:
+	for item: Array in [[CHEAPER_LABEL, destination["cheaper"]], [DEARER_LABEL, destination["dearer"]]]:
+		var categories: Array = item[1]
+		if not categories.is_empty() and not _flow.shows(item[0] + categories[0]):
+			return false
+	return true
+
+
+## Enter на товаре и ► — цены по городам: здесь — сейчас, город отъезда — с днём отъезда; ◄ —
+## снова график, Esc — рынок.
+func _city_prices() -> bool:
+	var goods: Array = _router.view()["market"]["goods"]
+	var cities: Array = goods[_good_row()]["cities"]
+	var left := cities.find_custom(func(city: Dictionary) -> bool: return not city["here"] and city["seen"] != null)
+	_flow.press(KEY_ENTER)
+	_flow.press(KEY_RIGHT)
+	if _router.top_name() != "city_prices" or not _flow.shows(CITY_PRICES_TITLE):
+		return _fail("► на графике не открыл цены по городам:\n" + _flow.buffer())
+	if left < 0 or not _flow.shows(cities[left]["seen"]):
+		return _fail("цены по городам не помнят город отъезда:\n" + _flow.buffer())
+	_flow.press(KEY_LEFT)
+	if _router.top_name() != "chart" or not _flow.shows(CHART_TITLE):
+		return _fail("◄ не вернул график:\n" + _flow.buffer())
+	_flow.press(KEY_ESCAPE)
 	return _on_market()
 
 

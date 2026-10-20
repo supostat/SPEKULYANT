@@ -5,11 +5,11 @@ use serde::de::DeserializeOwned;
 
 use super::validation;
 use super::{
-    Biography, BiographyId, BusinessForm, BusinessFormId, BusinessKind, BusinessKindId, City,
-    CityId, Content, ContentError, ContentFile, Ending, EndingId, EpochId, EpochProfile, Event,
-    EventId, Faction, FactionId, Good, GoodId, Habit, HabitId, HistoryNode, HistoryTemplate,
-    Housing, HousingId, Melody, MoneyPlace, MoneyPlaceId, NpcId, NpcTemplate, Policy, Route,
-    TimelineNodeId, ZoneService, ZoneServiceId,
+    Biography, BiographyId, BusinessForm, BusinessFormId, BusinessKind, BusinessKindId, Category,
+    CategoryId, City, CityId, Content, ContentError, ContentFile, Ending, EndingId, EpochId,
+    EpochProfile, Event, EventId, Faction, FactionId, Good, GoodId, Habit, HabitId, HistoryNode,
+    HistoryTemplate, Housing, HousingId, Melody, MoneyPlace, MoneyPlaceId, NpcId, NpcTemplate,
+    Policy, Route, TimelineNodeId, ZoneService, ZoneServiceId,
 };
 use crate::business::{BusinessRules, PolicyKind};
 use crate::economy::{MarketRules, MoneyRules};
@@ -59,6 +59,7 @@ pub(super) struct Parsed<'a> {
     pub boot_melody: Option<(&'a ContentFile, Melody)>,
     pub epochs: Vec<Entry<'a, EpochProfile>>,
     pub goods: Vec<Entry<'a, Good>>,
+    pub categories: Vec<Entry<'a, Category>>,
     pub cities: Vec<Entry<'a, City>>,
     pub routes: Option<(&'a ContentFile, Vec<Route>)>,
     pub money_places: Vec<Entry<'a, MoneyPlace>>,
@@ -214,6 +215,7 @@ pub(super) fn load(files: Vec<ContentFile>) -> Result<Content, Vec<ContentError>
         boot_melody,
         epochs: keyed(&parsed.epochs, EpochId::new),
         goods: keyed(&parsed.goods, GoodId::new),
+        categories: keyed(&parsed.categories, CategoryId::new),
         cities: keyed(&parsed.cities, CityId::new),
         routes: parsed.routes.map(|(_, routes)| routes).unwrap_or_default(),
         money_places: keyed(&parsed.money_places, MoneyPlaceId::new),
@@ -321,6 +323,7 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         }
         ["epochs", name] => push_entry(file, name, &mut parsed.epochs, errors),
         ["goods", name] => push_entry(file, name, &mut parsed.goods, errors),
+        ["categories", name] => push_entry(file, name, &mut parsed.categories, errors),
         ["cities", name] => push_entry(file, name, &mut parsed.cities, errors),
         ["money", name] => push_entry(file, name, &mut parsed.money_places, errors),
         ["factions", name] => push_entry(file, name, &mut parsed.factions, errors),
@@ -353,7 +356,7 @@ fn sort_into<'a>(file: &'a ContentFile, parsed: &mut Parsed<'a>, errors: &mut Ve
         _ => errors.push(ContentError::new(
             &file.path,
             None,
-            format!("путь не входит в раскладку data/ (goods/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, {LIFE_FILE}, housing/, endings/, epochs/, biographies/, npc/, events/<эпоха>/, {ZONE_RULES_FILE}, zone/services/, zone/events/, {HISTORY_GENERATOR_FILE}, history/, history/post2004/, {BOOT_MELODY_FILE}, balance.toml)"),
+            format!("путь не входит в раскладку data/ (goods/, categories/, cities/, {ROUTES_FILE}, {MARKET_FILE}, {MONEY_FILE}, money/, {REPUTATION_FILE}, factions/, {EVENT_RULES_FILE}, {RIVALS_FILE}, {BUSINESS_RULES_FILE}, business/forms/, business/kinds/, business/policies/, business/habits/, {LIFE_FILE}, housing/, endings/, epochs/, biographies/, npc/, events/<эпоха>/, {ZONE_RULES_FILE}, zone/services/, zone/events/, {HISTORY_GENERATOR_FILE}, history/, history/post2004/, {BOOT_MELODY_FILE}, balance.toml)"),
         )),
     }
 }

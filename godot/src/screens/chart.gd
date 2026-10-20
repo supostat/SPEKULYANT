@@ -3,7 +3,7 @@ extends RefCounted
 ## График цены товара (Enter на толкучке): цена покупки по неделям за последний год на этой
 ## толкучке, в номинале своей недели — тренд, колебания запаса и шоки событий; справа — цены и
 ## запас сейчас и сколько товара у игрока. Столбик — неделя, высота — в полклетки. ↑↓ листают
-## товары толкучки, Esc и F10 — назад к рынку.
+## товары толкучки, ◄► — цены этого товара по городам, Esc и F10 — назад к рынку.
 
 const TEXT := 7
 const BACKGROUND := 1
@@ -32,7 +32,7 @@ const NOW_COLUMN := 68
 const NOW_WIDTH := 9
 const NOW_TITLE := "Сейчас"
 const NOW_ROWS := [["Купить", "buy"], ["Продать", "sell"], ["Запас", "stock"], ["У тебя", "held"]]
-const HINT := "↑↓ товар   Esc — назад"
+const HINT := "↑↓ товар   ◄► цены по городам   Esc — назад"
 const HINT_ROW := 21
 const FKEYS := [
 	["1", "Помощь"],
@@ -46,19 +46,19 @@ const FKEYS := [
 ]
 const HELP_KEY := 1
 const BACK_KEY := 10
+const CITY_PRICES_SCREEN := "city_prices"
 
-## Товар на графике; пусто — первый товар толкучки.
-var _good := ""
+var _cursor := GoodCursor.new()
 
 
 ## `{"good": идентификатор товара}`.
 func enter(arguments: Dictionary) -> void:
-	_good = arguments["good"]
+	_cursor.good = arguments["good"]
 
 
 func draw(view: Dictionary, screen: TextScreen) -> void:
 	var market: Dictionary = view["market"]
-	var row := _row(market["goods"])
+	var row := _cursor.row(market["goods"])
 	screen.clear(TEXT, BACKGROUND)
 	Header.draw(view["header"], screen)
 	screen.box(BOX.position.x, BOX.position.y, BOX.size.x, BOX.size.y, FRAME, BACKGROUND, row["name"])
@@ -74,9 +74,10 @@ func handle(action: Dictionary, view: Dictionary) -> Dictionary:
 	var goods: Array = view["market"]["goods"]
 	match action["action"]:
 		"up", "down":
-			var index := goods.find(_row(goods)) + (-1 if action["action"] == "up" else 1)
-			_good = goods[clampi(index, 0, goods.size() - 1)]["good"]
+			_cursor.move(goods, -1 if action["action"] == "up" else 1)
 			return {"redraw": true}
+		"left", "right":
+			return {"switch": CITY_PRICES_SCREEN, "with": {"good": _cursor.row(goods)["good"]}}
 		"back", "confirm":
 			return {"pop": true}
 		"fkey":
@@ -95,12 +96,6 @@ func answered(_answer: Dictionary) -> void:
 ## Толкучки нет — в пути или в зоне товаров не видно — назад.
 func follow(view: Dictionary) -> Dictionary:
 	return {"pop": true} if view["market"]["goods"].is_empty() else {}
-
-
-## Строка товара на графике; товара больше нет на толкучке — первая строка.
-func _row(goods: Array) -> Dictionary:
-	var index := goods.find_custom(func(row: Dictionary) -> bool: return row["good"] == _good)
-	return goods[maxi(index, 0)]
 
 
 func _draw_axes(screen: TextScreen) -> void:
