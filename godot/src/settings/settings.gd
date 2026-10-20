@@ -1,8 +1,8 @@
 class_name Settings
 extends RefCounted
-## Настройки игрока в `user://settings.cfg`: CRT-эффект — по умолчанию выключен — и пищалка
-## PC-speaker — по умолчанию включена. Это вкус игрока, а не мир игры, поэтому они живут в Godot,
-## а не в ядре; экраны видят их в снимке под ключом `settings`.
+## Настройки игрока в `user://settings.cfg`: CRT-эффект — по умолчанию выключен, — пищалка
+## PC-speaker — по умолчанию включена — и полный экран — по умолчанию окно. Это вкус игрока, а не
+## мир игры, поэтому они живут в Godot, а не в ядре; экраны видят их в снимке под ключом `settings`.
 
 signal changed
 
@@ -10,7 +10,8 @@ const PLAYER_FILE := "user://settings.cfg"
 const SECTION := "player"
 const CRT := "crt"
 const SOUND := "sound"
-const DEFAULTS := {CRT: false, SOUND: true}
+const FULLSCREEN := "fullscreen"
+const DEFAULTS := {CRT: false, SOUND: true, FULLSCREEN: false}
 
 var _path: String
 var _config := ConfigFile.new()

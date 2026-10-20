@@ -95,9 +95,12 @@ func request_quit() -> void:
 		_follow({"push": QUIT_SCREEN})
 
 
-## Действие ввода — верхнему экрану.
+## Действие ввода — верхнему экрану; полный экран переключается с любого экрана.
 func press(action: Dictionary) -> void:
 	if action.is_empty():
+		return
+	if action["action"] == "fullscreen":
+		_follow({"toggle": Settings.FULLSCREEN})
 		return
 	_follow(_stack.back().handle(action, _view))
 

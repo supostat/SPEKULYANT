@@ -2,8 +2,9 @@ class_name Keymap
 extends RefCounted
 ## Ввод (docs/SPEKULYANT.md §13.1 п. 4): клавиатура в первую очередь — F1–F10, стрелки, цифры для
 ## выборов, буквы по латинской подписи клавиши, пробел — пауза, +/− — скорость, Esc — назад,
-## Enter — подтвердить, Backspace — стереть символ, Del — стереть строку, PgUp/PgDn — листать;
-## мышь — щелчок по строке F-клавиш или по строке окна. Экраны получают действия, а не клавиши.
+## Enter — подтвердить, Backspace — стереть символ, Del — стереть строку, PgUp/PgDn — листать,
+## F11 и Alt+Enter — полный экран; мышь — щелчок по строке F-клавиш или по строке окна. Экраны
+## получают действия, а не клавиши.
 
 const FUNCTION_KEYS := {
 	KEY_F1: 1, KEY_F2: 2, KEY_F3: 3, KEY_F4: 4, KEY_F5: 5,
@@ -27,7 +28,10 @@ const NAMED_KEYS := {
 	KEY_DELETE: "delete",
 	KEY_PAGEUP: "page_up",
 	KEY_PAGEDOWN: "page_down",
+	KEY_F11: "fullscreen",
 }
+const ENTER_KEYS := [KEY_ENTER, KEY_KP_ENTER]
+const FULLSCREEN := {"action": "fullscreen"}
 ## Прочая клавиша — тоже действие: исход события закрывается любой клавишей.
 const OTHER_KEY := {"action": "other"}
 
@@ -45,6 +49,8 @@ static func key_action(event: InputEventKey) -> Dictionary:
 	if not event.pressed:
 		return {}
 	var keycode := event.keycode
+	if keycode in ENTER_KEYS and event.alt_pressed:
+		return FULLSCREEN
 	if FUNCTION_KEYS.has(keycode):
 		return {"action": "fkey", "key": FUNCTION_KEYS[keycode]}
 	if keycode >= KEY_0 and keycode <= KEY_9:

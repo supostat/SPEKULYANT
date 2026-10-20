@@ -9,8 +9,8 @@ const FRAME := 15
 const WINDOW := Rect2i(8, 2, 64, 20)
 const TITLE := "Помощь"
 const COLUMN := 11
-const FIRST_ROW := 4
-const KEY_WIDTH := 13
+const FIRST_ROW := 3
+const KEY_WIDTH := 15
 const KEY_FOREGROUND := 15
 const KEYS := [
 	["F1", "эта помощь"],
@@ -26,6 +26,7 @@ const KEYS := [
 	["Пробел", "пауза"],
 	["+ −", "быстрее, медленнее"],
 	["Мышь", "щелчок по строке или по F-клавише"],
+	["F11, Alt+Enter", "полный экран или окно"],
 ]
 const TIME_NOTE := "Время идёт на рынке, в пути и в зоне; в остальных экранах оно стоит."
 const NOTE_FOREGROUND := 14

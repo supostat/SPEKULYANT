@@ -22,9 +22,10 @@ func _init(root: String) -> void:
 	router = Router.new(SpeculantGame.new(), screen, saves, Settings.new(root.path_join(SETTINGS_FILE)))
 
 
-func press(keycode: Key) -> void:
+func press(keycode: Key, alt := false) -> void:
 	var event := InputEventKey.new()
 	event.keycode = keycode
+	event.alt_pressed = alt
 	event.pressed = true
 	router.press(Keymap.action(event, screen))
 

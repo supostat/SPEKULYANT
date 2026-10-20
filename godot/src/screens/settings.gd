@@ -1,15 +1,16 @@
 class_name SettingsScreen
 extends RefCounted
-## Настройки (docs/SPEKULYANT.md §13.1 п. 5–6): CRT-эффект и пищалка PC-speaker — включено или нет.
+## Настройки (docs/SPEKULYANT.md §13.1 п. 5–6): CRT-эффект, пищалка PC-speaker и полный экран —
+## включено или нет.
 ## ↑↓ выбирают, ◄ ►, Enter или щелчок переключают; перемена видна и слышна сразу и сохраняется.
 
 const TEXT := 7
 const BACKGROUND := 1
 const FRAME := 15
-const WINDOW := Rect2i(17, 6, 46, 12)
+const WINDOW := Rect2i(17, 5, 46, 15)
 const TITLE := "Настройки"
 const COLUMN := 20
-const FIRST_ROW := 8
+const FIRST_ROW := 7
 const ITEM_ROWS := 3
 const LABEL_WIDTH := 22
 const VALUE_WIDTH := 5
@@ -22,9 +23,10 @@ const OFF := "выкл"
 const ITEMS := [
 	[Settings.CRT, "CRT-эффект", "строки развёртки и виньетка поверх экрана"],
 	[Settings.SOUND, "Пищалка PC-speaker", "мелодия заставки и бипы событий"],
+	[Settings.FULLSCREEN, "Полный экран", "F11 или Alt+Enter — с любого экрана"],
 ]
 const HINT := "↑↓ выбрать   ◄► переключить   Esc назад"
-const HINT_ROW := 15
+const HINT_ROW := 17
 const HINT_FOREGROUND := 8
 const FKEYS := [
 	["1", "Помощь"],

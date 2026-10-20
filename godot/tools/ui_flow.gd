@@ -1,7 +1,7 @@
 extends SceneTree
 ## Безголовый клавиатурный сценарий для `cargo xtask ui-flow-smoke`: настоящее ядро через мост и
 ## роутер экранов в чистом каталоге игрока — заставка под мелодию «Коробейников» → главное меню →
-## настройки: CRT включается и выключается → новая жизнь (студент, свободный режим, сид 7) → рынок:
+## настройки: CRT и полный экран включаются и выключаются → новая жизнь (студент, свободный режим, сид 7) → рынок:
 ## продажа того, чего нет, — бип отказа, F2 покупка в окне количества, пробел пауза и снова ход,
 ## событие с бипом → выбор → исход, F4 поездка → прибытие; дела, связи и пейджер — время в них
 ## стоит; меню выхода → сохранение в слот → «Abort, Retry, Fail?» → F в главное меню → загрузка
@@ -74,7 +74,8 @@ func _boot_and_menu() -> bool:
 	return true
 
 
-## Цифра 6 — настройки; Enter включает CRT и выключает его снова, Esc — назад в меню.
+## Цифра 6 — настройки; Enter включает CRT и выключает его снова, F11 включает полный экран, Alt+Enter
+## выключает, Esc — назад в меню.
 func _settings() -> bool:
 	_flow.press(DIGIT_KEYS[SETTINGS_ITEM])
 	if _router.top_name() != "settings" or not _flow.shows(" Настройки "):
@@ -83,6 +84,11 @@ func _settings() -> bool:
 		_flow.press(KEY_ENTER)
 		if _router.view()["settings"][Settings.CRT] != expected or Settings.new(SAVES_ROOT.path_join(FlowDriver.SETTINGS_FILE)).enabled(Settings.CRT) != expected:
 			return _fail("Enter не переключил CRT в %s:\n%s" % [expected, _flow.buffer()])
+	for toggle: Array in [[KEY_F11, false, true], [KEY_ENTER, true, false]]:
+		_flow.press(toggle[0], toggle[1])
+		var fullscreen: bool = toggle[2]
+		if _router.view()["settings"][Settings.FULLSCREEN] != fullscreen or Settings.new(SAVES_ROOT.path_join(FlowDriver.SETTINGS_FILE)).enabled(Settings.FULLSCREEN) != fullscreen:
+			return _fail("F11 и Alt+Enter не переключили полный экран в %s:\n%s" % [fullscreen, _flow.buffer()])
 	_flow.press(KEY_ESCAPE)
 	if _router.top_name() != "main_menu":
 		return _fail("Esc из настроек не вернул меню:\n" + _flow.buffer())
