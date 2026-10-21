@@ -1773,7 +1773,7 @@ checksum = "5b3dc8af474f516a851ff4bd12db780f948b9250ad37211e4eec0bccea54e01b"
 
 [[package]]
 name = "speculant-core"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "libm",
  "rand_chacha",
@@ -1784,7 +1784,7 @@ dependencies = [
 
 [[package]]
 name = "speculant-godot"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "godot",
  "include_dir",
@@ -1795,7 +1795,7 @@ dependencies = [
 
 [[package]]
 name = "speculant-sim"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "rand_chacha",
  "serde",
@@ -1806,7 +1806,7 @@ dependencies = [
 
 [[package]]
 name = "speculant-validate"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "notify",
  "serde_json",
@@ -2405,7 +2405,7 @@ checksum = "0637d3a5566a82fa5214bae89087bc8c9fb94cd8e8a3c07feb691bb8d9c632db"
 
 [[package]]
 name = "xtask"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "boa_engine",
