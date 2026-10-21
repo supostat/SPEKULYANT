@@ -6,7 +6,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use speculant_core::business::BusinessId;
-use speculant_core::content::{BusinessKindId, CityId, Content, GoodId, HabitId};
+use speculant_core::content::{BusinessKindId, CityId, Content, GoodId, HabitId, NpcId};
 use speculant_core::life::PagerDevice;
 use speculant_core::npc::Strategy;
 use speculant_core::time::GameDate;
@@ -481,6 +481,45 @@ fn hiring_and_firing_follow_the_people() {
         })
     );
     hire(&mut game, STALL, "tamara_ivanovna").expect("место свободно");
+}
+
+#[test]
+fn a_candidate_with_a_date_looks_for_work_only_from_it() {
+    let mut content = load();
+    let comes = date(1984, 2, 1);
+    content
+        .npcs
+        .get_mut(&NpcId::new("vitya_kosoy"))
+        .and_then(|template| template.employee.as_mut())
+        .expect("Витя нанимается")
+        .from = Some(comes);
+    let mut game = game_with(content, 7);
+    open(&mut game, "stall").expect("палатка открывается");
+    let is_candidate = |game: &Game| {
+        game.view()
+            .candidates
+            .iter()
+            .any(|candidate| candidate.candidate == "vitya_kosoy")
+    };
+    assert!(!is_candidate(&game), "до своего дня Витя работу не ищет");
+    let early = hire(&mut game, STALL, "vitya_kosoy");
+    assert_eq!(
+        early,
+        Err(CommandError::CandidateNotYet {
+            candidate: "vitya_kosoy".to_owned(),
+            name: "Витя Косой".to_owned(),
+            from: "01.02.1984".to_owned(),
+        })
+    );
+    assert_eq!(
+        early.expect_err("рано").to_string(),
+        "Витя Косой будет искать работу с 01.02.1984"
+    );
+    live_until(&mut game, comes.previous());
+    assert!(!is_candidate(&game), "накануне — ещё нет");
+    live_until(&mut game, comes);
+    assert!(is_candidate(&game), "в свой день — среди кандидатов");
+    hire(&mut game, STALL, "vitya_kosoy").expect("Витя нанимается в свой день");
 }
 
 #[test]

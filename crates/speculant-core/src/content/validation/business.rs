@@ -7,6 +7,7 @@ use super::super::loader::{Entry, Parsed};
 use super::super::{BusinessForm, BusinessKind, ContentError, EmployeeTraits, Habit, Policy};
 use super::{Known, Report, check_reference};
 use crate::business::{BusinessRules, PolicyKind};
+use crate::time::GameDate;
 
 pub(super) fn validate(parsed: &Parsed<'_>, known: &Known, errors: &mut Vec<ContentError>) {
     if let Some((file, rules)) = &parsed.business_rules {
@@ -86,6 +87,12 @@ pub(super) fn check_employee(traits: &EmployeeTraits, known: &Known, report: &mu
             "привычки",
             "business/habits/",
             report,
+        );
+    }
+    if traits.from.is_some_and(|from| from < GameDate::START) {
+        report.at(
+            report.file.line_of("from"),
+            "from раньше начала игры 1984-01-01".to_owned(),
         );
     }
 }

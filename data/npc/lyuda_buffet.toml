@@ -1,0 +1,10 @@
+name = "Люда-буфетчица"
+role = "буфетчица вокзального ресторана"
+faction = "people"
+description = "Обсчитывает так ласково, что ей ещё и спасибо говорят."
+
+[employee]
+skill = 3
+honesty = 2
+loyalty = 3
+habits = ["sticky_fingers"]

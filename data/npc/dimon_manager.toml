@@ -1,0 +1,11 @@
+name = "Димон"
+role = "менеджер с дипломом «Плешки»"
+faction = "traders"
+description = "Говорит «кэш-флоу» и уходит туда, где платят больше."
+
+[employee]
+skill = 5
+honesty = 2
+loyalty = 1
+habits = ["gambler"]
+from = "2000-01-01"

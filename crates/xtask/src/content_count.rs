@@ -22,14 +22,15 @@ struct Volume {
     goods: usize,
     cities: usize,
     npc: usize,
+    employees: usize,
     zone_events: usize,
     post2004_templates: usize,
     events: BTreeMap<String, usize>,
 }
 
 /// `cargo xtask content-count <вид>`: сколько сущностей вида в `data/` — товаров, городов,
-/// шаблонов соперников, событий эпохи (`events:<эпоха>`), событий зоны, шаблонов песочницы — и не
-/// меньше ли их порога `[volume]` из `data/balance.toml`.
+/// шаблонов соперников, людей, которых можно нанять, событий эпохи (`events:<эпоха>`), событий
+/// зоны, шаблонов песочницы — и не меньше ли их порога `[volume]` из `data/balance.toml`.
 pub fn run(kind: &str) -> Result<()> {
     let root = project_root();
     let balance_path = root.join(BALANCE_FILE);
@@ -54,6 +55,14 @@ pub fn run(kind: &str) -> Result<()> {
                 .filter(|template| template.strategy.is_some())
                 .count(),
             volume.npc,
+        ),
+        "employees" => (
+            content
+                .npcs
+                .values()
+                .filter(|template| template.employee.is_some())
+                .count(),
+            volume.employees,
         ),
         "zone-events" => (
             content
@@ -82,7 +91,7 @@ pub fn run(kind: &str) -> Result<()> {
                 (count, target)
             }
             None => bail!(
-                "вид {kind} неизвестен: goods, cities, npc, events:<эпоха>, zone-events, post2004-templates"
+                "вид {kind} неизвестен: goods, cities, npc, employees, events:<эпоха>, zone-events, post2004-templates"
             ),
         },
     };

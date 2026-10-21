@@ -1,0 +1,10 @@
+name = "Серёга-таксист"
+role = "таксист с Белорусского вокзала"
+faction = "people"
+description = "Знает всех, кто приезжает с товаром, и всех, кто его встречает."
+
+[employee]
+skill = 3
+honesty = 3
+loyalty = 3
+habits = ["drinks_on_fridays"]

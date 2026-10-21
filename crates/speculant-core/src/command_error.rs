@@ -172,6 +172,11 @@ pub enum CommandError {
         name: String,
         business: String,
     },
+    CandidateNotYet {
+        candidate: String,
+        name: String,
+        from: String,
+    },
     CandidateRefuses {
         candidate: String,
         name: String,
@@ -322,6 +327,9 @@ impl fmt::Display for CommandError {
                 write!(formatter, "{name} уже управляет делом «{business}»")
             }
             Self::CandidateRefuses { name, reason, .. } => write!(formatter, "{name}: {reason}"),
+            Self::CandidateNotYet { name, from, .. } => {
+                write!(formatter, "{name} будет искать работу с {from}")
+            }
             Self::NotManager { business, employee } => {
                 write!(formatter, "{employee} не управляет делом {business}")
             }

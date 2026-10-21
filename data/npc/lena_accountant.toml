@@ -1,0 +1,10 @@
+name = "Лена Звягина"
+role = "бухгалтер с двумя дипломами"
+faction = "traders"
+description = "Сведёт любой баланс. Вопрос — в чью пользу."
+
+[employee]
+skill = 5
+honesty = 3
+loyalty = 2
+from = "1994-01-01"

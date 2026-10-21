@@ -1,0 +1,10 @@
+name = "Инженер Лапин"
+role = "конструктор из закрытого НИИ"
+faction = "people"
+description = "Полгода без зарплаты. Считает честно, торгует стесняясь."
+
+[employee]
+skill = 3
+honesty = 5
+loyalty = 4
+from = "1992-01-02"

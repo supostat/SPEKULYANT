@@ -69,8 +69,9 @@ const USAGE: &str = "\
   deps-check                ядро speculant-core без Godot; пин gdext согласован с tools.toml
   new-event <эпоха> <имя>   заготовка события в data/events/<эпоха>/<имя>.toml
   docs-check [--all-decided] маркеры DECIDED-15-N совпадают в документе и дизайн-книге
-  content-count <вид>       сколько в data/ товаров, городов, соперников (npc), событий
-                            (events:<эпоха>, zone-events), шаблонов (post2004-templates)
+  content-count <вид>       сколько в data/ товаров, городов, соперников (npc), работников
+                            (employees), событий (events:<эпоха>, zone-events), шаблонов
+                            (post2004-templates)
                             — не меньше порога [volume] из data/balance.toml
   balance-check <эпоха|all> прогон [balance] lives жизней всеми стратегиями и сверка эпохи
                             или всех эпох с порогами [balance] из data/balance.toml

@@ -1,0 +1,11 @@
+name = "Вадик Бык"
+role = "бывший рэкетир, решивший работать"
+faction = "bandits"
+description = "Бросил бригаду, но бригада его не забыла."
+
+[employee]
+skill = 3
+honesty = 2
+loyalty = 3
+habits = ["gambler"]
+from = "1993-06-01"

@@ -6,6 +6,7 @@
 goods = 40
 cities = 10
 npc = 20                  # шаблоны соперников — люди со стратегией
+employees = 16            # люди, которых можно нанять управляющими, — шаблоны с [employee]
 zone_events = 40
 post2004_templates = 20
 

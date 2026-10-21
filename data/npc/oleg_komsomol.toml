@@ -1,0 +1,11 @@
+name = "Олег Вершинин"
+role = "комсомолец, открывший видеосалон"
+faction = "officials"
+description = "Знает, кому в райкоме занести, и пишет отчёты лучше всех."
+
+[employee]
+skill = 4
+honesty = 2
+loyalty = 2
+habits = ["party_card"]
+from = "1987-05-01"

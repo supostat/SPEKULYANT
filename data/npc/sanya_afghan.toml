@@ -1,0 +1,11 @@
+name = "Саня-афганец"
+role = "вернулся из Афганистана"
+faction = "people"
+description = "Немногословен. При нём на рынке никто не шумит."
+
+[employee]
+skill = 2
+honesty = 4
+loyalty = 5
+habits = ["afghan_veteran"]
+from = "1989-02-15"

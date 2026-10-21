@@ -120,8 +120,9 @@ impl Game {
         Ok(())
     }
 
-    /// Нанимает управляющего из кандидатов: место должно быть свободно, человек — не занят другим
-    /// делом игрока, на связи и не обижен. Нанятый становится связью.
+    /// Нанимает управляющего из кандидатов: место должно быть свободно, а человек — уже искать
+    /// работу, не управлять другим делом игрока, быть на связи и не держать обиды. Нанятый
+    /// становится связью.
     pub(super) fn hire(&mut self, business: &str, candidate: &str) -> Result<(), CommandError> {
         let content = Arc::clone(&self.content);
         let today = self.today();
@@ -134,6 +135,13 @@ impl Game {
             .ok_or_else(|| CommandError::UnknownCandidate {
                 candidate: candidate.to_owned(),
             })?;
+        if let Some(from) = traits.waits_until(today) {
+            return Err(CommandError::CandidateNotYet {
+                candidate: candidate.to_owned(),
+                name: template.name.clone(),
+                from: from.numeric(),
+            });
+        }
         let name = self.world.businesses[&id].name(&content);
         if let Some(manager) = self.world.businesses[&id].manager() {
             return Err(CommandError::ManagerInPlace {
@@ -205,14 +213,17 @@ impl Game {
         Ok(())
     }
 
-    /// Кандидаты в управляющие: люди с чертами сотрудника, не занятые делами игрока, на связи и
-    /// не обиженные.
+    /// Кандидаты в управляющие: люди с чертами сотрудника, которые уже ищут работу, не заняты
+    /// делами игрока, на связи и не обижены.
     pub(super) fn candidates(&self, today: GameDate) -> Vec<&NpcId> {
         self.content
             .npcs
             .iter()
             .filter(|(npc, template)| {
-                template.employee.is_some()
+                template
+                    .employee
+                    .as_ref()
+                    .is_some_and(|traits| traits.waits_until(today).is_none())
                     && self.employer_of(npc).is_none()
                     && self.candidate_refusal(npc, today).is_none()
             })

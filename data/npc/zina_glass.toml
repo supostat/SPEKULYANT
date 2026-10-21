@@ -1,0 +1,9 @@
+name = "Зина"
+role = "приёмщица стеклотары"
+faction = "people"
+description = "Тары нет — и всё тут. Но своих не бросает."
+
+[employee]
+skill = 2
+honesty = 3
+loyalty = 5

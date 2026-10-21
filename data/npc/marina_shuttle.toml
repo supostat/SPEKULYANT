@@ -1,0 +1,11 @@
+name = "Марина Сергеевна"
+role = "инженер, ушедшая в челноки"
+faction = "traders"
+description = "Три языка, две клетчатые сумки и ни одной лишней копейки."
+
+[employee]
+skill = 4
+honesty = 4
+loyalty = 3
+habits = ["sharp_counter"]
+from = "1989-06-01"

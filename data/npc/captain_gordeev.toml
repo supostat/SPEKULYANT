@@ -1,0 +1,10 @@
+name = "Капитан Гордеев"
+role = "капитан милиции в отставке"
+faction = "militia"
+description = "Из органов ушёл, а телефоны остались."
+
+[employee]
+skill = 2
+honesty = 3
+loyalty = 4
+from = "1999-01-01"

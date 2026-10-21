@@ -1,0 +1,10 @@
+name = "Аркадий Семёнович"
+role = "товаровед на пенсии"
+faction = "traders"
+description = "Помнит, что лежало на базе при Брежневе и что лежит теперь."
+
+[employee]
+skill = 4
+honesty = 4
+loyalty = 2
+habits = ["sharp_counter"]
